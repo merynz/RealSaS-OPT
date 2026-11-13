@@ -1,0 +1,1045 @@
+{
+  "schema": "RealSaS.HistoricalWorkflowRelocation.v1",
+  "source_main_sha": "71e45c696a3fe2ab5effde0d8f27c67b697a4d58",
+  "selection": "ONLY_PUSH_BRANCH_RESEARCH_VF11_20260921_OPTIONAL_MANUAL_DISPATCH",
+  "original_git_sha1_preserved": true,
+  "active_workflow_count_before": 429,
+  "archived_count": 207,
+  "paths": [
+    {
+      "old_path": ".github/workflows/caa_harmonic_first_donor_fallback_gate_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/caa_harmonic_first_donor_fallback_gate_v1.yml",
+      "git_blob_sha1": "5f4a37959e17483eb09b2c2bcb65b01bc034a57f"
+    },
+    {
+      "old_path": ".github/workflows/caa_v2_abstention_contract_gate.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/caa_v2_abstention_contract_gate.yml",
+      "git_blob_sha1": "257afb66250931bd4e887a262a57ea1bfbb77f27"
+    },
+    {
+      "old_path": ".github/workflows/g3_orientation_inversion_adversary_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/g3_orientation_inversion_adversary_v1.yml",
+      "git_blob_sha1": "8511f51948323c8ea66c3b981f7b60cfbdef9b17"
+    },
+    {
+      "old_path": ".github/workflows/g3_vectorized_equivalence_benchmark_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/g3_vectorized_equivalence_benchmark_v1.yml",
+      "git_blob_sha1": "80a6d1b045062070c58bab1fbd1bf293fbfe8da9"
+    },
+    {
+      "old_path": ".github/workflows/g3_vectorized_owner_unit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/g3_vectorized_owner_unit_v1.yml",
+      "git_blob_sha1": "b6c679bdbbd1ce659387ead25363a06aaac4230c"
+    },
+    {
+      "old_path": ".github/workflows/gsa_face_incidence_clique_adversary_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/gsa_face_incidence_clique_adversary_v1.yml",
+      "git_blob_sha1": "74e33dbdda063a56d265f0d8620d04510831290e"
+    },
+    {
+      "old_path": ".github/workflows/gsa_normal_topology_adversary_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/gsa_normal_topology_adversary_v1.yml",
+      "git_blob_sha1": "43379a0f35933b5764c79d6c1302deae416fbbf8"
+    },
+    {
+      "old_path": ".github/workflows/gsa_observation_semantics_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/gsa_observation_semantics_audit_v1.yml",
+      "git_blob_sha1": "4d8c0c764526e5d8d9c893cf3d6493f8c1c67334"
+    },
+    {
+      "old_path": ".github/workflows/gsa_surface_coherence_adversaries_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/gsa_surface_coherence_adversaries_v1.yml",
+      "git_blob_sha1": "04dc09c31afa29b76634e826426e37debd91bb15"
+    },
+    {
+      "old_path": ".github/workflows/iris_v4_2_tp64_geometry_contract.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/iris_v4_2_tp64_geometry_contract.yml",
+      "git_blob_sha1": "cf0f2d903b4fd90e94c7f05b424d22f116915d87"
+    },
+    {
+      "old_path": ".github/workflows/iris_v4_3_tp64_source_hull_lattice_contract.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/iris_v4_3_tp64_source_hull_lattice_contract.yml",
+      "git_blob_sha1": "09adfb5b93801d4ebca7a4d4bcf157cc408bb289"
+    },
+    {
+      "old_path": ".github/workflows/iris_v4_4_1_tp64_tail_visible_controller_contract.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/iris_v4_4_1_tp64_tail_visible_controller_contract.yml",
+      "git_blob_sha1": "470754bc8569a2c2fa1eecf8b82af695fa6af110"
+    },
+    {
+      "old_path": ".github/workflows/iris_v4_4_tp64_adaptive_hull_contract.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/iris_v4_4_tp64_adaptive_hull_contract.yml",
+      "git_blob_sha1": "184fe54e5a247aad70cfc25b78a7f7f8d9531cbb"
+    },
+    {
+      "old_path": ".github/workflows/iris_v4_demo_geometry_contract.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/iris_v4_demo_geometry_contract.yml",
+      "git_blob_sha1": "affe3eb498ffd8b925fba7f9e39248ba5dd86408"
+    },
+    {
+      "old_path": ".github/workflows/knight_actual_motion_residual_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_actual_motion_residual_court_v1.yml",
+      "git_blob_sha1": "d56a74f7f555697d7501b2f5722d1382642c416d"
+    },
+    {
+      "old_path": ".github/workflows/knight_all_face_skin_topology_stress_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_all_face_skin_topology_stress_court_v1.yml",
+      "git_blob_sha1": "a8efb02de9727b347d299f531328855b3fa7f04b"
+    },
+    {
+      "old_path": ".github/workflows/knight_arachne_stage17_stage18_repair_child_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_arachne_stage17_stage18_repair_child_v1.yml",
+      "git_blob_sha1": "223e26ccbe1506bce31470d1718b4d54c6c34b5f"
+    },
+    {
+      "old_path": ".github/workflows/knight_arachne_teacher_bank_path_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_arachne_teacher_bank_path_v1.yml",
+      "git_blob_sha1": "95681e5902c2706ae12c1eb29b0c47d73b8bf441"
+    },
+    {
+      "old_path": ".github/workflows/knight_arachne_teacher_binding_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_arachne_teacher_binding_audit_v1.yml",
+      "git_blob_sha1": "1f47303bcd4c2a3fda6bd49aa8db6c188d67208f"
+    },
+    {
+      "old_path": ".github/workflows/knight_arachne_teacher_support_coverage_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_arachne_teacher_support_coverage_court_v1.yml",
+      "git_blob_sha1": "d5edccd4a8a239d845372e03d24da38884190f15"
+    },
+    {
+      "old_path": ".github/workflows/knight_arachne_v6_2x2_rebound_stage35_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_arachne_v6_2x2_rebound_stage35_v1.yml",
+      "git_blob_sha1": "8089adc9828f83e6242a94a869d0d0ff43837d3d"
+    },
+    {
+      "old_path": ".github/workflows/knight_arachne_v6_coverage_sampling_2x2_preflight_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_arachne_v6_coverage_sampling_2x2_preflight_v1.yml",
+      "git_blob_sha1": "c5e3414eaa229c0f610c138ff44e62607d7b4a46"
+    },
+    {
+      "old_path": ".github/workflows/knight_arachne_v6_coverage_topology_repair_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_arachne_v6_coverage_topology_repair_court_v1.yml",
+      "git_blob_sha1": "913213cea0c10eedfd041beb88b9d6434e0a9e78"
+    },
+    {
+      "old_path": ".github/workflows/knight_arachne_v6_sampler_exposure_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_arachne_v6_sampler_exposure_court_v1.yml",
+      "git_blob_sha1": "5aa690e9e18ce04a0566e74dd46eda7e4dd4d361"
+    },
+    {
+      "old_path": ".github/workflows/knight_arachne_v6_uncertainty_source_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_arachne_v6_uncertainty_source_audit_v1.yml",
+      "git_blob_sha1": "8478d5cbac1bd7f75029db1ef1ed6bcd9deafa3b"
+    },
+    {
+      "old_path": ".github/workflows/knight_baseline_forensic_capsule_seal_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_baseline_forensic_capsule_seal_v1.yml",
+      "git_blob_sha1": "4c05ec24b11db046633b5cc96787e446428ba365"
+    },
+    {
+      "old_path": ".github/workflows/knight_baseline_forensic_render_capsule_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_baseline_forensic_render_capsule_v1.yml",
+      "git_blob_sha1": "d9239122aedec918d78f55673d791c1e2f481cd2"
+    },
+    {
+      "old_path": ".github/workflows/knight_baseline_mechanical_causality_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_baseline_mechanical_causality_v1.yml",
+      "git_blob_sha1": "2c694c4364a1f20f08fedc768671ca54536c114e"
+    },
+    {
+      "old_path": ".github/workflows/knight_bone_locality_constrained_weight_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_bone_locality_constrained_weight_court_v1.yml",
+      "git_blob_sha1": "7faa24a0707a17afecc4db3dbc8a1d8fbb136132"
+    },
+    {
+      "old_path": ".github/workflows/knight_bone_locality_signal_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_bone_locality_signal_court_v1.yml",
+      "git_blob_sha1": "8617484e33a261bc950e5dd9457279614046f756"
+    },
+    {
+      "old_path": ".github/workflows/knight_candidate_component_authority_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_candidate_component_authority_audit_v1.yml",
+      "git_blob_sha1": "440dfd4176d0dd4d895449d7475be4c6d1eb9f4e"
+    },
+    {
+      "old_path": ".github/workflows/knight_catastrophic_face_contingency_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_catastrophic_face_contingency_court_v1.yml",
+      "git_blob_sha1": "2a9fb4f48aec2ff24352d2ce69c7903ba1866476"
+    },
+    {
+      "old_path": ".github/workflows/knight_cluster_aware_weight_completion_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_cluster_aware_weight_completion_court_v1.yml",
+      "git_blob_sha1": "93b67dd5a74b52e35ba210f9dd273ca5d39b4767"
+    },
+    {
+      "old_path": ".github/workflows/knight_combined_oracle_residual_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_combined_oracle_residual_court_v1.yml",
+      "git_blob_sha1": "1308ba46b137f06cf4a0a25186c170ac5a42bee7"
+    },
+    {
+      "old_path": ".github/workflows/knight_combined_topology_teacher_weight_oracle_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_combined_topology_teacher_weight_oracle_v1.yml",
+      "git_blob_sha1": "ce91d13bc61cd0b9b140b6d862330a829a8cc739"
+    },
+    {
+      "old_path": ".github/workflows/knight_component_harmonic_seam_oracle_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_component_harmonic_seam_oracle_v1.yml",
+      "git_blob_sha1": "009830370cb360b1f5066fb5d243d8b26b55f8d9"
+    },
+    {
+      "old_path": ".github/workflows/knight_component_harmonic_support_provenance_oracle_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_component_harmonic_support_provenance_oracle_v1.yml",
+      "git_blob_sha1": "32cbcf67b6d39125250b9ec4b863acd4b3664d20"
+    },
+    {
+      "old_path": ".github/workflows/knight_corrected_component_source_visibility_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_corrected_component_source_visibility_audit_v1.yml",
+      "git_blob_sha1": "0a44d31d19886971de2427295c69352ca192dd2b"
+    },
+    {
+      "old_path": ".github/workflows/knight_corrected_mechanical_caa_diagnostic_render_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_corrected_mechanical_caa_diagnostic_render_v1.yml",
+      "git_blob_sha1": "43f7f6426e1d0921e4b940e2fabbad46ac360594"
+    },
+    {
+      "old_path": ".github/workflows/knight_corrected_mechanical_caa_frozen_renderer_ab_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_corrected_mechanical_caa_frozen_renderer_ab_v1.yml",
+      "git_blob_sha1": "c3c8df3617213fb7a9e96d701577ac7e5cdd956b"
+    },
+    {
+      "old_path": ".github/workflows/knight_corrected_mechanical_caa_recover_render_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_corrected_mechanical_caa_recover_render_v1.yml",
+      "git_blob_sha1": "eda592e05cea27285963e1deee9d560aaec93e43"
+    },
+    {
+      "old_path": ".github/workflows/knight_corrected_mechanical_caa_render_resume_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_corrected_mechanical_caa_render_resume_v1.yml",
+      "git_blob_sha1": "9e46291f068a42c738d87f50259099e1571d086f"
+    },
+    {
+      "old_path": ".github/workflows/knight_corrected_mechanical_caa_stage23_consumer_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_corrected_mechanical_caa_stage23_consumer_v1.yml",
+      "git_blob_sha1": "8207174485e50332835683dfd3263c2764e0a41d"
+    },
+    {
+      "old_path": ".github/workflows/knight_corrected_mechanical_caa_stage23_immutable_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_corrected_mechanical_caa_stage23_immutable_v1.yml",
+      "git_blob_sha1": "2323b1b04e250be1ee040376911904b0e0f4aef6"
+    },
+    {
+      "old_path": ".github/workflows/knight_corrected_stage24_diagnostics_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_corrected_stage24_diagnostics_v1.yml",
+      "git_blob_sha1": "1481669a356d51277e0e3458ec9ddef34b4c2085"
+    },
+    {
+      "old_path": ".github/workflows/knight_current_camera_normalization_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_current_camera_normalization_audit_v1.yml",
+      "git_blob_sha1": "1f231e5b8c961eec35f62117d88ec7462cbffd8f"
+    },
+    {
+      "old_path": ".github/workflows/knight_current_ledger_status_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_current_ledger_status_audit_v1.yml",
+      "git_blob_sha1": "c53e0e412029ec4ab5aae1f52f8b55791c426f83"
+    },
+    {
+      "old_path": ".github/workflows/knight_cutcell_motion_fidelity_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_cutcell_motion_fidelity_court_v1.yml",
+      "git_blob_sha1": "2ac93750c60ff1337d3431af572d26cc673af11a"
+    },
+    {
+      "old_path": ".github/workflows/knight_cutcell_prior_reproduction_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_cutcell_prior_reproduction_v1.yml",
+      "git_blob_sha1": "72e278ad443d64fe755913eb5f26ca7e9761b87a"
+    },
+    {
+      "old_path": ".github/workflows/knight_cutcell_support_gate_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_cutcell_support_gate_court_v1.yml",
+      "git_blob_sha1": "1e00079078c0823ebfa474182e399fb4731818d7"
+    },
+    {
+      "old_path": ".github/workflows/knight_demo_fallback_lineage_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_demo_fallback_lineage_audit_v1.yml",
+      "git_blob_sha1": "aae9a4137873289b2a1e33b756c573f2c4020590"
+    },
+    {
+      "old_path": ".github/workflows/knight_dense_face_lineage_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_dense_face_lineage_audit_v1.yml",
+      "git_blob_sha1": "0d4b58df0ab6feeaed9c3f39a58ceab8af386d7b"
+    },
+    {
+      "old_path": ".github/workflows/knight_deterministic_weight_reliability_feature_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_deterministic_weight_reliability_feature_court_v1.yml",
+      "git_blob_sha1": "bdc3e4dd1c68f9b7d5a92d394adee768453bd835"
+    },
+    {
+      "old_path": ".github/workflows/knight_edge_cut_component_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_edge_cut_component_court_v1.yml",
+      "git_blob_sha1": "6042028d8432648e1cba0da7cb56d47eeb27e2f8"
+    },
+    {
+      "old_path": ".github/workflows/knight_edge_seam_bilateral_support_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_edge_seam_bilateral_support_court_v1.yml",
+      "git_blob_sha1": "83c850e37b016d26f29e5d0f7af8874f8209e638"
+    },
+    {
+      "old_path": ".github/workflows/knight_edge_seam_cutcell_corroboration_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_edge_seam_cutcell_corroboration_court_v1.yml",
+      "git_blob_sha1": "51cff276be1f95fa2937fbda4404c404617a4699"
+    },
+    {
+      "old_path": ".github/workflows/knight_edge_seam_jt_stratification_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_edge_seam_jt_stratification_court_v1.yml",
+      "git_blob_sha1": "690d52591f19da411973fb2a5265d6b42f6758aa"
+    },
+    {
+      "old_path": ".github/workflows/knight_edge_seam_two_core_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_edge_seam_two_core_court_v1.yml",
+      "git_blob_sha1": "27ba93a2ed38f73a22c6bd420dcb0c438eef5c85"
+    },
+    {
+      "old_path": ".github/workflows/knight_face_seam_multiplicity_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_face_seam_multiplicity_court_v1.yml",
+      "git_blob_sha1": "8f9ecfe802fdd59cd88608bee77386c37ed2a6dc"
+    },
+    {
+      "old_path": ".github/workflows/knight_frozen_geometry_lineage_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_frozen_geometry_lineage_audit_v1.yml",
+      "git_blob_sha1": "4a5bd0527801a61405675de5c94fa4534a813d35"
+    },
+    {
+      "old_path": ".github/workflows/knight_g3_offender_classification_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_g3_offender_classification_v1.yml",
+      "git_blob_sha1": "ef6bcc3217f3238886f020abaa8a659caf093df1"
+    },
+    {
+      "old_path": ".github/workflows/knight_g3_vs_g3b_contract_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_g3_vs_g3b_contract_audit_v1.yml",
+      "git_blob_sha1": "6b6a825de64b0c22ddc5d8531c6e4751b4c74725"
+    },
+    {
+      "old_path": ".github/workflows/knight_global_skin_region_sweep_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_global_skin_region_sweep_v1.yml",
+      "git_blob_sha1": "d7bbfec19ca7af6c43e1643aaf350b178cb7e95d"
+    },
+    {
+      "old_path": ".github/workflows/knight_graph_seam_cut_preview_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_graph_seam_cut_preview_v1.yml",
+      "git_blob_sha1": "1471f73e8545928444683a42b3b5bccb74d48c1e"
+    },
+    {
+      "old_path": ".github/workflows/knight_historical_ledger_authority_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_historical_ledger_authority_v1.yml",
+      "git_blob_sha1": "3994ed91a99562606c8dad95c85f6b156ce89afa"
+    },
+    {
+      "old_path": ".github/workflows/knight_invalid_row_weight_oracle_topology_ceiling_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_invalid_row_weight_oracle_topology_ceiling_v1.yml",
+      "git_blob_sha1": "230d16f41cd0ee9395d5243d4847cdc980997257"
+    },
+    {
+      "old_path": ".github/workflows/knight_invented_face_skin_correlation_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_invented_face_skin_correlation_audit_v1.yml",
+      "git_blob_sha1": "641ec73257a66f2943cfed609611226d1a42a28f"
+    },
+    {
+      "old_path": ".github/workflows/knight_invented_face_smear_causality_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_invented_face_smear_causality_v1.yml",
+      "git_blob_sha1": "ff097a8f5398550625ecd3e4fb0e896cd943749b"
+    },
+    {
+      "old_path": ".github/workflows/knight_iris_09_11_binding_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_iris_09_11_binding_audit_v1.yml",
+      "git_blob_sha1": "b8092e841b0a2072d33805b2c12e0bd0611a0b46"
+    },
+    {
+      "old_path": ".github/workflows/knight_iris_historical_run_equivalence_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_iris_historical_run_equivalence_audit_v1.yml",
+      "git_blob_sha1": "bb357373604183630566274b9f72a0365db68866"
+    },
+    {
+      "old_path": ".github/workflows/knight_iris_observation_rebind_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_iris_observation_rebind_audit_v1.yml",
+      "git_blob_sha1": "482acf0546ce79837812926d58afdadc75d80052"
+    },
+    {
+      "old_path": ".github/workflows/knight_james_twigg_barrier_completion_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_james_twigg_barrier_completion_court_v1.yml",
+      "git_blob_sha1": "8d2d574a0b9ef322a9ca4688a915bde625528d21"
+    },
+    {
+      "old_path": ".github/workflows/knight_james_twigg_internal_core_anchor_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_james_twigg_internal_core_anchor_court_v1.yml",
+      "git_blob_sha1": "c2c601fc364bce51c20bca3199a0e800c62500f5"
+    },
+    {
+      "old_path": ".github/workflows/knight_james_twigg_region_inference_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_james_twigg_region_inference_v1.yml",
+      "git_blob_sha1": "e83be14b7713955bd95fc654b4eaeeeba587e9d9"
+    },
+    {
+      "old_path": ".github/workflows/knight_james_twigg_unsafe_patch_completion_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_james_twigg_unsafe_patch_completion_court_v1.yml",
+      "git_blob_sha1": "bf7a4e6d16c0342383dd539dce65e1645d308685"
+    },
+    {
+      "old_path": ".github/workflows/knight_james_twigg_weight_basis_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_james_twigg_weight_basis_court_v1.yml",
+      "git_blob_sha1": "ff75c91c82e801d07ab7c5d4b2186460f2f10e1f"
+    },
+    {
+      "old_path": ".github/workflows/knight_jt_one_unknown_origin_diagnosis_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_jt_one_unknown_origin_diagnosis_v1.yml",
+      "git_blob_sha1": "b1d69ad3a0d01e9d3f65abcf1e9ef21cd0e14275"
+    },
+    {
+      "old_path": ".github/workflows/knight_mechanical_mutex_evidence_policy_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_mechanical_mutex_evidence_policy_court_v1.yml",
+      "git_blob_sha1": "781e9c88cd6c671068c9220279cb1023056ce832"
+    },
+    {
+      "old_path": ".github/workflows/knight_mechanical_mutex_watershed_closure_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_mechanical_mutex_watershed_closure_v1.yml",
+      "git_blob_sha1": "3fa9d431198c4477676c42439b43e9bd37431295"
+    },
+    {
+      "old_path": ".github/workflows/knight_motion_gif_export.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_motion_gif_export.yml",
+      "git_blob_sha1": "e53da72064a1d5d20bc2656604a8018248393f8b"
+    },
+    {
+      "old_path": ".github/workflows/knight_motion_native_preview_v2.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_motion_native_preview_v2.yml",
+      "git_blob_sha1": "d2472036fde295c9b43fed300e42104ba1b40c13"
+    },
+    {
+      "old_path": ".github/workflows/knight_observable_seam_feature_separability_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_observable_seam_feature_separability_v1.yml",
+      "git_blob_sha1": "a2a4fcde066b2589281f1a62b503ee897ca094bb"
+    },
+    {
+      "old_path": ".github/workflows/knight_observable_seam_multivariate_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_observable_seam_multivariate_v1.yml",
+      "git_blob_sha1": "2eb03467d83a85bccb35d2368e74b1e2ecc927f7"
+    },
+    {
+      "old_path": ".github/workflows/knight_occupancy_native_witness_v2.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_occupancy_native_witness_v2.yml",
+      "git_blob_sha1": "c9de25cfc43cd92296fe12cc719998fb4d397158"
+    },
+    {
+      "old_path": ".github/workflows/knight_occupancy_witness_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_occupancy_witness_v1.yml",
+      "git_blob_sha1": "285ba4a5a88d7bab3f4293d7cae2522ec727440d"
+    },
+    {
+      "old_path": ".github/workflows/knight_offender_precompact_topology_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_offender_precompact_topology_audit_v1.yml",
+      "git_blob_sha1": "b832abc0879ad0009563667521e576391beb6418"
+    },
+    {
+      "old_path": ".github/workflows/knight_old_vs_corrected_lineage_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_old_vs_corrected_lineage_audit_v1.yml",
+      "git_blob_sha1": "fcfb3bba20b61d2da5545b5f93b65f5264122a7c"
+    },
+    {
+      "old_path": ".github/workflows/knight_oracle_holeless_region_split_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_oracle_holeless_region_split_court_v1.yml",
+      "git_blob_sha1": "197ee0432c362937f150ea26a37d943e2e2c4948"
+    },
+    {
+      "old_path": ".github/workflows/knight_oracle_topology_repair_causality_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_oracle_topology_repair_causality_v1.yml",
+      "git_blob_sha1": "07a2080a7ec5d4a315aef55e6fa75f72cba1b804"
+    },
+    {
+      "old_path": ".github/workflows/knight_preloaded_mutex_causal_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_preloaded_mutex_causal_court_v1.yml",
+      "git_blob_sha1": "00891caf7ac324d6a7a5fb6cd075ff73659727c7"
+    },
+    {
+      "old_path": ".github/workflows/knight_probe_conditioned_region_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_probe_conditioned_region_court_v1.yml",
+      "git_blob_sha1": "d1f565e9b42d528c6a5fddf4572ab73237ff5e2f"
+    },
+    {
+      "old_path": ".github/workflows/knight_production_g3_motion_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_production_g3_motion_court_v1.yml",
+      "git_blob_sha1": "534725a1736b741d9210ccbad943614c6ed090f0"
+    },
+    {
+      "old_path": ".github/workflows/knight_production_topology_replay_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_production_topology_replay_court_v1.yml",
+      "git_blob_sha1": "c8a18f4ddd505a66b3e50f6316c6b1b5e6b1c95e"
+    },
+    {
+      "old_path": ".github/workflows/knight_recover_geometry_lineage_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_recover_geometry_lineage_v1.yml",
+      "git_blob_sha1": "336424a39c3aa67b4920449626ced24f8900b330"
+    },
+    {
+      "old_path": ".github/workflows/knight_recover_stage28_authority_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_recover_stage28_authority_v1.yml",
+      "git_blob_sha1": "30d22f8d88b678873c8d816d6bbf5c013ef895f0"
+    },
+    {
+      "old_path": ".github/workflows/knight_reliability_mask_only_topology_ceiling_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_reliability_mask_only_topology_ceiling_v1.yml",
+      "git_blob_sha1": "4cc03629e24928e993f8e757e317454feaa81d0b"
+    },
+    {
+      "old_path": ".github/workflows/knight_remaining_mechanical_owner_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_remaining_mechanical_owner_court_v1.yml",
+      "git_blob_sha1": "173e1fd554138de4d46aee73f15ef667dba8e614"
+    },
+    {
+      "old_path": ".github/workflows/knight_remaining_smear_owner_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_remaining_smear_owner_audit_v1.yml",
+      "git_blob_sha1": "9619b18819ee1db5aab8e64602b12335910c0840"
+    },
+    {
+      "old_path": ".github/workflows/knight_residual_actual_motion_attribution_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_residual_actual_motion_attribution_v1.yml",
+      "git_blob_sha1": "ccb5a817fe672dbd559887fc63fd18045929a36e"
+    },
+    {
+      "old_path": ".github/workflows/knight_residual_topology_severity_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_residual_topology_severity_court_v1.yml",
+      "git_blob_sha1": "984bfb374343fdf1bb6f389d4cebe582162587ff"
+    },
+    {
+      "old_path": ".github/workflows/knight_retarget_joint_ablation_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_retarget_joint_ablation_court_v1.yml",
+      "git_blob_sha1": "18b6804300daf68fb9701b2704452d44f9cf3f2d"
+    },
+    {
+      "old_path": ".github/workflows/knight_risk_zero_repair_qualification_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_risk_zero_repair_qualification_court_v1.yml",
+      "git_blob_sha1": "7eb16c67703d9ad91c407080d3a4f88a545b1ca6"
+    },
+    {
+      "old_path": ".github/workflows/knight_s_w_topology_alignment_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_s_w_topology_alignment_audit_v1.yml",
+      "git_blob_sha1": "12a47cc018872400455eee16726b71724a47298b"
+    },
+    {
+      "old_path": ".github/workflows/knight_seeded_watershed_topology_closure_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_seeded_watershed_topology_closure_court_v1.yml",
+      "git_blob_sha1": "bd8a578976f4f1916b3577a87659468da540c18c"
+    },
+    {
+      "old_path": ".github/workflows/knight_skeleton_lineage_bridge_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_skeleton_lineage_bridge_audit_v1.yml",
+      "git_blob_sha1": "6eeb409b3c45cf1f44104ace64f14e4def67e132"
+    },
+    {
+      "old_path": ".github/workflows/knight_skin_evidence_transport_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_skin_evidence_transport_audit_v1.yml",
+      "git_blob_sha1": "c883c6257d975d7c4a6e72b13710c659a254227d"
+    },
+    {
+      "old_path": ".github/workflows/knight_skin_topology_compatibility_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_skin_topology_compatibility_audit_v1.yml",
+      "git_blob_sha1": "82a861bb7c9dd5aac924783801befc310241f67f"
+    },
+    {
+      "old_path": ".github/workflows/knight_skin_topology_graph_only_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_skin_topology_graph_only_v1.yml",
+      "git_blob_sha1": "5bb30ae7b520feeae50983344ef4509aa588b7ff"
+    },
+    {
+      "old_path": ".github/workflows/knight_skin_topology_repair_preview_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_skin_topology_repair_preview_v1.yml",
+      "git_blob_sha1": "331dfab9930ade3eb0a66724d861a777f2533af5"
+    },
+    {
+      "old_path": ".github/workflows/knight_smear_face_causality_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_smear_face_causality_v1.yml",
+      "git_blob_sha1": "17c253abdaf0527cd9e5ccaa2915fc0074f1cd57"
+    },
+    {
+      "old_path": ".github/workflows/knight_smear_topface_skin_counterfactual_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_smear_topface_skin_counterfactual_v1.yml",
+      "git_blob_sha1": "b3f6acd6019ff04b3d6d6cab152d31d8423b34f6"
+    },
+    {
+      "old_path": ".github/workflows/knight_solved_lineage_gifs_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_solved_lineage_gifs_v1.yml",
+      "git_blob_sha1": "e16a9158e77fe5e027f6dce57f376ed88957e62b"
+    },
+    {
+      "old_path": ".github/workflows/knight_source_authority_alignment_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_source_authority_alignment_v1.yml",
+      "git_blob_sha1": "33724a503757960b9b114881ca281e33ed974f57"
+    },
+    {
+      "old_path": ".github/workflows/knight_source_topology_appearance_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_source_topology_appearance_audit_v1.yml",
+      "git_blob_sha1": "0836d179c45f983937cc1bff01e2948e3f7e4f1e"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage05_stage13_binding_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage05_stage13_binding_audit_v1.yml",
+      "git_blob_sha1": "b460f4fb6803aefd66d9a86780a9ee4b0542a99f"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage14_18_structural_information_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage14_18_structural_information_audit_v1.yml",
+      "git_blob_sha1": "f3f682a093826676557fc0b92fa7dad49e17cbd5"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage17_boundary_truth_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage17_boundary_truth_audit_v1.yml",
+      "git_blob_sha1": "599698f7517144db485559017fbc64bd61a30665"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage17_partition_owner_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage17_partition_owner_audit_v1.yml",
+      "git_blob_sha1": "f1f6bd89f88e120b52f26ea6e9aaac9e33be8995"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage18_cdt_backend_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage18_cdt_backend_audit_v1.yml",
+      "git_blob_sha1": "78d4f487ae9f35dccaa58e8426984c0e884017b2"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage18_dense_face_replay_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage18_dense_face_replay_audit_v1.yml",
+      "git_blob_sha1": "750bea67235c6cf657fa30022cfbccd5a5c73632"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage18_dense_face_support_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage18_dense_face_support_audit_v1.yml",
+      "git_blob_sha1": "27afa92156b14f7f8e3665f03bf68909b342502c"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage18_invented_face_motion_contribution_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage18_invented_face_motion_contribution_v1.yml",
+      "git_blob_sha1": "a2de7facb85c342aacdada74162683ce30cbfdec"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage18_seam_support_causal_oracle_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage18_seam_support_causal_oracle_v1.yml",
+      "git_blob_sha1": "ec054250eb262ab73845859a44c67142f4a3f885"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage24_donor_counterfactual_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage24_donor_counterfactual_v1.yml",
+      "git_blob_sha1": "081d7a84fc72233f57299378f17164fcc1016924"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage24_holdout_owner_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage24_holdout_owner_audit_v1.yml",
+      "git_blob_sha1": "72da6473c1e0c8dbc1a0297a1a59c451c33da273"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage28_authority_chain_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage28_authority_chain_v1.yml",
+      "git_blob_sha1": "79e98a8109b08e5528e1debf30f227ef94958d29"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage31_32_exact_provenance_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage31_32_exact_provenance_audit_v1.yml",
+      "git_blob_sha1": "0c7039a0867f60d6c170a4593bc9c77b071e8854"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage31_proposal_metadata_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage31_proposal_metadata_audit_v1.yml",
+      "git_blob_sha1": "6c164b3497290120737149a611a98aa8fc527488"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage32_evidence_support_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage32_evidence_support_audit_v1.yml",
+      "git_blob_sha1": "db3eda1777b9a0f21a3c76ae79191349d57644f7"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage35_arachne_v6_2x2_exact_skin_replay_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage35_arachne_v6_2x2_exact_skin_replay_v1.yml",
+      "git_blob_sha1": "2406263e9e83d01c710ecb91fae59e9e41f28d51"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage35_exact_skin_replay_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage35_exact_skin_replay_v1.yml",
+      "git_blob_sha1": "f9b1fdcd6a30877714d2bd855f715dd7147547a2"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage35_in_memory_repair_effect_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage35_in_memory_repair_effect_v1.yml",
+      "git_blob_sha1": "4ff9df5e07d1700fde00c425a4b01d61e0846752"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage35_iterative_threshold_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage35_iterative_threshold_court_v1.yml",
+      "git_blob_sha1": "7f172d6a391b06aa4d05ac53035fb85aadc138ac"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage35_offender_capture_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage35_offender_capture_audit_v1.yml",
+      "git_blob_sha1": "c224060423f419bcdf94106db163f20dd245caf4"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage35_repair_effect_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage35_repair_effect_audit_v1.yml",
+      "git_blob_sha1": "ed7d7496bf5e39ef95be3a280d97ac121b6676e2"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage35_repartition_cut_closure_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage35_repartition_cut_closure_v1.yml",
+      "git_blob_sha1": "ac1114f1e16e103f619d5ee665c9c55df693af41"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage35_seam_owner_repartition_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage35_seam_owner_repartition_v1.yml",
+      "git_blob_sha1": "abeea24b99d74208123cfd6f849ef6b85bedb35c"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage35_seed_cut_closure_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage35_seed_cut_closure_v1.yml",
+      "git_blob_sha1": "0d6c88a5fce192d4d95a859636d16aac0f322fc8"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage35_skin_topology_repair_loop_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage35_skin_topology_repair_loop_v1.yml",
+      "git_blob_sha1": "ff67abfd0e797286cfc908a744b17a7918ff18e8"
+    },
+    {
+      "old_path": ".github/workflows/knight_stage35_unsafe_source_topology_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_stage35_unsafe_source_topology_audit_v1.yml",
+      "git_blob_sha1": "f99b5cdafb694aa73249e5565f9fb79c4e0f9aed"
+    },
+    {
+      "old_path": ".github/workflows/knight_teacher_artifact_inventory_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_teacher_artifact_inventory_v1.yml",
+      "git_blob_sha1": "bfbd864a08eb825ef14eb7dadf6e37d3e00025ad"
+    },
+    {
+      "old_path": ".github/workflows/knight_teacher_bank_topology_provenance_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_teacher_bank_topology_provenance_audit_v1.yml",
+      "git_blob_sha1": "783fea64dfe6837d2fd4d2dc3725ae9be015a394"
+    },
+    {
+      "old_path": ".github/workflows/knight_teacher_free_edge_seam_diagnosis_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_teacher_free_edge_seam_diagnosis_v1.yml",
+      "git_blob_sha1": "a8785943d5c813353038d2c87b5f544c5cd57b50"
+    },
+    {
+      "old_path": ".github/workflows/knight_teacher_free_topology_closure_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_teacher_free_topology_closure_court_v1.yml",
+      "git_blob_sha1": "483a2629ba0fa6b3115d3389e2af8e40dec47b26"
+    },
+    {
+      "old_path": ".github/workflows/knight_teacher_free_weight_completion_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_teacher_free_weight_completion_court_v1.yml",
+      "git_blob_sha1": "9b1a7eb97ed019145cef8e2adba75fba4ed16ee3"
+    },
+    {
+      "old_path": ".github/workflows/knight_teacher_projection_integrity_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_teacher_projection_integrity_v1.yml",
+      "git_blob_sha1": "8173f46e04a4c4b066527a83bd6e1ffdf52a96a6"
+    },
+    {
+      "old_path": ".github/workflows/knight_teacher_target_alignment_proof_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_teacher_target_alignment_proof_v1.yml",
+      "git_blob_sha1": "3ff5b470f68a6f53bdd08a09c706c312ce97f94e"
+    },
+    {
+      "old_path": ".github/workflows/knight_teacher_weight_oracle_causality_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_teacher_weight_oracle_causality_v1.yml",
+      "git_blob_sha1": "7e09d94c599d53e3b8213665fcfbb864d2fdf38b"
+    },
+    {
+      "old_path": ".github/workflows/knight_teacher_weight_seam_morphology_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_teacher_weight_seam_morphology_court_v1.yml",
+      "git_blob_sha1": "6ae38f4cd700de038e97ec9934e5dd3259881daf"
+    },
+    {
+      "old_path": ".github/workflows/knight_teacher_weight_topology_only_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_teacher_weight_topology_only_court_v1.yml",
+      "git_blob_sha1": "7dc560f5346601d9084f72dd6ac19d7e13e62a84"
+    },
+    {
+      "old_path": ".github/workflows/knight_topology_region_pair_decomposition_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_topology_region_pair_decomposition_court_v1.yml",
+      "git_blob_sha1": "52a6c1cf591d3a8f9214b07e2260dfec263036c9"
+    },
+    {
+      "old_path": ".github/workflows/knight_topology_weight_coupling_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_topology_weight_coupling_court_v1.yml",
+      "git_blob_sha1": "3c606e1264e36bfe6d36a9a5363d383b3aba89bb"
+    },
+    {
+      "old_path": ".github/workflows/knight_unsafe_patch_halo_anchor_diagnosis_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_unsafe_patch_halo_anchor_diagnosis_v1.yml",
+      "git_blob_sha1": "5113f0e76e7cae4fa93f4800f31737684e45f248"
+    },
+    {
+      "old_path": ".github/workflows/knight_unsafe_patch_local_cut_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_unsafe_patch_local_cut_court_v1.yml",
+      "git_blob_sha1": "68b7bbecb97b4109504d3cc16875d0a02cb10b1d"
+    },
+    {
+      "old_path": ".github/workflows/knight_unsafe_patch_motion_edge_separability_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_unsafe_patch_motion_edge_separability_court_v1.yml",
+      "git_blob_sha1": "d1c88f3f86fbaa8fed31c1743f3faf9458975537"
+    },
+    {
+      "old_path": ".github/workflows/knight_weight_outlier_signal_court_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/knight_weight_outlier_signal_court_v1.yml",
+      "git_blob_sha1": "3b65ea68d2b324c6e11fbf3d9c1ce698e64901c8"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_caa_abstention_owner_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_caa_abstention_owner_v1.yml",
+      "git_blob_sha1": "51e58cb40d4af8985122bcd042eeeebe202b9da1"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_caa_adaptive_tile_diagnostic.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_caa_adaptive_tile_diagnostic.yml",
+      "git_blob_sha1": "749856685b39d34a44e8aab6f12061999dee58a6"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_caa_boundary_guard_diagnostic.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_caa_boundary_guard_diagnostic.yml",
+      "git_blob_sha1": "586a250ba6a04034e3b9655bd977cb34b7197661"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_caa_completion_lattice_diagnostic.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_caa_completion_lattice_diagnostic.yml",
+      "git_blob_sha1": "99859dfdab6703b4a3f9fb123c97829efaca796d"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_caa_source_lock_rejection_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_caa_source_lock_rejection_v1.yml",
+      "git_blob_sha1": "49b08558237ffdf4f46f64c60ecf9b6b8ec798ad"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_caa_stage25_owner_diagnostic_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_caa_stage25_owner_diagnostic_v1.yml",
+      "git_blob_sha1": "17988e3b3bf2d9e78590cb88d02fcd39b0dc6195"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_caa_variational_challenger.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_caa_variational_challenger.yml",
+      "git_blob_sha1": "98c356a93bea3dfa6aa06996668b054b79e6d3fc"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_caa_variational_holdout_v2.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_caa_variational_holdout_v2.yml",
+      "git_blob_sha1": "87e4f01f463ae4f7ceee56b8df9eea50605119ed"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_arachne_v6_ingest.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_arachne_v6_ingest.yml",
+      "git_blob_sha1": "9cc2032d41b70eab3a71c06114bbed4792f92d28"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_geppetto_stage26_handoff.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_geppetto_stage26_handoff.yml",
+      "git_blob_sha1": "208ba6041e1aa083789d9b0128d762f3513602bd"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_geppetto_stage27_ingest.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_geppetto_stage27_ingest.yml",
+      "git_blob_sha1": "a82515361d4407c071d32dfad82a5bdd0687e629"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_geppetto_v2_reconcile.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_geppetto_v2_reconcile.yml",
+      "git_blob_sha1": "95f965a8b73025cd082cf69bd3276b2bdf73fe58"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_historical_stage08_recover_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_historical_stage08_recover_v1.yml",
+      "git_blob_sha1": "b4d2fcf731fdff4d6291cf94d980261baaa65680"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_motion_preview_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_motion_preview_v1.yml",
+      "git_blob_sha1": "47e53f8e4af45b47455ee23642ad40aed86bcc04"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_motion_retarget_preflight.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_motion_retarget_preflight.yml",
+      "git_blob_sha1": "a67693fc674175e5433d3a4041d6c8fbe80efb4d"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_resume_gate.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_resume_gate.yml",
+      "git_blob_sha1": "966406beed0e7968616a2373c9b5b59f7ee6435e"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_run_snapshot.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_run_snapshot.yml",
+      "git_blob_sha1": "c0a53c9c791b3e07fafb48eedfbad826878d234a"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_skeleton_lineage_probe.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_skeleton_lineage_probe.yml",
+      "git_blob_sha1": "60e6c5b1b6ec7156a8853d866551f8a5701effd0"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_stage01_08.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_stage01_08.yml",
+      "git_blob_sha1": "0ad31ec7bf6a17c0d36270a1d178853831645955"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_stage15_receipt_recover.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_stage15_receipt_recover.yml",
+      "git_blob_sha1": "b4233f0cc49554defd102ebe1457ad7f6f938349"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_stage16_19.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_stage16_19.yml",
+      "git_blob_sha1": "e6813bca97dec66884cf6188221d40323cbdc774"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_stage20_25_caa.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_stage20_25_caa.yml",
+      "git_blob_sha1": "d6f3764eb58714ad2329e7f1146fa16f52c7b02e"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_stage34_38.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_stage34_38.yml",
+      "git_blob_sha1": "fc5dc49b8d36cf152a46c86d4cbe7c0870c5ff6f"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_stage34_46_tail.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_stage34_46_tail.yml",
+      "git_blob_sha1": "9a0f380e0b8438716ef0af89b0e3ffd799645db1"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_stage35_static_preflight.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_stage35_static_preflight.yml",
+      "git_blob_sha1": "0869fc34164fed25707a997d63c19ab1f14c1918"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_demo_transfer_probe.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_demo_transfer_probe.yml",
+      "git_blob_sha1": "159374ceabf18406c7e8f3e9cb7624ce170b4e8a"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_frozen_c_lineage_probe_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_frozen_c_lineage_probe_v1.yml",
+      "git_blob_sha1": "72d181dc1befa67d7dcc3fc199c7fabc32e5e124"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_iris_binding_diagnostic_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_iris_binding_diagnostic_v1.yml",
+      "git_blob_sha1": "67cc9580242e4681213a5964d0db8723dead727d"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_mechanics_and_retarget_diagnostic_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_mechanics_and_retarget_diagnostic_v1.yml",
+      "git_blob_sha1": "3c1ad45e8e76b4f969bd88dca42a5a41bc41a039"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_mesh_quality_collapse_diagnostic.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_mesh_quality_collapse_diagnostic.yml",
+      "git_blob_sha1": "53ca348527feb80067f913f34cfe31d997f63f70"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_mesh_quality_flip_diagnostic.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_mesh_quality_flip_diagnostic.yml",
+      "git_blob_sha1": "d5cf8489f15c02bd723e933691191a2fca63cc43"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_mesh_quality_relax_diagnostic.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_mesh_quality_relax_diagnostic.yml",
+      "git_blob_sha1": "22b2c5907508652bc6693230d3663529348227be"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_motion_deform_candidate_retarget_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_motion_deform_candidate_retarget_v1.yml",
+      "git_blob_sha1": "1d8914045911537a644e73b59e5266cb0c9eb634"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_motion_source_action_diagnostic_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_motion_source_action_diagnostic_v1.yml",
+      "git_blob_sha1": "8739ff043f93e80c6d17d2a4631ace9375b33e70"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_motion_weighted_support_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_motion_weighted_support_v1.yml",
+      "git_blob_sha1": "ba90fb137d41e35ae148e6ebff6bed0cc36366a0"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_owner_diagnostics_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_owner_diagnostics_v1.yml",
+      "git_blob_sha1": "9943436fc66f6014e082620befe0ccf08bb24397"
+    },
+    {
+      "old_path": ".github/workflows/subject2_knight_stage08_historical_compare_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/subject2_knight_stage08_historical_compare_v1.yml",
+      "git_blob_sha1": "0218e5f375e61c2cd1ab9163e0bdacf101ba81b6"
+    },
+    {
+      "old_path": ".github/workflows/v2_dag_truthfulness_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/v2_dag_truthfulness_audit_v1.yml",
+      "git_blob_sha1": "b4d5305f78dcf4c3b59a421c4a35ced6983d9404"
+    },
+    {
+      "old_path": ".github/workflows/v2_fingerprint_completeness_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/v2_fingerprint_completeness_audit_v1.yml",
+      "git_blob_sha1": "60c0a0170f9d8c0be3b2e0e22437b88d03856088"
+    },
+    {
+      "old_path": ".github/workflows/v2_incremental_fingerprint_portability_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/v2_incremental_fingerprint_portability_audit_v1.yml",
+      "git_blob_sha1": "bc3ba7b154e63ad7d4d6214b0a656527128ac12b"
+    },
+    {
+      "old_path": ".github/workflows/v2_incremental_invalidation_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/v2_incremental_invalidation_audit_v1.yml",
+      "git_blob_sha1": "4837244d726cce6ddc4619340710fc9c653a0f9d"
+    },
+    {
+      "old_path": ".github/workflows/v2_intended_architecture_conformance_audit_v2.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/v2_intended_architecture_conformance_audit_v2.yml",
+      "git_blob_sha1": "b19f76526f3a32d5fc16123a768b913fe61ab341"
+    },
+    {
+      "old_path": ".github/workflows/v2_learned_evidence_contract_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/v2_learned_evidence_contract_audit_v1.yml",
+      "git_blob_sha1": "eb4b102125845bb4b756c24fa54737ac11d3e584"
+    },
+    {
+      "old_path": ".github/workflows/v2_motion_runtime_proof_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/v2_motion_runtime_proof_audit_v1.yml",
+      "git_blob_sha1": "1ade8c44d9ba139224b598a461774f2d41203b72"
+    },
+    {
+      "old_path": ".github/workflows/v2_orchestration_architecture_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/v2_orchestration_architecture_audit_v1.yml",
+      "git_blob_sha1": "f8ac4f9989e56566cc1cfb0deb4769c8303d663f"
+    },
+    {
+      "old_path": ".github/workflows/v2_static_mesh_source_fidelity_gate.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/v2_static_mesh_source_fidelity_gate.yml",
+      "git_blob_sha1": "b51d45b1189fbe163912aa982be28f6c14734387"
+    },
+    {
+      "old_path": ".github/workflows/v2_subject_generic_executable_closure_audit_v1.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/v2_subject_generic_executable_closure_audit_v1.yml",
+      "git_blob_sha1": "b525468476417fde68644a3640f8729e28769419"
+    },
+    {
+      "old_path": ".github/workflows/vf11_certified_adaptive_research_smoke.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/vf11_certified_adaptive_research_smoke.yml",
+      "git_blob_sha1": "5fbb8ec96e11dfc2c902b4590990d6a3e3d10099"
+    },
+    {
+      "old_path": ".github/workflows/vf11_iris_v3_dense_loss_contract.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/vf11_iris_v3_dense_loss_contract.yml",
+      "git_blob_sha1": "600b27d3da91748f338b11a308c8ab3b15664441"
+    },
+    {
+      "old_path": ".github/workflows/vf11_iris_v3_negative_space_contract.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/vf11_iris_v3_negative_space_contract.yml",
+      "git_blob_sha1": "95505a5bc955e195f305b854e5f3c9272cc1730a"
+    },
+    {
+      "old_path": ".github/workflows/vf11_iris_v3_negative_space_upper_bound_contract.yml",
+      "new_path": "historical/ci_workflows/vf11_20260921/vf11_iris_v3_negative_space_upper_bound_contract.yml",
+      "git_blob_sha1": "436761b114b441cd4673609f8a00402ad41570dc"
+    }
+  ]
+}

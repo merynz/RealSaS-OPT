@@ -3,7 +3,7 @@ from __future__ import annotations
 """Source alpha vs base/rest TESSA silhouette diagnostic (NOT source fidelity).
 
 Use the existing RealSaS V3 camera projector and half-integer top-left raster
-fill. This is a source-locked piece of StdGEN-style multiview supervision, not
+fill. This is a source-locked piece of RealSaS-style multiview supervision, not
 8-view camera synthesis, per-pixel 3D depth, surface RGB ownership, pose-
 conditioned animation (ArtMesh/AniGen), or editable drawable authority.
 All original RGBA and neural fields remain available in independent CAS.

@@ -40,7 +40,7 @@ class RSSvNextStructuralMeshCandidate:
     normals: Tensor                       # [1,V,3], differentiable
     geometry: dict[str, Tensor]           # includes UDF/sign *proposals*
     semantic_logits: Tensor               # [1,V,R+1], UNKNOWN last
-    presentation_role_logits: Tensor      # [1,V,K], StdGEN-style visible material strata
+    presentation_role_logits: Tensor      # [1,V,K], RealSaS-style visible material strata
     presentation_role_schema_id: str
     affordance_logits: Tensor             # [1,V,A+1]
     graphics_logits: Tensor               # [1,V,G]

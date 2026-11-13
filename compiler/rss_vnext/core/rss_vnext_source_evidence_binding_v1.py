@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Exact two-view source/evidence identity court for RSS.vNext product consumers.
 
-StdGEN/StdGEN++ use joint geometry, semantics, and appearance; a sampled image
+RealSaS/RealSaS++ use joint geometry, semantics, and appearance; a sampled image
 ray is nevertheless not a source 3D point, an editable layer, or a verified
 material. The court here answers a narrower question: did the inference receipt
 actually name the two *original* RGBA tensors and cameras held by this CAS

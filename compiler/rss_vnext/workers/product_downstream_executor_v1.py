@@ -284,6 +284,12 @@ def _replay_raw_source_graphics_proof_v1(
         and r.get("artifact_type") == receipt_type
     ]
     if not raws:
+        if any(
+            type(row) is dict and row.get("artifact_type")
+            == "RealSaS.RSSvNextSourceRGBImagePlaneCandidates"
+            for row in refs
+        ):
+            raise RuntimeError("PRODUCT_PROOF_ORPHAN_RAW_SOURCE_RGB_CANDIDATE")
         if supplied or compiled.metadata.get("origin") == (
             "RAW_TWO_IMAGE_UNIFIED_H_TYPED_GRAPHICS_CANDIDATES"
         ):
@@ -351,9 +357,39 @@ def _replay_raw_source_graphics_proof_v1(
         or claimed_receipt.get("product_revision_minted") is not False
     ):
         raise RuntimeError("PRODUCT_PROOF_RAW_GRAPHICS_RECEIPT_REPLAY_MISMATCH")
+    from compiler.realsas_compiler_services.platform_worker.rss_vnext_cas_parent_v1 import (
+        read_rss_vnext_parent_cas_v1,
+    )
+    from compiler.rss_vnext.workers.rss_vnext_source_rgb_projection_candidate_v1 import (
+        ARTIFACT_TYPE, MAX_ARTIFACT_BYTES,
+        decode_raw_source_rgb_image_plane_candidates_v1,
+    )
+    rgb_refs = [
+        row for row in request.get("input_artifacts") or ()
+        if type(row) is dict and row.get("artifact_type") == ARTIFACT_TYPE
+    ]
+    if len(rgb_refs) != 1 or rgb_refs[0].get("schema_version") != "v1":
+        raise RuntimeError("PRODUCT_PROOF_RAW_SOURCE_RGB_CAS_CARDINALITY")
+    raw_rgb = read_rss_vnext_parent_cas_v1(
+        rgb_refs[0], read_object, limit=MAX_ARTIFACT_BYTES,
+    )
+    _, claimed_rgb_manifest = decode_raw_source_rgb_image_plane_candidates_v1(raw_rgb)
+    expected_rgb, expected_rgb_manifest = _raw_source_rgb_candidate_from_cas_v1(
+        request, read_object, mesh,
+    )
+    if (
+        raw_rgb != expected_rgb
+        or claimed_rgb_manifest != expected_rgb_manifest
+        or claimed_rgb_manifest.get("mesh_lineage_hash") != mesh.mesh_lineage_hash
+    ):
+        raise RuntimeError("PRODUCT_PROOF_RAW_SOURCE_RGB_PIXEL_FACE_REPLAY_MISMATCH")
     return {
         "original_two_image_source_binding_replayed": True,
         "original_alpha_static_mesh_qualification_recomputed": True,
+        "original_rgb_source_pixel_face_candidates_recomputed": True,
+        "original_rgb_image_plane_sample_count": expected_rgb_manifest["sample_count"],
+        "original_rgb_image_plane_cas_sha256": sha256(raw_rgb).hexdigest(),
+        "original_rgb_surface_owner_source_qualified": False,
         "same_checkpoint_typed_graphics_recomputed": True,
         "original_source_rgb_appearance_qualified": False,
         "source_camera_observed": False,

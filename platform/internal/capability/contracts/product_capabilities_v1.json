@@ -204,7 +204,7 @@
       }
     },
     "product.rig": {
-      "entry_module": "compiler.realsas_compiler_services.platform_worker.rss_vnext_rig_executor_v3",
+      "entry_module": "compiler.rss_vnext.workers.rss_vnext_rig_executor_v4",
       "policy": {
         "allowed_modes": [
           "PRODUCT",
@@ -219,10 +219,10 @@
       "metadata": {
         "product_role_id": "rig",
         "implementation_class": "COMPILER",
-        "interface_contract": "RealSaS.ProductRigInference.v3",
-        "executor_contract": "RealSaS.ProductRigInference.v3",
+        "interface_contract": "RealSaS.ProductRigInference.v4",
+        "executor_contract": "RealSaS.ProductRigInference.v4",
         "required_models": [],
-        "input_source_artifact_type": "RealSaS.RSSvNextTwoViewSource",
+        "input_source_artifact_type": "RealSaS.RSSvNextUncalibratedTwoImageSource",
         "input_source_schema_version": "v1",
         "input_fanout_artifact_type": "RealSaS.RSSvNextProductEvidenceFanout",
         "input_fanout_schema_version": "v1",
@@ -244,7 +244,13 @@
         "compiler_control_synthesis_allowed": false,
         "compiler_constraint_synthesis_allowed": false,
         "post_bind_mechanics_and_skin_qualification_required": true,
-        "can_mint_product_revision": false
+        "can_mint_product_revision": false,
+        "alternate_calibrated_source_artifact_type": "RealSaS.RSSvNextTwoViewSource",
+        "raw_scene_artifact_type": "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier",
+        "raw_receipt_artifact_type": "RealSaS.RSSvNextUncalibratedConstructionReceipt",
+        "raw_model_config_artifact_type": "RealSaS.RSSvNextUnifiedModelConfig",
+        "raw_embedded_mira_decoder_artifact_type": "RealSaS.RSSvNextEmbeddedMIRADecoder",
+        "raw_canonical_mesh_static_alpha_replay_required": true
       }
     },
     "product.skin": {

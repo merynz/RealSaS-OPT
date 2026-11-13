@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict
 from hashlib import sha256
+import json
 
 import pytest
 
@@ -96,10 +97,10 @@ def test_computed_face_json_cas_replay_preserves_nested_neural_channels():
         state="UNQUALIFIED_COMPUTED_SURFACE_CANDIDATE",reason="",
         faces=(face,),
     )
-    actual = rss_vnext_computed_surface_from_dict_v1(asdict(surface))
+    actual = rss_vnext_computed_surface_from_dict_v1(json.loads(json.dumps(asdict(surface))))
     assert actual == surface
     assert actual.faces[0].original_rgba_by_corner[0][1] == (0.,1.,0.,1.)
-    corrupted = asdict(surface)
+    corrupted = json.loads(json.dumps(asdict(surface)))
     corrupted["faces"][0]["original_projection_valid_by_corner"] = None
     with pytest.raises(QualificationError,match="FACE_NESTING_INVALID"):
         rss_vnext_computed_surface_from_dict_v1(corrupted)

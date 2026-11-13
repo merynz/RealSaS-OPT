@@ -18,8 +18,9 @@ from compiler.realsas_compiler_core.graphics_v1 import (
 from compiler.realsas_compiler_core.rss_vnext_source_evidence_binding_v1 import (
     validate_rss_vnext_source_evidence_binding_v1,
 )
-from compiler.realsas_compiler_services.platform_worker.rss_vnext_rig_executor_v3 import (
-    _cas, _one,
+from compiler.realsas_compiler_services.platform_worker.rss_vnext_cas_parent_v1 import (
+    select_rss_vnext_parent_v1 as _one,
+    read_rss_vnext_parent_cas_v1 as _cas,
 )
 from compiler.realsas_compiler_services.platform_worker.rss_vnext_source_codec_v1 import (
     validate_rss_vnext_source_ref_v1,

@@ -56,7 +56,7 @@ func (RSSvNextSkinCandidateProvider) Capabilities(context.Context) ([]Descriptor
 		OwnerModuleID:        "product.skin",
 		ExecutorActivity:     "engine.execute_capability.v1",
 		Dependencies:         []string{ProductShapeCapabilityID, ProductMeshCapabilityID, ProductRigCapabilityID},
-		AllowedModes:         []Mode{ModeDeveloper},
+		AllowedModes:         []Mode{ModeProduct, ModeDeveloper},
 		ProductPassAuthority: false,
 		Aliases:              []string{"RSS vNext Canonical Skin", "Embedded SkinTokens"},
 		Metadata:             metadata,

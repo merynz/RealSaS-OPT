@@ -75,8 +75,8 @@ def execute_mechanics_capability_v1(
         if (
             type(intervention_policy) is not dict
             or set(intervention_policy) != {
-                "enabled", "max_probed_controls", "relative_translation",
-                "max_constraint_residual",
+                "enabled", "max_probed_controls", "max_full_mesh_deformation_probes",
+                "relative_translation", "max_constraint_residual",
             }
             or type(intervention_policy["enabled"]) is not bool
         ):
@@ -88,6 +88,7 @@ def execute_mechanics_capability_v1(
             intervention = compile_mechanics_intervention_court_v1(
                 mesh, rig, skin, mechanics,
                 max_probed_controls=intervention_policy["max_probed_controls"],
+                max_full_mesh_deformation_probes=intervention_policy["max_full_mesh_deformation_probes"],
                 relative_translation=intervention_policy["relative_translation"],
                 max_constraint_residual=intervention_policy["max_constraint_residual"],
             )
@@ -127,6 +128,14 @@ def execute_mechanics_capability_v1(
             ),
             "attachment_socket_pose_count": (
                 intervention.anchor_count if intervention is not None else 0
+            ),
+            "full_mesh_deformation_probe_count": (
+                intervention.full_mesh_deformation_probe_count
+                if intervention is not None else 0
+            ),
+            "full_mesh_deformation_complete": (
+                intervention.full_mesh_deformation_complete
+                if intervention is not None else False
             ),
             "source_contact_qualified": False,
             "learned_secondary_motion_qualified": False,

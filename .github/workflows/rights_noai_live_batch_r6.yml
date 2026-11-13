@@ -1,0 +1,85 @@
+name: R29 R6 PartVerse live license and NoAI evidence batch
+on:
+  push:
+    branches: [audit/rights-metadata-r4-20261113]
+    paths: [.github/workflows/rights_noai_live_batch_r6.yml]
+permissions:
+  contents: read
+concurrency:
+  group: rights-noai-live-batch-r6
+  cancel-in-progress: false
+jobs:
+  live-batch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      RCLONE_CONFIG: /tmp/r29-r6-drive.conf
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+    - name: Prepare private evidence source
+      run: |
+        set -euo pipefail
+        umask 077
+        test -n "$DRIVE_CONFIG_B64" || { echo MISSING_DRIVE_CONFIG; exit 3; }
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq --no-install-recommends rclone
+        python -m pip install --quiet 'requests>=2.31,<3'
+        printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+        mkdir -p "$RUNNER_TEMP/r29r6"
+        rclone copyto \
+          "gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_partverse_original_license_policy_v2/20261109_7034/PARTVERSE_7034_ORIGINAL_SOURCE_LICENSE_TRIAGE_V2.csv" \
+          "$RUNNER_TEMP/r29r6/input.csv" --retries 2
+        test "$(sha256sum "$RUNNER_TEMP/r29r6/input.csv" | awk '{print $1}')" = "2599e230876099d53ccf65e8c17e30b2fe07e0d764f9373ec1e25e094c761f02"
+    - name: Live-check first 150 CC BY/CC0 original models and capture creator metadata
+      run: |
+        python - "$RUNNER_TEMP/r29r6" <<'PY'
+        import csv,json,sys,re,time,requests,hashlib
+        from pathlib import Path
+        root=Path(sys.argv[1]);r=list(csv.DictReader((root/'input.csv').open()))
+        assert len(r)==7034
+        candidate=[x for x in r if x['corrected_license_class_v2'] in ('ATTRIBUTION_REVIEW','CC0_OR_PUBLIC_DOMAIN_CLAIM')]
+        assert len(candidate)==6659,(len(candidate),set(x['corrected_license_class_v2'] for x in r))
+        candidate=sorted(candidate,key=lambda x:x['uid'])[:150]
+        s=requests.Session(); s.headers.update({'User-Agent':'RealSaS-RightsAudit/6.0'})
+        results=[]
+        for x in candidate:
+         uid=x['uid'];status='UNKNOWN';license_label='';creator='';has_noai=None;tags=[];last_error=''
+         for attempt in range(4):
+          try:
+           resp=s.get('https://api.sketchfab.com/v3/models/'+uid,timeout=(12,30))
+           if resp.status_code==200:
+            o=resp.json(); tags=[str(t.get('slug',t.get('name',''))) if isinstance(t,dict) else str(t) for t in o.get('tags',[])]
+            has_noai=any(t.lower().strip()=='noai' for t in tags)
+            license_label=(o.get('license') or {}).get('label','') if isinstance(o.get('license'),dict) else str(o.get('license') or '')
+            creator=(o.get('user') or {}).get('username','') if isinstance(o.get('user'),dict) else ''
+            status='NOAI_BLOCKED' if has_noai else 'NOAI_TAG_NOT_PRESENT_AT_CHECK'
+            break
+           if resp.status_code in (429,500,502,503,504):
+            last_error='HTTP_'+str(resp.status_code)
+            time.sleep(min(45,6*(attempt+1)));continue
+           last_error='HTTP_'+str(resp.status_code);status=last_error;break
+          except Exception as e:
+           last_error=type(e).__name__;time.sleep(min(30,5*(attempt+1)))
+         results.append({'source_key':'PARTVERSE_XL:'+uid,'uid':uid,'original_license':x['objaverse_license_claim'],
+         'live_license':license_label,'creator':creator,'noai':has_noai,'result':status,
+         'source_url':'https://sketchfab.com/3d-models/'+uid,'last_error':last_error})
+         if len(results)%25==0:print('LIVE_RIGHTS_PROGRESS',len(results),len(candidate),flush=True)
+         time.sleep(.8)
+        with (root/'live_results.csv').open('w',newline='') as f:
+         w=csv.DictWriter(f,fieldnames=list(results[0]));w.writeheader();w.writerows(results)
+        from collections import Counter
+        summary={'input_rows':7034,'candidate_rows':6659,'checked_this_batch':len(results),
+        'results':dict(Counter(x['result'] for x in results)),
+        'live_license_classes':dict(Counter(x['live_license'] for x in results)),
+        'input_sha':'2599e230876099d53ccf65e8c17e30b2fe07e0d764f9373ec1e25e094c761f02'}
+        (root/'live_closeout.json').write_text(json.dumps(summary,indent=2))
+        print('R29_R6_FINAL_BATCH_SUMMARY',json.dumps(summary),flush=True)
+        PY
+    - name: Persist real evidence receipts to private Drive
+      run: |
+        set -euo pipefail
+        src="$RUNNER_TEMP/r29r6"
+        dest="gdrive:RSS.vNext Corpus/Part2_R2_9_COMMERCIAL_TRAINING_RIGHTS/R29_R6_LIVE_NOAI_BATCH/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+        rclone copyto "$src/live_results.csv" "$dest/live_results.csv" --retries 3
+        rclone copyto "$src/live_closeout.json" "$dest/live_closeout.json" --retries 3
+        cat "$src/live_closeout.json" >> "$GITHUB_STEP_SUMMARY"

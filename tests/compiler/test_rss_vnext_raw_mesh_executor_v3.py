@@ -214,6 +214,39 @@ def test_raw_mesh_rejects_face_address_drift_and_does_not_fallback_to_grid():
         _execute(cas, req)
 
 
+def test_raw_mesh_accepts_exact_config_decoder_children_without_reloading_codec():
+    from compiler.rss_vnext.workers.rss_vnext_mesh_executor_v3 import (
+        RAW_CONFIG, RAW_DECODER,
+    )
+    cas, req = _fixture()
+    config = {**cas.put_bytes(b'{"schema":"pinned-test-config"}'),
+              "artifact_type": RAW_CONFIG, "schema_version": "v1"}
+    decoder = {**cas.put_bytes(b"frozen-test-mira-decoder"),
+               "artifact_type": RAW_DECODER, "schema_version": "v1"}
+    receipt_ref = req["input_artifacts"][-1]
+    receipt = json.loads(cas.read_object(receipt_ref))
+    receipt["unified_model_config_content_sha256"] = config["content_sha256"]
+    receipt["embedded_mira_decoder_content_sha256"] = decoder["content_sha256"]
+    req["input_artifacts"][-1] = {
+        **cas.put_bytes(json.dumps(receipt).encode()),
+        "artifact_type": RAW_RECEIPT, "schema_version": "v1",
+    }
+    req["input_artifacts"].extend([config, decoder])
+    result = _execute(cas, req)
+    # Synthetic TESSA fixture has no original alpha acceptance, but the
+    # immutable model-config + codec parents are admitted as exact CAS children.
+    assert result["status"] == "FAIL"
+    assert result["diagnostics"]["control_state"] == "LEGACY_NOT_GENERATED"
+    bad = dict(req)
+    bad["input_artifacts"] = list(req["input_artifacts"])
+    bad["input_artifacts"][-1] = {
+        **cas.put_bytes(b"tampered-decoder"),
+        "artifact_type": RAW_DECODER, "schema_version": "v1",
+    }
+    with pytest.raises(RuntimeError, match="EMBEDDED_CODEC_RECEIPT_DRIFT"):
+        _execute(cas, bad)
+
+
 def test_calibrated_mesh_delegates_v2_without_a_second_model(monkeypatch):
     import compiler.rss_vnext.workers.rss_vnext_mesh_executor_v3 as module
     seen = []

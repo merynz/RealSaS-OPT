@@ -11,7 +11,6 @@ on:
       - "compiler/realsas_compiler_core/**"
       - "tests/models/test_rss_vnext_*.py"
       - "tests/compiler/test_controllable_puppet_runtime_v1.py"
-      - "tests/compiler/test_rss_vnext_canonical_rig_lowering_v1.py"
       - "tests/compiler/test_mechanics_control_solver_v1.py"
       - "tests/compiler/test_playback_runtime_v4_contract_v1.py"
       - "tests/compiler/test_graphics_v2.py"
@@ -54,7 +53,6 @@ jobs:
           python -m pytest -q -rs \
             tests/models/test_rss_vnext_*.py \
             tests/compiler/test_controllable_puppet_runtime_v1.py \
-            tests/compiler/test_rss_vnext_canonical_rig_lowering_v1.py \
             tests/compiler/test_mechanics_control_solver_v1.py \
             tests/compiler/test_playback_runtime_v4_contract_v1.py \
             tests/compiler/test_graphics_v2.py

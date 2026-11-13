@@ -52,6 +52,11 @@ MESH_KEYS = {
     "tessa_candidate_static_quality_logits",
     "tessa_candidate_unsigned_distance", "tessa_candidate_sign_logits",
 }
+RAW_GRAPHICS_KEYS = {
+    "region_relation_valid_mask", "presentation_role_probabilities",
+    "source_semantic_patch_logits", "source_semantic_log_uncertainty",
+}
+
 AXIS_MIRA_KEYS = {
     "axis_mira_dynamic_vertices", "axis_mira_soft_skin_weights",
     "axis_mira_discrete_skin_weights", "axis_mira_joint_hidden_states",
@@ -431,7 +436,7 @@ def execute_rss_vnext_mesh_capability_v3(
         raise RuntimeError("RSS_VNEXT_RAW_MESH_SOURCE_OR_CHECKPOINT_PARENT_DRIFT")
     scene = _archive(
         _cas(scene_ref, read_object),
-        required=SCENE_REQUIRED, allowed=SCENE_REQUIRED | MESH_KEYS | AXIS_MIRA_KEYS,
+        required=SCENE_REQUIRED, allowed=SCENE_REQUIRED | MESH_KEYS | AXIS_MIRA_KEYS | RAW_GRAPHICS_KEYS,
     )
     views = _archive(
         _cas(views_ref, read_object),

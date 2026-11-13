@@ -172,6 +172,29 @@ def test_raw_mesh_rejects_checkpoint_parent_drift_and_mixed_source():
         _execute(cas, req)
 
 
+
+def test_raw_mesh_component_truth_is_checked_per_face_not_global_set_membership():
+    cas, req = _fixture()
+    scene_ref = next(r for r in req["input_artifacts"] if r["artifact_type"] == RAW_SCENE)
+    with np.load(io.BytesIO(cas.read_object(scene_ref))) as stored:
+        arrays = {key: stored[key] for key in stored.files}
+    # Both component IDs exist globally but this face crosses components.
+    arrays["tessa_candidate_vertex_components"] = np.array([0, 1, 0], np.int64)
+    arrays["tessa_candidate_face_components"] = np.array([0], np.int64)
+    new_scene = {**cas.put_bytes(_npz(**arrays)), "artifact_type": RAW_SCENE, "schema_version": "v1"}
+    req["input_artifacts"][2] = new_scene
+    receipt = json.loads(cas.read_object(req["input_artifacts"][-1]))
+    receipt["scene_content_sha256"] = new_scene["content_sha256"]
+    req["input_artifacts"][-1] = {
+        **cas.put_bytes(json.dumps(receipt).encode()),
+        "artifact_type": RAW_RECEIPT, "schema_version": "v1",
+    }
+    result = _execute(cas, req)
+    assert result["status"] == "FAIL"
+    assert result["diagnostics"]["component_id_continuity"] is False
+    assert not result["diagnostics"]["canonical_mesh_minted"]
+
+
 def test_raw_mesh_rejects_face_address_drift_and_does_not_fallback_to_grid():
     cas, req = _fixture()
     scene_ref = next(r for r in req["input_artifacts"] if r["artifact_type"] == RAW_SCENE)

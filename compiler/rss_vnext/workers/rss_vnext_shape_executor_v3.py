@@ -212,7 +212,10 @@ def execute_rss_vnext_shape_capability_v3(
     expected_checkpoint_sha = checkpoint.get("content_sha256")
     if (
         checkpoint.get("artifact_type") != CHECKPOINT_ARTIFACT_TYPE
-        or checkpoint.get("schema_version") != CHECKPOINT_SCHEMA_VERSION
+        or checkpoint.get("schema_version") != (
+            CHECKPOINT_SCHEMA_VERSION if test_vision_encoder_factory is not None
+            else "v2"
+        )
         or not _hex64(expected_checkpoint_sha)
         or not Path(checkpoint.get("path") or "").is_file()
     ):
@@ -223,6 +226,22 @@ def execute_rss_vnext_shape_capability_v3(
     else:
         vision = test_vision_encoder_factory()
         product_mode = False
+
+    # Production execution cannot fall back to the older source-direct
+    # 2-view reconstruction even with a legitimate DINO checkpoint.
+    if product_mode:
+        from models.rss_vnext.realsas_product_neural_bundle_v1 import (
+            BUNDLE_SCHEMA,
+        )
+        import torch
+        try:
+            manifest = torch.load(
+                checkpoint["path"], map_location="cpu", weights_only=True,
+            )
+        except Exception as exc:
+            raise RuntimeError("RSS_VNEXT_SHAPE_BUNDLE_DECODE_FAILED") from exc
+        if not isinstance(manifest, dict) or manifest.get("schema") != BUNDLE_SCHEMA:
+            raise RuntimeError("RSS_VNEXT_SHAPE_THREE_STAGE_BUNDLE_REQUIRED")
 
     from models.rss_vnext.inference_pipeline_v1 import (
         run_canonical_two_view_to_compiler_proposal_v1,

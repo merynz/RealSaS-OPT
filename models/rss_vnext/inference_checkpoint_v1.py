@@ -236,10 +236,32 @@ def load_inference_checkpoint_v1(
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_PAYLOAD_INVALID")
     schema = payload.get("schema")
     modern = schema == RSS_VNEXT_CHECKPOINT_SCHEMA_V2
-    if schema not in (RSS_VNEXT_CHECKPOINT_SCHEMA, RSS_VNEXT_CHECKPOINT_SCHEMA_V2):
+    bundled = schema == "RealSaS.RSSvNext.UnifiedThreeStageNeuralRelease.v1"
+    if schema not in (
+        RSS_VNEXT_CHECKPOINT_SCHEMA, RSS_VNEXT_CHECKPOINT_SCHEMA_V2,
+        "RealSaS.RSSvNext.UnifiedThreeStageNeuralRelease.v1",
+    ):
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_SCHEMA_DRIFT")
-    if set(payload) != (_V2_KEYS if modern else _CHECKPOINT_KEYS):
+    if not bundled and set(payload) != (_V2_KEYS if modern else _CHECKPOINT_KEYS):
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_PAYLOAD_INVALID")
+    # The ONE production ModelRelease checkpoint embeds canonicalizer,
+    # multiview RGB/normal generator and shared H(x) expert weights. Do not
+    # silently decode that bundle as an older 2-view reconstruction model.
+    if schema == "RealSaS.RSSvNext.UnifiedThreeStageNeuralRelease.v1":
+        from .realsas_product_neural_bundle_v1 import (
+            load_product_neural_bundle_v1,
+        )
+        bound = load_product_neural_bundle_v1(
+            source, expected_sha256=expected_sha256,
+            vision_encoder=vision_encoder, device=device,
+            product_mode=product_mode,
+        )
+        if bound.model.training or not getattr(
+            bound.model, "construction_requires_generated_multiview", False
+        ):
+            raise RuntimeError("RSS_VNEXT_BUNDLE_SCENE_CONSTRUCTION_INVALID")
+        bound.model._pinned_neural_bundle = bound
+        return bound.model
     if payload["architecture_id"] != RSSvNextUnifiedCharacterModel.architecture_id:
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_ARCHITECTURE_DRIFT")
     if payload["source_policy"] != (_V2_SOURCE_POLICY if modern else _SOURCE_POLICY):

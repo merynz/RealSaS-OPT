@@ -498,3 +498,33 @@ def test_go_product_input_duplicate_semantic_artifacts_must_share_identical_cas(
         _one_canonical_source({
             "input_artifacts": [original, lossless_input, lossless_input],
         })
+
+def test_product_shape_rejects_legacy_checkpoint_before_neural_inference(tmp_path, monkeypatch):
+    """Only the complete three-stage release is eligible in product mode."""
+    src, cas, request, read, put, vision, digest, cfg = (
+        _make_executor_fixture(tmp_path, monkeypatch)
+    )
+    # Production cannot use a V1 model release despite the exact source CAS.
+    with pytest.raises(RuntimeError, match="CHECKPOINT_RELEASE_ABI_DRIFT"):
+        execute_rss_vnext_shape_capability_v3(
+            request, read_object=read, put_bytes=put,
+        )
+
+
+def test_product_shape_rejects_v2_label_on_legacy_checkpoint(tmp_path, monkeypatch):
+    """No version renaming can upgrade untrained source-direct weights."""
+    src, cas, request, read, put, vision, digest, cfg = (
+        _make_executor_fixture(tmp_path, monkeypatch)
+    )
+    old = request["model_releases"][0]
+    source = dict(old["checkpoint"])
+    source["schema_version"] = "v2"
+    request["model_releases"][0] = {**old, "checkpoint": source}
+    monkeypatch.setattr(
+        "compiler.realsas_compiler_services.platform_worker.rss_vnext_shape_executor_v3._production_vision_factory",
+        vision,
+    )
+    with pytest.raises(RuntimeError, match="THREE_STAGE_BUNDLE_REQUIRED"):
+        execute_rss_vnext_shape_capability_v3(
+            request, read_object=read, put_bytes=put,
+        )

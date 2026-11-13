@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """CAS-native downstream product consumers.
 
-These are executable MODULE boundaries, not a substitute for RSS.vNext source
+All model releases registered on the upstream Attempt remain visible in the\nPlatform execution envelope; these downstream workers neither load an extra\ncheckpoint nor treat inherited model release refs as a request for inference.\n\nThese are executable MODULE boundaries, not a substitute for RSS.vNext source
 qualification. All inputs are typed, content-addressed, and independently
 reopened; a successful compilation of a graphics/motion *candidate* cannot
 authorize ProductRevision. Proof deliberately abstains until the source,
@@ -28,7 +28,7 @@ def _require(request: dict, expected_id: str, contract: str) -> None:
         or request.get("capability_id") != expected_id
         or type(meta) is not dict
         or meta.get("executor_contract") != contract
-        or request.get("model_releases")
+        or meta.get("required_models", []) != []
     ):
         raise RuntimeError("PRODUCT_DOWNSTREAM_CONTRACT_OR_MODEL_DRIFT:" + expected_id)
 

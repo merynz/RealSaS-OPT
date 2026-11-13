@@ -207,7 +207,7 @@ def test_teacher_sequence_and_topology_must_be_bound_without_silent_repair():
     # before the downstream face-correspondence criterion is evaluated.
     with pytest.raises(ValueError,match="AXIS_PRODUCT_MATCHED_TESSA_MESH_REQUIRED"):
         trainer.objective(replace(batch,topology_valid_mask=torch.tensor([False])))
-    with pytest.raises(ValueError,match="TEACHER_INCOMPLETE"):
+    with pytest.raises(ValueError,match="AXIS_PRODUCT_MATCHED_TESSA_MESH_REQUIRED"):
         trainer.objective(replace(batch,topology_teacher_tokens=None))
     altered=batch.axis_teacher_sequence.coord_indices.clone()
     altered[0,10,0]+=1

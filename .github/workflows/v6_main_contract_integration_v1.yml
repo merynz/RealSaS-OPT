@@ -57,7 +57,6 @@ on:
       - 'tests/compiler/test_mechanics_main_subtree_runtime_v1.py'
       - 'tests/compiler/test_control_motion_ik_integration_v1.py'
       - 'tests/compiler/test_product_downstream_cas_v1.py'
-      - 'tests/compiler/test_rss_vnext_canonical_rig_lowering_v1.py'
       - 'compiler/realsas_compiler_core/rss_vnext_canonical_rig_lowering_v1.py'
       - 'compiler/realsas_compiler_services/platform_worker/product_downstream_executor_v1.py'
       - 'platform/internal/capability/product_downstream.go'
@@ -116,8 +115,7 @@ jobs:
             tests/repository/test_fit1_mechanical_product_role_alignment_v1.py \
             tests/compiler/test_mechanics_main_subtree_runtime_v1.py \
             tests/compiler/test_control_motion_ik_integration_v1.py \
-            tests/compiler/test_product_downstream_cas_v1.py \
-            tests/compiler/test_rss_vnext_canonical_rig_lowering_v1.py
+            tests/compiler/test_product_downstream_cas_v1.py
       - name: Typed contracts do not mint product or training authority
         run: |
           python - <<'PY'

@@ -168,6 +168,35 @@ def _read_graphics_mechanics_intervention_v1(request, read_object, mesh, rig, sk
     return receipt
 
 
+def _read_dynamic_integrity_proof_v1(
+    request: dict, read_object: Callable, mesh, rig, skin, mechanics,
+):
+    """Proof independently reruns moving LBS/collision from CAS parents.
+
+    A rehashed JSON receipt alone is not collision evidence. Bad/missing
+    witnesses must not be promoted to PASS by source claims or neural labels.
+    """
+    rows = [
+        row for row in request.get("input_artifacts") or ()
+        if type(row) is dict
+        and row.get("artifact_type") == "RealSaS.MechanicsDynamicIntegrityCourt"
+        and row.get("schema_version") == "v1"
+    ]
+    if len(rows) > 1:
+        raise RuntimeError("PRODUCT_PROOF_DYNAMIC_INTEGRITY_CARDINALITY")
+    if not rows:
+        return None
+    from compiler.realsas_compiler_core.mechanics_dynamic_integrity_court_v1 import (
+        validate_mechanics_dynamic_integrity_court_v1,
+    )
+    receipt = _read(
+        request, read_object, "RealSaS.MechanicsDynamicIntegrityCourt", "v1",
+    )
+    return validate_mechanics_dynamic_integrity_court_v1(
+        receipt, mesh=mesh, rig=rig, skin=skin, mechanics=mechanics,
+    )
+
+
 def execute_graphics_capability_v1(
     request: dict[str, Any], *, read_object: Callable, put_bytes: Callable,
 ) -> dict[str, Any]:
@@ -444,10 +473,23 @@ def execute_proof_capability_v1(
         != intervention["court_hash"]
     ):
         raise RuntimeError("PRODUCT_PROOF_GRAPHICS_MECHANICS_WITNESS_DRIFT")
+    dynamic_integrity = _read_dynamic_integrity_proof_v1(
+        request, read_object, mesh, rig, skin, mechanics,
+    )
+    dynamic_required = metadata.get("dynamic_integrity_court_required", False)
+    if type(dynamic_required) is not bool:
+        raise RuntimeError("PRODUCT_PROOF_DYNAMIC_INTEGRITY_POLICY_TYPE")
+    geometry_valid = (
+        dynamic_integrity is not None
+        and dynamic_integrity.complete_face_and_control_coverage
+        and dynamic_integrity.no_new_self_intersections
+        and dynamic_integrity.all_probe_vertices_finite
+    )
     # This court has rechecked the whole present canonical graph and pose
     # authority. ProductPASS still requires independent source pixels/rays,
     # native parity, time-varying collision/contact and edit consequences.
     missing = (
+        *(() if geometry_valid else ("DYNAMIC_COLLISION_AND_DEFORMATION_INTEGRITY",)),
         "SOURCE_APPEARANCE_AND_POSE_VISIBILITY",
         "NATIVE_GRAPHICS_RENDERER_PARITY",
         "CONTACT_AND_ATTACHMENT_BEHAVIOR",
@@ -464,6 +506,15 @@ def execute_proof_capability_v1(
         "mechanics_intervention_court_hash": (
             intervention["court_hash"] if intervention is not None else None
         ),
+        "dynamic_integrity_court_hash": (
+            dynamic_integrity.court_hash if dynamic_integrity is not None else None
+        ),
+        "dynamic_integrity_complete": bool(
+            dynamic_integrity and dynamic_integrity.complete_face_and_control_coverage
+        ),
+        "dynamic_collision_nonregression_qualified": bool(geometry_valid),
+        "dynamic_integrity_required_by_release": dynamic_required,
+        "dynamic_integrity_recomputed_in_proof": dynamic_integrity is not None,
         "graphics_graph_hash": compiled.graph_hash,
         "motion_lineage_hash": motion.motion_lineage_hash,
         "canonical_parent_binding_hash": content_sha256({

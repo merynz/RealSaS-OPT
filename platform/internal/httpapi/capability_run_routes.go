@@ -67,6 +67,23 @@ func (a API) HandlerWithCapabilityRun() http.Handler {
 			"artifact_ids":     loaded.ArtifactIDs,
 		})
 	})
+	mux.HandleFunc("POST /v1/product/capabilities/compile", func(w http.ResponseWriter, r *http.Request) {
+		var req command.ProductCapabilityCompileRequest
+		if !decode(w, r, &req) {
+			return
+		}
+		if req.EngineReleaseID == uuid.Nil || req.SubjectID == uuid.Nil ||
+			req.SubjectInputID == uuid.Nil || req.IdempotencyKey == "" || req.RequestedBy == "" {
+			respond(w, http.StatusBadRequest, map[string]string{"error": "product compile requires engine_release_id, subject_id, subject_input_id, idempotency_key and requested_by"})
+			return
+		}
+		if err := release.RequireCanonicalMain(r.Context(), a.Pool, req.EngineReleaseID, a.CodeSHA); err != nil {
+			result(w, nil, err)
+			return
+		}
+		out, err := command.SubmitProductCapabilityCompile(r.Context(), a.Pool, req)
+		result(w, out, err)
+	})
 	mux.HandleFunc("POST /v1/capabilities/run", func(w http.ResponseWriter, r *http.Request) {
 		var req capabilityRunRequest
 		if !decode(w, r, &req) {

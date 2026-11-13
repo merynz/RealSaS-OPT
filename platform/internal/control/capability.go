@@ -76,7 +76,11 @@ func (a Activities) ResolveCapabilityGoal(ctx context.Context, in orchestration.
 	if err != nil {
 		return orchestration.ResolvedCapabilityGoal{}, err
 	}
-	resolved, err := snapshot.Registry.Resolve(targets...)
+	resolved, err := (capability.Goal{
+		Type:            capability.GoalType(goalType),
+		Targets:         targets,
+		PromotionPolicy: capability.PromotionPolicy(promotionPolicy),
+	}).Validate(snapshot.Registry)
 	if err != nil {
 		return orchestration.ResolvedCapabilityGoal{}, err
 	}
@@ -793,14 +797,21 @@ func (a Activities) FinalizeCapabilityGoal(ctx context.Context, request map[stri
 		return orchestration.CapabilityWorkflowResult{}, err
 	}
 	defer tx.Rollback(ctx)
-	var policy string
+	var policy, goalType string
 	var resolvedRaw []byte
 	if err := tx.QueryRow(ctx, `
-		SELECT promotion_policy,resolved_capability_ids FROM execution_goals WHERE id=$1 AND attempt_id=$2
-	`, goalID, attemptID).Scan(&policy, &resolvedRaw); err != nil {
+		SELECT promotion_policy,goal_type,resolved_capability_ids FROM execution_goals WHERE id=$1 AND attempt_id=$2
+	`, goalID, attemptID).Scan(&policy, &goalType, &resolvedRaw); err != nil {
 		return orchestration.CapabilityWorkflowResult{}, err
 	}
-	if policy != "NEVER" {
+	if policy == "QUALIFIED_PRODUCT_ONLY" && goalType == "PRODUCT_COMPILE" {
+		// Proof PASS is necessary, but not sufficient. ProductRevision
+		// sealing needs its own independent source/native/release admission.
+		// This must never turn a successful capability run into ProductPASS.
+		return orchestration.CapabilityWorkflowResult{}, errors.New(
+			"RSS_VNEXT_PRODUCT_REVISION_FINALIZER_NOT_YET_ADMITTED")
+	}
+	if policy != "NEVER" || goalType != "DEVELOPER_RUN" {
 		return orchestration.CapabilityWorkflowResult{}, errors.New("CAPABILITY_FINALIZE_PROMOTION_FORBIDDEN")
 	}
 	var resolved []string

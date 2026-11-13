@@ -24,10 +24,13 @@ from .canonical_skin_ir_v2 import CanonicalSkinIRV2
 from .canonical_mechanics_ir_v1 import CanonicalMechanicsIRV1
 from .hashing import content_sha256
 from .mechanics_control_solver_v1 import (
-    ControlTransformIRV1, control_world_transforms_v1,
+    ControlTransformIRV1,
     solve_control_pose_v1, deform_mesh_lbs_v1,
 )
 from .types import QualificationError
+from .mechanics_attachment_socket_runtime_v1 import (
+    solve_attachment_socket_world_v1 as _socket_poses,
+)
 
 
 @dataclass(frozen=True)
@@ -72,47 +75,6 @@ class MechanicsInterventionCourtV1:
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
-
-
-def _socket_poses(
-    rig: CanonicalRigIRV2,
-    solved,
-    state: tuple[ControlTransformIRV1, ...],
-) -> dict[str, tuple[float, float, float]]:
-    joint_pose = {item.canonical_joint_id: item for item in solved.joints}
-    controls = control_world_transforms_v1(rig, state)
-    if len(joint_pose) != len(rig.joints):
-        raise QualificationError("INTERVENTION_JOINT_POSE_COVERAGE_DRIFT")
-    out: dict[str, tuple[float, float, float]] = {}
-    for socket in rig.attachment_anchors:
-        if socket.canonical_anchor_id in out:
-            raise QualificationError("INTERVENTION_SOCKET_ID_DUPLICATE")
-        local = np.asarray(socket.local_P, dtype=np.float64)
-        if local.shape != (3,) or not np.isfinite(local).all():
-            raise QualificationError("INTERVENTION_SOCKET_LOCAL_NONFINITE")
-        has_joint = socket.parent_canonical_joint_id is not None
-        has_control = socket.parent_canonical_control_id is not None
-        if has_joint == has_control:
-            raise QualificationError("INTERVENTION_SOCKET_PARENT_AMBIGUOUS")
-        if has_joint:
-            parent = joint_pose.get(socket.parent_canonical_joint_id)
-            if parent is None:
-                raise QualificationError("INTERVENTION_SOCKET_JOINT_PARENT_UNKNOWN")
-            origin = np.asarray(parent.solved_P, dtype=np.float64)
-            rotation = np.asarray(parent.rotation_basis, dtype=np.float64)
-            scale = np.asarray(parent.scale, dtype=np.float64)
-        else:
-            state_row = controls.get(socket.parent_canonical_control_id)
-            if state_row is None:
-                raise QualificationError("INTERVENTION_SOCKET_CONTROL_PARENT_UNKNOWN")
-            origin, rotation, scale = state_row
-        if rotation.shape != (3, 3) or scale.shape != (3,):
-            raise QualificationError("INTERVENTION_SOCKET_PARENT_TRANSFORM_INVALID")
-        world = origin + rotation @ (scale * local)
-        if not np.isfinite(world).all():
-            raise QualificationError("INTERVENTION_SOCKET_WORLD_NONFINITE")
-        out[socket.canonical_anchor_id] = tuple(float(x) for x in world)
-    return out
 
 
 def compile_mechanics_intervention_court_v1(

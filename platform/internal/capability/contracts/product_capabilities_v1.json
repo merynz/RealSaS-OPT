@@ -49,7 +49,7 @@
         "executor_contract": "RealSaS.ProductShapeInference.v4",
         "input_artifact_type": "RealSaS.RSSvNextUncalibratedTwoImageSource",
         "input_schema_version": "v1",
-        "output_artifact_type": "RealSaS.RSSvNextInferenceEvidence",
+        "output_artifact_type": "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier",
         "output_schema_version": "v1",
         "fanout_contract": "RealSaS.RSSvNext.ProductEvidenceFanout.v1",
         "maximum_new_tokens": 131072,
@@ -60,6 +60,41 @@
           }
         ],
         "auxiliary_outputs": [
+          {
+            "role": "rss_uncalibrated_generated_views",
+            "artifact_type": "RealSaS.RSSvNextGeneratedConditioningViews",
+            "schema_version": "v1"
+          },
+          {
+            "role": "rss_uncalibrated_construction_receipt",
+            "artifact_type": "RealSaS.RSSvNextUncalibratedConstructionReceipt",
+            "schema_version": "v1"
+          },
+          {
+            "role": "rss_uncalibrated_unified_model_config",
+            "artifact_type": "RealSaS.RSSvNextUnifiedModelConfig",
+            "schema_version": "v1"
+          },
+          {
+            "role": "rss_uncalibrated_embedded_mira_decoder",
+            "artifact_type": "RealSaS.RSSvNextEmbeddedMIRADecoder",
+            "schema_version": "v1"
+          }
+        ],
+        "input_observed_front_back_only": false,
+        "neural_scene_survives_mesh_abstain": true,
+        "learned_model_results_not_product": true,
+        "independent_iris_tessa_forbidden": true,
+        "alternate_calibrated_source_artifact_type": "RealSaS.RSSvNextTwoViewSource",
+        "alternate_calibrated_source_schema_version": "v1",
+        "raw_neural_scene_candidate_artifact_type": "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier",
+        "raw_generated_views_artifact_type": "RealSaS.RSSvNextGeneratedConditioningViews",
+        "raw_construction_receipt_artifact_type": "RealSaS.RSSvNextUncalibratedConstructionReceipt",
+        "raw_source_camera_calibration_authority": false,
+        "raw_mesh_proof_is_separate_admission": true,
+        "alternate_calibrated_output_artifact_type": "RealSaS.RSSvNextInferenceEvidence",
+        "alternate_calibrated_output_schema_version": "v1",
+        "calibrated_auxiliary_outputs": [
           {
             "role": "original_source",
             "artifact_type": "RealSaS.RSSvNextOriginalSource",
@@ -95,18 +130,7 @@
             "artifact_type": "RealSaS.RSSvNextProductEvidenceFanout",
             "schema_version": "v1"
           }
-        ],
-        "input_observed_front_back_only": false,
-        "neural_scene_survives_mesh_abstain": true,
-        "learned_model_results_not_product": true,
-        "independent_iris_tessa_forbidden": true,
-        "alternate_calibrated_source_artifact_type": "RealSaS.RSSvNextTwoViewSource",
-        "alternate_calibrated_source_schema_version": "v1",
-        "raw_neural_scene_candidate_artifact_type": "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier",
-        "raw_generated_views_artifact_type": "RealSaS.RSSvNextGeneratedConditioningViews",
-        "raw_construction_receipt_artifact_type": "RealSaS.RSSvNextUncalibratedConstructionReceipt",
-        "raw_source_camera_calibration_authority": false,
-        "raw_mesh_proof_is_separate_admission": true
+        ]
       }
     },
     "product.mesh": {
@@ -126,7 +150,7 @@
         "implementation_class": "COMPILER",
         "interface_contract": "RealSaS.ProductMeshCompile.v3",
         "executor_contract": "RealSaS.ProductMeshCompile.v3",
-        "input_shape_artifact_type": "RealSaS.RSSvNextInferenceEvidence",
+        "input_shape_artifact_type": "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier",
         "input_shape_schema_version": "v1",
         "input_source_artifact_type": "RealSaS.RSSvNextUncalibratedTwoImageSource",
         "input_source_schema_version": "v1",
@@ -200,7 +224,9 @@
         "raw_scene_candidate_artifact_type": "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier",
         "raw_generated_views_artifact_type": "RealSaS.RSSvNextGeneratedConditioningViews",
         "raw_construction_receipt_artifact_type": "RealSaS.RSSvNextUncalibratedConstructionReceipt",
-        "raw_candidate_cannot_mint_canonical_mesh": true
+        "raw_candidate_cannot_mint_canonical_mesh": false,
+        "alternate_calibrated_shape_artifact_type": "RealSaS.RSSvNextInferenceEvidence",
+        "raw_static_court_before_canonical_mint": true
       }
     },
     "product.rig": {
@@ -250,7 +276,8 @@
         "raw_receipt_artifact_type": "RealSaS.RSSvNextUncalibratedConstructionReceipt",
         "raw_model_config_artifact_type": "RealSaS.RSSvNextUnifiedModelConfig",
         "raw_embedded_mira_decoder_artifact_type": "RealSaS.RSSvNextEmbeddedMIRADecoder",
-        "raw_canonical_mesh_static_alpha_replay_required": true
+        "raw_canonical_mesh_static_alpha_replay_required": true,
+        "raw_scene_schema_version": "v1"
       }
     },
     "product.skin": {
@@ -306,7 +333,8 @@
         "raw_scene_artifact_type": "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier",
         "raw_model_config_artifact_type": "RealSaS.RSSvNextUnifiedModelConfig",
         "raw_embedded_mira_decoder_artifact_type": "RealSaS.RSSvNextEmbeddedMIRADecoder",
-        "raw_source_static_replay_required": true
+        "raw_source_static_replay_required": true,
+        "raw_scene_schema_version": "v1"
       }
     },
     "product.mechanics": {
@@ -426,7 +454,8 @@
         "raw_scene_artifact_type": "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier",
         "raw_construction_receipt_artifact_type": "RealSaS.RSSvNextUncalibratedConstructionReceipt",
         "raw_typed_region_relation_mask_required": true,
-        "raw_source_alpha_static_mesh_replay_required": true
+        "raw_source_alpha_static_mesh_replay_required": true,
+        "raw_scene_schema_version": "v1"
       }
     },
     "product.motion": {

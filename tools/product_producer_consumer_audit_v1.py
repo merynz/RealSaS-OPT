@@ -26,11 +26,11 @@ EDGES: dict[str, dict[str, tuple[str | None, str | None]]] = {
     "product.shape": {"product.input": ("input_artifact_type", "input_schema_version")},
     "product.mesh": {"product.shape": ("input_shape_artifact_type", "input_shape_schema_version")},
     "product.rig": {
-        "product.shape": ("input_fanout_artifact_type", "input_fanout_schema_version"),
+        "product.shape": ("raw_scene_artifact_type", "raw_scene_schema_version"),
         "product.mesh": ("input_mesh_artifact_type", "input_mesh_schema_version"),
     },
     "product.skin": {
-        "product.shape": ("input_fanout_artifact_type", "input_fanout_schema_version"),
+        "product.shape": ("raw_scene_artifact_type", "raw_scene_schema_version"),
         "product.mesh": ("input_mesh_artifact_type", "input_mesh_schema_version"),
         "product.rig": ("input_rig_artifact_type", "input_rig_schema_version"),
     },
@@ -40,7 +40,7 @@ EDGES: dict[str, dict[str, tuple[str | None, str | None]]] = {
         "product.skin": ("input_skin_artifact_type", "input_skin_schema_version"),
     },
     "product.graphics": {
-        "product.shape": ("input_fanout_artifact_type", "input_fanout_schema_version"),
+        "product.shape": ("raw_scene_artifact_type", "raw_scene_schema_version"),
         "product.mesh": ("input_mesh_artifact_type", "input_mesh_schema_version"),
         "product.rig": ("input_rig_artifact_type", "input_rig_schema_version"),
         "product.skin": ("input_skin_artifact_type", "input_skin_schema_version"),
@@ -226,18 +226,9 @@ def evaluate(snapshot: Mapping[str, Any]) -> dict[str, Any]:
             consumer_version = str(meta.get(input_version_key) or "")
             parent_type = str(producer_meta.get("output_artifact_type") or "")
             parent_version = str(producer_meta.get("output_schema_version") or "")
-            # Shape distributes an independently CAS-addressed fanout child,
-            # not its primary inference-evidence artifact.
-            if input_type_key == "input_fanout_artifact_type" and parent_id == "product.shape":
-                alternatives = [
-                    x for x in producer_meta.get("auxiliary_outputs", ())
-                    if x.get("role") == "rss_evidence_fanout"
-                ]
-                if len(alternatives) == 1:
-                    parent_type = str(alternatives[0].get("artifact_type") or "")
-                    parent_version = str(alternatives[0].get("schema_version") or "")
-                else:
-                    parent_type, parent_version = "", ""
+            # Active raw RSS.vNext CAS edges compare the exact one-checkpoint
+            # NeuralScene primary output; calibrated eight-view fanout is a
+            # separately declared alternative checked below.
             status = (
                 "MATCH"
                 if consumer_type and consumer_version
@@ -254,6 +245,69 @@ def evaluate(snapshot: Mapping[str, Any]) -> dict[str, Any]:
             })
             if status != "MATCH":
                 issues.append("REGISTERED_ARTIFACT_SCHEMA_MISMATCH:" + parent_id + "->" + capability_id)
+
+    # The alternate calibrated source still has its own evidence + seven
+    # children. Keep it visible without masking the primary raw product path.
+    shape = caps.get("product.shape", {}).get("metadata") or {}
+    mesh = caps.get("product.mesh", {}).get("metadata") or {}
+    raw_primary = ("RealSaS.RSSvNextUncalibratedNeuralSceneCarrier", "v1")
+    calibrated_primary = ("RealSaS.RSSvNextInferenceEvidence", "v1")
+    if (
+        (shape.get("output_artifact_type"), shape.get("output_schema_version"))
+        != raw_primary
+        or (shape.get("alternate_calibrated_output_artifact_type"),
+            shape.get("alternate_calibrated_output_schema_version"))
+        != calibrated_primary
+        or (mesh.get("input_shape_artifact_type"),
+            mesh.get("input_shape_schema_version")) != raw_primary
+        or mesh.get("alternate_calibrated_shape_artifact_type") != calibrated_primary[0]
+    ):
+        issues.append("ACTIVE_RAW_AND_CALIBRATED_SHAPE_PRIMARY_CONTRACT_DRIFT")
+    raw_expected = {
+        ("rss_uncalibrated_generated_views",
+         "RealSaS.RSSvNextGeneratedConditioningViews", "v1"),
+        ("rss_uncalibrated_construction_receipt",
+         "RealSaS.RSSvNextUncalibratedConstructionReceipt", "v1"),
+        ("rss_uncalibrated_unified_model_config",
+         "RealSaS.RSSvNextUnifiedModelConfig", "v1"),
+        ("rss_uncalibrated_embedded_mira_decoder",
+         "RealSaS.RSSvNextEmbeddedMIRADecoder", "v1"),
+    }
+    raw_declared = shape.get("auxiliary_outputs")
+    if (
+        not isinstance(raw_declared, list)
+        or len(raw_declared) != len(raw_expected)
+        or any(not isinstance(x, dict) for x in raw_declared)
+        or {
+            (x.get("role"), x.get("artifact_type"), x.get("schema_version"))
+            for x in raw_declared
+        } != raw_expected
+    ):
+        issues.append("ACTIVE_RAW_SHAPE_FIVE_CAS_OUTPUT_CONTRACT_DRIFT")
+    calibrated_declared = shape.get("calibrated_auxiliary_outputs")
+    if (
+        not isinstance(calibrated_declared, list)
+        or len(calibrated_declared) != 7
+        or any(not isinstance(x, dict) for x in calibrated_declared)
+    ):
+        issues.append("CALIBRATED_SHAPE_SEVEN_CAS_ALTERNATE_DRIFT")
+        calibrated_fanout = None
+    else:
+        fanout = [
+            x for x in calibrated_declared
+            if x.get("role") == "rss_evidence_fanout"
+        ]
+        calibrated_fanout = fanout[0] if len(fanout) == 1 else None
+    for role in ("product.rig", "product.skin", "product.graphics"):
+        meta = caps.get(role, {}).get("metadata") or {}
+        if (
+            calibrated_fanout is None
+            or meta.get("input_fanout_artifact_type")
+            != calibrated_fanout.get("artifact_type")
+            or meta.get("input_fanout_schema_version")
+            != calibrated_fanout.get("schema_version")
+        ):
+            issues.append("CALIBRATED_SHAPE_FANOUT_CONSUMER_DRIFT:" + role)
 
     # product.mesh emits more than its primary canonical output; this is actual
     # _seal call-site evidence, not an assertion based on documentation.

@@ -113,3 +113,51 @@ def test_missing_v2_runtime_source_remains_an_explicit_product_blocker():
 def test_contract_edge_recipes_cover_known_steady_product_prefix():
     assert EDGES["product.skin"]["product.rig"] == ("input_rig_artifact_type", "input_rig_schema_version")
     assert EDGES["product.motion"]["product.mechanics"] == ("input_mechanics_artifact_type", "input_mechanics_schema_version")
+
+
+
+def test_active_raw_shape_scene_is_the_primary_producer_not_old_inference_fanout():
+    snapshot = deepcopy(read_snapshot())
+    shape = snapshot["capabilities"]["product.shape"]["metadata"]
+    mesh = snapshot["capabilities"]["product.mesh"]["metadata"]
+    assert shape["output_artifact_type"] == mesh["input_shape_artifact_type"]
+    assert shape["output_artifact_type"] == (
+        "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier"
+    )
+    assert len(shape["auxiliary_outputs"]) == 4
+    assert len(shape["calibrated_auxiliary_outputs"]) == 7
+    for role in ("product.rig", "product.skin", "product.graphics"):
+        assert snapshot["capabilities"][role]["metadata"]["raw_scene_artifact_type"] == (
+            shape["output_artifact_type"]
+        )
+    shape["output_artifact_type"] = "RealSaS.RSSvNextInferenceEvidence"
+    report = evaluate(snapshot)
+    assert "REGISTERED_ARTIFACT_SCHEMA_MISMATCH:product.shape->product.mesh" in (
+        report["registered_issues"]
+    )
+    assert "ACTIVE_RAW_AND_CALIBRATED_SHAPE_PRIMARY_CONTRACT_DRIFT" in (
+        report["registered_issues"]
+    )
+
+
+def test_active_shape_cannot_hide_missing_raw_embedded_mira_child():
+    snapshot = deepcopy(read_snapshot())
+    shape = snapshot["capabilities"]["product.shape"]["metadata"]
+    shape["auxiliary_outputs"] = [
+        x for x in shape["auxiliary_outputs"]
+        if x["role"] != "rss_uncalibrated_embedded_mira_decoder"
+    ]
+    report = evaluate(snapshot)
+    assert "ACTIVE_RAW_SHAPE_FIVE_CAS_OUTPUT_CONTRACT_DRIFT" in report["registered_issues"]
+
+
+def test_calibrated_shape_fanout_is_explicit_alternative_not_raw_source_authority():
+    snapshot = deepcopy(read_snapshot())
+    snapshot["capabilities"]["product.skin"]["metadata"][
+        "input_fanout_artifact_type"
+    ] = "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier"
+    report = evaluate(snapshot)
+    assert "CALIBRATED_SHAPE_FANOUT_CONSUMER_DRIFT:product.skin" in (
+        report["registered_issues"]
+    )
+    assert report["product_e2e_qualified"] is False

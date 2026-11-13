@@ -47,11 +47,34 @@ def test_product_capability_implementations_are_complete_and_semantic():
         "architecture_id": "RSS.vNext.UnifiedCharacterCompiler.v1",
     }]
     assert shape["parameters"]["independent_iris_tessa_forbidden"] is True
-    assert len(shape["parameters"]["auxiliary_outputs"]) == 7
+    assert shape["parameters"]["output_artifact_type"] == (
+        "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier"
+    )
+    assert shape["parameters"]["alternate_calibrated_output_artifact_type"] == (
+        "RealSaS.RSSvNextInferenceEvidence"
+    )
+    raw = shape["parameters"]["auxiliary_outputs"]
+    calibrated = shape["parameters"]["calibrated_auxiliary_outputs"]
+    assert {r["role"] for r in raw} == {
+        "rss_uncalibrated_generated_views",
+        "rss_uncalibrated_construction_receipt",
+        "rss_uncalibrated_unified_model_config",
+        "rss_uncalibrated_embedded_mira_decoder",
+    }
+    assert len(calibrated) == 7
+    assert {r["role"] for r in calibrated} >= {"rss_evidence_fanout"}
 
     mesh = specs["product.mesh"]
     assert mesh["policy"]["dependencies"] == ["product.shape"]
     assert mesh["parameters"]["executor_contract"] == "RealSaS.ProductMeshCompile.v3"
+    assert mesh["parameters"]["input_shape_artifact_type"] == (
+        "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier"
+    )
+    assert mesh["parameters"]["alternate_calibrated_shape_artifact_type"] == (
+        "RealSaS.RSSvNextInferenceEvidence"
+    )
+    assert mesh["parameters"]["raw_candidate_cannot_mint_canonical_mesh"] is False
+    assert mesh["parameters"]["raw_static_court_before_canonical_mint"] is True
     assert mesh["parameters"]["output_artifact_type"] == "RealSaS.CanonicalMeshIR"
     assert mesh["parameters"]["output_schema_version"] == "v1"
     assert mesh["parameters"]["requires_shape_parent_binding"] is True
@@ -64,6 +87,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert rig["policy"]["dependencies"] == ["product.shape", "product.mesh"]
     assert rig["entry_module"] == "compiler.rss_vnext.workers.rss_vnext_rig_executor_v4"
     assert rig["parameters"]["executor_contract"] == "RealSaS.ProductRigInference.v4"
+    assert rig["parameters"]["raw_scene_schema_version"] == "v1"
     assert rig["parameters"]["required_models"] == []
     assert rig["parameters"]["single_checkpoint_inference_reused"] is True
     assert rig["parameters"]["independent_axis_model_release_allowed"] is False
@@ -78,6 +102,7 @@ def test_product_capability_implementations_are_complete_and_semantic():
     ]
     assert skin["entry_module"] == "compiler.rss_vnext.workers.rss_vnext_skin_executor_v4"
     assert skin["parameters"]["executor_contract"] == "RealSaS.ProductSkinInference.v4"
+    assert skin["parameters"]["raw_scene_schema_version"] == "v1"
     assert skin["parameters"]["required_models"] == []
     assert skin["parameters"]["single_checkpoint_inference_reused"] is True
     assert skin["parameters"]["exact_embedded_mira_decoder_replayed"] is True

@@ -48,11 +48,39 @@ func TestRSSvNextTwoViewInputAndSingleModelShapeFormOneCandidateRoleGraph(t *tes
 		requirements[0].ArchitectureID != RSSvNextArchitectureID {
 		t.Fatalf("RSS model ABI drift: %+v", requirements[0])
 	}
+	if shape.Metadata["output_artifact_type"] != "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier" ||
+		shape.Metadata["alternate_calibrated_output_artifact_type"] != "RealSaS.RSSvNextInferenceEvidence" {
+		t.Fatalf("RSS primary raw Shape CAS and calibrated alternate drift: %+v", shape.Metadata)
+	}
 	aux, ok := shape.Metadata["auxiliary_outputs"].([]any)
-	if !ok || len(aux) != 7 {
-		t.Fatalf("RSS must preserve seven independently consumable CAS outputs: %+v", aux)
+	if !ok || len(aux) != 4 {
+		t.Fatalf("RSS must retain four raw companion CAS outputs: %+v", aux)
 	}
 	wanted := map[string]bool{
+		"rss_uncalibrated_generated_views":       true,
+		"rss_uncalibrated_construction_receipt":  true,
+		"rss_uncalibrated_unified_model_config":  true,
+		"rss_uncalibrated_embedded_mira_decoder": true,
+	}
+	for _, raw := range aux {
+		row, ok := raw.(map[string]any)
+		if !ok {
+			t.Fatalf("RSS raw CAS artifact type drift: %+v", raw)
+		}
+		role, ok := row["role"].(string)
+		if !ok || !wanted[role] {
+			t.Fatalf("RSS raw companion duplicate/unknown: %+v", row)
+		}
+		delete(wanted, role)
+	}
+	if len(wanted) != 0 {
+		t.Fatalf("RSS five-artifact raw Shape fanout incomplete: %+v", wanted)
+	}
+	calibrated, ok := shape.Metadata["calibrated_auxiliary_outputs"].([]any)
+	if !ok || len(calibrated) != 7 {
+		t.Fatalf("RSS calibrated seven-child alternate lost: %+v", calibrated)
+	}
+	calibratedWanted := map[string]bool{
 		"original_source":         true,
 		"normalized_model_source": true,
 		"neural_scene":            true,
@@ -61,19 +89,19 @@ func TestRSSvNextTwoViewInputAndSingleModelShapeFormOneCandidateRoleGraph(t *tes
 		"embedded_mira_decoder":   true,
 		"rss_evidence_fanout":     true,
 	}
-	for _, raw := range aux {
+	for _, raw := range calibrated {
 		row, ok := raw.(map[string]any)
 		if !ok {
-			t.Fatalf("RSS auxiliary artifact type drift: %+v", raw)
+			t.Fatalf("RSS calibrated auxiliary ABI invalid: %+v", raw)
 		}
 		role, ok := row["role"].(string)
-		if !ok || !wanted[role] {
-			t.Fatalf("RSS auxiliary duplicate/unknown: %+v", row)
+		if !ok || !calibratedWanted[role] {
+			t.Fatalf("RSS calibrated companion duplicate/unknown: %+v", row)
 		}
-		delete(wanted, role)
+		delete(calibratedWanted, role)
 	}
-	if len(wanted) != 0 {
-		t.Fatalf("RSS retained evidence not fully declared: %+v", wanted)
+	if len(calibratedWanted) != 0 {
+		t.Fatalf("RSS calibrated companion set incomplete: %+v", calibratedWanted)
 	}
 	graph, err := ProductRoleGraph(registry)
 	if err != nil || len(graph) != 2 {

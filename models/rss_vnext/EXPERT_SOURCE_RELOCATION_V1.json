@@ -1,0 +1,1077 @@
+{
+  "schema": "RealSaS.RSSvNextUnifiedExpertStorage.v1",
+  "source_main_sha": "2ddcb5a0316157297883347e5fa777b1a3dda051",
+  "purpose": "PHYSICAL_COLOCATION_STABLE_IMPORT_IDENTITY",
+  "count": 178,
+  "paths": [
+    {
+      "old_path": "models/axis/__init__.py",
+      "new_path": "models/rss_vnext/experts/axis/__init__.py",
+      "original_git_blob_sha1": "3228a5844f5bd9803e434ba7c342ece3c2b8c70d",
+      "git_blob_sha1": "3228a5844f5bd9803e434ba7c342ece3c2b8c70d"
+    },
+    {
+      "old_path": "models/axis/axis_bfs_discrete_xyz_v541.py",
+      "new_path": "models/rss_vnext/experts/axis/axis_bfs_discrete_xyz_v541.py",
+      "original_git_blob_sha1": "e60f0cdb9924651c51e3340f1b1f627fa8c30c9b",
+      "git_blob_sha1": "e60f0cdb9924651c51e3340f1b1f627fa8c30c9b"
+    },
+    {
+      "old_path": "models/axis/product_training_v6.py",
+      "new_path": "models/rss_vnext/experts/axis/product_training_v6.py",
+      "original_git_blob_sha1": "b9a6355b2f38285974c9e2c372128e2ff2c8712e",
+      "git_blob_sha1": "b9a6355b2f38285974c9e2c372128e2ff2c8712e"
+    },
+    {
+      "old_path": "models/axis/rig_program_decode_v6.py",
+      "new_path": "models/rss_vnext/experts/axis/rig_program_decode_v6.py",
+      "original_git_blob_sha1": "854d5710aeb9313dd5a087c8b6cfb1f83897b868",
+      "git_blob_sha1": "854d5710aeb9313dd5a087c8b6cfb1f83897b868"
+    },
+    {
+      "old_path": "models/axis/rig_program_model_v6.py",
+      "new_path": "models/rss_vnext/experts/axis/rig_program_model_v6.py",
+      "original_git_blob_sha1": "505238a0b49cf989f620e8c2032af3c594c7cc86",
+      "git_blob_sha1": "505238a0b49cf989f620e8c2032af3c594c7cc86"
+    },
+    {
+      "old_path": "models/axis/runtime_checkpoint_v1.py",
+      "new_path": "models/rss_vnext/experts/axis/runtime_checkpoint_v1.py",
+      "original_git_blob_sha1": "b1ad409b4794cb2ef4bbf7f541e938f5ec622b50",
+      "git_blob_sha1": "b1ad409b4794cb2ef4bbf7f541e938f5ec622b50"
+    },
+    {
+      "old_path": "models/axis/runtime_checkpoint_v2.py",
+      "new_path": "models/rss_vnext/experts/axis/runtime_checkpoint_v2.py",
+      "original_git_blob_sha1": "7b77fab4aaad19fc9b568d018d62fd8e0dbcc023",
+      "git_blob_sha1": "7b77fab4aaad19fc9b568d018d62fd8e0dbcc023"
+    },
+    {
+      "old_path": "models/axis/scene_conditioning_v6.py",
+      "new_path": "models/rss_vnext/experts/axis/scene_conditioning_v6.py",
+      "original_git_blob_sha1": "6a90ba34255abfeae1785d903c349de79be13e73",
+      "git_blob_sha1": "6a90ba34255abfeae1785d903c349de79be13e73"
+    },
+    {
+      "old_path": "models/iris/README.md",
+      "new_path": "models/rss_vnext/experts/iris/README.md",
+      "original_git_blob_sha1": "27bbf498368806ff7feebdb8a5f82ce044938ec4",
+      "git_blob_sha1": "27bbf498368806ff7feebdb8a5f82ce044938ec4"
+    },
+    {
+      "old_path": "models/iris/__init__.py",
+      "new_path": "models/rss_vnext/experts/iris/__init__.py",
+      "original_git_blob_sha1": "be55031f819853fb32e85579a2bcc3adcc3f44ca",
+      "git_blob_sha1": "be55031f819853fb32e85579a2bcc3adcc3f44ca"
+    },
+    {
+      "old_path": "models/iris/topology/__init__.py",
+      "new_path": "models/rss_vnext/experts/iris/topology/__init__.py",
+      "original_git_blob_sha1": "487d02c860187c3221a91a7948a4ab5b52542eeb",
+      "git_blob_sha1": "487d02c860187c3221a91a7948a4ab5b52542eeb"
+    },
+    {
+      "old_path": "models/iris/topology/head_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/topology/head_v1.py",
+      "original_git_blob_sha1": "a663dc6cd249c7519ab240b782cea514276e22df",
+      "git_blob_sha1": "a663dc6cd249c7519ab240b782cea514276e22df"
+    },
+    {
+      "old_path": "models/iris/topology/scene_memory_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/topology/scene_memory_v1.py",
+      "original_git_blob_sha1": "e19f67d3b386bbb2666e30769cf6b4d994dd444a",
+      "git_blob_sha1": "e19f67d3b386bbb2666e30769cf6b4d994dd444a"
+    },
+    {
+      "old_path": "models/iris/training/__init__.py",
+      "new_path": "models/rss_vnext/experts/iris/training/__init__.py",
+      "original_git_blob_sha1": "528b3286ef55201503da95d503fc26259cf640ed",
+      "git_blob_sha1": "528b3286ef55201503da95d503fc26259cf640ed"
+    },
+    {
+      "old_path": "models/iris/training/apparatus_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/training/apparatus_v1.py",
+      "original_git_blob_sha1": "78934d2b9f92777a3c934441dbf0bcec22ea38a1",
+      "git_blob_sha1": "78934d2b9f92777a3c934441dbf0bcec22ea38a1"
+    },
+    {
+      "old_path": "models/iris/training/cohort_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/training/cohort_v1.py",
+      "original_git_blob_sha1": "53a7bffde60de37f86713485df92d713b11d297a",
+      "git_blob_sha1": "24ecdbb35ef72d6a210bd4fcde8b4381797112a2",
+      "note": "Repository root discovery updated for physical expert source relocation"
+    },
+    {
+      "old_path": "models/iris/truth/__init__.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/__init__.py",
+      "original_git_blob_sha1": "2a31dd63735c9647b0995234650ec1f7bd57ea53",
+      "git_blob_sha1": "2a31dd63735c9647b0995234650ec1f7bd57ea53"
+    },
+    {
+      "old_path": "models/iris/truth/component_geometry_authority_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/component_geometry_authority_v1.py",
+      "original_git_blob_sha1": "079f9b573e7cd10bcdc90000af391a55c542b0ab",
+      "git_blob_sha1": "079f9b573e7cd10bcdc90000af391a55c542b0ab"
+    },
+    {
+      "old_path": "models/iris/truth/component_geometry_training_targets_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/component_geometry_training_targets_v1.py",
+      "original_git_blob_sha1": "2ecd1321b7303865d28d2d4b73778fbcb392983a",
+      "git_blob_sha1": "2ecd1321b7303865d28d2d4b73778fbcb392983a"
+    },
+    {
+      "old_path": "models/iris/truth/contracts_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/contracts_v1.py",
+      "original_git_blob_sha1": "2e095cd27717390c85fa0ee8be34bc2a928b33e9",
+      "git_blob_sha1": "2e095cd27717390c85fa0ee8be34bc2a928b33e9"
+    },
+    {
+      "old_path": "models/iris/truth/geometric_topology_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/geometric_topology_v1.py",
+      "original_git_blob_sha1": "3af339cc93dc6d6409700d31ed1d325f5aa454e3",
+      "git_blob_sha1": "3af339cc93dc6d6409700d31ed1d325f5aa454e3"
+    },
+    {
+      "old_path": "models/iris/truth/graphics_oracle_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/graphics_oracle_v1.py",
+      "original_git_blob_sha1": "59d63ff10827bb53320a0361b5f6101adf410d77",
+      "git_blob_sha1": "59d63ff10827bb53320a0361b5f6101adf410d77"
+    },
+    {
+      "old_path": "models/iris/truth/local_oriented_probe_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/local_oriented_probe_v1.py",
+      "original_git_blob_sha1": "bb5e684afb0ed7107446988ac0746e801f130da9",
+      "git_blob_sha1": "bb5e684afb0ed7107446988ac0746e801f130da9"
+    },
+    {
+      "old_path": "models/iris/truth/measurements_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/measurements_v1.py",
+      "original_git_blob_sha1": "a030cf587ce0734d8d80338ea424e35e6c814e31",
+      "git_blob_sha1": "a030cf587ce0734d8d80338ea424e35e6c814e31"
+    },
+    {
+      "old_path": "models/iris/truth/mechanics_oracle_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/mechanics_oracle_v1.py",
+      "original_git_blob_sha1": "e61978aa1f1dbd49362dc0da307d7183dfc0d344",
+      "git_blob_sha1": "e61978aa1f1dbd49362dc0da307d7183dfc0d344"
+    },
+    {
+      "old_path": "models/iris/truth/motion_temporal_oracle_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/motion_temporal_oracle_v1.py",
+      "original_git_blob_sha1": "712b2e7020f4744134f27ab76d39b1d74cd0ae99",
+      "git_blob_sha1": "712b2e7020f4744134f27ab76d39b1d74cd0ae99"
+    },
+    {
+      "old_path": "models/iris/truth/motion_truth_availability_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/motion_truth_availability_v1.py",
+      "original_git_blob_sha1": "b1bfe19f74f0a47353685cc71de13a54f36d088f",
+      "git_blob_sha1": "b1bfe19f74f0a47353685cc71de13a54f36d088f"
+    },
+    {
+      "old_path": "models/iris/truth/package_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/package_v1.py",
+      "original_git_blob_sha1": "d40bac30feed4744209dc825c2cf7876f59e8045",
+      "git_blob_sha1": "d40bac30feed4744209dc825c2cf7876f59e8045"
+    },
+    {
+      "old_path": "models/iris/truth/presentation_pass_domain_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/presentation_pass_domain_v1.py",
+      "original_git_blob_sha1": "49e17143027ad894162d164136c8bac412476445",
+      "git_blob_sha1": "49e17143027ad894162d164136c8bac412476445"
+    },
+    {
+      "old_path": "models/iris/truth/presentation_qualification_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/presentation_qualification_v1.py",
+      "original_git_blob_sha1": "4a04fb64429642c2cac120118ba0ef1ea9bcccf7",
+      "git_blob_sha1": "4a04fb64429642c2cac120118ba0ef1ea9bcccf7"
+    },
+    {
+      "old_path": "models/iris/truth/presentation_response_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/presentation_response_v1.py",
+      "original_git_blob_sha1": "829aec764ad9634c88537b7c7270876fc14faa48",
+      "git_blob_sha1": "829aec764ad9634c88537b7c7270876fc14faa48"
+    },
+    {
+      "old_path": "models/iris/truth/presentation_response_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/presentation_response_v2.py",
+      "original_git_blob_sha1": "0472e31de480a4a8c0710a164a8110e05d0854a8",
+      "git_blob_sha1": "0472e31de480a4a8c0710a164a8110e05d0854a8"
+    },
+    {
+      "old_path": "models/iris/truth/qualification_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/qualification_v1.py",
+      "original_git_blob_sha1": "45dd6bbadf0e9a70539019d90c50fa5c1edade56",
+      "git_blob_sha1": "45dd6bbadf0e9a70539019d90c50fa5c1edade56"
+    },
+    {
+      "old_path": "models/iris/truth/ray_appearance_measurement_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/ray_appearance_measurement_v1.py",
+      "original_git_blob_sha1": "e8ee6481827f3c588af0106f6b1ee2daac208439",
+      "git_blob_sha1": "e8ee6481827f3c588af0106f6b1ee2daac208439"
+    },
+    {
+      "old_path": "models/iris/truth/ray_compositing_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/ray_compositing_v1.py",
+      "original_git_blob_sha1": "8e2adb8dfcc17499a9ca4b758abc7a199830a1d0",
+      "git_blob_sha1": "8e2adb8dfcc17499a9ca4b758abc7a199830a1d0"
+    },
+    {
+      "old_path": "models/iris/truth/response_operator_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/response_operator_v1.py",
+      "original_git_blob_sha1": "9f40d0628e73c12c1a9971cd07da4d480d80e459",
+      "git_blob_sha1": "9f40d0628e73c12c1a9971cd07da4d480d80e459"
+    },
+    {
+      "old_path": "models/iris/truth/source_alpha_parity_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/source_alpha_parity_v1.py",
+      "original_git_blob_sha1": "97121cf50ed24a00946cdddad4c519aba23d0987",
+      "git_blob_sha1": "97121cf50ed24a00946cdddad4c519aba23d0987"
+    },
+    {
+      "old_path": "models/iris/truth/temporal_response_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/truth/temporal_response_v1.py",
+      "original_git_blob_sha1": "8e8420d4cd06895cde2caf740f3831bf036a256c",
+      "git_blob_sha1": "8e8420d4cd06895cde2caf740f3831bf036a256c"
+    },
+    {
+      "old_path": "models/iris/v2/__init__.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/__init__.py",
+      "original_git_blob_sha1": "eabdd389a1261857b121ff4474e43e81ae3a7a63",
+      "git_blob_sha1": "eabdd389a1261857b121ff4474e43e81ae3a7a63"
+    },
+    {
+      "old_path": "models/iris/v2/checkpoint_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/checkpoint_v2.py",
+      "original_git_blob_sha1": "3d60b4d4741a090c78e89bb504c93f5a020f8d29",
+      "git_blob_sha1": "3d60b4d4741a090c78e89bb504c93f5a020f8d29"
+    },
+    {
+      "old_path": "models/iris/v2/depth_output_head_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/depth_output_head_v2.py",
+      "original_git_blob_sha1": "7542a44167fc6bc87da7e9d30042ea1f37cd3527",
+      "git_blob_sha1": "7542a44167fc6bc87da7e9d30042ea1f37cd3527"
+    },
+    {
+      "old_path": "models/iris/v2/dino_token_parity_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/dino_token_parity_v2.py",
+      "original_git_blob_sha1": "e9365634e23237ab1e84f5a0c3fa6ccde53995cb",
+      "git_blob_sha1": "e9365634e23237ab1e84f5a0c3fa6ccde53995cb"
+    },
+    {
+      "old_path": "models/iris/v2/dinov2_foundation_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/dinov2_foundation_v2.py",
+      "original_git_blob_sha1": "d1cfed1a43905b738c2c3067941d7bc27626ce4f",
+      "git_blob_sha1": "d1cfed1a43905b738c2c3067941d7bc27626ce4f"
+    },
+    {
+      "old_path": "models/iris/v2/eval_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/eval_v2.py",
+      "original_git_blob_sha1": "8b17657fd655fffb8270330547c9ba4caa1c8670",
+      "git_blob_sha1": "8b17657fd655fffb8270330547c9ba4caa1c8670"
+    },
+    {
+      "old_path": "models/iris/v2/evidence_field_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/evidence_field_v2.py",
+      "original_git_blob_sha1": "c6bf4a569f153f1ec29fc3800e2f68635dae1612",
+      "git_blob_sha1": "c6bf4a569f153f1ec29fc3800e2f68635dae1612"
+    },
+    {
+      "old_path": "models/iris/v2/foundation_adapter_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/foundation_adapter_v2.py",
+      "original_git_blob_sha1": "90fdfa0ed918664f28879dd4146524e318abf50d",
+      "git_blob_sha1": "90fdfa0ed918664f28879dd4146524e318abf50d"
+    },
+    {
+      "old_path": "models/iris/v2/iris_apparatus_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/iris_apparatus_v2.py",
+      "original_git_blob_sha1": "de720f85b78f79f4f9b72c601b26b14f0265de53",
+      "git_blob_sha1": "de720f85b78f79f4f9b72c601b26b14f0265de53"
+    },
+    {
+      "old_path": "models/iris/v2/local_refinement_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/local_refinement_v2.py",
+      "original_git_blob_sha1": "cbf7d01f392641cbc6cee5f26e9733211b2fcc36",
+      "git_blob_sha1": "cbf7d01f392641cbc6cee5f26e9733211b2fcc36"
+    },
+    {
+      "old_path": "models/iris/v2/model_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/model_v2.py",
+      "original_git_blob_sha1": "578d866624f95081b6eb88731c11bcdcd6b3c125",
+      "git_blob_sha1": "578d866624f95081b6eb88731c11bcdcd6b3c125"
+    },
+    {
+      "old_path": "models/iris/v2/observation_contract_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/observation_contract_v2.py",
+      "original_git_blob_sha1": "a16b8cd16cd6804976c4d3ab357a28f03e1f290f",
+      "git_blob_sha1": "a16b8cd16cd6804976c4d3ab357a28f03e1f290f"
+    },
+    {
+      "old_path": "models/iris/v2/observation_evidence_emitter_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/observation_evidence_emitter_v2.py",
+      "original_git_blob_sha1": "8b360e20280303c12b4404fb83aa881ac504cc8d",
+      "git_blob_sha1": "8b360e20280303c12b4404fb83aa881ac504cc8d"
+    },
+    {
+      "old_path": "models/iris/v2/q_descriptor_sampler_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/q_descriptor_sampler_v2.py",
+      "original_git_blob_sha1": "b66cf585984b2ba426f27ad3d52b61eacba6f1cb",
+      "git_blob_sha1": "b66cf585984b2ba426f27ad3d52b61eacba6f1cb"
+    },
+    {
+      "old_path": "models/iris/v2/q_domain_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/q_domain_v2.py",
+      "original_git_blob_sha1": "09f1850c61abbae9cdf1c250317b040463eddb81",
+      "git_blob_sha1": "09f1850c61abbae9cdf1c250317b040463eddb81"
+    },
+    {
+      "old_path": "models/iris/v2/q_evidence_encoder_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/q_evidence_encoder_v2.py",
+      "original_git_blob_sha1": "980421f89428d4bccadbb342ee06908ac34b0357",
+      "git_blob_sha1": "980421f89428d4bccadbb342ee06908ac34b0357"
+    },
+    {
+      "old_path": "models/iris/v2/q_spatial_graph_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/q_spatial_graph_v2.py",
+      "original_git_blob_sha1": "b5c50f169358af3c03f742ccf4596fb503d5380f",
+      "git_blob_sha1": "b5c50f169358af3c03f742ccf4596fb503d5380f"
+    },
+    {
+      "old_path": "models/iris/v2/ray_modes_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/ray_modes_v2.py",
+      "original_git_blob_sha1": "9008deef03c4401d0fde4b3f26ce0e6ccb8b74bb",
+      "git_blob_sha1": "9008deef03c4401d0fde4b3f26ce0e6ccb8b74bb"
+    },
+    {
+      "old_path": "models/iris/v2/resource_contract_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/resource_contract_v2.py",
+      "original_git_blob_sha1": "8831a8ede1927820f2413b66aa054892b578fe03",
+      "git_blob_sha1": "8831a8ede1927820f2413b66aa054892b578fe03"
+    },
+    {
+      "old_path": "models/iris/v2/train_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/train_v2.py",
+      "original_git_blob_sha1": "3b83401eca9e3520a7446b2cc39837aa9d02a668",
+      "git_blob_sha1": "3b83401eca9e3520a7446b2cc39837aa9d02a668"
+    },
+    {
+      "old_path": "models/iris/v2/world_regularizer_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v2/world_regularizer_v2.py",
+      "original_git_blob_sha1": "6d0f2b1e4e3d759e3cf39f537f22f74ae48ba53a",
+      "git_blob_sha1": "6d0f2b1e4e3d759e3cf39f537f22f74ae48ba53a"
+    },
+    {
+      "old_path": "models/iris/v3/PROMOTED_MAGE_FIT_WITNESS_V1.json",
+      "new_path": "models/rss_vnext/experts/iris/v3/PROMOTED_MAGE_FIT_WITNESS_V1.json",
+      "original_git_blob_sha1": "28e1aed73a943bfc60c8bb0f331fca5348dbcf9b",
+      "git_blob_sha1": "28e1aed73a943bfc60c8bb0f331fca5348dbcf9b"
+    },
+    {
+      "old_path": "models/iris/v3/__init__.py",
+      "new_path": "models/rss_vnext/experts/iris/v3/__init__.py",
+      "original_git_blob_sha1": "2d38e29056721439beb628972dc7d9ee220f4d8a",
+      "git_blob_sha1": "2d38e29056721439beb628972dc7d9ee220f4d8a"
+    },
+    {
+      "old_path": "models/iris/v3/dense_source_coverage_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/v3/dense_source_coverage_v3.py",
+      "original_git_blob_sha1": "aefc0b5bae3cacc1a5e68e965b3e5c92602c0483",
+      "git_blob_sha1": "aefc0b5bae3cacc1a5e68e965b3e5c92602c0483"
+    },
+    {
+      "old_path": "models/iris/v3/dense_source_sampling_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/v3/dense_source_sampling_v3.py",
+      "original_git_blob_sha1": "82653863f089b3ac9e293deb4af43742436c5610",
+      "git_blob_sha1": "82653863f089b3ac9e293deb4af43742436c5610"
+    },
+    {
+      "old_path": "models/iris/v3/full_screen_negative_space_audit_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/v3/full_screen_negative_space_audit_v3.py",
+      "original_git_blob_sha1": "79e7c5a32edbeef162b108549f64338220fcd6d3",
+      "git_blob_sha1": "79e7c5a32edbeef162b108549f64338220fcd6d3"
+    },
+    {
+      "old_path": "models/iris/v3/negative_space_barrier_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/v3/negative_space_barrier_v3.py",
+      "original_git_blob_sha1": "9a5c47f15af11cdea9dbdb987b73a0cfdec8b91d",
+      "git_blob_sha1": "9a5c47f15af11cdea9dbdb987b73a0cfdec8b91d"
+    },
+    {
+      "old_path": "models/iris/v3/negative_space_upper_bound_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/v3/negative_space_upper_bound_v3.py",
+      "original_git_blob_sha1": "564ff73d865bf87ab46f58af310a1ca2409f77c1",
+      "git_blob_sha1": "564ff73d865bf87ab46f58af310a1ca2409f77c1"
+    },
+    {
+      "old_path": "models/iris/v3/scene_first_signed_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/v3/scene_first_signed_v3.py",
+      "original_git_blob_sha1": "65819277910e91bb9106d593c7d5eb851dd58cec",
+      "git_blob_sha1": "65819277910e91bb9106d593c7d5eb851dd58cec"
+    },
+    {
+      "old_path": "models/iris/v3/train_dense_fit_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/v3/train_dense_fit_v3.py",
+      "original_git_blob_sha1": "0974598882b9f595403987281f4a2e76b34d6087",
+      "git_blob_sha1": "0974598882b9f595403987281f4a2e76b34d6087"
+    },
+    {
+      "old_path": "models/iris/v3/train_upper_bound_fit_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/v3/train_upper_bound_fit_v3.py",
+      "original_git_blob_sha1": "0726624eab742fb4dc405dc98e906c9a922ef7a9",
+      "git_blob_sha1": "0726624eab742fb4dc405dc98e906c9a922ef7a9"
+    },
+    {
+      "old_path": "models/iris/v3/zero_surface_decoder_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/v3/zero_surface_decoder_v3.py",
+      "original_git_blob_sha1": "c63993f531e9747537ab4a126420ea50acc315b1",
+      "git_blob_sha1": "c63993f531e9747537ab4a126420ea50acc315b1"
+    },
+    {
+      "old_path": "models/iris/v31/__init__.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/__init__.py",
+      "original_git_blob_sha1": "fa393130da74f1616c45b9d56a13ae602a04ed58",
+      "git_blob_sha1": "fa393130da74f1616c45b9d56a13ae602a04ed58"
+    },
+    {
+      "old_path": "models/iris/v31/alpha_resampling_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/alpha_resampling_v1.py",
+      "original_git_blob_sha1": "9be86f825f961b28813ed5ef1c0185fb78038cf7",
+      "git_blob_sha1": "9be86f825f961b28813ed5ef1c0185fb78038cf7"
+    },
+    {
+      "old_path": "models/iris/v31/checkpoint_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/checkpoint_v1.py",
+      "original_git_blob_sha1": "31a96419a6ea893cab8b4df6ccda061376e75918",
+      "git_blob_sha1": "31a96419a6ea893cab8b4df6ccda061376e75918"
+    },
+    {
+      "old_path": "models/iris/v31/evidence_adapter_model_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/evidence_adapter_model_v2.py",
+      "original_git_blob_sha1": "17595350f8871599827961d13a46e6a1c8e43dc9",
+      "git_blob_sha1": "17595350f8871599827961d13a46e6a1c8e43dc9"
+    },
+    {
+      "old_path": "models/iris/v31/fixed_snake_capacity_pilot_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/fixed_snake_capacity_pilot_v1.py",
+      "original_git_blob_sha1": "a4718c5f6ab2b11f29a4a1a731ca81c605abafa5",
+      "git_blob_sha1": "a4718c5f6ab2b11f29a4a1a731ca81c605abafa5"
+    },
+    {
+      "old_path": "models/iris/v31/fixed_snake_evidence_adapter_pilot_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/fixed_snake_evidence_adapter_pilot_v2.py",
+      "original_git_blob_sha1": "48e2211ef63bc62a0f28ba206b8f6188b9609641",
+      "git_blob_sha1": "48e2211ef63bc62a0f28ba206b8f6188b9609641"
+    },
+    {
+      "old_path": "models/iris/v31/fixed_snake_evidence_student_t_fixed_validation_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/fixed_snake_evidence_student_t_fixed_validation_v3.py",
+      "original_git_blob_sha1": "d75a709ec98a632ad3562edf10a00a4f70ac38ac",
+      "git_blob_sha1": "d75a709ec98a632ad3562edf10a00a4f70ac38ac"
+    },
+    {
+      "old_path": "models/iris/v31/fixed_snake_evidence_student_t_pilot_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/fixed_snake_evidence_student_t_pilot_v3.py",
+      "original_git_blob_sha1": "df84ce09e21155b372d34c103bd4bf7da6b4eba6",
+      "git_blob_sha1": "df84ce09e21155b372d34c103bd4bf7da6b4eba6"
+    },
+    {
+      "old_path": "models/iris/v31/frozen_features_v31.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/frozen_features_v31.py",
+      "original_git_blob_sha1": "ca1c0d54dfa1ca6e90e742c07742b2f663aae576",
+      "git_blob_sha1": "ca1c0d54dfa1ca6e90e742c07742b2f663aae576"
+    },
+    {
+      "old_path": "models/iris/v31/fstar_teacher_v31.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/fstar_teacher_v31.py",
+      "original_git_blob_sha1": "d555a6abe005be2475eb8e008ef6ac8e3db3b0a8",
+      "git_blob_sha1": "d555a6abe005be2475eb8e008ef6ac8e3db3b0a8"
+    },
+    {
+      "old_path": "models/iris/v31/inference_input_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/inference_input_v1.py",
+      "original_git_blob_sha1": "3a680dab0a234b8b1821b9a389c3de1dc48a9284",
+      "git_blob_sha1": "3a680dab0a234b8b1821b9a389c3de1dc48a9284"
+    },
+    {
+      "old_path": "models/iris/v31/lofo_trainer_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/lofo_trainer_v1.py",
+      "original_git_blob_sha1": "4ef2357475e2e45ac3d2f69713cf370df13490c6",
+      "git_blob_sha1": "4ef2357475e2e45ac3d2f69713cf370df13490c6"
+    },
+    {
+      "old_path": "models/iris/v31/lofo_trainer_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/lofo_trainer_v2.py",
+      "original_git_blob_sha1": "6641c466165280166d757edacef798afb16bc505",
+      "git_blob_sha1": "6641c466165280166d757edacef798afb16bc505"
+    },
+    {
+      "old_path": "models/iris/v31/lofo_trainer_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/lofo_trainer_v3.py",
+      "original_git_blob_sha1": "8fceedad81f6249cff7507351a1c47a99e01bee6",
+      "git_blob_sha1": "8fceedad81f6249cff7507351a1c47a99e01bee6"
+    },
+    {
+      "old_path": "models/iris/v31/mechanics_student_t_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/mechanics_student_t_v3.py",
+      "original_git_blob_sha1": "f491f5a1db4ac62ae4be299a89baba6f71ed9374",
+      "git_blob_sha1": "f491f5a1db4ac62ae4be299a89baba6f71ed9374"
+    },
+    {
+      "old_path": "models/iris/v31/model_v31.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/model_v31.py",
+      "original_git_blob_sha1": "0cf3b718f2bf7f94feac1052247ce8016c2336e3",
+      "git_blob_sha1": "0cf3b718f2bf7f94feac1052247ce8016c2336e3"
+    },
+    {
+      "old_path": "models/iris/v31/numerical_environment_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/numerical_environment_v1.py",
+      "original_git_blob_sha1": "f595196f3079618a6ddfc5160c5c1c0bad18f41e",
+      "git_blob_sha1": "f595196f3079618a6ddfc5160c5c1c0bad18f41e"
+    },
+    {
+      "old_path": "models/iris/v31/presentation_objective_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/presentation_objective_v1.py",
+      "original_git_blob_sha1": "88bf27ac3ebdee605af3697d65444812d1c6bb1a",
+      "git_blob_sha1": "88bf27ac3ebdee605af3697d65444812d1c6bb1a"
+    },
+    {
+      "old_path": "models/iris/v31/surface_witness_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/v31/surface_witness_v1.py",
+      "original_git_blob_sha1": "9dd78554dcd48083b1784f8437ec3cd6c6484017",
+      "git_blob_sha1": "9dd78554dcd48083b1784f8437ec3cd6c6484017"
+    },
+    {
+      "old_path": "models/iris/v32/training_input_contract_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/v32/training_input_contract_v1.py",
+      "original_git_blob_sha1": "b0b4a924fe3f917a9e2ebb493c99620fef61d019",
+      "git_blob_sha1": "b0b4a924fe3f917a9e2ebb493c99620fef61d019"
+    },
+    {
+      "old_path": "models/iris/v4/__init__.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/__init__.py",
+      "original_git_blob_sha1": "042b3846353f8f82b20f0b35753afcd92c118e39",
+      "git_blob_sha1": "042b3846353f8f82b20f0b35753afcd92c118e39"
+    },
+    {
+      "old_path": "models/iris/v4/adaptive_hull_constraint_v4_4.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/adaptive_hull_constraint_v4_4.py",
+      "original_git_blob_sha1": "ba07876a44ca39d5d1bdbcbf88e5af0716106bb4",
+      "git_blob_sha1": "ba07876a44ca39d5d1bdbcbf88e5af0716106bb4"
+    },
+    {
+      "old_path": "models/iris/v4/adaptive_hull_constraint_v4_4_1.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/adaptive_hull_constraint_v4_4_1.py",
+      "original_git_blob_sha1": "7649c6c5aaa0c4d07ffc41c090370f9b17626b8c",
+      "git_blob_sha1": "7649c6c5aaa0c4d07ffc41c090370f9b17626b8c"
+    },
+    {
+      "old_path": "models/iris/v4/audit_scheduler_v4_2.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/audit_scheduler_v4_2.py",
+      "original_git_blob_sha1": "a115e604d8481409da693a5d05d11472e0b85476",
+      "git_blob_sha1": "a115e604d8481409da693a5d05d11472e0b85476"
+    },
+    {
+      "old_path": "models/iris/v4/checkpoint_selection_v4_1.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/checkpoint_selection_v4_1.py",
+      "original_git_blob_sha1": "f1a4b57a3cb7653babe7916a1b386d79772e7af4",
+      "git_blob_sha1": "f1a4b57a3cb7653babe7916a1b386d79772e7af4"
+    },
+    {
+      "old_path": "models/iris/v4/mixed_precision_query_v4.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/mixed_precision_query_v4.py",
+      "original_git_blob_sha1": "0a6aab71c24489053f68a0b42d29660d4de3c99e",
+      "git_blob_sha1": "0a6aab71c24489053f68a0b42d29660d4de3c99e"
+    },
+    {
+      "old_path": "models/iris/v4/regularity_v4_1.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/regularity_v4_1.py",
+      "original_git_blob_sha1": "01465f6c5587f8a408a3d7fe2a7128067809353d",
+      "git_blob_sha1": "01465f6c5587f8a408a3d7fe2a7128067809353d"
+    },
+    {
+      "old_path": "models/iris/v4/regularity_v4_2.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/regularity_v4_2.py",
+      "original_git_blob_sha1": "e71a16a482fb507eeef9d2e5ac14508e492d374b",
+      "git_blob_sha1": "e71a16a482fb507eeef9d2e5ac14508e492d374b"
+    },
+    {
+      "old_path": "models/iris/v4/scene_first_signed_v4.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/scene_first_signed_v4.py",
+      "original_git_blob_sha1": "8e20d0d68feae429d5e5137336d0c6742f85f0f0",
+      "git_blob_sha1": "8e20d0d68feae429d5e5137336d0c6742f85f0f0"
+    },
+    {
+      "old_path": "models/iris/v4/source_constraint_v4.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/source_constraint_v4.py",
+      "original_git_blob_sha1": "69cf290ce42c79aada29091138933f48f368505b",
+      "git_blob_sha1": "69cf290ce42c79aada29091138933f48f368505b"
+    },
+    {
+      "old_path": "models/iris/v4/source_constraint_v4_1.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/source_constraint_v4_1.py",
+      "original_git_blob_sha1": "30e39f81ca9507907b7d9b97efb83281bc0c85c1",
+      "git_blob_sha1": "30e39f81ca9507907b7d9b97efb83281bc0c85c1"
+    },
+    {
+      "old_path": "models/iris/v4/source_exterior_v4.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/source_exterior_v4.py",
+      "original_git_blob_sha1": "fbfd3a580c4141601777149dbc576ab16e24c15e",
+      "git_blob_sha1": "fbfd3a580c4141601777149dbc576ab16e24c15e"
+    },
+    {
+      "old_path": "models/iris/v4/source_hull_lattice_v4_3.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/source_hull_lattice_v4_3.py",
+      "original_git_blob_sha1": "72f3ce8f63b05c7a864f7dd41a0db7e249c1fa78",
+      "git_blob_sha1": "72f3ce8f63b05c7a864f7dd41a0db7e249c1fa78"
+    },
+    {
+      "old_path": "models/iris/v4/train_demo_fit_v4.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/train_demo_fit_v4.py",
+      "original_git_blob_sha1": "a785bf266ac7eced19d0152960e7bd0b5e283b56",
+      "git_blob_sha1": "a785bf266ac7eced19d0152960e7bd0b5e283b56"
+    },
+    {
+      "old_path": "models/iris/v4/train_demo_fit_v4_1.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/train_demo_fit_v4_1.py",
+      "original_git_blob_sha1": "8e0e787f9aecf7907708f6aa2a46f3fe51886487",
+      "git_blob_sha1": "8e0e787f9aecf7907708f6aa2a46f3fe51886487"
+    },
+    {
+      "old_path": "models/iris/v4/train_fit_v4_2.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/train_fit_v4_2.py",
+      "original_git_blob_sha1": "d509edcc8fb2daeda86d1717bb78c96f261dbd5f",
+      "git_blob_sha1": "d509edcc8fb2daeda86d1717bb78c96f261dbd5f"
+    },
+    {
+      "old_path": "models/iris/v4/train_fit_v4_3.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/train_fit_v4_3.py",
+      "original_git_blob_sha1": "56f1ae4891d9eb10c610cd75d20bd1af639fddbc",
+      "git_blob_sha1": "56f1ae4891d9eb10c610cd75d20bd1af639fddbc"
+    },
+    {
+      "old_path": "models/iris/v4/train_fit_v4_4.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/train_fit_v4_4.py",
+      "original_git_blob_sha1": "4d7f735350b94e8a99a11395351016d208997ec8",
+      "git_blob_sha1": "4d7f735350b94e8a99a11395351016d208997ec8"
+    },
+    {
+      "old_path": "models/iris/v4/train_fit_v4_4_1.py",
+      "new_path": "models/rss_vnext/experts/iris/v4/train_fit_v4_4_1.py",
+      "original_git_blob_sha1": "7bcf433b5752f5a090648ce912f1ab5ef7b8952f",
+      "git_blob_sha1": "7bcf433b5752f5a090648ce912f1ab5ef7b8952f"
+    },
+    {
+      "old_path": "models/iris/v5/__init__.py",
+      "new_path": "models/rss_vnext/experts/iris/v5/__init__.py",
+      "original_git_blob_sha1": "e463c4d1f943282b8e63de2c0fb04f42a9050003",
+      "git_blob_sha1": "e463c4d1f943282b8e63de2c0fb04f42a9050003"
+    },
+    {
+      "old_path": "models/iris/v5/contained_sparse_tetra_decoder_v5.py",
+      "new_path": "models/rss_vnext/experts/iris/v5/contained_sparse_tetra_decoder_v5.py",
+      "original_git_blob_sha1": "ba0feb884fb5fb354b875ed1b22791c35c21e711",
+      "git_blob_sha1": "ba0feb884fb5fb354b875ed1b22791c35c21e711"
+    },
+    {
+      "old_path": "models/iris/v5/direct_fstar_fit_v5.py",
+      "new_path": "models/rss_vnext/experts/iris/v5/direct_fstar_fit_v5.py",
+      "original_git_blob_sha1": "f360f69f4eb8781aaed7ec955ae911fd5a350146",
+      "git_blob_sha1": "f360f69f4eb8781aaed7ec955ae911fd5a350146"
+    },
+    {
+      "old_path": "models/iris/v5/field_failure_diagnostics_v5.py",
+      "new_path": "models/rss_vnext/experts/iris/v5/field_failure_diagnostics_v5.py",
+      "original_git_blob_sha1": "785b3b0be802189af3882f8d9c23f11acca921c4",
+      "git_blob_sha1": "785b3b0be802189af3882f8d9c23f11acca921c4"
+    },
+    {
+      "old_path": "models/iris/v5/indexed_sparse_tetra_decoder_v5.py",
+      "new_path": "models/rss_vnext/experts/iris/v5/indexed_sparse_tetra_decoder_v5.py",
+      "original_git_blob_sha1": "5753c30effcf615610e8a66972cc39783d5e9eb3",
+      "git_blob_sha1": "5753c30effcf615610e8a66972cc39783d5e9eb3"
+    },
+    {
+      "old_path": "models/iris/v5/learned_tail_localization_v5.py",
+      "new_path": "models/rss_vnext/experts/iris/v5/learned_tail_localization_v5.py",
+      "original_git_blob_sha1": "02cf091d2d5378d0c68b898ea848ac5d0f0a8f98",
+      "git_blob_sha1": "02cf091d2d5378d0c68b898ea848ac5d0f0a8f98"
+    },
+    {
+      "old_path": "models/iris/v5/objective_tail_repair_v5.py",
+      "new_path": "models/rss_vnext/experts/iris/v5/objective_tail_repair_v5.py",
+      "original_git_blob_sha1": "1f00332acf39b47d0b88b1dfd554ccd90213c399",
+      "git_blob_sha1": "1f00332acf39b47d0b88b1dfd554ccd90213c399"
+    },
+    {
+      "old_path": "models/iris/v5/shell_escape_diagnostics_v5.py",
+      "new_path": "models/rss_vnext/experts/iris/v5/shell_escape_diagnostics_v5.py",
+      "original_git_blob_sha1": "fd4a7227c070e063692edb0a4c4daa8549a84e02",
+      "git_blob_sha1": "fd4a7227c070e063692edb0a4c4daa8549a84e02"
+    },
+    {
+      "old_path": "models/iris/v5/source_signed_field_v5.py",
+      "new_path": "models/rss_vnext/experts/iris/v5/source_signed_field_v5.py",
+      "original_git_blob_sha1": "f9c931de7491b69d878963763e7ccc6fd754aed8",
+      "git_blob_sha1": "f9c931de7491b69d878963763e7ccc6fd754aed8"
+    },
+    {
+      "old_path": "models/iris/v5/stage13_mask_morphology_v5.py",
+      "new_path": "models/rss_vnext/experts/iris/v5/stage13_mask_morphology_v5.py",
+      "original_git_blob_sha1": "5f311c7cfcd10e6e51265dfc474c50ffd651f60a",
+      "git_blob_sha1": "5f311c7cfcd10e6e51265dfc474c50ffd651f60a"
+    },
+    {
+      "old_path": "models/iris/vnext/__init__.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/__init__.py",
+      "original_git_blob_sha1": "b30ef8b4df5449d21fc9cf9275e37580807fedbc",
+      "git_blob_sha1": "b30ef8b4df5449d21fc9cf9275e37580807fedbc"
+    },
+    {
+      "old_path": "models/iris/vnext/boundary_causality_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/boundary_causality_v1.py",
+      "original_git_blob_sha1": "44dde89a8cd6bf10a49eba6f58d4ed364ef26c65",
+      "git_blob_sha1": "44dde89a8cd6bf10a49eba6f58d4ed364ef26c65"
+    },
+    {
+      "old_path": "models/iris/vnext/checkpoint_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/checkpoint_v1.py",
+      "original_git_blob_sha1": "c5b2d1b45cd689d6e7b22942156dd432f6ac0b42",
+      "git_blob_sha1": "c5b2d1b45cd689d6e7b22942156dd432f6ac0b42"
+    },
+    {
+      "old_path": "models/iris/vnext/contracts_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/contracts_v1.py",
+      "original_git_blob_sha1": "a422b901ad4c43b589bf0ce7f2746b3eebfe9306",
+      "git_blob_sha1": "a422b901ad4c43b589bf0ce7f2746b3eebfe9306"
+    },
+    {
+      "old_path": "models/iris/vnext/coordinate_contract_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/coordinate_contract_v1.py",
+      "original_git_blob_sha1": "76a684126cbf9b2799ed9b06bc4d7efa1155bd7f",
+      "git_blob_sha1": "76a684126cbf9b2799ed9b06bc4d7efa1155bd7f"
+    },
+    {
+      "old_path": "models/iris/vnext/evidence_heads_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/evidence_heads_v3.py",
+      "original_git_blob_sha1": "f55f5327ffd256f8db04caa8aa5e4ac7b4f715ae",
+      "git_blob_sha1": "f55f5327ffd256f8db04caa8aa5e4ac7b4f715ae"
+    },
+    {
+      "old_path": "models/iris/vnext/flexicubes_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/flexicubes_v1.py",
+      "original_git_blob_sha1": "e18b2e9c5dc9955d219d590bc5277d17f1a49e18",
+      "git_blob_sha1": "e18b2e9c5dc9955d219d590bc5277d17f1a49e18"
+    },
+    {
+      "old_path": "models/iris/vnext/graphics_truth_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/graphics_truth_v2.py",
+      "original_git_blob_sha1": "909d40886277de39d5ceaca63123ab0f23d4dfe6",
+      "git_blob_sha1": "909d40886277de39d5ceaca63123ab0f23d4dfe6"
+    },
+    {
+      "old_path": "models/iris/vnext/graphics_truth_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/graphics_truth_v3.py",
+      "original_git_blob_sha1": "854336e1362fa4faa368f32a5e66a98b2e54afad",
+      "git_blob_sha1": "854336e1362fa4faa368f32a5e66a98b2e54afad"
+    },
+    {
+      "old_path": "models/iris/vnext/heads_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/heads_v3.py",
+      "original_git_blob_sha1": "22b27cdf794764a196a02fdcd2315157872db76f",
+      "git_blob_sha1": "22b27cdf794764a196a02fdcd2315157872db76f"
+    },
+    {
+      "old_path": "models/iris/vnext/inference_input_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/inference_input_v1.py",
+      "original_git_blob_sha1": "3fcb949e9ff8988f863511c5672b08f5db278a00",
+      "git_blob_sha1": "3fcb949e9ff8988f863511c5672b08f5db278a00"
+    },
+    {
+      "old_path": "models/iris/vnext/model_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/model_v3.py",
+      "original_git_blob_sha1": "2ae0ef4f3f3bd775e685b6ef858667861bb186d7",
+      "git_blob_sha1": "2ae0ef4f3f3bd775e685b6ef858667861bb186d7"
+    },
+    {
+      "old_path": "models/iris/vnext/presentation_evidence_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/presentation_evidence_v1.py",
+      "original_git_blob_sha1": "d27628e2746fbfafcb881b49ebc19a5931e1f3dd",
+      "git_blob_sha1": "d27628e2746fbfafcb881b49ebc19a5931e1f3dd"
+    },
+    {
+      "old_path": "models/iris/vnext/quality_policy_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/quality_policy_v1.py",
+      "original_git_blob_sha1": "3693a9a3ef666db43f5f0390c89225150884cab6",
+      "git_blob_sha1": "3693a9a3ef666db43f5f0390c89225150884cab6"
+    },
+    {
+      "old_path": "models/iris/vnext/relation_support_v2.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/relation_support_v2.py",
+      "original_git_blob_sha1": "45a7f5da99dbed2cbfe9cf63f3ee66a25ca089f5",
+      "git_blob_sha1": "45a7f5da99dbed2cbfe9cf63f3ee66a25ca089f5"
+    },
+    {
+      "old_path": "models/iris/vnext/relation_truth_v3_adapter_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/relation_truth_v3_adapter_v1.py",
+      "original_git_blob_sha1": "c4e8b4b3f5422368f33dc4ec1428a8c288a9bfab",
+      "git_blob_sha1": "c4e8b4b3f5422368f33dc4ec1428a8c288a9bfab"
+    },
+    {
+      "old_path": "models/iris/vnext/scene_core_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/scene_core_v1.py",
+      "original_git_blob_sha1": "f7b2b9bf0cc1b0d7386eb034636d0305849a9561",
+      "git_blob_sha1": "f7b2b9bf0cc1b0d7386eb034636d0305849a9561"
+    },
+    {
+      "old_path": "models/iris/vnext/structure_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/structure_v3.py",
+      "original_git_blob_sha1": "79976f72710f05af9a235cf0ead00b165387c310",
+      "git_blob_sha1": "79976f72710f05af9a235cf0ead00b165387c310"
+    },
+    {
+      "old_path": "models/iris/vnext/structure_v4.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/structure_v4.py",
+      "original_git_blob_sha1": "2cf2e55fe752515247192d25bdbc9f513f9be613",
+      "git_blob_sha1": "2cf2e55fe752515247192d25bdbc9f513f9be613"
+    },
+    {
+      "old_path": "models/iris/vnext/structure_v5.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/structure_v5.py",
+      "original_git_blob_sha1": "25bffc901dd2c07002ce4d4d7b432c28d9fe78c9",
+      "git_blob_sha1": "25bffc901dd2c07002ce4d4d7b432c28d9fe78c9"
+    },
+    {
+      "old_path": "models/iris/vnext/surface_v1.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/surface_v1.py",
+      "original_git_blob_sha1": "3a96f2f1e59ba82514b1b5fc34b58ca78168ee93",
+      "git_blob_sha1": "3a96f2f1e59ba82514b1b5fc34b58ca78168ee93"
+    },
+    {
+      "old_path": "models/iris/vnext/training_v3.py",
+      "new_path": "models/rss_vnext/experts/iris/vnext/training_v3.py",
+      "original_git_blob_sha1": "4170e3ce3fd319640e6a20836aadd3905462dde8",
+      "git_blob_sha1": "4170e3ce3fd319640e6a20836aadd3905462dde8"
+    },
+    {
+      "old_path": "models/mira/__init__.py",
+      "new_path": "models/rss_vnext/experts/mira/__init__.py",
+      "original_git_blob_sha1": "96266144ce48b2d5eb75a7067a9d591a15186307",
+      "git_blob_sha1": "96266144ce48b2d5eb75a7067a9d591a15186307"
+    },
+    {
+      "old_path": "models/mira/carrier_native_v55.py",
+      "new_path": "models/rss_vnext/experts/mira/carrier_native_v55.py",
+      "original_git_blob_sha1": "2e11b53a0c668c8dfb0385fd421733975fbd205c",
+      "git_blob_sha1": "2e11b53a0c668c8dfb0385fd421733975fbd205c"
+    },
+    {
+      "old_path": "models/mira/conditioning_v6.py",
+      "new_path": "models/rss_vnext/experts/mira/conditioning_v6.py",
+      "original_git_blob_sha1": "0af84ececba58d1fd312f5145850170fa8a083a2",
+      "git_blob_sha1": "0af84ececba58d1fd312f5145850170fa8a083a2"
+    },
+    {
+      "old_path": "models/mira/direct_readout_v55.py",
+      "new_path": "models/rss_vnext/experts/mira/direct_readout_v55.py",
+      "original_git_blob_sha1": "7226b2f62f2798c10ccbe2fc259c0b7007605557",
+      "git_blob_sha1": "7226b2f62f2798c10ccbe2fc259c0b7007605557"
+    },
+    {
+      "old_path": "models/mira/inference_v55.py",
+      "new_path": "models/rss_vnext/experts/mira/inference_v55.py",
+      "original_git_blob_sha1": "70f9187b8a508965fb737917efdcf3dfb8ab302d",
+      "git_blob_sha1": "70f9187b8a508965fb737917efdcf3dfb8ab302d"
+    },
+    {
+      "old_path": "models/mira/product_training_v6.py",
+      "new_path": "models/rss_vnext/experts/mira/product_training_v6.py",
+      "original_git_blob_sha1": "b468761e0f66010409d68d3fea29cb30d8384a27",
+      "git_blob_sha1": "b468761e0f66010409d68d3fea29cb30d8384a27"
+    },
+    {
+      "old_path": "models/mira/runtime_checkpoint_v1.py",
+      "new_path": "models/rss_vnext/experts/mira/runtime_checkpoint_v1.py",
+      "original_git_blob_sha1": "defc86bb96589987b9b3157848d8795b9b27abed",
+      "git_blob_sha1": "defc86bb96589987b9b3157848d8795b9b27abed"
+    },
+    {
+      "old_path": "models/mira/runtime_checkpoint_v2.py",
+      "new_path": "models/rss_vnext/experts/mira/runtime_checkpoint_v2.py",
+      "original_git_blob_sha1": "6b2725fb3bc3f3dbedeb71c3ef6e61ad382ee3a4",
+      "git_blob_sha1": "6b2725fb3bc3f3dbedeb71c3ef6e61ad382ee3a4"
+    },
+    {
+      "old_path": "models/mira/skin_fsq_codec_v6.py",
+      "new_path": "models/rss_vnext/experts/mira/skin_fsq_codec_v6.py",
+      "original_git_blob_sha1": "a2c366ad7b2a21a9459b8d56fb50477baa3b1483",
+      "git_blob_sha1": "a2c366ad7b2a21a9459b8d56fb50477baa3b1483"
+    },
+    {
+      "old_path": "models/tessa/__init__.py",
+      "new_path": "models/rss_vnext/experts/tessa/__init__.py",
+      "original_git_blob_sha1": "82c9e57f6ebff70463e733b28e56c54b0b15a1f4",
+      "git_blob_sha1": "82c9e57f6ebff70463e733b28e56c54b0b15a1f4"
+    },
+    {
+      "old_path": "models/tessa/truth/component_surface_topology_v1.py",
+      "new_path": "models/rss_vnext/experts/tessa/truth/component_surface_topology_v1.py",
+      "original_git_blob_sha1": "e12a220e913f4a3868ab02ce42a9f08340430678",
+      "git_blob_sha1": "e12a220e913f4a3868ab02ce42a9f08340430678"
+    },
+    {
+      "old_path": "models/tessa/v1/__init__.py",
+      "new_path": "models/rss_vnext/experts/tessa/v1/__init__.py",
+      "original_git_blob_sha1": "2d20f3bff60742a86381c6a30d1196a0f5874507",
+      "git_blob_sha1": "2d20f3bff60742a86381c6a30d1196a0f5874507"
+    },
+    {
+      "old_path": "models/tessa/v1/conditioning_v1.py",
+      "new_path": "models/rss_vnext/experts/tessa/v1/conditioning_v1.py",
+      "original_git_blob_sha1": "30ca0363976d913863a0599530c98f14d6d08158",
+      "git_blob_sha1": "30ca0363976d913863a0599530c98f14d6d08158"
+    },
+    {
+      "old_path": "models/tessa/v1/contracts_v1.py",
+      "new_path": "models/rss_vnext/experts/tessa/v1/contracts_v1.py",
+      "original_git_blob_sha1": "18d80213400b384e647e4b829ed15963eed8a660",
+      "git_blob_sha1": "18d80213400b384e647e4b829ed15963eed8a660"
+    },
+    {
+      "old_path": "models/tessa/v1/mechanical_objective_v1.py",
+      "new_path": "models/rss_vnext/experts/tessa/v1/mechanical_objective_v1.py",
+      "original_git_blob_sha1": "4d16c00bca96b4de066f18878aa0dfce7d44ca35",
+      "git_blob_sha1": "4d16c00bca96b4de066f18878aa0dfce7d44ca35"
+    },
+    {
+      "old_path": "models/tessa/v1/model_v1.py",
+      "new_path": "models/rss_vnext/experts/tessa/v1/model_v1.py",
+      "original_git_blob_sha1": "00115d96cff5da2c88f18304543a2d45800560fb",
+      "git_blob_sha1": "00115d96cff5da2c88f18304543a2d45800560fb"
+    },
+    {
+      "old_path": "models/tessa/v1/proposal_v1.py",
+      "new_path": "models/rss_vnext/experts/tessa/v1/proposal_v1.py",
+      "original_git_blob_sha1": "50fd9aaa477ba07be495decbcd35c039055564d6",
+      "git_blob_sha1": "50fd9aaa477ba07be495decbcd35c039055564d6"
+    },
+    {
+      "old_path": "models/tessa/v1/sequence_codec_v1.py",
+      "new_path": "models/rss_vnext/experts/tessa/v1/sequence_codec_v1.py",
+      "original_git_blob_sha1": "e1338b943b922239dedf80309567709d10700af5",
+      "git_blob_sha1": "e1338b943b922239dedf80309567709d10700af5"
+    },
+    {
+      "old_path": "models/tessa/v1/tokenization_v1.py",
+      "new_path": "models/rss_vnext/experts/tessa/v1/tokenization_v1.py",
+      "original_git_blob_sha1": "83b3deb096b4cdb224c404756e7fc17c49ae1d2b",
+      "git_blob_sha1": "83b3deb096b4cdb224c404756e7fc17c49ae1d2b"
+    },
+    {
+      "old_path": "models/tessa/v1/training_data_v1.py",
+      "new_path": "models/rss_vnext/experts/tessa/v1/training_data_v1.py",
+      "original_git_blob_sha1": "e7af2de89d24e8624e0f90cb007bcf30867caa67",
+      "git_blob_sha1": "e7af2de89d24e8624e0f90cb007bcf30867caa67"
+    },
+    {
+      "old_path": "models/tessa/v2/__init__.py",
+      "new_path": "models/rss_vnext/experts/tessa/v2/__init__.py",
+      "original_git_blob_sha1": "94c862f9ae717d559a4e77601a01b124c24f1524",
+      "git_blob_sha1": "94c862f9ae717d559a4e77601a01b124c24f1524"
+    },
+    {
+      "old_path": "models/tessa/v2/config_v2.py",
+      "new_path": "models/rss_vnext/experts/tessa/v2/config_v2.py",
+      "original_git_blob_sha1": "518520c524ac218defd41d96e3a2870d064f7613",
+      "git_blob_sha1": "518520c524ac218defd41d96e3a2870d064f7613"
+    },
+    {
+      "old_path": "models/tessa/v2/court_v2.py",
+      "new_path": "models/rss_vnext/experts/tessa/v2/court_v2.py",
+      "original_git_blob_sha1": "a27a1a24382ba7998470717b1e5534c9e4803777",
+      "git_blob_sha1": "a27a1a24382ba7998470717b1e5534c9e4803777"
+    },
+    {
+      "old_path": "models/tessa/v2/generation_v2.py",
+      "new_path": "models/rss_vnext/experts/tessa/v2/generation_v2.py",
+      "original_git_blob_sha1": "e55bd9f53391bae96d78c380627f801b96ca333f",
+      "git_blob_sha1": "e55bd9f53391bae96d78c380627f801b96ca333f"
+    },
+    {
+      "old_path": "models/tessa/v2/model_v2.py",
+      "new_path": "models/rss_vnext/experts/tessa/v2/model_v2.py",
+      "original_git_blob_sha1": "5966ec8e8f532869fffa825f9e5421d3716ac0dc",
+      "git_blob_sha1": "5966ec8e8f532869fffa825f9e5421d3716ac0dc"
+    },
+    {
+      "old_path": "models/tessa/v2/objective_v2.py",
+      "new_path": "models/rss_vnext/experts/tessa/v2/objective_v2.py",
+      "original_git_blob_sha1": "9ff7649e822d8e80450b39d1aa2b77970c87bbf9",
+      "git_blob_sha1": "9ff7649e822d8e80450b39d1aa2b77970c87bbf9"
+    },
+    {
+      "old_path": "models/tessa/v2/windowed_incremental_generation_v2.py",
+      "new_path": "models/rss_vnext/experts/tessa/v2/windowed_incremental_generation_v2.py",
+      "original_git_blob_sha1": "5041cdf423cd21a204de851845fbf32b90ab017f",
+      "git_blob_sha1": "5041cdf423cd21a204de851845fbf32b90ab017f"
+    },
+    {
+      "old_path": "models/tessa/v3/__init__.py",
+      "new_path": "models/rss_vnext/experts/tessa/v3/__init__.py",
+      "original_git_blob_sha1": "7b893559f7071e9d03055abc1bfbda4be066c257",
+      "git_blob_sha1": "7b893559f7071e9d03055abc1bfbda4be066c257"
+    },
+    {
+      "old_path": "models/tessa/v3/checkpoint_v1.py",
+      "new_path": "models/rss_vnext/experts/tessa/v3/checkpoint_v1.py",
+      "original_git_blob_sha1": "f654d8f5a80ecf3d63d93510061771bd18cc2939",
+      "git_blob_sha1": "f654d8f5a80ecf3d63d93510061771bd18cc2939"
+    },
+    {
+      "old_path": "models/tessa/v3/config_v3.py",
+      "new_path": "models/rss_vnext/experts/tessa/v3/config_v3.py",
+      "original_git_blob_sha1": "0e46724c819acdad72f224bc90503c8c6eb1a2f9",
+      "git_blob_sha1": "0e46724c819acdad72f224bc90503c8c6eb1a2f9"
+    },
+    {
+      "old_path": "models/tessa/v3/model_v3.py",
+      "new_path": "models/rss_vnext/experts/tessa/v3/model_v3.py",
+      "original_git_blob_sha1": "c622237f62b352536d9902bf89bf15fe535e7def",
+      "git_blob_sha1": "c622237f62b352536d9902bf89bf15fe535e7def"
+    },
+    {
+      "old_path": "models/tessa/v31/__init__.py",
+      "new_path": "models/rss_vnext/experts/tessa/v31/__init__.py",
+      "original_git_blob_sha1": "25dcb6daf1f790ef9ec755fd3abe26cedb36db58",
+      "git_blob_sha1": "25dcb6daf1f790ef9ec755fd3abe26cedb36db58"
+    },
+    {
+      "old_path": "models/tessa/v31/attention_v31.py",
+      "new_path": "models/rss_vnext/experts/tessa/v31/attention_v31.py",
+      "original_git_blob_sha1": "77ad158df72b811a79f70db7328c6ca1af86db41",
+      "git_blob_sha1": "77ad158df72b811a79f70db7328c6ca1af86db41"
+    },
+    {
+      "old_path": "models/tessa/v31/checkpoint_v1.py",
+      "new_path": "models/rss_vnext/experts/tessa/v31/checkpoint_v1.py",
+      "original_git_blob_sha1": "236468e88ea4fea00e3d5102b3bb63f14bc4daef",
+      "git_blob_sha1": "236468e88ea4fea00e3d5102b3bb63f14bc4daef"
+    },
+    {
+      "old_path": "models/tessa/v31/incremental_v31.py",
+      "new_path": "models/rss_vnext/experts/tessa/v31/incremental_v31.py",
+      "original_git_blob_sha1": "9d08be78246e3451f743fa23d08cb5f55b54be88",
+      "git_blob_sha1": "9d08be78246e3451f743fa23d08cb5f55b54be88"
+    },
+    {
+      "old_path": "models/tessa/v31/model_v31.py",
+      "new_path": "models/rss_vnext/experts/tessa/v31/model_v31.py",
+      "original_git_blob_sha1": "0f7e5cb79f84db8d283beff22b44d007614ec153",
+      "git_blob_sha1": "0f7e5cb79f84db8d283beff22b44d007614ec153"
+    },
+    {
+      "old_path": "models/tessa/v32/training_input_contract_v1.py",
+      "new_path": "models/rss_vnext/experts/tessa/v32/training_input_contract_v1.py",
+      "original_git_blob_sha1": "cef8f7992bda52b87a9178f9c6985ffb8cb080f1",
+      "git_blob_sha1": "cef8f7992bda52b87a9178f9c6985ffb8cb080f1"
+    }
+  ]
+}

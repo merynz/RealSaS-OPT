@@ -617,6 +617,7 @@ def _local_source_relocation_paths() -> dict[str, Path]:
     """
     manifests = (
         ROOT / "historical/model_sources/RELOCATION_MANIFEST_V1.json",
+        ROOT / "models/rss_vnext/EXPERT_SOURCE_RELOCATION_V1.json",
         ROOT / "compiler/rss_vnext/RELOCATION_MANIFEST_V1.json",
         ROOT / "compiler/rss_vnext/INTEGRATION_LINEAGE_V1.json",
     )
@@ -652,7 +653,13 @@ def _local_module_path(module_name: str) -> Path | None:
     init_path = ROOT / rel / "__init__.py"
     relocated = _local_source_relocation_paths().get(str(module_name))
     if relocated is not None:
-        if file_path.is_file() or init_path.is_file():
+        # A directory-level compatibility symlink is one physical owner,
+        # not a duplicate implementation. Reject any shadow file whose
+        # resolved path disagrees with the manifest-owned byte source.
+        if (
+            (file_path.is_file() and file_path.resolve() != relocated)
+            or (init_path.is_file() and init_path.resolve() != relocated)
+        ):
             raise RuntimeError("LOCAL_SOURCE_DUPLICATE_OWNER:" + str(module_name))
         return relocated
     if file_path.is_file():

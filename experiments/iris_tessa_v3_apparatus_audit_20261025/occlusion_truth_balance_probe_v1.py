@@ -28,6 +28,10 @@ def run(repo_root: Path) -> dict:
     producers = []
     for path in _py_sources(repo_root):
         rel = path.relative_to(repo_root).as_posix()
+        # Physical RSS.vNext expert colocation preserves the historical
+        # logical producer identity; source bytes/semantics remain checked.
+        if rel.startswith("models/rss_vnext/experts/"):
+            rel = "models/" + rel[len("models/rss_vnext/experts/"):]
         text = path.read_text(encoding="utf-8")
         if PRODUCER_TOKEN in text:
             producers.append(rel)

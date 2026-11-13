@@ -80,3 +80,18 @@ One final checkpoint may contain the fused experts even though training is seque
 - RSS precursor: `docs/research/RSS_VNEXT_CONSUMER_BACKTRACE_EVIDENCE_CONTRACT_20261111.md`; `docs/platform/RSS_VNEXT_EVIDENCE_TO_RUNTIME_OWNERSHIP.md`; `docs/research/rss_vnext_reference_forensics/WHOLE_PAPER_COHERENCE_AUDIT_20261113.md`.
 
 This document registers decisions and open seams. **No source provenance upgrade, artist intent, product qualification, independent 3D truth from two input images, trained unseen quality, or architecture freeze is claimed.**
+
+
+## F. Completed typed cross-expert join (2026-11-13)
+
+A complete local-frame/surface-attachment hypothesis needs to keep **three different address domains** rather than collapsing them into a geometric nearest-neighbor association:
+
+- `AXISRigProgramModelV6` emits `SOCKET_CONTROL` and `ANCHOR`; `RigProgramEventV6.coord_indices` for an ANCHOR are **parent-local offset indices**, not world-space coordinates. The established `models/axis/rig_program_decode_v6.py` explicitly decodes these via `_local_vector(config,...,scale=...)`, whereas control and joint rest positions use `_world_point`. A direct mesh nearest-triangle search around those local coordinate indices would be incorrect.
+- TESSA's own component grammar is an explicit `COMPONENT_BEGIN` / `COMPONENT_END` sequence in `models/tessa/v1/sequence_codec_v1.py`, and its rest mesh is the only source of candidate face/component addresses. Multiple disconnected triangle strips within one component do **not** prove two independent mechanical owners.
+- The anonymous Semantic relation head predicts directionally indexed `[R,R,3]` affinities. The bounded Compiler scheduler projects these to **explicit requested** `(held_face,holder_face)` pairs, preserving UNKNOWN. It is not an unconditional anchor→face pairing head.
+
+**Added to research PR #484:** `compiler/realsas_compiler_core/rss_vnext_socket_face_join_v1.py` with `tests/models/test_rss_vnext_socket_face_join_v1.py`. The court replays the exact sealed TESSA candidate surface and AXIS anchor readout, compiles only explicit directed face-pair requests from the original source-bound region graph, retains its parent/checkpoint/mesh hash chain, preserves local anchor coordinates and reports each missing executable witness. It **never creates** `AttachmentSurfaceBindingV1`, source-native contact, a correct world-space anchor, render draw-order, or a ProductRevision.
+
+The real two-view model/H(x)/TESSA synthetic multi-component + AXIS V6 + Semantic relation joint CPU test suite reported **448 passed, 8 skipped** (NVIDIA native CUDA/FlexiCubes absent); this proves *cross-expert dataflow invariants*, not true source recognition or trained attachment accuracy. Positive candidate status means only that typed evidence domains are mutually addressable; same-component ownership absence, non-socket anchors, forged evidence, reverse direction, duplicate/out-of-domain requests and unknown region relations must be fail-closed or remain UNKNOWN.
+
+**Still missing and not satisfiable by geometric Compiler heuristics:** an independently trained, source-supervised *anchor-to-component/face* correspondence policy (or justified equivalent evidence derived from a future structural stage), exact admitted joint/control parent rest-frame binding, and held-out relative-motion/attach-detach tests. Only then may the existing `mechanics_attachment_evidence_gate_v1.py` and `rigid_attachment_surface_anchor_v1.py` promote a selected pair to an executable rigid attachment. This must be planned as a true **model output plus training evidence**, not added as a free Compiler nearest-face inference.

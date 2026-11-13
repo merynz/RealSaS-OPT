@@ -173,14 +173,32 @@ def product_readiness(root: Path, capabilities: dict) -> dict:
     frontend_routes = set(re.findall(
         r"/api/(?:compile|studio)/[a-z-]+", frontend
     ))
-    # Parse actual backend string literals; comments/documentation are not routes.
-    backend_literals = {
-        node.value
-        for body in (server, parent)
-        for node in ast.walk(ast.parse(body))
+    # A mentioned route is NOT a working handler: the inherited Living Compile
+    # server explicitly raises on several compile endpoints. An overriding
+    # BUSTED handler may implement one, but a rejected parent route is absent.
+    server_literals = {
+        node.value for node in ast.walk(ast.parse(server))
         if isinstance(node, ast.Constant) and isinstance(node.value, str)
     }
-    missing_routes = sorted(frontend_routes - backend_literals)
+    parent_ast = ast.parse(parent)
+    parent_literals = {
+        node.value for node in ast.walk(parent_ast)
+        if isinstance(node, ast.Constant) and isinstance(node.value, str)
+    }
+    parent_rejected = {
+        node.value
+        for conditional in ast.walk(parent_ast)
+        if isinstance(conditional, ast.If) and any(
+            isinstance(child, ast.Raise)
+            for statement in conditional.body for child in ast.walk(statement)
+        )
+        for node in ast.walk(conditional.test)
+        if isinstance(node, ast.Constant)
+        and isinstance(node.value, str)
+        and node.value.startswith("/api/")
+    }
+    handled_routes = server_literals | (parent_literals - parent_rejected)
+    missing_routes = sorted(frontend_routes - handled_routes)
     checks = []
 
     def block(code: str, owner: str, reason: str, details: dict) -> None:

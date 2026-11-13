@@ -54,6 +54,7 @@ func (ProductMechanicsProvider) Capabilities(context.Context) ([]Descriptor, err
 	intervention := map[string]any{}
 	intervention["enabled"] = true
 	intervention["max_probed_controls"] = 128
+	intervention["max_full_mesh_deformation_probes"] = 4
 	intervention["relative_translation"] = 0.02
 	intervention["max_constraint_residual"] = 0.001
 	metadata["control_intervention_policy"] = intervention

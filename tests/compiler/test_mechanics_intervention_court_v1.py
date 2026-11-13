@@ -49,6 +49,8 @@ def test_root_drag_moves_actual_skinned_mesh_and_bound_control_socket():
     assert court.status == "MEASURED_COMPILER_CONTROL_INTERVENTIONS_NOT_SOURCE_BEHAVIOR"
     assert court.control_count == len(rig.controls) == 1
     assert court.anchor_count == 1
+    assert court.full_mesh_deformation_probe_count == 1
+    assert court.full_mesh_deformation_complete is True
     assert len(court.probes) == 1
     probe = court.probes[0]
     assert probe.control_id == rig.controls[0].canonical_control_id
@@ -87,6 +89,7 @@ def test_mechanics_worker_emits_optional_cas_intervention_without_mutating_rig()
     request, read, put, outputs, mesh, rig, skin = _fixture()
     request["capability_metadata"]["control_intervention_policy"] = {
         "enabled": True, "max_probed_controls": 128,
+        "max_full_mesh_deformation_probes": 4,
         "relative_translation": 0.02, "max_constraint_residual": 0.001,
     }
     result = execute_mechanics_capability_v1(

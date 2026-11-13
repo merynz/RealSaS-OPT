@@ -74,17 +74,31 @@ def test_two_original_images_neural_shape_mesh_rig_skin_mechanics_graphics_runti
         req, read_object=cas.read_object, put_bytes=cas.put_bytes,
     )
     assert out["status"] == "PASS"
-    assert len(out["outputs"]) == 4
+    assert len(out["outputs"]) == 5
     assert set(x["artifact_type"] for x in out["outputs"]) == {
         "RealSaS.CompiledGraphics", "RealSaS.RuntimeGraphics",
         "RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
         "RealSaS.RSSvNextSourceRGBImagePlaneCandidates",
+        "RealSaS.RSSvNextMeshUVTextureAtlasCandidate",
     }
     diagnostics = out["diagnostics"]
     assert diagnostics["source_appearance_qualified"] is False
     assert diagnostics["source_original_rgb_image_plane_candidate_present"] is True
     assert diagnostics["source_original_rgb_image_plane_sample_count"] > 0
     assert diagnostics["source_rgb_surface_ownership_qualified"] is False
+    assert diagnostics["mesh_uv_texture_atlas_candidate_present"] is True
+    assert diagnostics["graphics_draw_order_independent_of_uv_atlas"] is True
+    assert diagnostics["mesh_uv_texels_per_original_view"][0] > 0
+    from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
+        reopen_rss_vnext_uv_texture_atlas_v1,
+    )
+    uv, uv_manifest = reopen_rss_vnext_uv_texture_atlas_v1(
+        cas.read_object(out["outputs"][4])
+    )
+    assert len(uv["face_chart_xywh_i32"]) == 1
+    assert len(uv["face_vertex_uv_f32"]) == 1
+    assert uv_manifest["draw_order_is_not_texture_atlas_authority"] is True
+    assert uv_manifest["source_3d_surface_ownership_verified"] is False
     from compiler.rss_vnext.workers.rss_vnext_source_rgb_projection_candidate_v1 import (
         decode_raw_source_rgb_image_plane_candidates_v1,
     )

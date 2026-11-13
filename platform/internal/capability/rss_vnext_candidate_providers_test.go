@@ -57,9 +57,9 @@ func TestRSSvNextTwoViewInputAndSingleModelShapeFormOneCandidateRoleGraph(t *tes
 		t.Fatalf("RSS must retain four raw companion CAS outputs: %+v", aux)
 	}
 	wanted := map[string]bool{
-		"rss_uncalibrated_generated_views":      true,
-		"rss_uncalibrated_construction_receipt": true,
-		"rss_uncalibrated_unified_model_config": true,
+		"rss_uncalibrated_generated_views":       true,
+		"rss_uncalibrated_construction_receipt":  true,
+		"rss_uncalibrated_unified_model_config":  true,
 		"rss_uncalibrated_embedded_mira_decoder": true,
 	}
 	for _, raw := range aux {

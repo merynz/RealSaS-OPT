@@ -47,8 +47,7 @@ func meshReleaseTestGraph(t *testing.T) *stagegraph.Graph {
 }
 
 func TestBuildEngineReleaseRegistryIncludesCurrentProductClosure(t *testing.T) {
-	graph := meshReleaseTestGraph(t)
-	registry, err := BuildEngineReleaseRegistry(context.Background(), graph)
+	registry, err := BuildEngineReleaseRegistry(context.Background(), meshReleaseTestGraph(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,189 +55,111 @@ func TestBuildEngineReleaseRegistryIncludesCurrentProductClosure(t *testing.T) {
 		StageCapabilityID("05_CAMERA_CONTRACT_SOLVED"),
 		StageCapabilityID("07_OBSERVATION_CONTRACT_QUALIFIED"),
 		StageCapabilityID("08_NORMALIZATION_DOMAIN_QUALIFIED"),
-		ProductInputCapabilityID,
-		ProductShapeCapabilityID,
-		ProductMeshCapabilityID,
-		ProductRigCapabilityID,
-		ProductSkinCapabilityID,
+		ProductInputCapabilityID, ProductShapeCapabilityID, ProductMeshCapabilityID,
+		ProductRigCapabilityID, ProductSkinCapabilityID, ProductMechanicsCapabilityID,
+		ProductGraphicsCapabilityID, ProductMotionCapabilityID, ProductProofCapabilityID,
 	} {
 		if _, ok := registry.Get(id); !ok {
 			t.Fatalf("release registry missing %s", id)
 		}
 	}
-
-	rigResolved, err := registry.Resolve(ProductRigCapabilityID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rigSeen := map[string]bool{}
-	for _, descriptor := range rigResolved {
-		rigSeen[descriptor.ID] = true
-	}
-	for _, id := range []string{
-		ProductInputCapabilityID,
-		ProductShapeCapabilityID,
-		StageCapabilityID("05_CAMERA_CONTRACT_SOLVED"),
-		StageCapabilityID("07_OBSERVATION_CONTRACT_QUALIFIED"),
-		StageCapabilityID("08_NORMALIZATION_DOMAIN_QUALIFIED"),
-		ProductMeshCapabilityID,
-		ProductRigCapabilityID,
+	for _, testcase := range []struct {
+		target string
+		want []string
+	}{
+		{ProductRigCapabilityID, []string{ProductInputCapabilityID, ProductShapeCapabilityID,
+			ProductMeshCapabilityID, ProductRigCapabilityID}},
+		{ProductSkinCapabilityID, []string{ProductInputCapabilityID, ProductShapeCapabilityID,
+			ProductMeshCapabilityID, ProductRigCapabilityID, ProductSkinCapabilityID}},
 	} {
-		if !rigSeen[id] {
-			t.Fatalf("rig resolution missing %s: %+v", id, rigResolved)
+		resolved, err := registry.Resolve(testcase.target)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(resolved) != len(testcase.want) {
+			t.Fatalf("%s stage-free dependency closure drift: %+v", testcase.target, resolved)
+		}
+		for index, want := range testcase.want {
+			if resolved[index].ID != want {
+				t.Fatalf("%s dependency[%d]=%s want=%s", testcase.target, index, resolved[index].ID, want)
+			}
 		}
 	}
-	if rigSeen[ProductSkinCapabilityID] {
-		t.Fatal("target-scoped Rig closure must not include downstream Skin")
-	}
-
-	skinResolved, err := registry.Resolve(ProductSkinCapabilityID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	skinSeen := map[string]bool{}
-	for _, descriptor := range skinResolved {
-		skinSeen[descriptor.ID] = true
-	}
-	for _, id := range []string{
-		ProductInputCapabilityID,
-		ProductShapeCapabilityID,
-		StageCapabilityID("05_CAMERA_CONTRACT_SOLVED"),
-		StageCapabilityID("07_OBSERVATION_CONTRACT_QUALIFIED"),
-		StageCapabilityID("08_NORMALIZATION_DOMAIN_QUALIFIED"),
-		ProductMeshCapabilityID,
-		ProductRigCapabilityID,
-		ProductSkinCapabilityID,
-	} {
-		if !skinSeen[id] {
-			t.Fatalf("skin resolution missing %s: %+v", id, skinResolved)
+	// A staged research graph must not silently insert retired eight-view,
+	// fit or zero-surface compiler stages into new RSS product dependencies.
+	for _, role := range []string{ProductMeshCapabilityID, ProductRigCapabilityID, ProductSkinCapabilityID} {
+		closure, err := registry.Resolve(role)
+		if err != nil {
+			t.Fatal(err)
 		}
-	}
-	for _, forbidden := range []string{
-		"09_IRIS_FIT_PREREGISTERED",
-		"10_IRIS_FIT",
-		"11_IRIS_CHECKPOINT_SEALED",
-		"12_ZERO_SURFACE_DECODED",
-		"13_GEOMETRY_SUBSTRATE_QUALIFIED",
-		"14_GSA_BUILD",
-		"15_RIGGING_SURFACE_QUALIFIED",
-		"17_MECHANICAL_PARTITION_QUALIFIED",
-	} {
-		if skinSeen[StageCapabilityID(forbidden)] {
-			t.Fatalf("legacy fit-era stage leaked into product.skin closure: %s", forbidden)
+		for _, row := range closure {
+			if strings.HasPrefix(row.ID, "compiler.stage/") {
+				t.Fatalf("%s unexpectedly depends on historical stage %s", role, row.ID)
+			}
 		}
-	}
-	if skinResolved[len(skinResolved)-1].ID != ProductSkinCapabilityID {
-		t.Fatalf("skin must resolve after all dependencies: %+v", skinResolved)
 	}
 }
 
 func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
-	providers := ProductProviders()
-	if len(providers) != 9 {
-		t.Fatalf("product provider count=%d", len(providers))
+	if providers := ProductProviders(); len(providers) != 9 {
+		t.Fatalf("product provider count=%d want=9", len(providers))
 	}
 	registry := productProvidersTestRegistry(t)
-	if _, ok := registry.Get(ProductInputCapabilityID); !ok {
-		t.Fatal("product.input missing")
-	}
-	shape, ok := registry.Get(ProductShapeCapabilityID)
-	if !ok || len(shape.Dependencies) != 1 || shape.Dependencies[0] != ProductInputCapabilityID {
-		t.Fatalf("shape descriptor=%+v", shape)
-	}
-	mesh, ok := registry.Get(ProductMeshCapabilityID)
-	if !ok {
-		t.Fatal("product.mesh missing")
-	}
-	wantMeshDeps := []string{
-		ProductShapeCapabilityID,
-		StageCapabilityID("05_CAMERA_CONTRACT_SOLVED"),
-		StageCapabilityID("07_OBSERVATION_CONTRACT_QUALIFIED"),
-		StageCapabilityID("08_NORMALIZATION_DOMAIN_QUALIFIED"),
-	}
-	if len(mesh.Dependencies) != len(wantMeshDeps) {
-		t.Fatalf("mesh descriptor=%+v", mesh)
-	}
-	for index, want := range wantMeshDeps {
-		if mesh.Dependencies[index] != want {
-			t.Fatalf("mesh dependency[%d]=%s want=%s", index, mesh.Dependencies[index], want)
+	for _, testcase := range []struct{
+		id string
+		dependencies []string
+		contract string
+		modelCount int
+	}{
+		{ProductInputCapabilityID, nil, RSSvNextInputContractV2, 0},
+		{ProductShapeCapabilityID, []string{ProductInputCapabilityID}, RSSvNextShapeContractV3, 1},
+		{ProductMeshCapabilityID, []string{ProductShapeCapabilityID}, RSSvNextMeshContractV2, 0},
+		{ProductRigCapabilityID, []string{ProductShapeCapabilityID, ProductMeshCapabilityID}, RSSvNextRigContractV3, 0},
+		{ProductSkinCapabilityID, []string{ProductShapeCapabilityID, ProductMeshCapabilityID, ProductRigCapabilityID}, RSSvNextSkinContractV3, 0},
+	} {
+		row, ok := registry.Get(testcase.id)
+		if !ok {
+			t.Fatalf("missing product role %s", testcase.id)
 		}
-	}
-	for _, dependency := range mesh.Dependencies {
-		if dependency == StageCapabilityID("16_OUTPUT_PRESENTATION_DIRECTIONS_SEALED") {
-			t.Fatal("presentation direction leaked into Mesh birth dependency")
+		if len(row.Dependencies) != len(testcase.dependencies) {
+			t.Fatalf("%s dependency count drift: %+v", testcase.id, row.Dependencies)
 		}
-		for _, forbidden := range []string{"IRIS_FIT", "CHECKPOINT_SEALED", "ZERO_SURFACE", "GEOMETRY_SUBSTRATE", "RIGGING_SURFACE", "MECHANICAL_PARTITION"} {
-			if strings.Contains(dependency, forbidden) {
-				t.Fatalf("legacy derived-stage dependency leaked into product.mesh: %s", dependency)
+		for i, want := range testcase.dependencies {
+			if row.Dependencies[i] != want {
+				t.Fatalf("%s dependency[%d]=%s want=%s", testcase.id, i, row.Dependencies[i], want)
 			}
 		}
+		if row.Metadata["executor_contract"] != testcase.contract {
+			t.Fatalf("%s executor contract drift: %+v", testcase.id, row.Metadata)
+		}
+		models, err := descriptorRequiredModels(row)
+		if err != nil || len(models) != testcase.modelCount {
+			t.Fatalf("%s independently selected model release: %+v / %v", testcase.id, models, err)
+		}
+		if row.ProductPassAuthority {
+			t.Fatalf("%s claimed ProductPASS authority", testcase.id)
+		}
 	}
-	if mesh.Metadata["fit_allowed_during_product_execution"] != false || mesh.Metadata["legacy_ir_fit_stage_dependency"] != false {
-		t.Fatalf("mesh fit policy drift=%+v", mesh.Metadata)
+	mesh, _ := registry.Get(ProductMeshCapabilityID)
+	if mesh.Metadata["output_artifact_type"] != "RealSaS.CanonicalMeshIR" ||
+		mesh.Metadata["canonical_mesh_required_for_product_execution"] != true ||
+		mesh.Metadata["requires_legacy_eight_view_stages"] != false ||
+		mesh.Metadata["independent_model_inference_forbidden"] != true {
+		t.Fatalf("RSS canonical Mesh source admission drift: %+v", mesh.Metadata)
 	}
-	if mesh.Metadata["surface_born_inside_mesh_court"] != true || mesh.Metadata["surface_is_canonical_mesh_authority"] != false {
-		t.Fatalf("mesh surface boundary drift=%+v", mesh.Metadata)
-	}
-
-	rig, ok := registry.Get(ProductRigCapabilityID)
-	if !ok {
-		t.Fatal("product.rig missing")
-	}
-	if len(rig.Dependencies) != 1 || rig.Dependencies[0] != ProductMeshCapabilityID {
-		t.Fatalf("rig descriptor=%+v", rig)
-	}
-	if rig.Metadata["feature_evidence_source"] != "PRODUCT_MESH_OUTPUT" || rig.Metadata["legacy_stage15_dependency"] != false {
-		t.Fatalf("rig feature evidence source drift=%+v", rig.Metadata)
-	}
-	if rig.Metadata["mesh_is_canonical_parent"] != true {
-		t.Fatalf("rig mesh parent metadata=%+v", rig.Metadata)
-	}
-	if rig.Metadata["feature_evidence_is_canonical_parent"] != false {
-		t.Fatalf("rig feature evidence became canonical parent: %+v", rig.Metadata)
-	}
-	if rig.Metadata["frame_observability_claimed"] != false {
-		t.Fatalf("rig prematurely claims post-bind observability: %+v", rig.Metadata)
-	}
-	if rig.Metadata["executor_contract"] != ProductRigContractV2 ||
-		rig.Metadata["output_schema_version"] != "v2" ||
-		rig.Metadata["skin_code_output_artifact_type"] != "RealSaS.SkinCodeProposalIR" ||
-		rig.Metadata["skin_code_output_schema_version"] != "v1" ||
-		rig.Metadata["skin_code_output_source"] != "SAME_AXIS_CAUSAL_SEQUENCE" {
-		t.Fatalf("active Rig does not emit V6 Rig + SkinCode contract: %+v", rig.Metadata)
-	}
+	rig, _ := registry.Get(ProductRigCapabilityID)
 	if rig.Metadata["compiler_control_synthesis_allowed"] != false ||
-		rig.Metadata["compiler_constraint_synthesis_allowed"] != false {
-		t.Fatalf("Rig authoring must remain learned, not Compiler-synthesized: %+v", rig.Metadata)
+		rig.Metadata["compiler_constraint_synthesis_allowed"] != false ||
+		rig.Metadata["single_checkpoint_inference_reused"] != true ||
+		rig.Metadata["canonical_mesh_parent_required"] != true {
+		t.Fatalf("RSS Rig rewrote learned control program: %+v", rig.Metadata)
 	}
-
-	skin, ok := registry.Get(ProductSkinCapabilityID)
-	if !ok {
-		t.Fatal("product.skin missing")
-	}
-	if len(skin.Dependencies) != 2 || skin.Dependencies[0] != ProductMeshCapabilityID || skin.Dependencies[1] != ProductRigCapabilityID {
-		t.Fatalf("skin descriptor=%+v", skin)
-	}
-	if skin.Metadata["legacy_stage15_dependency"] != false {
-		t.Fatalf("skin legacy Stage15 dependency drift=%+v", skin.Metadata)
-	}
-	if skin.Metadata["mesh_and_rig_are_canonical_parents"] != true {
-		t.Fatalf("skin canonical parent metadata=%+v", skin.Metadata)
-	}
-	if skin.Metadata["executor_contract"] != ProductSkinContractV2 ||
-		skin.Metadata["input_rig_schema_version"] != "v2" ||
-		skin.Metadata["input_skin_code_source"] != "PRODUCT_RIG_OUTPUT" ||
-		skin.Metadata["input_skin_code_artifact_type"] != "RealSaS.SkinCodeProposalIR" ||
-		skin.Metadata["output_schema_version"] != "v2" {
-		t.Fatalf("V6 Skin must decode the exact V6 Rig code output: %+v", skin.Metadata)
-	}
-	if skin.Metadata["compiler_code_search_allowed"] != false ||
+	skin, _ := registry.Get(ProductSkinCapabilityID)
+	if skin.Metadata["input_skin_code_artifact_type"] != "RealSaS.SkinCodeProposalIR" ||
+		skin.Metadata["exact_embedded_mira_decoder_replayed"] != true ||
 		skin.Metadata["compiler_code_repair_allowed"] != false ||
-		skin.Metadata["codec_checkpoint_must_match_axis_skin_code"] != true {
-		t.Fatalf("V6 Skin code identity and no-repair policy drift: %+v", skin.Metadata)
-	}
-	if _, oldSurfaceInput := skin.Metadata["feature_evidence_source"]; oldSurfaceInput {
-		t.Fatal("V5-only RiggingSurface material input leaked into active Skin V6")
+		skin.Metadata["post_hoc_skin_transfer_allowed"] != false {
+		t.Fatalf("RSS Skin rewrote generated FSQ evidence: %+v", skin.Metadata)
 	}
 }
 

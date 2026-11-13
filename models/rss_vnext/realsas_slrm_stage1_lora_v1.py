@@ -112,6 +112,7 @@ def install_rss_realsas_stage1_attention_lora_v1(
     model.iris.scene.scene_queries.requires_grad_(True)
     model.iris.scene.upsample.requires_grad_(True)
     model.realsas_stage1_lora_adapter_installed=True
+    model._realsas_lora_config=(rank,float(alpha))
     trainable=sum(x.numel() for x in model.parameters() if x.requires_grad)
     frozen=sum(x.numel() for x in model.parameters() if not x.requires_grad)
     if trainable<=0 or frozen<=0:

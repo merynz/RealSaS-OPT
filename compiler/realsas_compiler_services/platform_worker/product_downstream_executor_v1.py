@@ -240,19 +240,28 @@ def execute_proof_capability_v1(
         "EDIT_CONSEQUENCE_AND_RUNTIME_RSS_REOPEN",
         "SOURCE_AND_MODEL_RELEASE_ADMISSION",
     )
-    # Engine's proof dependency must remain WAITING instead of sealing a
-    # successful product or a fabricated proof artifact.
+    # The Go capability orchestrator commits any non-PASS MODULE result as
+    # terminal FAIL, unlike its special STAGE external-evidence WAIT protocol.
+    # Return an explicit qualification failure: there is no registered source
+    # signal that could safely unblock a suspended product.proof MODULE job.
+    diagnostics = {
+        "schema":"RealSaS.ProductProofDiagnostics.v1",
+        "parent_artifacts_replayed":True,
+        "missing_independent_witnesses":list(missing),
+        "product_pass_authority":False,
+        "product_revision_minted":False,
+    }
     return {
         "capability_id":"product.proof",
-        "status":"WAITING_EXTERNAL_EVIDENCE",
-        "outputs":[],"failure":None,
-        "diagnostics":{
-            "schema":"RealSaS.ProductProofDiagnostics.v1",
-            "parent_artifacts_replayed":True,
-            "missing_independent_witnesses":list(missing),
-            "product_pass_authority":False,
-            "product_revision_minted":False,
+        "status":"FAIL",
+        "outputs":[],
+        "failure":{
+            "code":"PRODUCT_PROOF_INDEPENDENT_WITNESSES_MISSING",
+            "class":"QUALIFICATION",
+            "reported_owner_module_id":"product.proof",
+            "diagnostics":diagnostics,
         },
+        "diagnostics":diagnostics,
     }
 
 

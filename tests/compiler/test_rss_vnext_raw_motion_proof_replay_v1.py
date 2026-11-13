@@ -84,6 +84,12 @@ def test_two_original_images_through_motion_and_independent_proof_source_replay(
         "original_rgb_source_pixel_face_candidates_recomputed"
     ] is True
     assert d["raw_original_source_graphics_replay"][
+        "mesh_uv_texture_atlas_recomputed_independently"
+    ] is True
+    assert d["raw_original_source_graphics_replay"][
+        "mesh_uv_texture_surface_owner_source_qualified"
+    ] is False
+    assert d["raw_original_source_graphics_replay"][
         "original_rgb_image_plane_sample_count"
     ] > 0
     assert d["raw_original_source_graphics_replay"][
@@ -167,6 +173,53 @@ def test_raw_proof_requires_rgb_candidate_companion_on_active_product_path(
         _proof(cas, request)
 
 
+def test_raw_proof_rejects_malicious_mesh_uv_atlas_without_source_replay(
+    tmp_path,
+):
+    cas, request, _, _ = _complete_product_preflight(tmp_path)
+    old = next(
+        r for r in request["input_artifacts"]
+        if r["artifact_type"] == "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
+    )
+    import io
+    import numpy as np
+    from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
+        _archive, reopen_rss_vnext_uv_texture_atlas_v1,
+    )
+    blob = cas.read_object(old)
+    with np.load(io.BytesIO(blob), allow_pickle=False) as f:
+        arrays = {k: f[k] for k in f.files}
+    actual = np.argwhere(arrays["texture_source_sample_mask_u8"] == 1)
+    assert len(actual) > 0
+    view, y, x = actual[0]
+    arrays["texture_rgba_u8"][view, y, x, 0] ^= 2
+    forged = _archive(arrays)
+    # Fully rehashed and parseable source color, but original CAS still wins.
+    reopen_rss_vnext_uv_texture_atlas_v1(forged)
+    bad = {
+        **cas.put_bytes(forged),
+        "artifact_type": old["artifact_type"],
+        "schema_version": "v1",
+    }
+    request["input_artifacts"] = [
+        bad if r is old else r for r in request["input_artifacts"]
+    ]
+    with pytest.raises(RuntimeError, match="RAW_UV_TEXTURE_ATLAS_SOURCE_REPLAY_MISMATCH"):
+        _proof(cas, request)
+
+
+def test_raw_proof_refuses_missing_mesh_uv_atlas_before_release(
+    tmp_path,
+):
+    cas, request, _, _ = _complete_product_preflight(tmp_path)
+    request["input_artifacts"] = [
+        r for r in request["input_artifacts"]
+        if r["artifact_type"] != "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
+    ]
+    with pytest.raises(RuntimeError, match="RAW_UV_TEXTURE_ATLAS_CARDINALITY"):
+        _proof(cas, request)
+
+
 def test_raw_proof_rejects_changed_original_source_cas(
     tmp_path,
 ):
@@ -210,5 +263,5 @@ def test_raw_proof_refuses_source_and_receipt_downgrade_to_legacy(
             "RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
         }
     ]
-    with pytest.raises(RuntimeError, match="ORPHAN_RAW_SOURCE_RGB_CANDIDATE"):
+    with pytest.raises(RuntimeError, match="ORPHAN_RAW_UV_TEXTURE_ATLAS"):
         _proof(cas, request)

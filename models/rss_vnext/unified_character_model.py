@@ -386,6 +386,12 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         self.early_semantics = RSSvNextEarlySemanticField(
             cfg.iris.image_token_dim, h, cfg.semantic_evidence_channels,
         )
+        # Predicted normal maps inform 3D scene construction jointly with
+        # predicted RGB; zero initialization preserves the legacy baseline.
+        self.normal_condition_proj = nn.Linear(
+            cfg.iris.image_token_dim, cfg.iris.image_token_dim, bias=False,
+        )
+        nn.init.zeros_(self.normal_condition_proj.weight)
         self.semantic_evidence_to_memory = nn.Linear(cfg.semantic_evidence_channels, h)
         # Shared semantic probabilities originate in H(x): same spatial
         # carrier for SDF, RGB/graphics, structural mesh and mechanics.
@@ -483,7 +489,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         xx, yy, zz = torch.meshgrid(axis, axis, axis, indexing="ij")
         return torch.stack((xx, yy, zz), dim=-1).reshape(1, -1, 3)
 
-    def encode_observations(self, rgba: Tensor, camera_features: Tensor) -> tuple[RSSvNextSceneState, Tensor | None, Tensor | None]:
+    def _original_source_tokens(self, rgba: Tensor, camera_features: Tensor):
         if rgba.ndim != 5 or rgba.shape[1] != 2 or rgba.shape[2] != 4:
             raise ValueError("RSS_VNEXT_ONLY_TWO_SOURCE_RGBA_VIEWS")
         if camera_features.shape != (rgba.shape[0], 2, self.cfg.iris.camera_feature_dim):
@@ -500,10 +506,17 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             raise ValueError("RSS_VNEXT_VISION_TOKEN_CONTRACT")
         if token_xy.shape != (*tokens.shape[:3], 2):
             raise ValueError("RSS_VNEXT_VISION_XY_CONTRACT")
-        early_semantics = self.early_semantics(tokens)
-        planes = self.iris.encode_scene(
-            early_semantics.conditioned_image_tokens, token_xy, camera_features,
-        )
+        return tokens, token_xy, self.early_semantics(tokens)
+
+    def _assemble_scene_from_planes(
+        self, *, rgba: Tensor, camera_features: Tensor, source_tokens: Tensor,
+        source_early, planes: Tensor, novel_ring=None,
+        authority: str = "DIRECT_OBSERVED_TWO_VIEWS",
+        generation_checkpoint_sha256: str = "",
+        generated_view_count: int = 0,
+    ) -> RSSvNextSceneState:
+        """Single H(x) construction consumed by training and product inference."""
+        b = rgba.shape[0]
         xyz = self._query_grid.to(planes).expand(b, -1, -1)
         local = self.iris.query(planes, xyz)
         h = local["H"]
@@ -514,10 +527,6 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         }
         regions = self.semantic_structure(h)
         presentation_logits = self.presentation_role_head(h)
-        # Self-pairs are not relational evidence. Pool ONLY admitted directed
-        # (other-slot) edges, preserving incoming/outgoing distinction.
-        # Earlier mean() included diagonal logits in both directions, letting
-        # an unobservable self-relation condition topology and articulation.
         relation_valid = regions.relation_valid_mask.unsqueeze(-1)
         relation_values = regions.relation_logits.masked_fill(~relation_valid, 0.0)
         outgoing_count = relation_valid.sum(dim=2).clamp_min(1)
@@ -528,6 +537,45 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             regions.region_slots
             + self.region_graph_to_memory(torch.cat((outgoing, incoming), dim=-1))
         )
+        return RSSvNextSceneState(
+            observed_rgba=rgba,
+            camera_features=camera_features,
+            observed_image_tokens=source_tokens,
+            conditioned_image_tokens=source_early.conditioned_image_tokens,
+            source_semantic_patch_logits=source_early.source_patch_logits,
+            source_semantic_log_uncertainty=source_early.source_evidence_uncertainty,
+            constructed_camera_features=(
+                None if novel_ring is None else novel_ring.novel_cameras
+            ),
+            constructed_camera_angles=(
+                None if novel_ring is None else novel_ring.novel_angles_rad
+            ),
+            scene_triplanes=planes,
+            query_xyz=xyz,
+            local_features=h,
+            geometry=local,
+            semantic_logits=self.semantic(h) + regions.membership_logits,
+            semantic_evidence_logits=self.early_semantics.query_field(h),
+            presentation_role_logits=presentation_logits,
+            presentation_role_probabilities=torch.softmax(presentation_logits, dim=-1),
+            affordance_logits=self.affordance(h),
+            graphics_logits=self.graphics(h),
+            region_slot_features=regions.region_slots,
+            region_relation_tokens=relation_tokens,
+            region_relation_logits=regions.relation_logits,
+            region_relation_valid_mask=regions.relation_valid_mask,
+            scene_conditioning_authority=authority,
+            generating_checkpoint_sha256=generation_checkpoint_sha256,
+            generated_view_count=generated_view_count,
+        )
+
+    def encode_observations(
+        self, rgba: Tensor, camera_features: Tensor,
+    ) -> tuple[RSSvNextSceneState, Tensor | None, Tensor | None]:
+        tokens, token_xy, early = self._original_source_tokens(rgba, camera_features)
+        planes = self.iris.encode_scene(
+            early.conditioned_image_tokens, token_xy, camera_features,
+        )
         aux = aux_unc = None
         novel_ring = None
         if self.aux_views is not None:
@@ -535,36 +583,50 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 camera_features, self.cfg.constructed_total_views,
             )
             aux, aux_unc = self.aux_views(tokens, novel_ring.novel_cameras)
-        return (
-            RSSvNextSceneState(
-                observed_rgba=rgba,
-                camera_features=camera_features,
-                observed_image_tokens=tokens,
-                conditioned_image_tokens=early_semantics.conditioned_image_tokens,
-                source_semantic_patch_logits=early_semantics.source_patch_logits,
-                source_semantic_log_uncertainty=early_semantics.source_evidence_uncertainty,
-                constructed_camera_features=(
-                    None if novel_ring is None else novel_ring.novel_cameras
-                ),
-                constructed_camera_angles=(
-                    None if novel_ring is None else novel_ring.novel_angles_rad
-                ),
-                scene_triplanes=planes,
-                query_xyz=xyz,
-                local_features=h,
-                geometry=local,
-                semantic_logits=self.semantic(h) + regions.membership_logits,
-                semantic_evidence_logits=self.early_semantics.query_field(h),
-                presentation_role_logits=presentation_logits,
-                presentation_role_probabilities=torch.softmax(presentation_logits, dim=-1),
-                affordance_logits=self.affordance(h),
-                graphics_logits=self.graphics(h),
-                region_slot_features=regions.region_slots,
-                region_relation_tokens=relation_tokens,
-                region_relation_logits=regions.relation_logits,
-                region_relation_valid_mask=regions.relation_valid_mask,
-            ),
-            aux, aux_unc,
+        state = self._assemble_scene_from_planes(
+            rgba=rgba, camera_features=camera_features,
+            source_tokens=tokens, source_early=early,
+            planes=planes, novel_ring=novel_ring,
+        )
+        return state, aux, aux_unc
+
+    def encode_generated_multiview(
+        self, observed_rgba: Tensor, original_camera_features: Tensor,
+        *, generated_rgba: Tensor, generated_cameras: Tensor,
+        generation_checkpoint_sha256: str, source_binding_sha256: str,
+        generated_normals: Tensor,
+    ) -> RSSvNextSceneState:
+        """Canonicalized six-view construction, not six original observations.
+
+        The same scene H(x) and expert heads are used on both training and
+        inference. No generated pixel overwrites either of the original views.
+        """
+        if self.aux_views is not None:
+            raise ValueError("RSS_VNEXT_TWO_COMPETING_MULTIVIEW_CONSTRUCTORS")
+        tokens, _, early = self._original_source_tokens(
+            observed_rgba, original_camera_features,
+        )
+        from .realsas_scene_conditioning_v1 import (
+            encode_realsas_conditioning_into_shared_H_v1,
+            SIX_VIEW_PRIOR,
+        )
+        generated = encode_realsas_conditioning_into_shared_H_v1(
+            self,
+            conditioning_rgba=generated_rgba,
+            conditioning_cameras=generated_cameras,
+            conditioning_normals=generated_normals,
+            source_binding_sha256=source_binding_sha256,
+            original_observed_view_count=2,
+            conditioning_authority=SIX_VIEW_PRIOR,
+            generating_checkpoint_sha256=generation_checkpoint_sha256,
+        )
+        return self._assemble_scene_from_planes(
+            rgba=observed_rgba, camera_features=original_camera_features,
+            source_tokens=tokens, source_early=early,
+            planes=generated.scene_triplanes,
+            authority="GENERATED_SIX_VIEW_SHARED_SCENE",
+            generation_checkpoint_sha256=generation_checkpoint_sha256,
+            generated_view_count=6,
         )
 
     def construct_novel_views(
@@ -689,6 +751,19 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
     ) -> RSSvNextOutput:
         # No source 3D mesh, teacher joints, skin, or extra image view is accepted.
         state, auxiliary, aux_unc = self.encode_observations(rgba, camera_features)
+        return self._forward_from_state(
+            state, auxiliary, aux_unc,
+            topology_prefix=topology_prefix, rig_sequence=rig_sequence,
+            pair_indices=pair_indices, mesh_teacher_tokens=mesh_teacher_tokens,
+            flexicubes_extractor=flexicubes_extractor, flexicubes_layer=flexicubes_layer,
+        )
+
+    def _forward_from_state(
+        self, state: RSSvNextSceneState, auxiliary: Tensor | None, aux_unc: Tensor | None,
+        *, topology_prefix: Tensor | None = None, rig_sequence: AXISSequenceV6 | None = None,
+        pair_indices: Tensor | None = None, mesh_teacher_tokens: Tensor | None = None,
+        flexicubes_extractor=None, flexicubes_layer: RSSvNextSemanticLayerSpec | None = None,
+    ) -> RSSvNextOutput:
         surface_witness = None
         if (flexicubes_extractor is None) != (flexicubes_layer is None):
             raise ValueError("RSS_VNEXT_FC_OPERATOR_AND_LAYER_MUST_BE_TOGETHER")
@@ -760,6 +835,21 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             dynamic_mesh_candidate=dynamic,
             flexicubes_surface_evidence=surface_witness,
         )
+
+    def forward_generated_multiview(
+        self, observed_rgba: Tensor, original_camera_features: Tensor,
+        *, generated_rgba: Tensor, generated_cameras: Tensor,
+        generated_normals: Tensor, generation_checkpoint_sha256: str,
+        source_binding_sha256: str,
+    ) -> RSSvNextOutput:
+        state = self.encode_generated_multiview(
+            observed_rgba, original_camera_features,
+            generated_rgba=generated_rgba, generated_cameras=generated_cameras,
+            generated_normals=generated_normals,
+            generation_checkpoint_sha256=generation_checkpoint_sha256,
+            source_binding_sha256=source_binding_sha256,
+        )
+        return self._forward_from_state(state, None, None)
 
     def query_semantic_equivalent_field(
         self,
@@ -849,6 +939,11 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         max_topology_tokens: int | None = None,
         generate_controls: bool = False,
         executable_constraint_operators: tuple[str, ...] | None = None,
+        generated_rgba: Tensor | None = None,
+        generated_cameras: Tensor | None = None,
+        generated_normals: Tensor | None = None,
+        generation_checkpoint_sha256: str | None = None,
+        source_binding_sha256: str | None = None,
     ) -> dict:
         """Free-running constrained topology and mechanical proposal.
 
@@ -864,7 +959,24 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             raise ValueError("RSS_VNEXT_UNUSED_COMPILER_CAPABILITIES")
         if rgba.shape[0] != 1:
             raise ValueError("RSS_VNEXT_MESH_GENERATION_BATCH_ONE_ONLY")
-        out = self(rgba, camera_features)
+        supplied = (
+            generated_rgba, generated_cameras, generated_normals,
+            generation_checkpoint_sha256, source_binding_sha256,
+        )
+        if any(v is not None for v in supplied):
+            if any(v is None for v in supplied):
+                raise ValueError("RSS_VNEXT_GENERATED_SCENE_INCOMPLETE")
+            out = self.forward_generated_multiview(
+                rgba, camera_features,
+                generated_rgba=generated_rgba, generated_cameras=generated_cameras,
+                generated_normals=generated_normals,
+                generation_checkpoint_sha256=generation_checkpoint_sha256,
+                source_binding_sha256=source_binding_sha256,
+            )
+        elif getattr(self, "construction_requires_generated_multiview", False):
+            raise RuntimeError("RSS_VNEXT_CHECKPOINT_REQUIRES_CANONICAL_MULTIVIEW")
+        else:
+            out = self(rgba, camera_features)
         limit = min(max_topology_tokens or self.cfg.topology_decode_cap,
                     self.cfg.topology_decode_cap)
         if limit < 2:

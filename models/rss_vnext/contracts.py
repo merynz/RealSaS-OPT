@@ -167,6 +167,9 @@ class RSSvNextSceneState:
     region_relation_valid_mask: torch.Tensor
     source_view_authority: tuple[str, str] = ("SOURCE_OBSERVED_FRONT", "SOURCE_OBSERVED_BACK")
     aux_view_authority: str = "LEARNED_PREDICTED_ONLY"
+    scene_conditioning_authority: str = "DIRECT_OBSERVED_TWO_VIEWS"
+    generating_checkpoint_sha256: str = ""
+    generated_view_count: int = 0
 
 
 @dataclass

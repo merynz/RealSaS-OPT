@@ -74,6 +74,7 @@ class RealSaSSLRMBatchV1:
     stage3_target_depth: Tensor | None = None
     stage3_normal_mask: Tensor | None = None
     stage3_depth_mask: Tensor | None = None
+    conditioning_normals: Tensor | None = None  # learned 6-view normal conditioning
 
 
 @dataclass(frozen=True)
@@ -292,6 +293,7 @@ class RealSaSSLRMTrainerV1:
             original_observed_view_count=batch.original_observed_view_count,
             conditioning_authority=batch.conditioning_authority,
             generating_checkpoint_sha256=batch.generating_checkpoint_sha256,
+            conditioning_normals=batch.conditioning_normals,
         )
         teacher=batch.source_3d_render_target
         # Stage3 has its OWN mesh raster objective: never consume NeRF RGB,

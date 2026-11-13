@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-"""RealSaS-faithful 1/6-view neural scene input, separate from original rays.
+"""RealSaS-owned 1/6-view neural scene construction, separate from original rays.
 
 The older product camera/SourceObservation ABI intentionally stays EXACTLY
 two real calibrated FRONT/BACK images; it must never be populated from a
 diffusion model. This module instead handles:
-  - one *canonical reference* RGB/A image (RealSaS one-view baseline), or
-  - six RGB/A images from a multi-view diffusion model (RealSaS S-LRM input).
+  - one *canonical reference* RGB/A image (single-view research baseline), or
+  - six RGB/A images from a multi-view diffusion model (six-view neural reconstruction input).
 The common IRIS 3D triplane and existing geometry/Graphics/semantic heads
 are reused, not duplicated. An input produced by diffusion is a hypothesis.
 
@@ -52,12 +52,13 @@ def encode_realsas_conditioning_into_shared_H_v1(
     original_observed_view_count: int,
     conditioning_authority: str,
     generating_checkpoint_sha256: str | None = None,
+    conditioning_normals: Tensor | None = None,
 ) -> RealSaSSceneConditioningV1:
     """One canonical view or six aligned diffusion-generated views -> H(x).
 
     No field becomes original source observations and no generated camera
     receives calibrated-observation authority. The six-view format mirrors
-    RealSaS infer_slrm.py's six RGB views; generated normals stay a separate
+    the six-view generative reconstruction arrangement; generated normals stay a separate
     refinement prior, not six additional "source views".
     """
     if (
@@ -132,6 +133,19 @@ def encode_realsas_conditioning_into_shared_H_v1(
     # IMPORTANT: encode_observations() only accepts 2 ORIGINAL views.
     # This bypass does not change those original rays or their cameras.
     tokens,xy=model.vision.forward_variable_views(conditioning_rgba)
+    if conditioning_normals is not None:
+        if (
+            v != 6 or conditioning_normals.shape != (b, v, 3, h, w)
+            or not bool(torch.isfinite(conditioning_normals).all())
+            or bool(((conditioning_normals < -1.0001) | (conditioning_normals > 1.0001)).any())
+        ):
+            raise ValueError("RSS_VNEXT_PREDICTED_NORMAL_CONDITIONING_INVALID")
+        normal_rgb = (conditioning_normals + 1.) * .5
+        normal_rgba = torch.cat((normal_rgb, conditioning_rgba[:, :, 3:4]), dim=2)
+        normal_tokens, normal_xy = model.vision.forward_variable_views(normal_rgba)
+        if normal_tokens.shape != tokens.shape or not torch.equal(normal_xy,xy):
+            raise ValueError("RSS_VNEXT_NORMAL_RGB_PATCH_GRID_DRIFT")
+        tokens = tokens + model.normal_condition_proj(normal_tokens)
     early=model.early_semantics.forward_variable_views(tokens)
     planes=model.iris.encode_scene(
         early.conditioned_image_tokens,xy,conditioning_cameras,

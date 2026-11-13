@@ -1,0 +1,49 @@
+name: R29 R7 UniML3D exact upstream identity availability probe
+on:
+  push:
+    branches: [audit/rights-metadata-r4-20261113]
+    paths: [.github/workflows/rights_uniml_provenance_r7.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      RCLONE_CONFIG: /tmp/r29-r7-uniml-rclone.conf
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+    steps:
+    - name: Check original mirror metadata fields without downloading 3D assets
+      run: |
+        set -euo pipefail
+        python - <<'PY'
+        import requests,csv,io,json,re
+        base='https://huggingface.co'
+        datasets=['Linzhan/Objaverse-XL-Rigged-Animated','Linzhan/UniML3D','Linzhan/Objaverse-XL-Rigged-Animated-Renders']
+        for name in datasets:
+         url=base+'/api/datasets/'+name+'/tree/main'
+         try:
+          resp=requests.get(url,timeout=(15,45),params={'limit':100})
+          result=resp.json() if resp.status_code==200 else {'error':resp.status_code}
+          print('DATASET_TOP_LEVEL',json.dumps({'repo':name,'status':resp.status_code,
+            'items':[{'path':x.get('path'),'type':x.get('type')} for x in result] if isinstance(result,list) else result}),flush=True)
+         except Exception as exc:print('DATASET_TREE_ERROR',name,type(exc).__name__,str(exc)[:200],flush=True)
+        url=base+'/datasets/Linzhan/Objaverse-XL-Rigged-Animated/resolve/main/metadata.csv'
+        r=requests.get(url,timeout=(15,80),stream=True)
+        print('MIRROR_METADATA_HTTP',r.status_code,r.headers.get('Content-Length','-'),flush=True)
+        r.raise_for_status()
+        blob=bytearray()
+        for chunk in r.iter_content(1024*256):
+         blob.extend(chunk)
+         if len(blob)>35000000:raise RuntimeError('MIRROR_METADATA_OVER_35MB')
+        text=blob.decode('utf-8-sig');reader=csv.DictReader(io.StringIO(text))
+        print('MIRROR_METADATA_HEADERS',json.dumps(reader.fieldnames),flush=True)
+        rows=list(reader)
+        print('MIRROR_METADATA_ROWS',len(rows),flush=True)
+        for row in rows:
+         obj=str(row.get('object_id','') or row.get('file',''))
+         if re.match(r'669a6[345]',obj):
+          print('MIRROR_SAMPLE_ROW',json.dumps(row,ensure_ascii=False)[:1500],flush=True)
+          break
+        print('IDENTITY_EVIDENCE_COLUMNS',[k for k in reader.fieldnames if any(t in k.lower() for t in ('url','hash','sha','licen','creator','fileident','original','source'))],flush=True)
+        PY

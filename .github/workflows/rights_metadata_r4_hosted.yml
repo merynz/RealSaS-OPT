@@ -1,0 +1,117 @@
+name: R29 R4 upstream source-license metadata crosswalk (CPU only)
+
+on:
+  push:
+    branches:
+      - audit/rights-metadata-r4-20261113
+    paths:
+      - .github/workflows/rights_metadata_r4_hosted.yml
+      - tools/corpus/rights/rights_bulk_metadata_r4.py
+      - tests/corpus/test_rights_bulk_metadata_r4.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r29-rights-metadata-r4-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  crosswalk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      RCLONE_CONFIG: /tmp/r29-r4-drive.conf
+      DRIVE_ROOT: "gdrive:RSS.vNext Corpus/Part2_R2_9_COMMERCIAL_TRAINING_RIGHTS"
+      SHA_PLAN: d43858a3e710fb44391711dbf8a1d082891a7c03f2ab2452cd88f24c287957c3
+      SHA_GITHUB: f14bf4daceac97072eee5721489ad160089b9fc1514e6a9e096574c3e4276da6
+      SHA_SKETCHFAB: 6462ef2ecf39069e210f6df1416e8a28ca931039e3c7fe6aa3dca593115c64e3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run pure offline regression tests
+        run: |
+          python -m compileall -q tools/corpus/rights/rights_bulk_metadata_r4.py
+          PYTHONPATH=tools/corpus/rights python -m unittest discover -s tests/corpus -p test_rights_bulk_metadata_r4.py -v
+      - name: Prepare bounded CPU runner and authenticated Drive read
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64" || { echo 'BLOCKED_MISSING_PRIVATE_DRIVE_SECRET'; exit 2; }
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone
+          python -m pip install --quiet --no-cache-dir 'pyarrow>=19,<24' 'requests>=2.31,<3'
+          printf '%s' "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          mkdir -p "$RUNNER_TEMP/r29r4/in" "$RUNNER_TEMP/r29r4/out"
+          df -h "$RUNNER_TEMP"
+      - name: Retrieve only existing rights-plan manifest, not 3D assets
+        run: |
+          set -euo pipefail
+          p="$RUNNER_TEMP/r29r4/in/R29_ALL_SOURCE_PROVENANCE_PLAN.csv"
+          rclone copyto "$DRIVE_ROOT/R29_ALL_SOURCE_PROVENANCE_PLAN.csv" "$p" --retries 3
+          test "$(sha256sum "$p" | cut -d' ' -f1)" = "$SHA_PLAN"
+      - name: Download pinned official Objaverse-XL GitHub and Sketchfab metadata only
+        run: |
+          set -euo pipefail
+          python - "$RUNNER_TEMP/r29r4/in" <<'PY'
+          from pathlib import Path
+          import os,sys,hashlib,time,shutil,requests
+          root=Path(sys.argv[1]); root.mkdir(parents=True,exist_ok=True)
+          if shutil.disk_usage(root).free < 4*1024**3:raise SystemExit('BLOCKED_INSUFFICIENT_EPHEMERAL_DISK')
+          files=[('github.parquet','https://huggingface.co/datasets/allenai/objaverse-xl/resolve/main/github/github.parquet',os.environ['SHA_GITHUB'],950*1024**2),
+                 ('sketchfab.parquet','https://huggingface.co/datasets/allenai/objaverse-xl/resolve/main/sketchfab/sketchfab.parquet',os.environ['SHA_SKETCHFAB'],130*1024**2)]
+          for name,url,digest,limit in files:
+           path=root/name
+           if path.exists() and hashlib.file_digest(open(path,'rb'),'sha256').hexdigest()==digest:continue
+           for attempt in range(3):
+            tmp=root/(name+'.partial');tmp.unlink(missing_ok=True)
+            try:
+             hasher=hashlib.sha256();n=0
+             with requests.get(url,stream=True,timeout=(30,180),headers={'User-Agent':'RealSaS-R29-RightsMetadata/4.0'}) as resp:
+              resp.raise_for_status()
+              with tmp.open('wb') as out:
+               for chunk in resp.iter_content(4*1024*1024):
+                if not chunk:continue
+                n+=len(chunk)
+                if n>limit:raise RuntimeError('REMOTE_METADATA_SIZE_BUDGET_EXCEEDED')
+                hasher.update(chunk);out.write(chunk)
+             if hasher.hexdigest()!=digest:raise RuntimeError('PINNED_PROVIDER_SHA256_MISMATCH')
+             tmp.replace(path);print('Verified official source:',name,n,digest);break
+            except Exception as exc:
+             tmp.unlink(missing_ok=True)
+             if attempt==2:raise
+             print('Retry bounded upstream source download:',name,type(exc).__name__,flush=True);time.sleep(5*(attempt+1))
+          PY
+      - name: Stream only requested corpus records through both Parquet tables
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/r29r4"
+          python tools/corpus/rights/rights_bulk_metadata_r4.py \
+            --ledger "$root/in/R29_ALL_SOURCE_PROVENANCE_PLAN.csv" \
+            --github "$root/in/github.parquet" \
+            --sketchfab "$root/in/sketchfab.parquet" \
+            --out "$root/out" | tee "$root/summary.log"
+          python - "$root/out/R29_R4_CLOSEOUT.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          d=json.load(open(sys.argv[1]));assert d['sources']==20847 and d['training_admitted']==0
+          print('## R29 R4 official bulk-source metadata (NOT training approval)')
+          print('Original source records:',d['sources'])
+          print('Source records with a metadata license claim:',d['source_rows_with_license_claim'])
+          print('Match strengths:',d['match_strengths'])
+          print('24-hex UniML source IDs without original identifier crosswalk remain unmatched.')
+          PY
+      - name: Save small evidence supplement privately, without rehosting 797MB upstream parquet
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/r29r4/out"
+          rclone copy "$root" "$DRIVE_ROOT/R29_R4_OFFICIAL_BULK_METADATA/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" --retries 3
+          echo 'Only compact evidence crosswalk/closeout saved; original 3D and metadata parquet not duplicated to Drive.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r29-r4-official-upstream-license-claims-${{ github.run_id }}
+          path: ${{ runner.temp }}/r29r4/out/
+          if-no-files-found: ignore
+          retention-days: 30

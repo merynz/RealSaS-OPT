@@ -210,3 +210,18 @@ def test_wrong_source_bytes_or_observation_provenance_rejected_before_join():
             native_teacher_npz_sha256="c"*64,
             observation_admission_sha256="d"*64,
         )
+
+
+def test_zero_triangle_renderable_owner_preserves_source_identity_without_held_face():
+    rows=[
+        _owner(0,"InvisibleAttachmentHelper",bone="Grip"),
+        _owner(1,"VisibleBody"),
+    ]
+    got=_court(rows,owners=[1,1,1,1])
+    empty=got.owners[0]
+    assert empty.source_face_count==0
+    assert empty.state=="ABSTAIN_EMPTY_RENDERABLE_MESH_NO_FACE_ADDRESS"
+    assert empty.parent_bone_name is None
+    assert not empty.held_face_selected
+    assert got.owners[1].source_face_start==0
+    assert got.owners[1].source_face_count==4

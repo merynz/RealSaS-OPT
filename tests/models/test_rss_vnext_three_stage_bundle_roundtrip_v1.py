@@ -163,7 +163,7 @@ def test_single_bundle_roundtrip_restores_three_stage_weights_and_adapter(
             vision_encoder=RSSvNextPatchEncoderForTests(32),
             product_mode=False,
         )
-    with pytest.raises(RuntimeError, match="TEST_VISION_FORBIDDEN_IN_PRODUCT"):
+    with pytest.raises(RuntimeError, match="BUNDLE_PRODUCTION_VISION_REQUIRED"):
         load_inference_checkpoint_v1(
             path, expected_sha256=digest,
             vision_encoder=RSSvNextPatchEncoderForTests(32),

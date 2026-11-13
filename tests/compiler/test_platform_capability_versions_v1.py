@@ -62,8 +62,8 @@ def test_product_capability_implementations_are_complete_and_semantic():
 
     rig = specs["product.rig"]
     assert rig["policy"]["dependencies"] == ["product.shape", "product.mesh"]
-    assert rig["entry_module"] == "compiler.realsas_compiler_services.platform_worker.rss_vnext_rig_executor_v3"
-    assert rig["parameters"]["executor_contract"] == "RealSaS.ProductRigInference.v3"
+    assert rig["entry_module"] == "compiler.rss_vnext.workers.rss_vnext_rig_executor_v4"
+    assert rig["parameters"]["executor_contract"] == "RealSaS.ProductRigInference.v4"
     assert rig["parameters"]["required_models"] == []
     assert rig["parameters"]["single_checkpoint_inference_reused"] is True
     assert rig["parameters"]["independent_axis_model_release_allowed"] is False

@@ -14,6 +14,13 @@ from dataclasses import asdict, dataclass, replace
 import math
 from typing import Any
 
+import numpy as np
+
+from .mesh.product_coverage_v1 import (
+    rasterize_triangles_half_integer_top_left,
+    source_connected_component_recall_metrics,
+)
+
 from .canonical_mesh_ir_v1 import CanonicalMeshIR, mint_canonical_mesh_v1
 from .hashing import content_sha256
 from .mechanical_carrier_evidence_v1 import build_mechanical_carrier_evidence_v1
@@ -33,7 +40,7 @@ from .rss_vnext_source_observation_v1 import RSSvNextTwoViewSourceObservationV1
 from .rss_vnext_two_view_raster_diagnostic_v1 import (
     RSSvNextTwoViewRasterDiagnosticV1,
     compile_rss_vnext_two_view_raster_diagnostic_v1,
-    validate_rss_vnext_two_view_raster_diagnostic_v1,
+    validate_rss_vnext_two_view_raster_diagnostic_v1, _project,
 )
 from .static_mesh_qualification_v1 import relation_parent_quality_report_v1
 from .surface_addressing_v1 import (
@@ -54,6 +61,7 @@ class RSSvNextTwoViewStaticPolicyV1:
     min_component_recall: float
     max_silhouette_edge_p95_px: float
     source_alpha_threshold: int = 128
+    component_min_foreground_fraction: float = 0.005
     schema: str = "RealSaS.RSSvNext.TwoObservedViewMeshPolicy.v1"
 
     def validate(self) -> None:
@@ -64,6 +72,7 @@ class RSSvNextTwoViewStaticPolicyV1:
         ):
             raise QualificationError("RSS_VNEXT_TWO_VIEW_STATIC_POLICY_SCHEMA_OR_ALPHA_DRIFT")
         values = (
+            self.component_min_foreground_fraction,
             self.min_recall, self.min_precision,
             self.max_largest_coherent_hole_fraction,
             self.max_interior_uncovered_fraction,
@@ -162,6 +171,10 @@ def qualify_rss_vnext_two_view_mesh_v1(
         "mesh_policy_hash": mesh_policy.qualification_policy_lineage_hash,
     })
     results: list[dict[str, Any]] = []
+    rgba = np.asarray(source.native_rgba)
+    height, width = map(int, rgba.shape[-2:])
+    xyz = np.asarray(evidence.mesh["rest_xyz"], dtype=np.float64)
+    faces = np.asarray(evidence.mesh["faces"], dtype=np.int64)
     for i, row in enumerate(diagnostic.views):
         if (
             type(row) is not dict
@@ -178,6 +191,24 @@ def qualify_rss_vnext_two_view_mesh_v1(
             raise QualificationError("RSS_VNEXT_TWO_VIEW_RASTER_MEASUREMENT_MISSING") from exc
         if item.get("source_threshold_has_foreground") is not True:
             raise QualificationError("RSS_VNEXT_TWO_VIEW_NO_OBSERVED_CHARACTER")
+        projected = _project(xyz, source.camera_features[i], i,
+                             width=width, height=height)
+        triangles = [tuple((float(projected[int(k), 0]),
+                            float(projected[int(k), 1])) for k in tri)
+                     for tri in faces]
+        predicted = rasterize_triangles_half_integer_top_left(
+            triangles, width=width, height=height,
+        )
+        from hashlib import sha256
+        if hashlib.sha256(predicted).hexdigest() != row["geometry"]["rest"]["binary_projected_raster_sha256"]:
+            raise QualificationError("RSS_VNEXT_TWO_VIEW_REPLAY_RASTER_HASH_DRIFT")
+        source_mask = bytes((rgba[i, 3] >= static_policy.source_alpha_threshold).astype(np.uint8).ravel())
+        components = source_connected_component_recall_metrics(
+            source_mask, predicted, width=width, height=height,
+            minimum_foreground_fraction=static_policy.component_min_foreground_fraction,
+        )
+        if int(components["eligible_component_count"]) == 0:
+            raise QualificationError("RSS_VNEXT_TWO_VIEW_NO_ELIGIBLE_SOURCE_COMPONENT")
         acceptance = (
             float(metrics["recall"]) >= static_policy.min_recall
             and float(metrics["precision"]) >= static_policy.min_precision
@@ -185,7 +216,7 @@ def qualify_rss_vnext_two_view_mesh_v1(
             <= static_policy.max_largest_coherent_hole_fraction
             and float(metrics["interior_uncovered_fraction"])
             <= static_policy.max_interior_uncovered_fraction
-            and float(metrics["minimum_eligible_component_recall"])
+            and float(components["minimum_eligible_component_recall"])
             >= static_policy.min_component_recall
             and float(metrics["silhouette_edge_p95_px"])
             <= static_policy.max_silhouette_edge_p95_px
@@ -195,6 +226,7 @@ def qualify_rss_vnext_two_view_mesh_v1(
             "original_source_rgba_sha256": source.view_pixel_sha256[i],
             "observed_2d_silhouette_qualified": bool(acceptance),
             "measurement": metrics,
+            "source_component_recall": components,
         })
     passed = (
         int(quality["degenerate_face_count"]) == 0

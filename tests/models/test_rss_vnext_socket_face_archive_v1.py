@@ -247,3 +247,125 @@ def test_original_evidence_with_no_generated_mesh_has_no_socket_sidecar():
     empty={**p,"mesh_candidate":None,"control_event_proposal":(),
            "anchor_face_candidate":None}
     assert export_rss_vnext_neural_socket_face_archive_v1(empty,evidence=e) is None
+
+
+def test_pinned_checkpoint_two_view_archive_receipt_and_compiler_reader_e2e(
+    tmp_path,monkeypatch,
+):
+    """Forced valid *synthetic* topology is explicitly a smoke-test fixture.
+
+    Production still requires a learned unseen topology and actual source
+    native correspondence. All infrastructure is the REAL receipt writer,
+    pinned checkpoint loader, original neural carrier and Compiler join.
+    """
+    from models.rss_vnext.unified_character_model import (
+        RSSvNextUnifiedCharacterModel,RSSvNextPatchEncoderForTests,
+    )
+    from models.rss_vnext.inference_checkpoint_v1 import save_inference_checkpoint_v1
+    from models.rss_vnext.inference_pipeline_v1 import (
+        run_two_view_to_compiler_proposal_v1,
+        read_compiler_proposal_receipt_v1,
+        read_compiler_model_selected_socket_face_join_v1,
+    )
+    net=_network().eval()
+    ckpt=tmp_path/"rss_unified.pt"
+    digest=save_inference_checkpoint_v1(ckpt,net)
+    rgba=torch.rand(1,2,4,28,28)
+    _,cam=_images()
+
+    def controlled_synthetic_proposal(
+        self,rgba,camera_features,*,
+        max_topology_tokens=None,generate_controls=False,
+        executable_constraint_operators=None,
+    ):
+        assert generate_controls
+        state,aux,_=self.encode_observations(rgba,camera_features)
+        mesh=self.build_mesh_candidate(state,_tokens(self))
+        events=_events()
+        seq=AXISSequenceV6.from_events(events,device=rgba.device)
+        control_memory=self._control_memory(
+            state,self._structural_memory(state,aux),mesh,
+        )
+        axis_hidden=self.axis(control_memory,seq)["hidden"]
+        candidate=self.anchor_face_correspondence(
+            mesh=mesh,axis_hidden=axis_hidden,axis_sequence=seq,
+            region_relation_logits=state.region_relation_logits,
+        )
+        candidate=replace(
+            candidate,
+            held_face_logits=torch.tensor([[80.,-80.,-80.]],device=rgba.device),
+            holder_face_logits=torch.tensor([[-80.,80.,-80.]],device=rgba.device),
+        )
+        return dict(
+            state=state,mesh_candidate=mesh,
+            mesh_status="UNQUALIFIED_MESH_CANDIDATE",
+            mesh_failure=None,control_event_proposal=events,
+            qualification_status="UNQUALIFIED_NEURAL_PROPOSAL",
+            observed_view_count=2,
+            auxiliary_view_authority="LEARNED_PREDICTED_ONLY",
+            anchor_face_candidate=candidate,
+        )
+
+    monkeypatch.setattr(
+        RSSvNextUnifiedCharacterModel,"propose_teacher_free",
+        controlled_synthetic_proposal,
+    )
+    output=tmp_path/"model_receipt"
+    receipt=run_two_view_to_compiler_proposal_v1(
+        checkpoint_path=ckpt,expected_checkpoint_sha256=digest,
+        vision_encoder=RSSvNextPatchEncoderForTests(net.cfg.iris.image_token_dim),
+        observed_rgba=rgba,camera_features=cam,
+        output_directory=output,generate_controls=True,product_mode=False,
+    )
+    assert receipt["anchor_face_archive_schema"]=="RealSaS.RSSvNext.NeuralSocketFaceArchive.v1"
+    assert receipt["anchor_face_executable_attachment_qualified"] is False
+    sidecar=output/"rss_vnext_neural_anchor_face.json"
+    assert sidecar.is_file()
+    actual,evidence=read_compiler_proposal_receipt_v1(
+        output,expected_checkpoint_sha256=digest,
+    )
+    assert actual==receipt
+    compiler=read_compiler_model_selected_socket_face_join_v1(
+        output,expected_checkpoint_sha256=digest,model_config=net.cfg,
+    )
+    assert compiler.candidate_join is not None
+    assert len(compiler.candidate_join.candidates)==1
+    row=compiler.candidate_join.candidates[0]
+    assert (row.held_face_index,row.holder_face_index)==(0,1)
+    assert not row.executable_attachment_qualified
+    assert not compiler.executable_attachment_authority
+    # Even the exact declared sidecar bytes must be protected by the
+    # source/receipt digest; a rehashed neural JSON alone is insufficient.
+    before=sidecar.read_bytes()
+    sidecar.write_bytes(before+b"tamper")
+    with pytest.raises(RuntimeError,match="RECEIPT_ANCHOR_FACE_ARCHIVE_BYTES_DRIFT"):
+        read_compiler_proposal_receipt_v1(
+            output,expected_checkpoint_sha256=digest,
+        )
+
+
+def test_undeclared_socket_face_file_cannot_be_spliced_into_abstain_receipt(
+    tmp_path,
+):
+    from models.rss_vnext.unified_character_model import RSSvNextPatchEncoderForTests
+    from models.rss_vnext.inference_checkpoint_v1 import save_inference_checkpoint_v1
+    from models.rss_vnext.inference_pipeline_v1 import (
+        run_two_view_to_compiler_proposal_v1,read_compiler_proposal_receipt_v1,
+    )
+    net=_network().eval()
+    ckpt=tmp_path/"ckpt.pt"
+    digest=save_inference_checkpoint_v1(ckpt,net)
+    rgba=torch.rand(1,2,4,28,28)
+    _,cam=_images()
+    root=tmp_path/"no_controls"
+    result=run_two_view_to_compiler_proposal_v1(
+        checkpoint_path=ckpt,expected_checkpoint_sha256=digest,
+        vision_encoder=RSSvNextPatchEncoderForTests(net.cfg.iris.image_token_dim),
+        observed_rgba=rgba,camera_features=cam,output_directory=root,
+        generate_controls=False,product_mode=False,max_topology_tokens=12,
+    )
+    assert "anchor_face_archive_file_sha256" not in result
+    read_compiler_proposal_receipt_v1(root,expected_checkpoint_sha256=digest)
+    (root/"rss_vnext_neural_anchor_face.json").write_text("{}")
+    with pytest.raises(RuntimeError,match="RECEIPT_UNDECLARED_ANCHOR_FACE_ARCHIVE"):
+        read_compiler_proposal_receipt_v1(root,expected_checkpoint_sha256=digest)

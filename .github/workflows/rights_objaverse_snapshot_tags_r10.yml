@@ -1,0 +1,125 @@
+name: R29 R10 archived Sketchfab NoAI tags and creator provenance
+on:
+  push:
+    branches: [audit/rights-metadata-r4-20261113]
+    paths: [.github/workflows/rights_objaverse_snapshot_tags_r10.yml]
+permissions:
+  contents: read
+concurrency:
+  group: r29-r10-noai-archive
+  cancel-in-progress: false
+jobs:
+  archive-claims:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      RCLONE_CONFIG: /tmp/r29-r10-drive.conf
+    steps:
+    - name: Get pinned licence candidate lists without model files
+      run: |
+        set -euo pipefail
+        umask 077
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq --no-install-recommends rclone
+        python -m pip install -q 'requests>=2.31,<3'
+        printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+        mkdir -p "$RUNNER_TEMP/r29r10"
+        rclone copyto "gdrive:RealSaS_MASTER_CORPUS_1024_V3/audits/truth_foundry_partverse_original_license_policy_v2/20261109_7034/PARTVERSE_7034_ORIGINAL_SOURCE_LICENSE_TRIAGE_V2.csv" "$RUNNER_TEMP/r29r10/partverse.csv" --retries 2
+        rclone copyto "gdrive:RSS.vNext Corpus/Part2_R2_9_COMMERCIAL_TRAINING_RIGHTS/R29_R9_ARTICULATION_PARTVERSE_UNION/43462114901-1/R29_R9_ARTICULATION_SKETCHFAB_LICENSE_CROSSWALK.csv" "$RUNNER_TEMP/r29r10/artic.csv" --retries 2
+        test "$(sha256sum "$RUNNER_TEMP/r29r10/partverse.csv" | cut -d' ' -f1)" = "2599e230876099d53ccf65e8c17e30b2fe07e0d764f9373ec1e25e094c761f02"
+        test "$(sha256sum "$RUNNER_TEMP/r29r10/artic.csv" | cut -d' ' -f1)" = "ff86b5bb97a40084e5fa5c927fded260fc26810cb6a559627cf3f2ba2b4b2e96"
+    - name: Get official archived object tags, NoAI, original license and creator
+      run: |
+        python - "$RUNNER_TEMP/r29r10" <<'PY'
+        import csv,os,sys,collections,hashlib,io,json,gzip,requests,time,concurrent.futures
+        from pathlib import Path
+        root=Path(sys.argv[1])
+        with (root/'partverse.csv').open(newline='',encoding='utf-8-sig') as f:
+         p=[r['uid'] for r in csv.DictReader(f) if r['corrected_license_class_v2'] in ('ATTRIBUTION_REVIEW','CC0_OR_PUBLIC_DOMAIN_CLAIM')]
+        with (root/'artic.csv').open(newline='',encoding='utf-8-sig') as f:
+         a=[r['source_uid'] for r in csv.DictReader(f) if r['morphology_tag_candidate']=='1' and r['license_class'] in ('CC_BY','CC0')]
+        requested=set(p)|set(a)
+        assert len(requested)==11996, len(requested)
+        base='https://huggingface.co/datasets/allenai/objaverse/resolve/main/'
+        R=requests.Session();R.headers.update({'User-Agent':'RealSaS-Archived-Rights-Audit/10.0'})
+        response=R.get(base+'object-paths.json.gz',timeout=(30,150));response.raise_for_status()
+        if len(response.content)>40000000:raise RuntimeError('PATHS_SIZE_LIMIT')
+        sha_paths=hashlib.sha256(response.content).hexdigest()
+        raw=json.loads(gzip.decompress(response.content))
+        assert isinstance(raw,dict)
+        shards=collections.defaultdict(set);missing=[]
+        for uid in sorted(requested):
+         path=raw.get(uid)
+         if not path:missing.append(uid);continue
+         bits=path.split('/')
+         if len(bits)<2:missing.append(uid);continue
+         shards[bits[1]].add(uid)
+        print('R10_INDEX',json.dumps({'requested':len(requested),'indexed':len(requested)-len(missing),'missing':len(missing),'shards':len(shards),'object_paths_sha256':sha_paths}),flush=True)
+        def fetch_shard(item):
+         sh,uids=item;url=base+'metadata/'+sh+'.json.gz';last=None
+         for attempt in range(3):
+          try:
+           res=requests.get(url,timeout=(30,160),headers={'User-Agent':'RealSaS-Archived-Rights-Audit/10.0'})
+           res.raise_for_status()
+           content=res.content
+           if len(content)>12000000:raise RuntimeError('SHARD_SIZE_LIMIT:'+sh)
+           meta=json.loads(gzip.decompress(content))
+           if not isinstance(meta,dict):raise RuntimeError('INVALID_SHARD')
+           selected={uid:meta[uid] for uid in uids if uid in meta}
+           return sh,len(meta),hashlib.sha256(content).hexdigest(),selected,None
+          except Exception as e:
+           last=type(e).__name__+':'+str(e)[:160]
+           time.sleep(4*(attempt+1))
+         return sh,0,'',{},last
+        items=sorted(shards.items())
+        data={};receipts=[];errs=[]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+         for i,(sh,n,dig,m,error) in enumerate(pool.map(fetch_shard,items),1):
+          receipts.append({'shard':sh,'metadata_count':n,'sha256':dig,'error':error or '', 'found_source_uids':len(m)})
+          data.update(m)
+          if error:errs.append((sh,error))
+          if i%20==0:print('R10_PROGRESS',i,'/',len(items),'matched',len(data),'errors',len(errs),flush=True)
+        rows=[];categories=collections.Counter()
+        for uid in sorted(requested):
+         d=data.get(uid) or {}
+         tags=d.get('tags') or []
+         parsed=[str(t.get('slug',t.get('name',''))) if isinstance(t,dict) else str(t) for t in tags]
+         lower={z.lower().strip() for z in parsed}
+         user=d.get('user') or {}
+         if not isinstance(user,dict):user={}
+         license_obj=d.get('license')
+         if isinstance(license_obj,dict):license_obj=license_obj.get('slug') or license_obj.get('label') or ''
+         noai='ARCHIVE_TAG_NOAI' if 'noai' in lower else ('ARCHIVE_TAG_NOT_PRESENT' if d else 'NO_ARCHIVE_METADATA')
+         categories[noai]+=1
+         rows.append({'uid':uid,'original_objaverse_archive_found':bool(d),'source_legacy_license':str(license_obj or ''),
+            'creator':user.get('username',''),'source_published_at':str(d.get('publishedAt') or ''),
+            'archived_noai_tag':noai,'archived_createdwithai_tag':int('createdwithai' in lower or 'created-with-ai' in lower),
+            'source_page':'https://sketchfab.com/3d-models/'+uid,
+            'evidence_archive':'https://huggingface.co/datasets/allenai/objaverse/tree/main/metadata',
+            'current_noai_cleared':False,'commercial_training_authorized':False})
+        path=root/'R29_R10_ARCHIVED_NOAI_LICENSE_CREATOR.csv'
+        with path.open('w',newline='',encoding='utf-8') as f:
+         w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
+        receipt=root/'R29_R10_SHARD_SHA_RECEIPTS.csv'
+        with receipt.open('w',newline='',encoding='utf-8') as f:
+         w=csv.DictWriter(f,fieldnames=list(receipts[0]));w.writeheader();w.writerows(receipts)
+        summary={'schema':'RealSaS.R29.R10.ArchivedSketchfabTags.v1',
+          'source_uid_requested':len(requested),'metadata_index_found':len(requested)-len(missing),
+          'source_metadata_found':len(data),'archive_tag_status':dict(categories),
+          'shards_scanned':len(items),'shard_failures':errs,'object_paths_sha256':sha_paths,
+          'source_listing_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),
+          'archive_coverage_limitation':'Snapshot tags do NOT prove current NoAI state. Positive NoAI historical tag is a block; missing tag only says not observed in that snapshot.',
+          'training_admitted':0}
+        (root/'R29_R10_SUMMARY.json').write_text(json.dumps(summary,indent=2,sort_keys=True))
+        print('R10_SUMMARY',json.dumps(summary),flush=True)
+        assert not errs,'ARCHIVE_SHARD_DOWNLOAD_FAILED'
+        PY
+    - name: Persist compact archive rights evidence with SHA
+      if: always()
+      run: |
+        set -euo pipefail
+        dst="gdrive:RSS.vNext Corpus/Part2_R2_9_COMMERCIAL_TRAINING_RIGHTS/R29_R10_ARCHIVED_NOAI/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+        for fn in R29_R10_ARCHIVED_NOAI_LICENSE_CREATOR.csv R29_R10_SHARD_SHA_RECEIPTS.csv R29_R10_SUMMARY.json; do
+          if [ -f "$RUNNER_TEMP/r29r10/$fn" ]; then rclone copyto "$RUNNER_TEMP/r29r10/$fn" "$dst/$fn" --retries 3; fi
+        done

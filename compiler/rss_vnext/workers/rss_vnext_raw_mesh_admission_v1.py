@@ -30,7 +30,7 @@ from compiler.realsas_compiler_core.mesh.product_coverage_v1 import (
 from compiler.realsas_compiler_core.product_authority_v1 import (
     CanonicalMeshCandidateIR, CanonicalMeshVertexCandidateIR,
     ComponentCarrierDecisionIR, ComponentRegionIR, RiggingSurfaceIR,
-    SurfaceNode, build_component_carrier_policy,
+    build_component_carrier_policy,
     build_mechanical_partition, canonical_mesh_candidate_lineage_hash,
     validate_canonical_mesh_candidate,
 )
@@ -38,7 +38,7 @@ from compiler.realsas_compiler_core.surface_addressing_v1 import (
     StaticCanonicalMeshQualificationIR, build_surface_addressing,
     static_mesh_qualification_hash,
 )
-from compiler.realsas_compiler_core.types import SurfaceSupportBinding
+from compiler.realsas_compiler_core.types import SurfaceNode, SurfaceSupportBinding
 from compiler.realsas_compiler_core.rss_vnext_uncalibrated_upload_v1 import (
     RSSvNextUncalibratedTwoImageSourceV1,
 )

@@ -279,7 +279,8 @@ def test_real_production_worker_fails_closed_if_pinned_local_dino_is_unavailable
     monkeypatch.setenv(
         "REALSAS_RSS_DINOV2_SOURCE", str(tmp_path / "missing-pretrained-model"),
     )
-    with pytest.raises(RuntimeError, match="LOCAL_DINOV2_NOT_FOUND"):
+    # Reject a V1 checkpoint before attempting to initialize DINO.
+    with pytest.raises(RuntimeError, match="CHECKPOINT_RELEASE_ABI_DRIFT"):
         execute_rss_vnext_shape_capability_v3(
             request, read_object=read, put_bytes=put,
         )
@@ -524,7 +525,8 @@ def test_product_shape_rejects_v2_label_on_legacy_checkpoint(tmp_path, monkeypat
         "compiler.realsas_compiler_services.platform_worker.rss_vnext_shape_executor_v3._production_vision_factory",
         vision,
     )
-    with pytest.raises(RuntimeError, match="THREE_STAGE_BUNDLE_REQUIRED"):
+    # A forged checkpoint version cannot admit test vision into product.
+    with pytest.raises(RuntimeError, match="TEST_VISION_FORBIDDEN_IN_PRODUCT"):
         execute_rss_vnext_shape_capability_v3(
             request, read_object=read, put_bytes=put,
         )

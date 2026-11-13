@@ -225,7 +225,7 @@ def test_generated_six_view_path_is_actual_compiler_shape_inference(tmp_path, mo
         digest = runner.save_training_weights(dest)
         runner.load_pinned_task_weights(dest, expected_sha256=digest)
 
-    network = model().eval()
+    network = model().eval().requires_grad_(False)
     network.construction_requires_generated_multiview = True
     network._pinned_neural_bundle = RSSvNextPinnedNeuralBundleV1(
         model=network,

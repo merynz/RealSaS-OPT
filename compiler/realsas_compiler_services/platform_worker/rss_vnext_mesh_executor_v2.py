@@ -92,25 +92,26 @@ def _read_cas(ref: dict[str, Any], read_object: Callable[[dict[str, Any]], bytes
 
 
 def _parents(request: dict[str, Any]):
+    from .rss_vnext_cas_parent_v1 import select_rss_vnext_parent_v1
+
     refs = list(request.get("input_artifacts") or ())
-    if len(refs) != 9 or any(type(x) is not dict for x in refs):
+    if len(refs) not in (9, 10) or any(type(x) is not dict for x in refs):
         raise RuntimeError("RSS_VNEXT_MESH_EXPECTS_SOURCE_INDEX_AND_SEVEN_CHILDREN")
-    sources = [x for x in refs if x.get("artifact_type") == SOURCE_ARTIFACT_TYPE]
+    # The tenth transport ref is permitted ONLY when the original Goal
+    # source and the Input output are an identical immutable CAS object.
+    source = select_rss_vnext_parent_v1(request, SOURCE_ARTIFACT_TYPE, "v1")
     indexes = [x for x in refs if x.get("artifact_type") == INDEX_ARTIFACT_TYPE]
-    if len(sources) != 1 or len(indexes) != 1:
+    if len(indexes) != 1 or indexes[0].get("schema_version") != "v1":
         raise RuntimeError("RSS_VNEXT_MESH_SOURCE_OR_INDEX_CARDINALITY")
-    if (
-        sources[0].get("schema_version") != "v1"
-        or indexes[0].get("schema_version") != "v1"
-    ):
-        raise RuntimeError("RSS_VNEXT_MESH_PARENT_ABI_DRIFT")
+    if sum(x.get("artifact_type") == SOURCE_ARTIFACT_TYPE for x in refs) != len(refs) - 8:
+        raise RuntimeError("RSS_VNEXT_MESH_SOURCE_REF_COUNT_DRIFT")
     forbidden = {
         "RealSaS.ShapeInput", "RealSaS.ShapeProposal",
         "RealSaS.SourceObservation", "RealSaS.IRISSceneEvidence",
     }
     if any(x.get("artifact_type") in forbidden for x in refs):
         raise RuntimeError("RSS_VNEXT_MESH_LEGACY_PARENT_FORBIDDEN")
-    return sources[0], indexes[0], refs
+    return source, indexes[0], refs
 
 
 def _read_receipt(

@@ -189,3 +189,74 @@ def test_alpha_head_has_independent_training_gradient():
     assert torch.isfinite(loss)
     assert head.weight.grad is not None
     assert head.weight.grad.abs().sum() > 0
+
+
+
+def test_generated_six_view_path_is_actual_compiler_shape_inference(tmp_path, monkeypatch):
+    """Use synthetic weights ONLY as test seam; exact product runner is shared."""
+    import numpy as np
+    import models.rss_vnext.inference_pipeline_v1 as inference
+    from compiler.realsas_compiler_core.rss_vnext_source_observation_v1 import (
+        canonicalize_two_view_source_v1,
+    )
+    from models.rss_vnext.realsas_virtual_camera_policy_v1 import (
+        target_canonical_and_six_cameras_v1,
+    )
+    from models.rss_vnext.realsas_product_neural_bundle_v1 import (
+        RSSvNextPinnedNeuralBundleV1,
+    )
+
+    torch.manual_seed(41)
+    torch.set_num_threads(1)
+    canonical, six = target_canonical_and_six_cameras_v1(1)
+    assert torch.det(torch.stack((
+        canonical[:, :, 3:6], canonical[:, :, 6:9], canonical[:, :, 9:12],
+    ), dim=-2)).min() > .99
+    src = canonicalize_two_view_source_v1(
+        np.full((2, 4, 16, 16), 190, dtype=np.uint8),
+        canonical[0].numpy().copy(),
+        source_rights_claim_sha256="e" * 64,
+    )
+    source_rgba, source_cameras = src.to_model_tensors()
+    stage1 = stage(STAGE_CANONICAL)
+    stage2 = stage(STAGE_MULTIVIEW)
+    for filename, runner in (("canonical.pt", stage1), ("multiview.pt", stage2)):
+        dest = tmp_path / filename
+        digest = runner.save_training_weights(dest)
+        runner.load_pinned_task_weights(dest, expected_sha256=digest)
+
+    network = model().eval()
+    network.construction_requires_generated_multiview = True
+    network._pinned_neural_bundle = RSSvNextPinnedNeuralBundleV1(
+        model=network,
+        canonical=stage1,
+        multiview=stage2,
+        checkpoint_sha256="f" * 64,
+        image_size=16,
+        denoise_steps=1,
+    )
+    monkeypatch.setattr(inference, "load_inference_checkpoint_v1", lambda *a, **kw: network)
+    output_dir = tmp_path / "generated-inference"
+    original = inference.run_two_view_to_compiler_proposal_v1(
+        checkpoint_path=tmp_path / "handled-by-pinned-test-seam",
+        expected_checkpoint_sha256="f" * 64,
+        vision_encoder=network.vision,
+        observed_rgba=source_rgba,
+        camera_features=source_cameras,
+        source_observation=src,
+        output_directory=output_dir,
+        max_topology_tokens=6,
+        generate_controls=False,
+        product_mode=False,
+    )
+    assert original["scene_construction_policy"] == (
+        "TWO_ORIGINAL_TO_CANONICAL_TO_SIX_GENERATED_RGB_NORMAL"
+    )
+    assert original["generated_view_count"] == 6
+    assert original["generated_source_observation"] is False
+    assert original["product_revision_minted"] is False
+    loaded, evidence = inference.read_compiler_proposal_receipt_v1(
+        output_dir, expected_checkpoint_sha256="f" * 64,
+    )
+    assert loaded == original
+    assert evidence.mesh_status in ("ABSTAIN", "UNQUALIFIED_MESH_CANDIDATE")

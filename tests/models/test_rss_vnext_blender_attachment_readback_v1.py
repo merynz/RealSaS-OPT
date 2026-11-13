@@ -6,6 +6,7 @@ All fixtures are synthetic. Results cannot qualify training, contact, or a
 NO_FACE negative without an external source-native authored inventory court.
 """
 from dataclasses import asdict
+from hashlib import sha256
 import json
 
 import numpy as np
@@ -92,6 +93,26 @@ def _fixture():
     for frame in (0,1):
         frames["parent_sampled_world"][0,frame]=_mat(.1*(frame+1),.2*(frame+1))
         frames["root_sampled_world"][0,frame]=_mat()
+    rig_graph=[
+        {
+            "armature_name":"Rig","object_parent":None,
+            "object_constraints":[],
+            "bones":[{
+                "name":"Grip","parent":None,
+                "native_rest_matrix_local":_mat().tolist(),
+                "constraints":[],
+            }],
+            "native_graph_authority":"DIAGNOSTIC_ONLY_NO_HOLDER_FACE_OR_SOCKET_ID",
+        },
+        {
+            "armature_name":"Other","object_parent":None,
+            "object_constraints":[],"bones":[],
+            "native_graph_authority":"DIAGNOSTIC_ONLY_NO_HOLDER_FACE_OR_SOCKET_ID",
+        },
+    ]
+    graph_sha=sha256(json.dumps(
+        rig_graph,sort_keys=True,separators=(",",":"),allow_nan=False,
+    ).encode()).hexdigest()
     receipt={
         "schema":"RealSaS.TruthFoundry.BlenderNativeAttachmentObservation.v1",
         "subject_id":"test-subject",
@@ -102,6 +123,8 @@ def _fixture():
         "importer_policy":teacher["import"],
         "original_teacher_frame_rows":rows,
         "source_owner_inventory":authors,
+        "native_armature_bone_constraint_graph":rig_graph,
+        "native_armature_bone_constraint_graph_sha256":graph_sha,
         "source_link_candidates":json.loads(json.dumps(asdict(registry))),
         "parent_root_npz_sha256":"e"*64,
         "parent_root_npz_filename":"native_attachment_parent_root_frames.npz",
@@ -128,6 +151,8 @@ def test_readback_recomputes_native_face_owner_and_samples_against_original_teac
     out=audit_native_blender_attachment_receipt_v1(**q)
     assert out["schema"]=="RealSaS.TruthFoundry.BlenderNativeAttachmentReadback.v1"
     assert out["bone_link_candidate_count"]==1
+    assert out["native_source_armature_count"]==2
+    assert out["native_source_bone_count"]==1
     assert out["parent_root_available_samples"]==2
     assert out["original_teacher_frame_count"]==3
     assert out["non_se3_source_frames"]==0
@@ -224,3 +249,31 @@ def test_valid_nonuniform_source_scale_is_diagnostic_not_se3_certification():
     )
     assert out["non_se3_source_frames"]==1
     assert not out["heldout_intervention_qualified"]
+
+
+def test_rig_graph_hash_parent_and_source_action_identity_are_immutable():
+    q=_fixture()
+    bad=json.loads(json.dumps(q["receipt"]))
+    bad["native_armature_bone_constraint_graph"][0]["bones"][0]["parent"]="WrongBone"
+    with pytest.raises(ValueError,match="NATIVE_SOURCE_RIG_GRAPH_HASH_DRIFT"):
+        audit_native_blender_attachment_receipt_v1(
+            **{**q,"receipt":bad},
+        )
+    graph=bad["native_armature_bone_constraint_graph"]
+    bad["native_armature_bone_constraint_graph_sha256"]=sha256(json.dumps(
+        graph,sort_keys=True,separators=(",",":"),allow_nan=False,
+    ).encode()).hexdigest()
+    with pytest.raises(ValueError,match="SOURCE_RIG_PARENT_OR_CONSTRAINT_DRIFT"):
+        audit_native_blender_attachment_receipt_v1(
+            **{**q,"receipt":bad},
+        )
+    bad=json.loads(json.dumps(q["receipt"]))
+    bad["native_armature_bone_constraint_graph"][1]["armature_name"]="Unrelated"
+    bad["native_armature_bone_constraint_graph_sha256"]=sha256(json.dumps(
+        bad["native_armature_bone_constraint_graph"],
+        sort_keys=True,separators=(",",":"),allow_nan=False,
+    ).encode()).hexdigest()
+    with pytest.raises(ValueError,match="SOURCE_RIG_ACTION_OWNER_UNRESOLVED"):
+        audit_native_blender_attachment_receipt_v1(
+            **{**q,"receipt":bad},
+        )

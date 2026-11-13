@@ -238,12 +238,15 @@ class RSSvNextPinnedDiffusionStageV1:
         if not bool(torch.isfinite(rgb).all()):
             raise RuntimeError("RSS_VNEXT_GENERATOR_NONFINITE_RGB")
         if self.stage == STAGE_MULTIVIEW:
+            # Training ABI is RGB modalities [0:6], normal modalities [6:12].
+            # Do not transpose them at inference: that silently corrupts both
+            # appearance and predicted geometry even for a valid checkpoint.
+            colors = rgb[: b * 6]
             normal = F.normalize(
-                rgb[: b * 6].reshape(b, 6, 3, height, width) * 2. - 1.,
+                rgb[b * 6:].reshape(b, 6, 3, height, width) * 2. - 1.,
                 dim=2, eps=1e-6,
             )
-            colors = rgb[b * 6:]
-            camera = target_cameras[:, 6:]
+            camera = target_cameras[:, :6]
         else:
             normal = None
             colors = rgb

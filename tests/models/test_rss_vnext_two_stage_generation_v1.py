@@ -260,3 +260,49 @@ def test_generated_six_view_path_is_actual_compiler_shape_inference(tmp_path, mo
     )
     assert loaded == original
     assert evidence.mesh_status in ("ABSTAIN", "UNQUALIFIED_MESH_CANDIDATE")
+
+def test_multiview_decoder_respects_rgb_first_normal_second_training_abi(tmp_path):
+    """First six outputs are RGB; last six are aligned normals, not reverse."""
+    class IndexedVAE(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.config = SimpleNamespace(scaling_factor=1.)
+
+        def decode(self, latent):
+            batch_views = latent.shape[0]
+            assert batch_views == 12
+            out = torch.empty(
+                (12, 3, 16, 16), dtype=latent.dtype, device=latent.device,
+            )
+            # First six encode opaque RED (1,0,0) after [-1,1] decoding.
+            out[:6, 0].fill_(1.)
+            out[:6, 1:].fill_(-1.)
+            # Last six encode +Z normals (0,0,1) after RGB->[−1,1].
+            out[6:, :2].fill_(0.)
+            out[6:, 2].fill_(1.)
+            return SimpleNamespace(sample=out)
+
+    torch.manual_seed(63)
+    runner = stage(STAGE_MULTIVIEW)
+    runner.vae = IndexedVAE()
+    ckpt = tmp_path / "view-order.pt"
+    digest = runner.save_training_weights(ckpt)
+    runner.load_pinned_task_weights(ckpt, expected_sha256=digest)
+    cameras = six_cameras()
+    result = runner.generate(
+        source_tokens=torch.rand(1, 2, 4, 32),
+        target_cameras=torch.cat((cameras, cameras), dim=1),
+        target_modalities=torch.tensor([[0]*6 + [1]*6], dtype=torch.long),
+        height=16, width=16, steps=1, seed=19,
+    )
+    assert result.rgba.shape == (1, 6, 4, 16, 16)
+    assert torch.allclose(
+        result.rgba[:, :, :3, 0, 0],
+        torch.tensor([1., 0., 0.]).reshape(1, 1, 3).expand(1, 6, 3),
+    )
+    assert torch.allclose(
+        result.normals[:, :, :, 0, 0],
+        torch.tensor([0., 0., 1.]).reshape(1, 1, 3).expand(1, 6, 3),
+        atol=1e-6,
+    )
+    assert torch.equal(result.cameras, cameras)

@@ -25,14 +25,14 @@ func TestRSSvNextTwoViewInputAndSingleModelShapeFormOneCandidateRoleGraph(t *tes
 	}
 
 	input, ok := registry.Get(ProductInputCapabilityID)
-	if !ok || input.Metadata["executor_contract"] != RSSvNextInputContractV2 ||
+	if !ok || input.Metadata["executor_contract"] != RSSvNextInputContractV3 ||
 		input.Metadata["source_copy_policy"] != "BYTE_IDENTICAL_CAS_REUSE" ||
 		input.Metadata["model_inference_in_input_forbidden"] != true ||
 		input.ProductPassAuthority {
 		t.Fatalf("RSS Input drift: %+v", input)
 	}
 	shape, ok := registry.Get(ProductShapeCapabilityID)
-	if !ok || shape.Metadata["executor_contract"] != RSSvNextShapeContractV3 ||
+	if !ok || shape.Metadata["executor_contract"] != RSSvNextShapeContractV4 ||
 		shape.Metadata["input_artifact_type"] != input.Metadata["output_artifact_type"] ||
 		shape.Metadata["input_schema_version"] != input.Metadata["output_schema_version"] ||
 		shape.Metadata["neural_scene_survives_mesh_abstain"] != true ||

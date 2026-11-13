@@ -35,13 +35,13 @@ def test_product_capability_implementations_are_complete_and_semantic():
         "skin.influence_legality_qualification", "skin.influence_proposal",
     ]
     input_spec = specs["product.input"]
-    assert input_spec["parameters"]["executor_contract"] == "RealSaS.ProductInputTwoView.v2"
+    assert input_spec["parameters"]["executor_contract"] == "RealSaS.ProductInputTwoView.v3"
     assert input_spec["parameters"]["original_observed_view_count"] == 2
     assert input_spec["parameters"]["source_copy_policy"] == "BYTE_IDENTICAL_CAS_REUSE"
     assert input_spec["parameters"]["model_inference_in_input_forbidden"] is True
 
     shape = specs["product.shape"]
-    assert shape["parameters"]["executor_contract"] == "RealSaS.ProductShapeInference.v3"
+    assert shape["parameters"]["executor_contract"] == "RealSaS.ProductShapeInference.v4"
     assert shape["parameters"]["required_models"] == [{
         "family": "RSSVNEXT",
         "architecture_id": "RSS.vNext.UnifiedCharacterCompiler.v1",

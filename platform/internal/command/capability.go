@@ -81,7 +81,7 @@ type ProductCapabilityCompileRequest struct {
 	RequestedBy     string    `json:"requested_by"`
 }
 
-// SubmitProductCapabilityCompile accepts only a sealed, exact two-view source
+// SubmitProductCapabilityCompile accepts only a sealed, exact two-image source
 // and the single terminal product.proof target. It does NOT reuse developer
 // promotion authority or accept arbitrary caller-selected capability targets.
 // The DB trigger freezes the full PRODUCTION ModelRelease envelope atomically.
@@ -97,8 +97,9 @@ func SubmitProductCapabilityCompile(
 		return CapabilityReceipt{}, err
 	}
 	if len(loaded.RootInputs) != 1 || len(loaded.ArtifactIDs) != 1 ||
-		loaded.RootInputs[0].ArtifactType != "RealSaS.RSSvNextTwoViewSource" {
-		return CapabilityReceipt{}, errors.New("PRODUCT_CAPABILITY_TWO_VIEW_SOURCE_ONLY")
+		(loaded.RootInputs[0].ArtifactType != "RealSaS.RSSvNextTwoViewSource" &&
+			loaded.RootInputs[0].ArtifactType != "RealSaS.RSSvNextUncalibratedTwoImageSource") {
+		return CapabilityReceipt{}, errors.New("PRODUCT_CAPABILITY_EXACT_TWO_IMAGE_SOURCE_ONLY")
 	}
 	var schemaVersion string
 	if err := pool.QueryRow(ctx, `

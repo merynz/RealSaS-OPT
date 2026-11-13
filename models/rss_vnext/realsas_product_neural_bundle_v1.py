@@ -342,10 +342,15 @@ def load_product_neural_bundle_v1(
         files = {name: root / (name + ".pt") for name in required}
         for name in required:
             files[name].write_bytes(blobs[name])
+        if product_mode:
+            from .unified_character_model import RSSvNextFrozenDINOv2
+            if type(vision_encoder) is not RSSvNextFrozenDINOv2:
+                raise RuntimeError("RSS_VNEXT_BUNDLE_PRODUCTION_VISION_REQUIRED")
+        # The enclosing model release is the authority. The reconstruction V2
+        # is not a standalone product checkpoint.
         model = load_inference_checkpoint_v1(
             files["reconstruction"], expected_sha256=digests["reconstruction"],
-            vision_encoder=vision_encoder, device=device,
-            product_mode=product_mode,
+            vision_encoder=vision_encoder, device=device, product_mode=False,
         )
         if not getattr(model, "construction_requires_generated_multiview", False):
             raise RuntimeError("RSS_VNEXT_BUNDLE_RECONSTRUCTION_NOT_SIX_VIEW")

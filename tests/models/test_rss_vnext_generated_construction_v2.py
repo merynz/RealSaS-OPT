@@ -135,7 +135,7 @@ def test_lora_reconstruction_v2_checkpoint_rebuilds_identical_inference_module(t
             torch.rand(1, 2, 4, 16, 16), _source_cameras(),
             max_topology_tokens=8,
         )
-    with pytest.raises(RuntimeError, match="TEST_VISION_FORBIDDEN"):
+    with pytest.raises(RuntimeError, match="THREE_STAGE_BUNDLE_REQUIRED"):
         load_inference_checkpoint_v1(
             path, expected_sha256=sha,
             vision_encoder=RSSvNextPatchEncoderForTests(model.cfg.iris.image_token_dim),

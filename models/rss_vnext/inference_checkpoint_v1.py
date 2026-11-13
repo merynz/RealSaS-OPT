@@ -220,18 +220,6 @@ def load_inference_checkpoint_v1(
         payload = torch.load(source, map_location="cpu", weights_only=True)
     except Exception as exc:
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_DECODE_FAILED") from exc
-    if isinstance(payload, Mapping) and payload.get("schema") == (
-        "RealSaS.RSSvNext.UnifiedThreeStageNeuralRelease.v1"
-    ):
-        from .realsas_product_neural_bundle_v1 import load_product_neural_bundle_v1
-        bundle = load_product_neural_bundle_v1(
-            source, expected_sha256=expected_sha256,
-            vision_encoder=vision_encoder, device=device,
-            product_mode=product_mode,
-        )
-        model = bundle.model
-        model._pinned_neural_bundle = bundle
-        return model
     if not isinstance(payload, Mapping):
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_PAYLOAD_INVALID")
     schema = payload.get("schema")
@@ -266,6 +254,8 @@ def load_inference_checkpoint_v1(
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_ARCHITECTURE_DRIFT")
     if payload["source_policy"] != (_V2_SOURCE_POLICY if modern else _SOURCE_POLICY):
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_SOURCE_POLICY_DRIFT")
+    if modern and product_mode:
+        raise RuntimeError("RSS_VNEXT_THREE_STAGE_BUNDLE_REQUIRED")
     if payload["qualification_status"] != "INFERENCE_PACKAGING_ONLY_NOT_PRODUCT_RELEASE":
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_AUTHORITY_DRIFT")
     cfg = _load_config(payload["config"])
@@ -274,6 +264,8 @@ def load_inference_checkpoint_v1(
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_VISION_BACKEND_DRIFT")
     if product_mode and backend != "FROZEN_LOCAL_DINOV2":
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_TEST_VISION_FORBIDDEN_IN_PRODUCT")
+    if product_mode:
+        raise RuntimeError("RSS_VNEXT_THREE_STAGE_BUNDLE_REQUIRED")
     state = _validated_state(payload["model_state_dict"])
     model = RSSvNextUnifiedCharacterModel(cfg, vision_encoder=vision_encoder)
     if modern:

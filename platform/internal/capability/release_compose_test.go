@@ -111,8 +111,8 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 		contract     string
 		modelCount   int
 	}{
-		{ProductInputCapabilityID, nil, RSSvNextInputContractV2, 0},
-		{ProductShapeCapabilityID, []string{ProductInputCapabilityID}, RSSvNextShapeContractV3, 1},
+		{ProductInputCapabilityID, nil, RSSvNextInputContractV3, 0},
+		{ProductShapeCapabilityID, []string{ProductInputCapabilityID}, RSSvNextShapeContractV4, 1},
 		{ProductMeshCapabilityID, []string{ProductShapeCapabilityID}, RSSvNextMeshContractV2, 0},
 		{ProductRigCapabilityID, []string{ProductShapeCapabilityID, ProductMeshCapabilityID}, RSSvNextRigContractV3, 0},
 		{ProductSkinCapabilityID, []string{ProductShapeCapabilityID, ProductMeshCapabilityID, ProductRigCapabilityID}, RSSvNextSkinContractV3, 0},

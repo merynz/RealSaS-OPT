@@ -359,6 +359,19 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
 
     if (
         str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductInputTwoView.v3"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.rss_vnext_input_executor_v3 import (
+            execute_rss_vnext_input_capability_v3,
+        )
+        def run_rss_input_v3(value):
+            return execute_rss_vnext_input_capability_v3(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            )
+        return await _with_heartbeat(run_rss_input_v3, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
         and metadata.get("executor_contract") == "RealSaS.ProductInputInference.v1"
     ):
         from compiler.realsas_compiler_services.platform_worker.input_executor_v1 import (
@@ -410,6 +423,19 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
                 value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
             )
         return await _with_heartbeat(run_rss_shape, request)
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductShapeInference.v4"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.rss_vnext_shape_executor_v4 import (
+            execute_rss_vnext_shape_capability_v4,
+        )
+        def run_rss_shape_v4(value):
+            return execute_rss_vnext_shape_capability_v4(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            )
+        return await _with_heartbeat(run_rss_shape_v4, request)
 
     if (
         str(request.get("kind") or "") == "MODULE"

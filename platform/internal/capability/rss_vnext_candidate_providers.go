@@ -10,7 +10,9 @@ type RSSvNextInputCandidateProvider struct{}
 
 const (
 	RSSvNextInputContractV2 = "RealSaS.ProductInputTwoView.v2"
+	RSSvNextInputContractV3 = "RealSaS.ProductInputTwoView.v3"
 	RSSvNextShapeContractV3 = "RealSaS.ProductShapeInference.v3"
+	RSSvNextShapeContractV4 = "RealSaS.ProductShapeInference.v4"
 	RSSvNextModelFamily     = "RSSVNEXT"
 	RSSvNextArchitectureID  = "RSS.vNext.UnifiedCharacterCompiler.v1"
 )
@@ -31,12 +33,15 @@ func (RSSvNextInputCandidateProvider) Capabilities(context.Context) ([]Descripto
 		Metadata: map[string]any{
 			"product_role_id":                       string(ProductRoleInput),
 			"implementation_class":                  string(ImplementationHybrid),
-			"interface_contract":                    RSSvNextInputContractV2,
-			"executor_contract":                     RSSvNextInputContractV2,
-			"input_artifact_type":                   "RealSaS.RSSvNextTwoViewSource",
+			"interface_contract":                    RSSvNextInputContractV3,
+			"executor_contract":                     RSSvNextInputContractV3,
+			"input_artifact_type":                   "RealSaS.RSSvNextUncalibratedTwoImageSource",
 			"input_schema_version":                  "v1",
-			"output_artifact_type":                  "RealSaS.RSSvNextTwoViewSource",
+			"output_artifact_type":                  "RealSaS.RSSvNextUncalibratedTwoImageSource",
 			"output_schema_version":                 "v1",
+			"alternate_calibrated_source_artifact_type": "RealSaS.RSSvNextTwoViewSource",
+			"alternate_calibrated_source_schema_version": "v1",
+			"uncalibrated_source_original_camera_required": false,
 			"original_observed_view_count":          2,
 			"source_copy_policy":                    "BYTE_IDENTICAL_CAS_REUSE",
 			"model_inference_in_input_forbidden":    true,
@@ -71,13 +76,20 @@ func (RSSvNextShapeCandidateProvider) Capabilities(context.Context) ([]Descripto
 		Metadata: map[string]any{
 			"product_role_id":       string(ProductRoleShape),
 			"implementation_class":  string(ImplementationModel),
-			"interface_contract":    RSSvNextShapeContractV3,
-			"executor_contract":     RSSvNextShapeContractV3,
-			"input_artifact_type":   "RealSaS.RSSvNextTwoViewSource",
+			"interface_contract":    RSSvNextShapeContractV4,
+			"executor_contract":     RSSvNextShapeContractV4,
+			"input_artifact_type":   "RealSaS.RSSvNextUncalibratedTwoImageSource",
 			"input_schema_version":  "v1",
 			"output_artifact_type":  "RealSaS.RSSvNextInferenceEvidence",
 			"output_schema_version": "v1",
 			"fanout_contract":       "RealSaS.RSSvNext.ProductEvidenceFanout.v1",
+			"alternate_calibrated_source_artifact_type": "RealSaS.RSSvNextTwoViewSource",
+			"alternate_calibrated_source_schema_version": "v1",
+			"raw_neural_scene_candidate_artifact_type": "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier",
+			"raw_generated_views_artifact_type": "RealSaS.RSSvNextGeneratedConditioningViews",
+			"raw_construction_receipt_artifact_type": "RealSaS.RSSvNextUncalibratedConstructionReceipt",
+			"raw_source_camera_calibration_authority": false,
+			"raw_mesh_proof_is_separate_admission": true,
 			"maximum_new_tokens":    131072,
 			"required_models": []any{
 				map[string]any{
@@ -94,7 +106,7 @@ func (RSSvNextShapeCandidateProvider) Capabilities(context.Context) ([]Descripto
 				map[string]any{"role": "embedded_mira_decoder", "artifact_type": "RealSaS.RSSvNextEmbeddedMIRADecoder", "schema_version": "v1"},
 				map[string]any{"role": "rss_evidence_fanout", "artifact_type": "RealSaS.RSSvNextProductEvidenceFanout", "schema_version": "v1"},
 			},
-			"input_observed_front_back_only":     true,
+			"input_observed_front_back_only":     false,
 			"neural_scene_survives_mesh_abstain": true,
 			"learned_model_results_not_product":  true,
 			"independent_iris_tessa_forbidden":   true,

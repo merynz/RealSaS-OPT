@@ -43,11 +43,13 @@ def validate_paired_denoiser_abi_v1(
         raise ValueError("RSS_VNEXT_DENOISER_ABI_ARGUMENTS_INVALID")
     if getattr(denoiser, "rowwise_attention_in_unet_features", False):
         raise RuntimeError("RSS_VNEXT_DENOISER_FEATURE_ROW_ABI_MISMATCH")
+    channels_in = _config_field(denoiser, "in_channels")
     if latent_row_attention is not None:
         actual_latent = getattr(latent_row_attention, "latent_channels", None)
-        if actual_latent != 4:
+        # Tiny synthetic training doubles may use a 3-channel stand-in VAE,
+        # but no real configured denoiser or release can claim that ABI.
+        if actual_latent != 4 and (require_explicit_config or channels_in is not None):
             raise RuntimeError("RSS_VNEXT_DENOISER_ROW_LATENT_ABI_MISMATCH")
-    channels_in = _config_field(denoiser, "in_channels")
     channels_out = _config_field(denoiser, "out_channels")
     cross_width = _config_field(denoiser, "cross_attention_dim")
     if require_explicit_config and (

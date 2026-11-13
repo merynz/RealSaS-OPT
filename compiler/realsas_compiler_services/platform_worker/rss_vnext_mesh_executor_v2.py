@@ -434,6 +434,33 @@ def execute_rss_vnext_mesh_capability_v2(
                 "diagnostics": {},
             },
         }
+    if (
+        metadata.get("canonical_mesh_required_for_product_execution") is True
+        and admission is None
+    ):
+        # A source candidate CAS court may pass, but a *product.mesh* release
+        # advertising CanonicalMesh as its required output cannot do so without
+        # separately admitted observed raster + geometry policy.
+        return {
+            "capability_id": "product.mesh", "status": "FAIL",
+            "outputs": [],
+            "diagnostics": {
+                "schema": "RealSaS.RSSvNext.ProductMeshAdmissionDiagnostics.v1",
+                "candidate_evidence_preserved_in_shape_cas": True,
+                "observed_static_source_policy_bound": policy_bound,
+                "canonical_mesh_qualified": False,
+                "product_revision_minted": False,
+            },
+            "failure": {
+                "code": "RSS_VNEXT_CANONICAL_MESH_REQUIRED_BUT_NOT_ADMITTED",
+                "class": "COMPILER_MESH",
+                "reported_owner_module_id": "product.mesh",
+                "diagnostics": {
+                    "observed_static_source_policy_bound": policy_bound,
+                    "topology_state": surface.state,
+                },
+            },
+        }
     if admission is not None:
         output.append(_store_json(
             admission.static_qualification.to_dict(),

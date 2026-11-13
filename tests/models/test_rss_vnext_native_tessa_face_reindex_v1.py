@@ -201,3 +201,29 @@ def test_teacher_change_is_not_overridden_by_same_source_index_map():
             tessa_teacher_token_ids=tokens,
             coordinate_bins=256,
         )
+
+
+def test_coordinate_overlap_across_components_is_legal_with_true_tessa_rematerialization():
+    from models.tessa.v1.model_v1 import TESSAConfigV1
+    from models.tessa.v1.tokenization_v1 import encode_adjacent_teacher_mesh_v1
+    net,xyz,faces,comps,tokens=_native()
+    xyz[3]=xyz[0]
+    cfg=TESSAConfigV1(coordinate_bins=net.cfg.tessa.coordinate_bins)
+    parts=[]
+    for i in (0,1):
+        part=encode_adjacent_teacher_mesh_v1(
+            xyz[i*3:(i+1)*3],np.array([[0,1,2]],dtype=np.int64),
+            component_id=f"native_{i}",chart_id=f"c{i}",cfg=cfg,
+        ).token_ids
+        parts.append(part)
+    teacher=tuple(parts[0][:-1]+parts[1][1:])
+    reindexed=reindex_source_faces_to_tessa_teacher_v1(
+        source_vertices_normalized=xyz,
+        source_faces=faces,
+        source_face_component_indices=comps,
+        tessa_teacher_token_ids=teacher,
+        coordinate_bins=net.cfg.tessa.coordinate_bins,
+    )
+    assert reindexed.source_face_to_tessa_face==(1,0)
+    assert reindexed.tessa_face_to_source_face==(1,0)
+    assert not reindexed.trainer_admission_qualified

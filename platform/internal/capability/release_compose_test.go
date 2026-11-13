@@ -135,7 +135,7 @@ func TestBuildEngineReleaseRegistryIncludesCurrentProductClosure(t *testing.T) {
 
 func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 	providers := ProductProviders()
-	if len(providers) != 5 {
+	if len(providers) != 9 {
 		t.Fatalf("product provider count=%d", len(providers))
 	}
 	registry := productProvidersTestRegistry(t)

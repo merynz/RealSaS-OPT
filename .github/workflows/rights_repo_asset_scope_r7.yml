@@ -1,0 +1,192 @@
+name: R29 R7 pinned GitHub asset-scope evidence (hosted CPU)
+on:
+  push:
+    branches: [audit/rights-metadata-r4-20261113]
+    paths: [.github/workflows/rights_repo_asset_scope_r7.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: r29-r7-repo-asset-scope
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 38
+    env:
+      RCLONE_CONFIG: /tmp/r29-r7-rclone.conf
+      DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+      API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+    - name: Prepare CPU-only audit and existing 20,847-source inventory
+      run: |
+        set -euo pipefail
+        umask 077
+        test -n "$DRIVE_CONFIG_B64" || { echo MISSING_DRIVE_CONFIG; exit 2; }
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq --no-install-recommends rclone
+        python -m pip install -q 'requests>=2.31,<3'
+        printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+        mkdir -p "$RUNNER_TEMP/r29r7"
+        rclone copyto "gdrive:RSS.vNext Corpus/Part2_R2_9_COMMERCIAL_TRAINING_RIGHTS/R29_ALL_SOURCE_PROVENANCE_PLAN.csv" "$RUNNER_TEMP/r29r7/source.csv" --retries 3
+        test "$(sha256sum "$RUNNER_TEMP/r29r7/source.csv" | cut -d' ' -f1)" = "d43858a3e710fb44391711dbf8a1d082891a7c03f2ab2452cd88f24c287957c3"
+    - name: Audit top 200 source repos with exact-commit scoped license documents
+      run: |
+        python - "$RUNNER_TEMP/r29r7" <<'PY'
+        import csv,hashlib,json,os,re,sys,time,requests
+        from pathlib import Path
+        from collections import Counter,defaultdict
+        from urllib.parse import urlparse,quote
+        root=Path(sys.argv[1])
+        def sha(v):return hashlib.sha256(v.encode('utf-8')).hexdigest()
+        def repo_source(url):
+         p=urlparse(url)
+         if p.netloc.lower()!='github.com':return None
+         parts=p.path.strip('/').split('/')
+         if len(parts)<6 or parts[2]!='blob' or not re.fullmatch(r'[0-9a-f]{40}',parts[3],re.I):return None
+         if '..' in parts: return None
+         return parts[0]+'/'+parts[1],parts[3].lower(),'/'.join(parts[4:])
+        with (root/'source.csv').open(newline='',encoding='utf-8') as f:items=list(csv.DictReader(f))
+        assert len(items)==20847 and len({r['source_key'] for r in items})==20847
+        groups=defaultdict(list)
+        for r in items:
+         got=repo_source(r['source_url'])
+         if got:groups[got[0],got[1]].append({'source_key':r['source_key'],'path':got[2],'original_sha':r['original_sha']})
+        targets=sorted(groups,key=lambda x:(-len(groups[x]),x))[:200]
+        assert any(x[0].lower()=='hoshiyuki-tamako/atelier_online_data_unpack' for x in targets)
+        S=requests.Session();S.headers.update({'User-Agent':'RealSaS-Rights-Audit/7.0','Accept':'application/vnd.github+json',
+           'Authorization':'Bearer '+os.environ['API_TOKEN']})
+        R=requests.Session();R.headers.update({'User-Agent':'RealSaS-Rights-Audit/7.0'})
+        def license_cls(txt):
+         l=txt.lower()
+         if re.search(r'\bnoai\b|\bno.ai\b|\bno ai\b',l):return 'NOAI'
+         if re.search(r'non.?commercial|\bcc.by.nc\b|no commercial use',l):return 'NC'
+         if re.search(r'\bcc0\b|public.domain|creative.commons.zero',l):return 'CC0'
+         if re.search(r'creative.commons.attribution|\bcc.by\b',l):return 'CC_BY'
+         if 'mit license' in l:return 'MIT'
+         if 'apache license' in l:return 'APACHE'
+         if 'gnu general public license' in l:return 'GPL'
+         return 'UNDETERMINED'
+        def flags(text):
+         t=re.sub(r'\s+',' ',text.lower())
+         explicit=bool(re.search(r'(models?|images?|assets?|audios?).{0,70}(?:not (?:licensed?|covered)|excluded from|not included in).{0,45}(?:mit|licen)|all exported files.{0,30}not licen|not (?:licensed?|covered).{0,80}(?:models?|images?|assets?)',t))
+         risk=bool(re.search(r'asset store|unity store|unreal marketplace|ripped (?:assets|models)|extracted from (?:the )?game|copyright (?:of|belongs to)|all rights reserved|third.party (?:models|assets)',t))
+         broad=bool(re.search(r'(?:all|every) (?:assets?|3d.models?|models?|files|contents).{0,110}(?:cc0|mit|licen|creative commons)|(?:cc0|mit|creative commons).{0,85}(?:all|every) (?:assets?|models?|files|contents)',t))
+         return explicit,risk,broad
+        def raw_get(repo,ref,path):
+         url='https://raw.githubusercontent.com/'+repo+'/'+ref+'/'+quote(path,safe='/')
+         try:
+          z=R.get(url,timeout=(8,22))
+          if z.status_code!=200:return None
+          if len(z.content)>200000:return None
+          return {'url':url,'path':path,'sha256':hashlib.sha256(z.content).hexdigest(),'text':z.text}
+         except Exception:return None
+        repo_records=[];row_records=[];attempts=Counter()
+        for ix,(repo,ref) in enumerate(targets,1):
+         assets=groups[repo,ref];paths={z['path'] for z in assets}
+         tree=[];tree_status='';truncated=False
+         try:
+          resp=S.get('https://api.github.com/repos/'+repo+'/git/trees/'+ref+'?recursive=1',timeout=(10,30))
+          attempts[str(resp.status_code)]+=1;tree_status='HTTP_'+str(resp.status_code)
+          if resp.status_code==200:
+           data=resp.json();truncated=bool(data.get('truncated'));tree=[z['path'] for z in data.get('tree',[]) if z.get('type')=='blob' and isinstance(z.get('path'),str)]
+          elif resp.status_code in (403,429):
+           tree_status='RATE_LIMIT';repo_records.append({'repo':repo,'ref':ref,'asset_count':len(assets),'status':tree_status})
+           print('R7_STOP_RATE_LIMIT',repo,flush=True);break
+         except Exception as exc:tree_status=type(exc).__name__
+         doc_candidates=[]
+         for path in tree:
+          fname=path.split('/')[-1].lower()
+          if not re.match(r'^(?:readme(?:\..*)?|license(?:\..*)?|licence(?:\..*)?|copying(?:\..*)?|notice(?:\..*)?|credits(?:\..*)?|attribution(?:\..*)?)$',fname):continue
+          parent=path.rpartition('/')[0].lower()
+          if parent in ('','docs','doc','documentation'): rank=100 if parent=='' else 75
+          else:
+           scores=[]
+           for asset in paths:
+            ap=asset.lower().rsplit('/',1)[0]
+            if ap==parent or ap.startswith(parent+'/'): scores.append(len(parent))
+           if not scores:continue
+           rank=100+max(scores)
+          if fname.startswith(('license','licence','copying','notice')):rank+=20
+          doc_candidates.append((rank,path))
+         selected=[path for _,path in sorted(doc_candidates,key=lambda x:(-x[0],x[1]))[:10]]
+         for p in ('README.md','LICENSE','LICENSE.md','LICENSE.txt','COPYING','NOTICE'):
+          if p not in selected:selected.append(p)
+         selected=selected[:13]
+         docs=[doc for p in selected if (doc:=raw_get(repo,ref,p))]
+         explicit=[];risks=[];broads=[];scoped=[]
+         for d in docs:
+          x,y,b=flags(d['text'])
+          if x:explicit.append(d)
+          if y:risks.append(d)
+          if b:broads.append(d)
+          par=d['path'].rsplit('/',1)[0].lower() if '/' in d['path'] else ''
+          if par and par not in ('docs','doc','documentation') and any(
+             a['path'].lower().startswith(par+'/') for a in assets):
+           if license_cls(d['text'])!='UNDETERMINED':scoped.append(d)
+         if explicit: status='EXPLICIT_ASSET_EXCLUDED_FROM_REPO_LICENSE'
+         elif scoped:status='ASSET_DIRECTORY_LICENSE_EVIDENCE_REVIEW'
+         elif broads:status='REPO_AUTHOR_CLAIMS_ALL_ASSETS_LICENSED_REVIEW'
+         elif risks:status='THIRD_PARTY_OR_REPACK_RISK'
+         elif docs:status='REPO_DOCUMENTS_NOT_ASSET_RIGHTS_PROOF'
+         else:status='NO_LICENSE_DOCUMENT_FOUND'
+         if tree_status=='RATE_LIMIT':status='REMOTE_RATE_LIMIT'
+         related=explicit or scoped or broads or risks or docs
+         receipt=[{'path':d['path'],'url':d['url'],'sha256':d['sha256'],'license_class':license_cls(d['text']),
+                   'explicit_asset_exclusion':flags(d['text'])[0], 'risk':flags(d['text'])[1],
+                   'broad_assets_licensed':flags(d['text'])[2],
+                   'excerpt':re.sub(r'\s+',' ',d['text'])[:450]} for d in related[:5]]
+         record={'repository':repo,'commit':ref,'asset_count':len(assets),'status':status,'tree_status':tree_status,
+             'tree_truncated':truncated,'docs_checked':len(selected),'docs_found':len(docs),
+             'scoped_doc_count':len(scoped),'explicit_exclusion_doc_count':len(explicit),
+             'supporting_documents':json.dumps(receipt,ensure_ascii=False)}
+         repo_records.append(record)
+         for a in assets:
+          ap=a['path'].lower().rsplit('/',1)[0]
+          near=[d for d in scoped if (par:=d['path'].lower().rsplit('/',1)[0]) and (ap==par or ap.startswith(par+'/'))]
+          if explicit:row_stat='HOLD_EXPLICIT_NONCOVERAGE'
+          elif near:row_stat='HOLD_ASSET_DIRECTORY_LICENSE_REVIEW'
+          elif broads:row_stat='HOLD_AUTHOR_BROAD_ASSET_LICENSE_REVIEW'
+          elif risks:row_stat='HOLD_THIRD_PARTY_SOURCE_RISK'
+          elif docs:row_stat='HOLD_REPO_DOCS_NOT_SUFFICIENT'
+          else:row_stat='HOLD_NO_LICENSE_DOCUMENT'
+          row_records.append({'source_key':a['source_key'],'repository':repo,'commit':ref,'asset_path':a['path'],
+                              'decision':row_stat,'evidence_url':receipt[0]['url'] if receipt else '',
+                              'doc_sha256':receipt[0]['sha256'] if receipt else '',
+                              'training_authorized':'False'})
+         if ix%20==0:print('R7_REPOS',ix,'/',len(targets),'ASSETS',len(row_records),dict(Counter(x['decision'] for x in row_records)),flush=True)
+         time.sleep(.16)
+        def dump(file,rows):
+         if not rows:return
+         with (root/file).open('w',newline='',encoding='utf-8') as f:
+          w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
+        dump('R29_R7_REPO_DOCUMENT_RECEIPTS.csv',repo_records)
+        dump('R29_R7_SOURCE_SCOPE_DECISIONS.csv',row_records)
+        summary={'schema':'RealSaS.R29.R7.PinnedGithubAssetScope.v1','source_records':len(items),
+                 'unique_repo_commits':len(groups),'unique_repo_commits_scanned':len(repo_records),
+                 'source_records_in_scanned_repos':len(row_records),'asset_scope_decisions':dict(Counter(x['decision'] for x in row_records)),
+                 'repository_decisions':dict(Counter(x['status'] for x in repo_records)),
+                 'api_http_codes':dict(attempts),'training_admitted':0,
+                 'critical':'Only asset-specific licence grants can authorize training; root repo licences never automatically cover third-party 3D.'}
+        (root/'R29_R7_CLOSEOUT.json').write_text(json.dumps(summary,indent=2,sort_keys=True))
+        print('R7_SUMMARY',json.dumps(summary),flush=True)
+        PY
+    - name: Retain compact source-scoped evidence in private Drive
+      if: always()
+      run: |
+        set -euo pipefail
+        dest="gdrive:RSS.vNext Corpus/Part2_R2_9_COMMERCIAL_TRAINING_RIGHTS/R29_R7_PINNED_REPO_SCOPE/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+        for filename in R29_R7_REPO_DOCUMENT_RECEIPTS.csv R29_R7_SOURCE_SCOPE_DECISIONS.csv R29_R7_CLOSEOUT.json; do
+          if [ -f "$RUNNER_TEMP/r29r7/$filename" ]; then rclone copyto "$RUNNER_TEMP/r29r7/$filename" "$dest/$filename" --retries 3; fi
+        done
+    - name: Attach evidence receipts to run
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: r29-r7-asset-scope
+        path: |
+          ${{ runner.temp }}/r29r7/R29_R7_REPO_DOCUMENT_RECEIPTS.csv
+          ${{ runner.temp }}/r29r7/R29_R7_SOURCE_SCOPE_DECISIONS.csv
+          ${{ runner.temp }}/r29r7/R29_R7_CLOSEOUT.json
+        if-no-files-found: ignore
+        retention-days: 30

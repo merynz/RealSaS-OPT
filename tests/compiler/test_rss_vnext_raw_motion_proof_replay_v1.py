@@ -80,11 +80,20 @@ def test_two_original_images_through_motion_and_independent_proof_source_replay(
     assert d["persisted_graphics_runtime_replayed"]
     assert d["dynamic_integrity_recomputed_in_proof"]
     assert d["raw_two_image_replay_completed"]
+    assert d["raw_original_source_graphics_replay"]["source_original_rgb_candidate_replayed"]
+    assert d["raw_original_source_graphics_replay"]["source_original_rgb_candidate_samples"] > 0
     assert d["raw_original_source_graphics_replay"] == {
         **d["raw_original_source_graphics_replay"],
         "original_two_image_source_binding_replayed": True,
         "original_alpha_static_mesh_qualification_recomputed": True,
         "same_checkpoint_typed_graphics_recomputed": True,
+        "source_original_rgb_candidate_replayed": True,
+        "source_original_rgb_candidate_hash": (
+            d["raw_original_source_graphics_replay"]["source_original_rgb_candidate_hash"]
+        ),
+        "source_original_rgb_candidate_samples": (
+            d["raw_original_source_graphics_replay"]["source_original_rgb_candidate_samples"]
+        ),
         "original_source_rgb_appearance_qualified": False,
         "source_camera_observed": False,
         "dynamic_source_visibility_qualified": False,
@@ -121,6 +130,43 @@ def test_raw_proof_rejects_rehashed_altered_graphics_candidate_receipt(
         forged if ref is old else ref for ref in request["input_artifacts"]
     ]
     with pytest.raises(RuntimeError, match="RAW_GRAPHICS_RECEIPT_REPLAY_MISMATCH"):
+        _proof(cas, request)
+
+
+def test_raw_proof_rejects_forged_original_rgb_sample_cas_even_with_valid_hash(
+    tmp_path,
+):
+    cas, request, _, _ = _complete_product_preflight(tmp_path)
+    old = next(
+        ref for ref in request["input_artifacts"]
+        if ref["artifact_type"] == "RealSaS.RSSvNextObservedRGBHypothesisSamples"
+    )
+    sample = json.loads(cas.read_object(old))
+    assert sample["views"][0]["samples"]
+    sample["views"][0]["samples"][0]["rgba8_observed"][0] ^= 1
+    from compiler.realsas_compiler_core.hashing import content_sha256
+    sample.pop("candidate_hash")
+    sample["candidate_hash"] = content_sha256(sample)
+    forged = {
+        **cas.put_bytes(json.dumps(sample, sort_keys=True).encode()),
+        "artifact_type": old["artifact_type"], "schema_version": "v1",
+    }
+    request["input_artifacts"] = [
+        forged if ref is old else ref for ref in request["input_artifacts"]
+    ]
+    with pytest.raises(RuntimeError, match="ORIGINAL_RGB_CANDIDATE_REPLAY_MISMATCH"):
+        _proof(cas, request)
+
+
+def test_raw_proof_rejects_missing_rgb_color_samples_but_retained_graphics(
+    tmp_path,
+):
+    cas, request, _, _ = _complete_product_preflight(tmp_path)
+    request["input_artifacts"] = [
+        row for row in request["input_artifacts"]
+        if row["artifact_type"] != "RealSaS.RSSvNextObservedRGBHypothesisSamples"
+    ]
+    with pytest.raises(RuntimeError, match="ORIGINAL_RGB_CANDIDATE_REPLAY_MISMATCH"):
         _proof(cas, request)
 
 
@@ -165,6 +211,7 @@ def test_raw_proof_refuses_source_and_receipt_downgrade_to_legacy(
         if row["artifact_type"] not in {
             "RealSaS.RSSvNextUncalibratedTwoImageSource",
             "RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
+            "RealSaS.RSSvNextObservedRGBHypothesisSamples",
         }
     ]
     with pytest.raises(RuntimeError, match="ORPHAN_RAW_GRAPHICS_RECEIPT"):

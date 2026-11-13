@@ -2,6 +2,7 @@ import {installAwakenReactor} from './busted_ignition_reactor_v3.js';
 import {apiFetch} from './api_gateway_v1.js';
 const shell = document.querySelector('.awaken-shell');
 const input = document.querySelector('#sourceInput');
+const RSS_VNEXT_REQUIRED_SOURCE_VIEWS = 2; // front + back, no inferred second source
 const dropzone = document.querySelector('#dropzone');
 const preview = document.querySelector('#sourcePreview');
 const resultPreview = document.querySelector('#resultPreview');
@@ -121,7 +122,7 @@ function syncGatewayUI() {
   const ready = Boolean(project?.compile_available && project?.public_compile_gateway);
   // Offline users can inspect the one-shot visual interaction, but no compile
   // action is offered or submitted: the adjacent status is always explicit.
-  awaken.disabled = running || (ready && selectedFiles.length === 0);
+  awaken.disabled = running || (ready && selectedFiles.length !== RSS_VNEXT_REQUIRED_SOURCE_VIEWS);
   awaken.dataset.ignitionPreview = String(!ready);
   awaken.setAttribute('aria-label', ready ? 'Awaken your character' :
     'Preview ignition interaction — compiler offline');
@@ -129,7 +130,7 @@ function syncGatewayUI() {
     status.querySelector('span').textContent = ready ? 'COMPILER READY' : 'COMPILER OFFLINE';
     status.classList.toggle('ready', ready);
   }
-  awaken.title = ready ? (selectedFiles.length ? 'Compile selected source views' : 'Select a front view first') :
+  awaken.title = ready ? (selectedFiles.length === RSS_VNEXT_REQUIRED_SOURCE_VIEWS ? 'Compile FRONT + BACK as one RSS.vNext attempt' : 'Select both original FRONT and BACK source views') :
     'Preview ignition effect only · compiler offline';
   if (compileAvailability) {
     compileAvailability.textContent = ready ? 'COMPILER READY · VERIFIED GATEWAY' : 'UI PREVIEW · COMPILER OFFLINE';
@@ -161,7 +162,9 @@ function setFiles(files) {
   viewCount.textContent = `${selectedFiles.length} VIEW${selectedFiles.length > 1 ? 'S' : ''}`;
   syncGatewayUI();
   showLiveCompileStatus('SOURCE ATTACHED', project?.compile_available && project?.public_compile_gateway
-    ? 'Source views selected. Use AWAKEN to submit them to the verified compiler gateway.'
+    ? selectedFiles.length === RSS_VNEXT_REQUIRED_SOURCE_VIEWS
+      ? 'Two original source views ready. AWAKEN submits one immutable attempt.'
+      : 'A second original BACK source view is required; no synthetic back view will be invented.'
     : 'Source views selected. This static preview has no production compiler connection.');
   addLog(`source intake armed · ${selectedFiles.length} view${selectedFiles.length > 1 ? 's' : ''}`, true);
 }
@@ -329,6 +332,9 @@ async function startIdleReveal(bundle) {
 }
 
 async function startProductionCompile() {
+  if (selectedFiles.length !== RSS_VNEXT_REQUIRED_SOURCE_VIEWS) {
+    throw new Error('RSS_VNEXT_TWO_OBSERVED_VIEWS_FRONT_AND_BACK_REQUIRED');
+  }
   const views = await Promise.all(selectedFiles.map(async (file, index) => ({
     slot: index === 0 ? 'front' : 'back',
     name: file.name,
@@ -430,7 +436,7 @@ async function playAwakenIgnition() {
 
 awaken.addEventListener('click', async () => {
   const ready = Boolean(project?.compile_available && project?.public_compile_gateway);
-  if (running || (ready && !selectedFiles.length)) return;
+  if (running || (ready && selectedFiles.length !== RSS_VNEXT_REQUIRED_SOURCE_VIEWS)) return;
   running = true;
   try {
     // The charge belongs to a click, not to page load, hover or scrolling.

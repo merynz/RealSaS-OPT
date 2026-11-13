@@ -39,10 +39,10 @@ ROOT_DISPOSITIONS = {
 LEGACY_MODEL_PREFIXES = ("models.arachne", "models.geppetto", "models.skin_field_codec")
 PRODUCT_READER_ROOTS = (
     "models/rss_vnext/",
-    "models/iris/vnext/",
-    "models/tessa/",
-    "models/axis/",
-    "models/mira/",
+    "models/rss_vnext/experts/iris/vnext/",
+    "models/rss_vnext/experts/tessa/",
+    "models/rss_vnext/experts/axis/",
+    "models/rss_vnext/experts/mira/",
     "compiler/realsas_compiler_services/platform_worker/",
     "compiler/rss_vnext/workers/",
 )

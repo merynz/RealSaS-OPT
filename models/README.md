@@ -1,3 +1,5 @@
+> **One physical product model:** [`rss_vnext/`](rss_vnext/) contains the unified model and [`experts/`](rss_vnext/experts/) houses IRIS, TESSA, AXIS, MIRA source. The original `models.iris`, `models.tessa`, `models.axis` and `models.mira` Python module names remain stable through the declared package search path; there are not four ModelReleases. See [relocation manifest](rss_vnext/EXPERT_SOURCE_RELOCATION_V1.json).
+
 # Models · unified RSS.vNext
 
 The current product target is **one RSSVNEXT release, one inference**, with independently addressable specialist evidence. **Model proposals are not canonical compiler output.** The exact runtime model selection comes from `../platform/internal/capability/contracts/product_capabilities_v1.json` on the checked-out branch.
@@ -5,10 +7,10 @@ The current product target is **one RSSVNEXT release, one inference**, with inde
 | Specialist | Current source | Role |
 | --- | --- | --- |
 | Shared model / fanout | `rss_vnext/` | Unified backbone and typed evidence |
-| IRIS | `iris/vnext/` plus supporting modules | Geometry and shared 3D scene evidence |
-| TESSA | `tessa/` | Surface/topology proposal |
-| AXIS | `axis/` | Learned control and articulation structure |
-| MIRA | `mira/` | Influence/skin evidence tied to the same mesh and rig |
+| IRIS | `rss_vnext/experts/iris/vnext/` plus supporting modules | Geometry and shared 3D scene evidence |
+| TESSA | `rss_vnext/experts/tessa/` | Surface/topology proposal |
+| AXIS | `rss_vnext/experts/axis/` | Learned control and articulation structure |
+| MIRA | `rss_vnext/experts/mira/` | Influence/skin evidence tied to the same mesh and rig |
 
 This integrated source tree selects the nine-role RSS.vNext graph through the Go capability catalog. Checkpoint training and unseen qualification are **not** established by source availability.
 

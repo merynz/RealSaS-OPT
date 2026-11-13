@@ -617,6 +617,7 @@ def _local_source_relocation_paths() -> dict[str, Path]:
     """
     manifests = (
         ROOT / "historical/model_sources/RELOCATION_MANIFEST_V1.json",
+        ROOT / "models/rss_vnext/EXPERT_SOURCE_RELOCATION_V1.json",
         ROOT / "compiler/rss_vnext/RELOCATION_MANIFEST_V1.json",
         ROOT / "compiler/rss_vnext/INTEGRATION_LINEAGE_V1.json",
     )

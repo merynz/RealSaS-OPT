@@ -12,5 +12,9 @@ from pathlib import Path as _Path
 _HISTORICAL_MODELS = (
     _Path(__file__).resolve().parent.parent / "historical" / "model_sources"
 )
+_UNIFIED_EXPERTS = _Path(__file__).resolve().parent / "rss_vnext" / "experts"
+if _UNIFIED_EXPERTS.is_dir():
+    __path__.append(str(_UNIFIED_EXPERTS))
+
 if _HISTORICAL_MODELS.is_dir():
     __path__.append(str(_HISTORICAL_MODELS))

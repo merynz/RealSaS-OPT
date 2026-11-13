@@ -89,7 +89,13 @@ def validate_knight_recipe(policy, source):
     """Reject silent core/config/recipe drift before creating optimizer state."""
     if "knight_recipe_reference" not in policy:
         return
-    root = Path(__file__).resolve().parents[3]
+    # This implementation is now within models/rss_vnext/experts/iris.
+    # Resolve the repository from its stable project marker, never a fixed
+    # number of source-directory parents.
+    root = next((parent for parent in Path(__file__).resolve().parents
+                 if (parent / "pyproject.toml").is_file()), None)
+    if root is None:
+        raise ValueError("IRIS_COHORT_REPOSITORY_ROOT_MISSING")
     reference = json.loads((root / policy["knight_recipe_reference"]).read_text())
     for path, digest in reference["core_source_sha256"].items():
         if file_hash(root / path) != digest or (source and source.get(path) != digest):

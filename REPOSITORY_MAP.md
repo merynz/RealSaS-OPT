@@ -6,8 +6,8 @@ This map is **human navigation**; it is not a competing architecture configurati
 
 | Path | Responsibility |
 | --- | --- |
-| `models/rss_vnext/` | One shared model inference; specialist evidence fanout |
-| `models/iris/`, `models/tessa/`, `models/axis/`, `models/mira/` | Geometry, topology, articulation and skin expert implementations |
+| `models/rss_vnext/` | Single unified product model and physical IRIS/TESSA/AXIS/MIRA experts; stable original Python import aliases |
+| `models/rss_vnext/experts/` | Geometry, topology, articulation and skin source modules under one unified release |
 | `compiler/rss_vnext/` | Unified RSS.vNext-specific courts and workers (single physical home; 4 modules subsequently updated from the product integration) |
 | `compiler/realsas_compiler_core/`, `compiler/realsas_compiler_services/` | Shared canonical primitives, mechanics, graphics, motion, proof and compatibility machinery |
 | `runtime/` | Interactive puppet, skin deformation, native rendering |

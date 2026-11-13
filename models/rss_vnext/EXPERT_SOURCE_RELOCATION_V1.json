@@ -98,7 +98,8 @@
       "old_path": "models/iris/training/cohort_v1.py",
       "new_path": "models/rss_vnext/experts/iris/training/cohort_v1.py",
       "original_git_blob_sha1": "53a7bffde60de37f86713485df92d713b11d297a",
-      "git_blob_sha1": "53a7bffde60de37f86713485df92d713b11d297a"
+      "git_blob_sha1": "24ecdbb35ef72d6a210bd4fcde8b4381797112a2",
+      "note": "Repository root discovery updated for physical expert source relocation"
     },
     {
       "old_path": "models/iris/truth/__init__.py",

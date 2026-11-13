@@ -30,8 +30,8 @@ WORKFLOW_EVENTS = frozenset({
     "issues", "issue_comment", "workflow_run", "create", "delete",
     "merge_group", "check_suite", "check_run", "status",
 })
-TOP_LEVEL_ON = re.compile(r"^(?:on|['\"]on['\"]):(?:\\s*(.*))?$")
-EVENT_KEY = re.compile(r"^\\s+([a-z_]+)\\s*:")
+TOP_LEVEL_ON = re.compile(r"^(?:on|['\"]on['\"]):(?:\s*(.*))?$")
+EVENT_KEY = re.compile(r"^\s+([a-z_]+)\s*:")
 
 
 def tracked_paths(root: Path) -> list[str]:
@@ -40,7 +40,7 @@ def tracked_paths(root: Path) -> list[str]:
         check=True,
     ).stdout
     return sorted(
-        raw.decode("utf-8", "surrogateescape") for raw in out.split(b"\\0") if raw
+        raw.decode("utf-8", "surrogateescape") for raw in out.split(b"\0") if raw
     )
 
 
@@ -55,7 +55,7 @@ def workflow_events(source: str) -> list[str]:
         inline = (m.group(1) or "").strip()
         if inline:
             events.update(event for event in WORKFLOW_EVENTS
-                          if re.search(r"(?<![\\w-])" + event + r"(?![\\w-])", inline))
+                          if re.search(r"(?<![\w-])" + event + r"(?![\w-])", inline))
         for row in rows[i + 1:]:
             if row.strip() and not row[0].isspace() and not row.lstrip().startswith("#"):
                 break

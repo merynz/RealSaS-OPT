@@ -161,7 +161,7 @@ def compile_blender_native_attachment_inventory_candidate_v1(
         ):
             _fail("SOURCE_OWNER_ROW_INCOMPLETE")
         count=int(np.sum(source_face_owner==index))
-        if count<1 or np.any(source_face_owner[offset:offset+count]!=index):
+        if np.any(source_face_owner[offset:offset+count]!=index):
             _fail("SOURCE_FACE_CONTIGUOUS_OWNER_DRIFT")
         links=[]
         unresolved=0
@@ -195,7 +195,13 @@ def compile_blender_native_attachment_inventory_candidate_v1(
                 _fail("SOURCE_MODIFIER_TYPED")
         deform=sum(str(m["type"])=="ARMATURE" for m in modifiers)
         pairs={(a,b) for a,b,_ in links}
-        if len(pairs)==1 and unresolved==0:
+        if count==0:
+            # The existing native teacher may include a renderable Blender
+            # object with vertices but no triangles. It has no source face
+            # address for an attachment; keep its inventory, but abstain.
+            parent=bone=mechanism=None
+            state="ABSTAIN_EMPTY_RENDERABLE_MESH_NO_FACE_ADDRESS"
+        elif len(pairs)==1 and unresolved==0:
             parent,bone=next(iter(pairs))
             state=_CANDIDATE
             mechanism="+".join(sorted({kind for _,_,kind in links}))

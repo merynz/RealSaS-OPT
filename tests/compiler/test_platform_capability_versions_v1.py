@@ -22,6 +22,10 @@ def test_product_capability_implementations_are_complete_and_semantic():
         "product.mesh",
         "product.rig",
         "product.skin",
+        "product.mechanics",
+        "product.graphics",
+        "product.motion",
+        "product.proof",
     }
     assert set(specs) == set(implementations)
     assert specs["product.input"]["parameters"]["responsibility_ids"] == [

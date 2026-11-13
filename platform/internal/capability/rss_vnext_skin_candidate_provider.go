@@ -31,6 +31,7 @@ func (RSSvNextSkinCandidateProvider) Capabilities(context.Context) ([]Descriptor
 	metadata["input_source_artifact_type"] = "RealSaS.RSSvNextUncalibratedTwoImageSource"
 	metadata["alternate_calibrated_source_artifact_type"] = "RealSaS.RSSvNextTwoViewSource"
 	metadata["raw_scene_artifact_type"] = "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier"
+	metadata["raw_scene_schema_version"] = "v1"
 	metadata["raw_model_config_artifact_type"] = "RealSaS.RSSvNextUnifiedModelConfig"
 	metadata["raw_embedded_mira_decoder_artifact_type"] = "RealSaS.RSSvNextEmbeddedMIRADecoder"
 	metadata["raw_source_static_replay_required"] = true

@@ -60,13 +60,13 @@ func rssVNextMeshParentBinding(
 	// and compiler/.../platform_worker/model_inputs.py. Do not approximate
 	// release behavior as checkpoint hash alone.
 	identity := map[string]any{
-		"schema": "RealSaS.ModelReleaseBehaviorIdentity.v1",
-		"family": model.Family,
-		"model_release_id": model.ModelReleaseID.String(),
-		"architecture_id": model.ArchitectureID,
-		"model_engine_release_id": model.ModelEngineReleaseID.String(),
-		"source_code_sha": model.SourceCodeSHA,
-		"checkpoint_artifact_id": model.CheckpointArtifactID.String(),
+		"schema":                    "RealSaS.ModelReleaseBehaviorIdentity.v1",
+		"family":                    model.Family,
+		"model_release_id":          model.ModelReleaseID.String(),
+		"architecture_id":           model.ArchitectureID,
+		"model_engine_release_id":   model.ModelEngineReleaseID.String(),
+		"source_code_sha":           model.SourceCodeSHA,
+		"checkpoint_artifact_id":    model.CheckpointArtifactID.String(),
 		"checkpoint_content_sha256": model.CheckpointContentSHA256,
 	}
 	behaviorSHA, err := semantic.JSONSHA256(identity)
@@ -74,9 +74,9 @@ func rssVNextMeshParentBinding(
 		return nil, fmt.Errorf("RSS_VNEXT_MESH_MODEL_IDENTITY_HASH_FAILED: %w", err)
 	}
 	return map[string]any{
-		"schema": "RealSaS.RSSvNext.ShapeParentBinding.v1",
-		"source_content_sha256": source.ContentSHA256,
-		"checkpoint_sha256": model.CheckpointContentSHA256,
+		"schema":                        "RealSaS.RSSvNext.ShapeParentBinding.v1",
+		"source_content_sha256":         source.ContentSHA256,
+		"checkpoint_sha256":             model.CheckpointContentSHA256,
 		"model_release_behavior_sha256": behaviorSHA,
 	}, nil
 }

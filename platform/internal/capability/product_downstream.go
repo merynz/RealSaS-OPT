@@ -134,10 +134,20 @@ func (ProductProofProvider) Capabilities(context.Context) ([]Descriptor, error) 
 	metadata["input_graphics_schema_version"] = "v1"
 	metadata["input_motion_artifact_type"] = "RealSaS.CanonicalMotionIR"
 	metadata["input_motion_schema_version"] = "v2"
+	metadata["input_runtime_graphics_artifact_type"] = "RealSaS.RuntimeGraphics"
+	metadata["input_runtime_graphics_schema_version"] = "v1"
+	metadata["runtime_graphics_required"] = true
+	metadata["input_mechanics_intervention_artifact_type"] = "RealSaS.MechanicsInterventionCourt"
+	metadata["input_mechanics_intervention_schema_version"] = "v1"
+	metadata["mechanics_intervention_required"] = true
+	metadata["canonical_cross_expert_parent_reopen_required"] = true
 	metadata["output_artifact_type"] = "RealSaS.ProductProofDiagnostic"
 	metadata["output_schema_version"] = "v1"
 	metadata["required_models"] = []any{}
 	metadata["product_revision_requires_independent_admission"] = true
 	metadata["can_mint_product_revision"] = false
-	return downstreamDescriptor(ProductRoleProof, []string{"product.mechanics", "product.graphics", "product.motion"}, metadata)
+	return downstreamDescriptor(ProductRoleProof, []string{
+		"product.input", "product.shape", "product.mesh", "product.rig",
+		"product.skin", "product.mechanics", "product.graphics", "product.motion",
+	}, metadata)
 }

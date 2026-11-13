@@ -203,7 +203,9 @@ def test_untrusted_target_or_source_reindex_is_rejected_before_training():
 def test_teacher_sequence_and_topology_must_be_bound_without_silent_repair():
     net,make,batch,receipt,axis=_training_court()
     trainer=make()
-    with pytest.raises(ValueError,match="SINGLE_TEACHER_MESH_REQUIRED"):
+    # AXIS product memory now rejects absent source TESSA supervision
+    # before the downstream face-correspondence criterion is evaluated.
+    with pytest.raises(ValueError,match="AXIS_PRODUCT_MATCHED_TESSA_MESH_REQUIRED"):
         trainer.objective(replace(batch,topology_valid_mask=torch.tensor([False])))
     with pytest.raises(ValueError,match="TEACHER_INCOMPLETE"):
         trainer.objective(replace(batch,topology_teacher_tokens=None))

@@ -1,0 +1,26 @@
+name: R29 R6 Diagnose Sketchfab HTTP 202 on PartVerse UUIDs
+on:
+  push:
+    branches: [audit/rights-metadata-r4-20261113]
+    paths: [.github/workflows/rights_sketchfab_202_probe.yml]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+    - name: Investigate HTTP 202 source-vs-control behavior
+      run: |
+        python - <<'PY'
+        import requests,json
+        uids=['0008dc75fb3648f2af4ca8c4d711e53e','0004492ea54f48b2a41e0b922e5402b0','000ed5b9d3b949fa9bd5ca41026fbd19','019bb9695162464886824f050792a4e5','005bd524d42341c792d25891317c18b9']
+        for uid in uids:
+         for url in ['https://api.sketchfab.com/v3/models/'+uid,'https://sketchfab.com/3d-models/'+uid]:
+          try:
+           r=requests.get(url,timeout=25,headers={'User-Agent':'RealSaS-Diagnostic/1.0'})
+           print('DIAG',json.dumps({'uid':uid,'url_type':'api' if 'api.sketchfab' in url else 'web',
+             'code':r.status_code,'headers':{k:v for k,v in r.headers.items() if k.lower() in ('content-type','location','retry-after','x-ratelimit-remaining')},
+             'body_prefix':r.text[:600]}),flush=True)
+          except Exception as e: print('DIAG_ERROR',str(e)[:250],flush=True)
+        PY

@@ -15,7 +15,7 @@ func (RSSvNextRigCandidateProvider) Capabilities(context.Context) ([]Descriptor,
 	if err != nil {
 		return nil, err
 	}
-		metadata := map[string]any{}
+	metadata := map[string]any{}
 	metadata["product_role_id"] = string(ProductRoleRig)
 	metadata["implementation_class"] = string(ImplementationCompiler)
 	metadata["interface_contract"] = RSSvNextRigContractV3
@@ -45,7 +45,7 @@ func (RSSvNextRigCandidateProvider) Capabilities(context.Context) ([]Descriptor,
 	metadata["post_bind_mechanics_and_skin_qualification_required"] = true
 	metadata["can_mint_product_revision"] = false
 	metadata["responsibility_ids"] = responsibilities
-return []Descriptor{{
+	return []Descriptor{{
 		ID:                   ProductRigCapabilityID,
 		Kind:                 KindModule,
 		OwnerModuleID:        "product.rig",

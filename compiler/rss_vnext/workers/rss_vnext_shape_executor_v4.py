@@ -34,6 +34,8 @@ EXECUTOR_CONTRACT = "RealSaS.ProductShapeInference.v4"
 RAW_SCENE_ARTIFACT = "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier"
 RAW_GENERATED_VIEWS_ARTIFACT = "RealSaS.RSSvNextGeneratedConditioningViews"
 RAW_RECEIPT_ARTIFACT = "RealSaS.RSSvNextUncalibratedConstructionReceipt"
+RAW_MODEL_CONFIG_ARTIFACT = "RealSaS.RSSvNextUnifiedModelConfig"
+RAW_EMBEDDED_MIRA_ARTIFACT = "RealSaS.RSSvNextEmbeddedMIRADecoder"
 _MAX_RAW_NEURAL_BYTES = 256 * 1024 * 1024
 
 
@@ -385,6 +387,30 @@ def execute_rss_vnext_shape_capability_v4(
         generated_bytes, kind=RAW_GENERATED_VIEWS_ARTIFACT,
         role="rss_predicted_conditioning_views", put_bytes=put_bytes,
     )
+    from models.rss_vnext.model_config_archive_v1 import (
+        encode_rss_vnext_unified_model_config_v1,
+    )
+    from models.rss_vnext.embedded_mira_decoder_v1 import (
+        encode_embedded_mira_decoder_v1,
+    )
+    model_config_bytes = encode_rss_vnext_unified_model_config_v1(
+        model.cfg, checkpoint_sha256=checkpoint["content_sha256"],
+    )
+    embedded_mira_bytes = encode_embedded_mira_decoder_v1(
+        model, parent_unified_checkpoint_sha256=checkpoint["content_sha256"],
+    )
+    config_ref = _cas_ref(
+        model_config_bytes, kind=RAW_MODEL_CONFIG_ARTIFACT,
+        role="rss_uncalibrated_unified_model_config",
+        put_bytes=put_bytes,
+    )
+    mira_ref = _cas_ref(
+        embedded_mira_bytes, kind=RAW_EMBEDDED_MIRA_ARTIFACT,
+        role="rss_uncalibrated_embedded_mira_decoder",
+        put_bytes=put_bytes,
+    )
+    config_ref["authority_class"] = "PINNED_UNIFIED_MODEL_CONFIG_NO_PRODUCT_AUTHORITY"
+    mira_ref["authority_class"] = "PINNED_EMBEDDED_MIRA_SUBMODULE_NO_SKIN_AUTHORITY"
     receipt = {
         "schema": "RealSaS.RSSvNext.UncalibratedConstructionReceipt.v1",
         "source_content_sha256": source["content_sha256"],
@@ -398,6 +424,8 @@ def execute_rss_vnext_shape_capability_v4(
         ),
         "derived_conditioning_sha256": construction.derived_conditioning_sha256,
         "scene_content_sha256": scene_ref["content_sha256"],
+        "unified_model_config_content_sha256": config_ref["content_sha256"],
+        "embedded_mira_decoder_content_sha256": mira_ref["content_sha256"],
         "generated_views_content_sha256": views_ref["content_sha256"],
         "original_camera_calibrated": False,
         "original_pixel_count": 2,
@@ -422,7 +450,7 @@ def execute_rss_vnext_shape_capability_v4(
         "capability_id": "product.shape",
         "status": "PASS",
         "failure": None,
-        "outputs": [scene_ref, views_ref, receipt_ref],
+        "outputs": [scene_ref, views_ref, receipt_ref, config_ref, mira_ref],
         "diagnostics": {
             "schema": "RealSaS.RSSvNext.ProductShapeDiagnostics.v4",
             "mode": "TWO_UNCALIBRATED_ORIGINAL_IMAGES_TO_GENERATED_H",
@@ -443,5 +471,6 @@ def execute_rss_vnext_shape_capability_v4(
 __all__ = [
     "EXECUTOR_CONTRACT",
     "RAW_SCENE_ARTIFACT", "RAW_GENERATED_VIEWS_ARTIFACT",
-    "RAW_RECEIPT_ARTIFACT", "execute_rss_vnext_shape_capability_v4",
+    "RAW_RECEIPT_ARTIFACT", "RAW_MODEL_CONFIG_ARTIFACT",
+    "RAW_EMBEDDED_MIRA_ARTIFACT", "execute_rss_vnext_shape_capability_v4",
 ]

@@ -156,11 +156,13 @@ def test_raw_shape_runs_two_actual_generators_and_persists_only_candidate_cas(
     )
     assert result["status"] == "PASS"
     assert result["failure"] is None
-    assert len(result["outputs"]) == 3
+    assert len(result["outputs"]) == 5
     assert set(r["artifact_type"] for r in result["outputs"]) == {
         "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier",
         "RealSaS.RSSvNextGeneratedConditioningViews",
         "RealSaS.RSSvNextUncalibratedConstructionReceipt",
+        "RealSaS.RSSvNextUnifiedModelConfig",
+        "RealSaS.RSSvNextEmbeddedMIRADecoder",
     }
     assert not any(
         x["artifact_type"] == "RealSaS.RSSvNextInferenceEvidence"
@@ -172,6 +174,32 @@ def test_raw_shape_runs_two_actual_generators_and_persists_only_candidate_cas(
     assert receipt["original_pixel_count"] == 2
     assert receipt["source_ray_evidence_qualified"] is False
     assert receipt["product_revision_minted"] is False
+    assert receipt["unified_model_config_content_sha256"] == (
+        result["outputs"][3]["content_sha256"]
+    )
+    assert receipt["embedded_mira_decoder_content_sha256"] == (
+        result["outputs"][4]["content_sha256"]
+    )
+    from models.rss_vnext.model_config_archive_v1 import (
+        decode_rss_vnext_unified_model_config_v1, _digest,
+    )
+    from models.rss_vnext.embedded_mira_decoder_v1 import (
+        load_embedded_mira_decoder_v1,
+    )
+    cfg = decode_rss_vnext_unified_model_config_v1(
+        cas.read_object(result["outputs"][3]),
+        expected_checkpoint_sha256="b" * 64,
+        expected_config_sha256=_digest(bundle.model.cfg),
+    )
+    decoder, binding = load_embedded_mira_decoder_v1(
+        cas.read_object(result["outputs"][4]),
+        expected_parent_unified_checkpoint_sha256="b" * 64,
+        expected_subcheckpoint_sha256=result["outputs"][4]["content_sha256"],
+        expected_model_config_sha256=_digest(cfg),
+        model_config=cfg,
+    )
+    assert binding.checkpoint_hash == result["outputs"][4]["content_sha256"]
+    assert decoder.training is False
     assert receipt["axis_mira_control_status"] in (
         "ABSTAIN_NO_VALID_PREDICTED_MESH",
         "UNQUALIFIED_AXISMIRA_CONTROL_CANDIDATE",

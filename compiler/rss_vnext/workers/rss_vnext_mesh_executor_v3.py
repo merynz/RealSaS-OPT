@@ -30,7 +30,10 @@ RAW_SOURCE = "RealSaS.RSSvNextUncalibratedTwoImageSource"
 RAW_SCENE = "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier"
 RAW_VIEWS = "RealSaS.RSSvNextGeneratedConditioningViews"
 RAW_RECEIPT = "RealSaS.RSSvNextUncalibratedConstructionReceipt"
+RAW_CONFIG = "RealSaS.RSSvNextUnifiedModelConfig"
+RAW_DECODER = "RealSaS.RSSvNextEmbeddedMIRADecoder"
 RAW_TYPES = {RAW_SOURCE, RAW_SCENE, RAW_VIEWS, RAW_RECEIPT}
+RAW_RELEASE_TYPES = RAW_TYPES | {RAW_CONFIG, RAW_DECODER}
 MAX_ARCHIVE_BYTES = 256 * 1024 * 1024
 MAX_UNCOMPRESSED_BYTES = 512 * 1024 * 1024
 
@@ -347,9 +350,11 @@ def execute_rss_vnext_mesh_capability_v3(
         return execute_rss_vnext_mesh_capability_v2(
             calibrated, read_object=read_object, put_bytes=put_bytes,
         )
-    if len(raw) not in (1, 2) or len(refs) != len(raw) + 3 or (
-        {r.get("artifact_type") for r in refs} != RAW_TYPES
-    ) or any(
+    parent_types = {r.get("artifact_type") for r in refs}
+    pinned_decoder_present = parent_types == RAW_RELEASE_TYPES
+    if len(raw) not in (1, 2) or (
+        parent_types != RAW_TYPES and parent_types != RAW_RELEASE_TYPES
+    ) or len(refs) != len(raw) + (5 if pinned_decoder_present else 3) or any(
         r.get("schema_version") != "v1" for r in refs
     ) or any(
         r.get(key) != raw[0].get(key)
@@ -373,6 +378,21 @@ def execute_rss_vnext_mesh_capability_v3(
         receipt = json.loads(_cas(receipt_ref, read_object).decode("utf8"))
     except Exception as exc:
         raise RuntimeError("RSS_VNEXT_RAW_MESH_RECEIPT_DECODE_FAILED") from exc
+    if pinned_decoder_present:
+        config_ref, decoder_ref = one(RAW_CONFIG), one(RAW_DECODER)
+        if (
+            receipt.get("unified_model_config_content_sha256") != config_ref["content_sha256"]
+            or receipt.get("embedded_mira_decoder_content_sha256") != decoder_ref["content_sha256"]
+        ):
+            raise RuntimeError("RSS_VNEXT_RAW_MESH_EMBEDDED_CODEC_RECEIPT_DRIFT")
+        # Decoder weights are *not* loaded in Mesh. Rig/Skin reopen them
+        # from exact CAS bytes and replay discrete SkinTokens.
+        _cas(config_ref, read_object)
+    elif (
+        receipt.get("unified_model_config_content_sha256")
+        or receipt.get("embedded_mira_decoder_content_sha256")
+    ):
+        raise RuntimeError("RSS_VNEXT_RAW_MESH_MISSING_EXACT_CODEC_CHILD")
     binding = request.get("shape_parent_binding")
     if (
         type(binding) is not dict or set(binding) != {

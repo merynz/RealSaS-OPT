@@ -137,3 +137,27 @@ def test_motion_cannot_request_its_own_model_family():
         execute_motion_capability_v2(
             req,read_object=cas.read_object,put_bytes=cas.put_bytes,
         )
+
+
+def test_policy_rest_hold_is_explicitly_not_synthetic_animation_or_source_truth():
+    cas,mesh,rig,skin,mechanics,request = _requests()
+    req = request("motion",MOTION_CONTRACT)
+    req["input_artifacts"] = [
+        row for row in req["input_artifacts"]
+        if row["artifact_type"] != "RealSaS.ControlMotionClipProposalIR"
+    ]
+    with pytest.raises(RuntimeError,match="PRODUCT_MOTION_SOURCE_AMBIGUOUS_OR_ABSENT"):
+        execute_motion_capability_v2(
+            req,read_object=cas.read_object,put_bytes=cas.put_bytes,
+        )
+    req["capability_metadata"]["default_rest_hold_policy"] = "DETERMINISTIC_ZERO_TRACK_REST_HOLD_V1"
+    result = execute_motion_capability_v2(
+        req,read_object=cas.read_object,put_bytes=cas.put_bytes,
+    )
+    assert result["status"] == "PASS"
+    assert result["diagnostics"]["motion_source_kind"] == "COMPILER_POLICY_REST_HOLD_NOT_ANIMATED_IDLE"
+    value = canonical_motion_from_dict_v2(json.loads(cas.read_object(result["outputs"][1])))
+    assert value.intent == "REST_HOLD_POLICY"
+    assert value.control_tracks == ()
+    assert value.metadata["editable_motion_space"] == "ANIMATOR_CONTROLS"
+    assert result["diagnostics"]["source_motion_independently_verified"] is False

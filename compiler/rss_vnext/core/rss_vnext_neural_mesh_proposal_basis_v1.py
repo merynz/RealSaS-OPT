@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Two-image RSS/TESSA proposal basis for the EXISTING CanonicalMesh pipeline.
 
-RealSaS's feed-forward multiview geometry/color/semantics and multilayer
+StdGEN's feed-forward multiview geometry/color/semantics and multilayer
 extraction remain upstream. The canonical candidate is generated from the
 actual topology-decoder output, never from invented source 3D supervision.
 The substrate is explicitly a NEURAL CANDIDATE, not an independently observed

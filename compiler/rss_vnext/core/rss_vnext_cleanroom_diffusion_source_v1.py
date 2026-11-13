@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-"""RealSaS-inspired, independently authored two-source diffusion boundary.
+"""StdGEN-inspired, independently authored two-source diffusion boundary.
 
-CVPR 2025 the CVPR 2025 reference §3.1: SD + ReferenceNet canonicalizes arbitrary pose;
+CVPR 2025 StdGEN §3.1: SD + ReferenceNet canonicalizes arbitrary pose;
 Era3D-style joint multi-view RGB/normal diffusion predicts missing views.
 Here TWO *unmodified* customer frames are retained. Generated canonical
 frames, generated camera labels, hidden surfaces, and normals have no original

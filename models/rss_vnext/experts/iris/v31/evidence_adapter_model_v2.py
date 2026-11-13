@@ -1,4 +1,4 @@
-"""REALSAS-inspired protected evidence adapters over the IRIS V3.1 shared scene.
+"""STDGEN-inspired protected evidence adapters over the IRIS V3.1 shared scene.
 
 The geometry foundation and the evidence families share the same observation
 carrier and continuous query state, but they do not share their final private

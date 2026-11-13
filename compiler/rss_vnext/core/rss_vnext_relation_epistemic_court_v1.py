@@ -3,7 +3,7 @@ from __future__ import annotations
 """Epistemic relation court for one RSS.vNext product mesh candidate.
 
 This module deliberately does NOT infer relations from part names, triangle
-adjacency or logits. RealSaS-style geometry/semantic proposals remain raw
+adjacency or logits. StdGEN-style geometry/semantic proposals remain raw
 hypotheses. Only independently qualified source/deformation/renderer witnesses
 can subsequently admit executable abilities. The ledger preserves opposing
 claims and never votes, averages depths, or silently converts UNKNOWN to false.

@@ -14,7 +14,7 @@ from models.axis.rig_program_model_v6 import (
     AXIS_V6_PRODUCT_ARCHITECTURE_ID,
 )
 from models.rss_vnext.attachment_face_correspondence_v1 import (
-    axis_sequence_digest_v1,_digest_tensor,
+    axis_sequence_digest_v1,mesh_topology_digest_v1,_digest_tensor,
 )
 from models.rss_vnext.training_engine import (
     RSSvNextStructuralTrainer,RSSvNextStructuralTrainingBatch,
@@ -101,6 +101,13 @@ def _training_court():
         "teacher_sequence_sha256":axis_teacher_sequence_sha256_v6(teacher),
         "mira_codec_state_sha256":frozen_mira_codec_state_sha256_v6(net),
         "teacher_semantics":"SOURCE_RIG_AND_PINNED_FSQ_NOT_INFERRED_CONTROLS",
+        "mesh_teacher_semantics":"SOURCE_NATIVE_TESSA_TEACHER_TOPOLOGY_FOR_AXIS_PRODUCT",
+        "mesh_teacher_source_reindex_proven":True,
+        "mesh_teacher_tokens_sha256":source_surface_tensor_sha256(topo),
+        "mesh_teacher_valid_mask_sha256":source_surface_tensor_sha256(torch.tensor([True])),
+        "mesh_teacher_topology_digest":mesh_topology_digest_v1(mesh),
+        "observed_rgba_sha256":source_surface_tensor_sha256(rgba),
+        "observed_camera_sha256":source_surface_tensor_sha256(cam),
         "intervention_qualification_status":"QUALIFIED_SOURCE_CONTROL_CONSEQUENCE",
         "source_intervention_sha256":"9"*64,
     }
@@ -131,16 +138,35 @@ def _training_court():
     return net,new_trainer,batch,receipt,axis_receipt
 
 
-def test_optimizer_jointly_updates_native_face_head_and_shared_iris_axis():
+def test_optimizer_jointly_updates_native_face_head_and_shared_iris_axis(monkeypatch):
     net,make,batch,receipt,axis= _training_court()
     trainer=make()
     before=net.anchor_face_correspondence.held_query.weight.detach().clone()
+    seen_mesh=[]
+    seen_mem=[]
+    original_mesh=net.build_mesh_candidate
+    original_axis=net.axis.forward
+    def watch_mesh(*args,**kwargs):
+        row=original_mesh(*args,**kwargs)
+        seen_mesh.append(row)
+        return row
+    def watch_axis(scene_memory,sequence):
+        seen_mem.append(scene_memory)
+        return original_axis(scene_memory,sequence)
+    monkeypatch.setattr(net,"build_mesh_candidate",watch_mesh)
+    monkeypatch.setattr(net.axis,"forward",watch_axis)
     result=trainer.train_step(batch)
+    assert len(seen_mesh)==1
+    assert len(seen_mem)==2
+    # Both causal loss and held/holder head are conditioned on THE SAME
+    # scene+TESSA mesh memory tensor, not two independent mesh decodings.
+    assert seen_mem[0] is seen_mem[1]
     assert result.anchor_face_correspondence_loss is not None
     assert result.eligible_anchor_held_faces==1
     assert result.eligible_anchor_holder_faces==1
     assert result.eligible_anchor_negative_faces==0
     assert result.axis_rig_skin_loss is not None
+    assert result.axis_training_conditioning=="PRODUCT_MESH_MATCHED_TESSA_H"
     assert torch.isfinite(result.total_loss)
     assert trainer.global_step==1
     assert not torch.equal(before,net.anchor_face_correspondence.held_query.weight)

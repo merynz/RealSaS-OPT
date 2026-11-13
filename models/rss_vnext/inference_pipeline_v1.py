@@ -319,6 +319,30 @@ def read_compiler_proposal_receipt_v1(
     claimed_hash = claimed.pop("receipt_hash", None)
     if claimed_hash != content_sha256(claimed):
         raise RuntimeError("RSS_VNEXT_RECEIPT_HASH_DRIFT")
+    generation_keys = {
+        "scene_construction_policy", "generation_checkpoint_binding_sha256",
+        "canonical_stage_checkpoint_sha256", "multiview_stage_checkpoint_sha256",
+        "generated_view_count", "generated_source_observation",
+    }
+    has_generation = generation_keys.issubset(receipt)
+    if generation_keys.intersection(receipt) and not has_generation:
+        raise RuntimeError("RSS_VNEXT_RECEIPT_GENERATION_FIELDS_INCOMPLETE")
+    if has_generation and (
+        receipt["scene_construction_policy"]
+        != "TWO_ORIGINAL_TO_CANONICAL_TO_SIX_GENERATED_RGB_NORMAL"
+        or receipt["generated_view_count"] != 6
+        or receipt["generated_source_observation"] is not False
+        or any(
+            type(receipt[key]) is not str or len(receipt[key]) != 64
+            or any(c not in "0123456789abcdef" for c in receipt[key])
+            for key in (
+                "generation_checkpoint_binding_sha256",
+                "canonical_stage_checkpoint_sha256",
+                "multiview_stage_checkpoint_sha256",
+            )
+        )
+    ):
+        raise RuntimeError("RSS_VNEXT_RECEIPT_GENERATION_AUTHORITY_INVALID")
     if (
         receipt.get("checkpoint_sha256") != expected_checkpoint_sha256
         or type(receipt.get("unified_model_config_sha256")) is not str
@@ -376,7 +400,13 @@ def read_compiler_proposal_receipt_v1(
     if evidence.evidence_hash != receipt["evidence_hash"] or evidence.mesh_status != receipt["status"]:
         raise RuntimeError("RSS_VNEXT_RECEIPT_EVIDENCE_DRIFT")
     if not _carrier_decoder_follows:
-        read_neural_scene_carrier_v1(carrier_path.read_bytes(), evidence=evidence)
+        read_neural_scene_carrier_v1(
+            carrier_path.read_bytes(), evidence=evidence,
+            expected_generation_checkpoint_sha256=(
+                receipt["generation_checkpoint_binding_sha256"]
+                if has_generation else None
+            ),
+        )
     # _carrier_decoder_follows is an internal performance seam for consumers
     # that immediately run the SAME bound neural-carrier court themselves.
     # The public/default receipt reader never skips full archive validation.

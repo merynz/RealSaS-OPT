@@ -126,8 +126,8 @@ func TestRSSvNextCandidateMeshConsumesExactUnifiedShapeNotOldEightViewStages(t *
 		t.Fatalf("RSS Input→Shape→Mesh dependency drift: %+v", resolved)
 	}
 	mesh, ok := registry.Get(ProductMeshCapabilityID)
-	if !ok || mesh.Metadata["executor_contract"] != RSSvNextMeshContractV2 ||
-		mesh.Metadata["input_source_artifact_type"] != "RealSaS.RSSvNextTwoViewSource" ||
+	if !ok || mesh.Metadata["executor_contract"] != RSSvNextMeshContractV3 ||
+		mesh.Metadata["input_source_artifact_type"] != "RealSaS.RSSvNextUncalibratedTwoImageSource" ||
 		mesh.Metadata["input_fanout_artifact_type"] != "RealSaS.RSSvNextProductEvidenceFanout" ||
 		mesh.Metadata["output_artifact_type"] != "RealSaS.CanonicalMeshIR" ||
 		mesh.Metadata["canonical_mesh_required_for_product_execution"] != true ||

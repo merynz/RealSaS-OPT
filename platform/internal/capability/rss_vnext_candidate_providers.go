@@ -123,7 +123,10 @@ func (RSSvNextShapeCandidateProvider) Capabilities(context.Context) ([]Descripto
 // independently pinned. ProductRevision and 2D appearance remain unqualified.
 type RSSvNextMeshCandidateProvider struct{}
 
-const RSSvNextMeshContractV2 = "RealSaS.ProductMeshCompile.v2"
+const (
+	RSSvNextMeshContractV2 = "RealSaS.ProductMeshCompile.v2"
+	RSSvNextMeshContractV3 = "RealSaS.ProductMeshCompile.v3"
+)
 
 func (RSSvNextMeshCandidateProvider) Capabilities(context.Context) ([]Descriptor, error) {
 	responsibilities, err := responsibilityIDsForRole(ProductRoleMesh)
@@ -142,14 +145,19 @@ func (RSSvNextMeshCandidateProvider) Capabilities(context.Context) ([]Descriptor
 		Metadata: map[string]any{
 			"product_role_id":                               string(ProductRoleMesh),
 			"implementation_class":                          string(ImplementationCompiler),
-			"interface_contract":                            RSSvNextMeshContractV2,
-			"executor_contract":                             RSSvNextMeshContractV2,
+			"interface_contract":                            RSSvNextMeshContractV3,
+			"executor_contract":                             RSSvNextMeshContractV3,
 			"input_shape_artifact_type":                     "RealSaS.RSSvNextInferenceEvidence",
 			"input_shape_schema_version":                    "v1",
-			"input_source_artifact_type":                    "RealSaS.RSSvNextTwoViewSource",
+			"input_source_artifact_type":                    "RealSaS.RSSvNextUncalibratedTwoImageSource",
 			"input_source_schema_version":                   "v1",
 			"input_fanout_artifact_type":                    "RealSaS.RSSvNextProductEvidenceFanout",
 			"input_fanout_schema_version":                   "v1",
+			"alternate_calibrated_source_artifact_type":    "RealSaS.RSSvNextTwoViewSource",
+			"raw_scene_candidate_artifact_type":            "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier",
+			"raw_generated_views_artifact_type":            "RealSaS.RSSvNextGeneratedConditioningViews",
+			"raw_construction_receipt_artifact_type":       "RealSaS.RSSvNextUncalibratedConstructionReceipt",
+			"raw_candidate_cannot_mint_canonical_mesh":     true,
 			"requires_shape_parent_binding":                 true,
 			"requires_full_neural_scene_if_abstain":         false,
 			"output_artifact_type":                          "RealSaS.CanonicalMeshIR",

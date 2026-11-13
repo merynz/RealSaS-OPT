@@ -154,6 +154,7 @@ def _raw_axis_mira_candidates_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
     receipt with exact model lineage, never a canonical rig/skin.
     """
     from dataclasses import asdict
+    import torch
     from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
         _validate_neural_control_events,
     )
@@ -202,7 +203,7 @@ def _raw_axis_mira_candidates_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
         raise RuntimeError("RSS_VNEXT_SHAPE_V4_MIRA_DYNAMIC_AND_DISCRETE_PAIR")
     if dynamic is not None:
         dynamic.validate()
-        if dynamic.source_mesh is not mesh or not isinstance(hard, __import__("torch").Tensor) or (
+        if dynamic.source_mesh is not mesh or not isinstance(hard, torch.Tensor) or (
             hard.shape != dynamic.weights.shape
             or hidden.ndim != 3
             or hidden.shape[:2] != (1, hard.shape[2])
@@ -216,7 +217,7 @@ def _raw_axis_mira_candidates_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
             "axis_mira_joint_hidden_states": hidden,
             "axis_mira_dynamic_displacement": dynamic.displacement,
             "axis_mira_readiness_logits": dynamic.readiness_logits,
-            "axis_mira_joint_valid_mask": joint_mask,
+            "axis_mira_joint_valid_mask": joint_mask.to(dtype=torch.uint8),
         }
     return tensors, {
         "axis_mira_control_status": state,

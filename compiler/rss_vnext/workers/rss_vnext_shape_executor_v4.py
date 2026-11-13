@@ -74,6 +74,78 @@ def _tensor_archive(**arrays) -> bytes:
     return buffer.getvalue()
 
 
+
+def _tessa_candidate_tensors_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
+    """Persist *all* decoded TESSA topology/surface proposals in the H(x) CAS.
+
+    Model inference has already happened. Dropping the topology token stream
+    here would force an unpinned second decoding in Mesh or silently erase a
+    valid candidate. Neither tokens nor predicted vertices imply canonical
+    source, ray, drawable, skin, or product authority.
+    """
+    import torch
+    from models.rss_vnext.animation_ready_mesh import RSSvNextStructuralMeshCandidate
+
+    if type(proposal) is not dict:
+        raise RuntimeError("RSS_VNEXT_SHAPE_V4_TESSA_PROPOSAL_REQUIRED")
+    tokens = proposal.get("structural_token_proposal")
+    if (
+        not isinstance(tokens, torch.Tensor)
+        or tokens.ndim != 2 or tokens.shape[0] != 1 or tokens.shape[1] < 1
+        or tokens.dtype not in (torch.int32, torch.int64)
+    ):
+        raise RuntimeError("RSS_VNEXT_SHAPE_V4_TESSA_TOKEN_DOMAIN")
+    mesh = proposal.get("mesh_candidate")
+    status = proposal.get("mesh_status")
+    if status not in ("ABSTAIN", "UNQUALIFIED_MESH_CANDIDATE") or (
+        (status == "ABSTAIN") != (mesh is None)
+    ):
+        raise RuntimeError("RSS_VNEXT_SHAPE_V4_TESSA_STATUS_OR_CANDIDATE_DRIFT")
+    tensors = {"tessa_topology_token_ids": tokens}
+    receipt = {
+        "tessa_token_count": int(tokens.shape[1]),
+        "tessa_mesh_candidate_present": mesh is not None,
+        "tessa_mesh_candidate_vertex_count": 0,
+        "tessa_mesh_candidate_face_count": 0,
+        "tessa_mesh_candidate_role_schema_id": None,
+        "tessa_mesh_candidate_authority": "UNQUALIFIED_LEARNED_PROPOSAL_ONLY",
+    }
+    if mesh is None:
+        return tensors, receipt
+    if (
+        type(mesh) is not RSSvNextStructuralMeshCandidate
+        or mesh.canonical_mesh_authority
+        or mesh.source_ray_evidence is not None
+        or mesh.source_authority != "LEARNED_PREDICTED_TOPOLOGY"
+        or mesh.signed_solid_authority != "UNQUALIFIED"
+        or tuple(int(v) for v in tokens[0].tolist()) != mesh.topology_token_ids
+    ):
+        raise RuntimeError("RSS_VNEXT_SHAPE_V4_TESSA_PREMATURE_SOURCE_AUTHORITY")
+    mesh.validate()
+    tensors.update({
+        "tessa_candidate_base_vertices": mesh.base_vertices_iris,
+        "tessa_candidate_rest_vertices": mesh.rest_vertices_iris,
+        "tessa_candidate_faces": mesh.faces,
+        "tessa_candidate_vertex_components": mesh.vertex_component_ids,
+        "tessa_candidate_face_components": mesh.face_component_ids,
+        "tessa_candidate_local_features": mesh.local_features,
+        "tessa_candidate_normals": mesh.normals,
+        "tessa_candidate_semantic_logits": mesh.semantic_logits,
+        "tessa_candidate_presentation_role_logits": mesh.presentation_role_logits,
+        "tessa_candidate_affordance_logits": mesh.affordance_logits,
+        "tessa_candidate_graphics_logits": mesh.graphics_logits,
+        "tessa_candidate_static_quality_logits": mesh.static_quality_logits,
+        "tessa_candidate_unsigned_distance": mesh.geometry["unsigned_distance"],
+        "tessa_candidate_sign_logits": mesh.geometry["sign_logit"],
+    })
+    receipt.update({
+        "tessa_mesh_candidate_vertex_count": int(mesh.rest_vertices_iris.shape[1]),
+        "tessa_mesh_candidate_face_count": int(mesh.faces.shape[0]),
+        "tessa_mesh_candidate_role_schema_id": mesh.presentation_role_schema_id,
+    })
+    return tensors, receipt
+
+
 def _raw_source_ref(request: dict[str, Any]) -> dict[str, Any] | None:
     refs = request.get("input_artifacts") or ()
     if not isinstance(refs, (list, tuple)) or any(type(ref) is not dict for ref in refs):
@@ -195,10 +267,13 @@ def execute_rss_vnext_shape_capability_v4(
         or construction.construction.product_revision_minted
     ):
         raise RuntimeError("RSS_VNEXT_SHAPE_V4_PREMATURE_SOURCE_AUTHORITY")
-    state = construction.construction.proposal["state"]
+    proposal = construction.construction.proposal
+    state = proposal["state"]
     if state.camera_features is not None:
         raise RuntimeError("RSS_VNEXT_SHAPE_V4_SOURCE_CAMERA_WAS_INVENTED")
+    tessa_tensors, tessa_receipt = _tessa_candidate_tensors_v1(proposal)
     scene_bytes = _tensor_archive(
+        **tessa_tensors,
         scene_triplanes=state.scene_triplanes,
         query_xyz=state.query_xyz,
         local_features=state.local_features,
@@ -242,7 +317,8 @@ def execute_rss_vnext_shape_capability_v4(
         "generated_views_as_original_source": False,
         "canonical_mesh_qualified": False,
         "product_revision_minted": False,
-        "mesh_status": construction.construction.proposal["mesh_status"],
+        "mesh_status": proposal["mesh_status"],
+        **tessa_receipt,
     }
     receipt_ref = _cas_ref(
         (json.dumps(receipt, sort_keys=True, separators=(",", ":"), allow_nan=False)

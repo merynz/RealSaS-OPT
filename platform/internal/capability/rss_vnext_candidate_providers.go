@@ -54,9 +54,10 @@ func (RSSvNextInputCandidateProvider) Capabilities(context.Context) ([]Descripto
 }
 
 // RSSvNextShapeCandidateProvider is the active one-checkpoint Shape provider.
-// It emits seven independently addressable specialist CAS children. IRIS,
-// TESSA, AXIS and MIRA remain expert responsibilities inside RSSVNEXT; they
-// are not four ModelReleases or independent downstream inference jobs.
+// Calibrated inputs retain the seven-child inference evidence fanout; raw
+// two-image uploads emit three unqualified scene/conditioning/receipt CAS
+// candidates instead. Neither path creates independent IRIS/TESSA/AXIS/MIRA
+// ModelReleases, and raw candidates cannot be treated as source measurements.
 type RSSvNextShapeCandidateProvider struct{}
 
 func (RSSvNextShapeCandidateProvider) Capabilities(context.Context) ([]Descriptor, error) {

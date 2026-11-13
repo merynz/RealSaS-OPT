@@ -116,10 +116,14 @@ def _training_court():
         flexicubes_surface=0.,axis_rig_skin_codes=1.,
         anchor_face_correspondence=1.,
     )
-    def new_trainer(anchor_row=receipt,axis_row=axis_receipt):
+    def new_trainer(
+        anchor_row=receipt,axis_row=axis_receipt,
+        axis_policy="PRODUCT_MESH_MATCHED_REQUIRED",
+    ):
         return RSSvNextStructuralTrainer(
             net,torch.optim.AdamW(net.parameters(),lr=1.e-3),
             dataset_manifest_sha256="3"*64,weights=weights,
+            axis_training_policy=axis_policy,
             trusted_axis_teacher_registry={"native-axis":axis_row},
             trusted_anchor_face_registry={"native-attachment":anchor_row},
         )
@@ -245,3 +249,58 @@ def test_missing_source_labels_and_disabled_objective_do_not_train_negative():
     )
     with pytest.raises(ValueError,match="SOCKET_FACE_TRAIN_WEIGHT_REQUIRED"):
         disabled.objective(batch)
+
+
+def test_product_axis_without_source_admitted_tessa_mesh_fails_closed():
+    net,make,batch,receipt,axis=_training_court()
+    # No source topology: cannot train a PRODUCT rig conditioned on a mesh
+    # while its forward uses only the unindexed structural stream.
+    with pytest.raises(ValueError,match="AXIS_PRODUCT_MATCHED_TESSA_MESH_REQUIRED"):
+        make().objective(replace(
+            batch,topology_teacher_tokens=None,
+            source_anchor_face_targets=None,source_anchor_face_mask=None,
+            source_anchor_face_admission_key="",
+        ))
+    bad_receipt={**axis,"mesh_teacher_source_reindex_proven":False}
+    with pytest.raises(ValueError,match="AXIS_PRODUCT_TESSA_SOURCE_BINDING_DRIFT"):
+        make(axis_row=bad_receipt).objective(batch)
+    bad_receipt={**axis,"mesh_teacher_topology_digest":"9"*64}
+    with pytest.raises(ValueError,match="AXIS_PRODUCT_TESSA_FACE_REINDEX_DRIFT"):
+        make(axis_row=bad_receipt).objective(batch)
+
+
+def test_pretrain_cannot_upgrade_unmatched_axis_socket_anchor_or_train_source_face():
+    net,make,batch,receipt,axis=_training_court()
+    # Even without native anchor-face labels, a rig-only lane may not
+    # expose the source ANCHOR and then claim product AXIS conditioning.
+    no_face=replace(
+        batch,source_anchor_face_targets=None,source_anchor_face_mask=None,
+        source_anchor_face_admission_key="",
+    )
+    with pytest.raises(ValueError,match="AXIS_RIG_ONLY_ANCHOR_REQUIRES_MESH"):
+        make(axis_policy="RIG_ONLY_PRETRAIN").objective(no_face)
+    with pytest.raises(ValueError,match="AXIS_RIG_ONLY_ANCHOR_REQUIRES_MESH"):
+        make(axis_policy="RIG_ONLY_PRETRAIN").objective(batch)
+
+
+def test_product_pretrain_policy_cannot_be_swapped_during_checkpoint_resume(tmp_path):
+    net,make,batch,receipt,axis=_training_court()
+    valid=make()
+    result=valid.objective(batch)
+    assert result.axis_training_conditioning=="PRODUCT_MESH_MATCHED_TESSA_H"
+    out=tmp_path/"matched-product.pt"
+    valid.save_checkpoint(out,sampler_cursor=31)
+    with pytest.raises(ValueError,match="CHECKPOINT_OBJECTIVE_POLICY_DRIFT"):
+        make(axis_policy="RIG_ONLY_PRETRAIN").load_checkpoint(out)
+    assert make().load_checkpoint(out)==31
+    with pytest.raises(ValueError,match="CONDITIONING_POLICY_UNKNOWN"):
+        make(axis_policy="PERMISSIVE_MESH_NEARBY")
+
+
+def test_product_axis_uses_actual_teacher_mesh_not_fake_same_signature():
+    net,make,batch,receipt,axis=_training_court()
+    # Source teacher mesh face IDs are bound to exact token tensor bytes.
+    corrupted=batch.topology_teacher_tokens.clone()
+    corrupted[0,1]+=1
+    with pytest.raises(ValueError,match="AXIS_PRODUCT_TESSA_SOURCE_BINDING_DRIFT"):
+        make().objective(replace(batch,topology_teacher_tokens=corrupted))

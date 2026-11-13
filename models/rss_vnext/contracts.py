@@ -144,7 +144,7 @@ class RSSvNextConfig:
 class RSSvNextSceneState:
     """Learned state and provenance kept together, with no teacher asset fields."""
     observed_rgba: torch.Tensor
-    camera_features: torch.Tensor
+    camera_features: torch.Tensor | None  # None: no original camera observed
     observed_image_tokens: torch.Tensor
     conditioned_image_tokens: torch.Tensor  # original source tokens remain accessible
     source_semantic_patch_logits: torch.Tensor  # [B,2,T,K] from image encoder
@@ -166,6 +166,7 @@ class RSSvNextSceneState:
     region_relation_logits: torch.Tensor
     region_relation_valid_mask: torch.Tensor
     source_view_authority: tuple[str, str] = ("SOURCE_OBSERVED_FRONT", "SOURCE_OBSERVED_BACK")
+    source_camera_authority: str = "ADMITTED_SOURCE_CAMERA_13D"
     aux_view_authority: str = "LEARNED_PREDICTED_ONLY"
     scene_conditioning_authority: str = "DIRECT_OBSERVED_TWO_VIEWS"
     generating_checkpoint_sha256: str = ""

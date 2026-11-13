@@ -489,17 +489,14 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         xx, yy, zz = torch.meshgrid(axis, axis, axis, indexing="ij")
         return torch.stack((xx, yy, zz), dim=-1).reshape(1, -1, 3)
 
-    def _original_source_tokens(self, rgba: Tensor, camera_features: Tensor):
+    def _observed_pixel_tokens_without_camera(self, rgba: Tensor):
+        """Encode only original pixels, with no unmeasured camera features."""
         if rgba.ndim != 5 or rgba.shape[1] != 2 or rgba.shape[2] != 4:
             raise ValueError("RSS_VNEXT_ONLY_TWO_SOURCE_RGBA_VIEWS")
-        if camera_features.shape != (rgba.shape[0], 2, self.cfg.iris.camera_feature_dim):
-            raise ValueError("RSS_VNEXT_FRONT_BACK_CAMERA_SHAPE")
         if not torch.is_floating_point(rgba) or not bool(torch.isfinite(rgba).all()):
             raise ValueError("RSS_VNEXT_SOURCE_RGBA_NUMERIC")
         if bool((rgba < 0).any() or (rgba > 1).any()):
             raise ValueError("RSS_VNEXT_SOURCE_RGBA_RANGE")
-        if not bool(torch.isfinite(camera_features).all()):
-            raise ValueError("RSS_VNEXT_CAMERA_NUMERIC")
         tokens, token_xy = self.vision(rgba)
         b = rgba.shape[0]
         if tokens.ndim != 4 or tokens.shape[:2] != (b, 2) or tokens.shape[-1] != self.cfg.iris.image_token_dim:
@@ -508,8 +505,17 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             raise ValueError("RSS_VNEXT_VISION_XY_CONTRACT")
         return tokens, token_xy, self.early_semantics(tokens)
 
+    def _original_source_tokens(self, rgba: Tensor, camera_features: Tensor):
+        if not isinstance(camera_features, Tensor) or camera_features.shape != (
+            rgba.shape[0], 2, self.cfg.iris.camera_feature_dim,
+        ):
+            raise ValueError("RSS_VNEXT_FRONT_BACK_CAMERA_SHAPE")
+        if not bool(torch.isfinite(camera_features).all()):
+            raise ValueError("RSS_VNEXT_CAMERA_NUMERIC")
+        return self._observed_pixel_tokens_without_camera(rgba)
+
     def _assemble_scene_from_planes(
-        self, *, rgba: Tensor, camera_features: Tensor, source_tokens: Tensor,
+        self, *, rgba: Tensor, camera_features: Tensor | None, source_tokens: Tensor,
         source_early, planes: Tensor, novel_ring=None,
         authority: str = "DIRECT_OBSERVED_TWO_VIEWS",
         generation_checkpoint_sha256: str = "",
@@ -540,6 +546,15 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         return RSSvNextSceneState(
             observed_rgba=rgba,
             camera_features=camera_features,
+            source_view_authority=(
+                ("SOURCE_OBSERVED_FRONT", "SOURCE_OBSERVED_BACK")
+                if camera_features is not None else
+                ("SOURCE_OBSERVED_UNCALIBRATED_0", "SOURCE_OBSERVED_UNCALIBRATED_1")
+            ),
+            source_camera_authority=(
+                "ADMITTED_SOURCE_CAMERA_13D" if camera_features is not None
+                else "UNKNOWN_NO_ORIGINAL_CAMERA_PROJECTION"
+            ),
             observed_image_tokens=source_tokens,
             conditioned_image_tokens=source_early.conditioned_image_tokens,
             source_semantic_patch_logits=source_early.source_patch_logits,
@@ -591,7 +606,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         return state, aux, aux_unc
 
     def encode_generated_multiview(
-        self, observed_rgba: Tensor, original_camera_features: Tensor,
+        self, observed_rgba: Tensor, original_camera_features: Tensor | None,
         *, generated_rgba: Tensor, generated_cameras: Tensor,
         generation_checkpoint_sha256: str, source_binding_sha256: str,
         generated_normals: Tensor,
@@ -603,9 +618,14 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         """
         if self.aux_views is not None:
             raise ValueError("RSS_VNEXT_TWO_COMPETING_MULTIVIEW_CONSTRUCTORS")
-        tokens, _, early = self._original_source_tokens(
-            observed_rgba, original_camera_features,
-        )
+        if original_camera_features is None:
+            tokens, _, early = self._observed_pixel_tokens_without_camera(
+                observed_rgba,
+            )
+        else:
+            tokens, _, early = self._original_source_tokens(
+                observed_rgba, original_camera_features,
+            )
         from .realsas_scene_conditioning_v1 import (
             encode_realsas_conditioning_into_shared_H_v1,
             SIX_VIEW_PRIOR,
@@ -837,7 +857,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         )
 
     def forward_generated_multiview(
-        self, observed_rgba: Tensor, original_camera_features: Tensor,
+        self, observed_rgba: Tensor, original_camera_features: Tensor | None,
         *, generated_rgba: Tensor, generated_cameras: Tensor,
         generated_normals: Tensor, generation_checkpoint_sha256: str,
         source_binding_sha256: str,
@@ -923,10 +943,13 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         )
         # Requery immutable source rays instead of compressing all visual
         # evidence into semantic labels or assigning invented hidden textures.
-        mesh.source_ray_evidence = sample_front_back_source_rays(
-            state.observed_rgba, state.camera_features,
-            mesh.rest_vertices_iris,
-        )
+        # Missing original camera means NO source-point projection:
+        # generated virtual cameras cannot be relabeled as source rays.
+        if state.camera_features is not None:
+            mesh.source_ray_evidence = sample_front_back_source_rays(
+                state.observed_rgba, state.camera_features,
+                mesh.rest_vertices_iris,
+            )
         mesh.validate()
         return mesh
 
@@ -934,7 +957,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
     def propose_teacher_free(
         self,
         rgba: Tensor,
-        camera_features: Tensor,
+        camera_features: Tensor | None,
         *,
         max_topology_tokens: int | None = None,
         generate_controls: bool = False,
@@ -953,6 +976,8 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         """
         if self.training:
             raise RuntimeError("RSS_VNEXT_TEACHER_FREE_REQUIRES_EVAL")
+        if camera_features is None and generate_controls:
+            raise RuntimeError("RSS_VNEXT_UNCALIBRATED_CONTROL_PROOF_NOT_READY")
         if generate_controls and executable_constraint_operators is None:
             raise ValueError("RSS_VNEXT_RIG_REQUIRES_COMPILER_CAPABILITIES")
         if not generate_controls and executable_constraint_operators is not None:
@@ -973,6 +998,8 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 generation_checkpoint_sha256=generation_checkpoint_sha256,
                 source_binding_sha256=source_binding_sha256,
             )
+        elif camera_features is None:
+            raise RuntimeError("RSS_VNEXT_UNCALIBRATED_SOURCE_REQUIRES_GENERATED_MULTIVIEW")
         elif getattr(self, "construction_requires_generated_multiview", False):
             raise RuntimeError("RSS_VNEXT_CHECKPOINT_REQUIRES_CANONICAL_MULTIVIEW")
         else:

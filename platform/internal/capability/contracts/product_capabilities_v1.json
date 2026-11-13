@@ -309,7 +309,22 @@
           "max_position_drift": 0.00001,
           "max_constraint_residual": 0.0001
         },
-        "can_mint_product_revision": false
+        "can_mint_product_revision": false,
+        "control_intervention_policy": {
+          "enabled": true,
+          "max_probed_controls": 128,
+          "relative_translation": 0.02,
+          "max_constraint_residual": 0.001
+        },
+        "auxiliary_outputs": [
+          {
+            "role": "mechanics_intervention_court",
+            "artifact_type": "RealSaS.MechanicsInterventionCourt",
+            "schema_version": "v1"
+          }
+        ],
+        "source_contact_qualified_by_intervention": false,
+        "learned_secondary_motion_qualified_by_intervention": false
       }
     },
     "product.graphics": {

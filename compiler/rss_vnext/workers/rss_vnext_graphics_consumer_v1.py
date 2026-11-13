@@ -237,6 +237,14 @@ def _raw_two_image_graphics_v1(
             },
         ) for i in range(8)
     )
+    from .rss_vnext_raw_source_rgb_candidate_v1 import (
+        build_raw_original_rgb_candidate_v1,
+    )
+    rgb_candidate = build_raw_original_rgb_candidate_v1(
+        source=source, scene=scene, receipt=receipt,
+        scene_digest=scene_ref["content_sha256"],
+        canonical_mesh=canonical_mesh,
+    )
     bound = replace(compiled, views=virtual_views, metadata={
         **compiled.metadata,
         "origin": "RAW_TWO_IMAGE_UNIFIED_H_TYPED_GRAPHICS_CANDIDATES",
@@ -247,6 +255,8 @@ def _raw_two_image_graphics_v1(
         "independent_editability_proven": False,
         "source_pixels_win_where_observed": False,
         "source_rgb_surface_owner_qualified": False,
+        "source_original_rgb_candidate_hash": rgb_candidate["candidate_hash"],
+        "source_original_rgb_candidate_sample_count": rgb_candidate["sample_count"],
         "camera_hypotheses_not_observations": True,
         "eight_virtual_runtime_views_not_source_observations": True,
         "source_view_visibility_unqualified": True,
@@ -265,6 +275,8 @@ def _raw_two_image_graphics_v1(
         "canonical_skin_lineage_hash": canonical_skin.skin_lineage_hash,
         "candidate_graph_hash": compiled.graph_hash,
         "graphics_source_observation_qualified": False,
+        "source_original_rgb_candidate_hash": rgb_candidate["candidate_hash"],
+        "source_original_rgb_candidate_sample_count": rgb_candidate["sample_count"],
         "source_hidden_surface_qualified": False,
         "pose_conditioned_visibility_qualified": False,
         "virtual_runtime_view_count": 8,
@@ -273,7 +285,7 @@ def _raw_two_image_graphics_v1(
         "product_revision_minted": False,
     }
     receipt["receipt_hash"] = content_sha256(receipt)
-    return compiled, receipt
+    return compiled, receipt, rgb_candidate
 
 
 def compile_rss_vnext_shape_native_graphics_v1(

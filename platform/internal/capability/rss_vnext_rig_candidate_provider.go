@@ -15,7 +15,37 @@ func (RSSvNextRigCandidateProvider) Capabilities(context.Context) ([]Descriptor,
 	if err != nil {
 		return nil, err
 	}
-	return []Descriptor{{
+		metadata := map[string]any{}
+	metadata["product_role_id"] = string(ProductRoleRig)
+	metadata["implementation_class"] = string(ImplementationCompiler)
+	metadata["interface_contract"] = RSSvNextRigContractV3
+	metadata["executor_contract"] = RSSvNextRigContractV3
+	metadata["required_models"] = []any{}
+	metadata["input_source_artifact_type"] = "RealSaS.RSSvNextTwoViewSource"
+	metadata["input_source_schema_version"] = "v1"
+	metadata["input_fanout_artifact_type"] = "RealSaS.RSSvNextProductEvidenceFanout"
+	metadata["input_fanout_schema_version"] = "v1"
+	metadata["input_mesh_artifact_type"] = "RealSaS.CanonicalMeshIR"
+	metadata["input_mesh_schema_version"] = "v1"
+	metadata["input_candidate_artifact_type"] = "RealSaS.RSSvNextComputedCandidateSurface"
+	metadata["input_candidate_schema_version"] = "v1"
+	metadata["output_artifact_type"] = "RealSaS.CanonicalRigIR"
+	metadata["output_schema_version"] = "v2"
+	metadata["skin_code_output_artifact_type"] = "RealSaS.SkinCodeProposalIR"
+	metadata["skin_code_output_schema_version"] = "v1"
+	metadata["canonical_mesh_parent_required"] = true
+	metadata["single_checkpoint_inference_reused"] = true
+	metadata["independent_axis_model_release_allowed"] = false
+	metadata["independent_mira_model_release_allowed"] = false
+	metadata["mechanics_attachment_qualified_by_rig"] = false
+	metadata["source_joint_truth_claimed"] = false
+	metadata["compiler_parent_reselection_allowed"] = false
+	metadata["compiler_control_synthesis_allowed"] = false
+	metadata["compiler_constraint_synthesis_allowed"] = false
+	metadata["post_bind_mechanics_and_skin_qualification_required"] = true
+	metadata["can_mint_product_revision"] = false
+	metadata["responsibility_ids"] = responsibilities
+return []Descriptor{{
 		ID:                   ProductRigCapabilityID,
 		Kind:                 KindModule,
 		OwnerModuleID:        "product.rig",
@@ -24,36 +54,5 @@ func (RSSvNextRigCandidateProvider) Capabilities(context.Context) ([]Descriptor,
 		AllowedModes:         []Mode{ModeDeveloper},
 		ProductPassAuthority: false,
 		Aliases:              []string{"RSS vNext Canonical Rig", "Unified AXIS Controls"},
-		Metadata: map[string]any{
-			"product_role_id":                  string(ProductRoleRig),
-			"implementation_class":            string(ImplementationCompiler),
-			"interface_contract":              RSSvNextRigContractV3,
-			"executor_contract":               RSSvNextRigContractV3,
-			"required_models":                 []any{},
-			"input_source_artifact_type":      "RealSaS.RSSvNextTwoViewSource",
-			"input_source_schema_version":     "v1",
-			"input_fanout_artifact_type":      "RealSaS.RSSvNextProductEvidenceFanout",
-			"input_fanout_schema_version":     "v1",
-			"input_mesh_artifact_type":        "RealSaS.CanonicalMeshIR",
-			"input_mesh_schema_version":       "v1",
-			"input_candidate_artifact_type":   "RealSaS.RSSvNextComputedCandidateSurface",
-			"input_candidate_schema_version":  "v1",
-			"output_artifact_type":            "RealSaS.CanonicalRigIR",
-			"output_schema_version":           "v2",
-			"skin_code_output_artifact_type":  "RealSaS.SkinCodeProposalIR",
-			"skin_code_output_schema_version": "v1",
-			"canonical_mesh_parent_required":  true,
-			"single_checkpoint_inference_reused": true,
-			"independent_axis_model_release_allowed": false,
-			"independent_mira_model_release_allowed": false,
-			"mechanics_attachment_qualified_by_rig": false,
-			"source_joint_truth_claimed": false,
-			"compiler_parent_reselection_allowed": false,
-			"compiler_control_synthesis_allowed": false,
-			"compiler_constraint_synthesis_allowed": false,
-			"post_bind_mechanics_and_skin_qualification_required": true,
-			"can_mint_product_revision": false,
-			"responsibility_ids": responsibilities,
-		},
-	}}, nil
+		Metadata: metadata,	}}, nil
 }

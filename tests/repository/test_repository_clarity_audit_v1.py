@@ -66,7 +66,7 @@ def test_product_readiness_audit_never_promotes_source_inspection_to_pass():
     assert result["product_capability_count"] == 9
     issues = {row["id"]: row for row in result["checks"]}
     # These are actual blockers at this source revision, not model failures.
-    assert "PRODUCT_CAPABILITIES_DEVELOPER_ONLY" in issues
+    assert "PRODUCT_CAPABILITIES_DEVELOPER_ONLY" not in issues
     assert "PROOF_HAS_NO_PASS_EXECUTION_PATH" in issues
     assert "PROOF_INDEPENDENT_WITNESSES_MISSING" in issues
     assert "PUBLIC_COMPILE_GATEWAY_DISABLED" in issues

@@ -5,6 +5,7 @@
       "entry_module": "compiler.realsas_compiler_services.platform_worker.rss_vnext_input_executor_v2",
       "policy": {
         "allowed_modes": [
+          "PRODUCT",
           "DEVELOPER"
         ],
         "product_pass_authority": false
@@ -30,6 +31,7 @@
       "entry_module": "compiler.realsas_compiler_services.platform_worker.rss_vnext_shape_executor_v3",
       "policy": {
         "allowed_modes": [
+          "PRODUCT",
           "DEVELOPER"
         ],
         "product_pass_authority": false,
@@ -101,6 +103,7 @@
       "entry_module": "compiler.realsas_compiler_services.platform_worker.rss_vnext_mesh_executor_v2",
       "policy": {
         "allowed_modes": [
+          "PRODUCT",
           "DEVELOPER"
         ],
         "product_pass_authority": false,
@@ -189,6 +192,7 @@
       "entry_module": "compiler.realsas_compiler_services.platform_worker.rss_vnext_rig_executor_v3",
       "policy": {
         "allowed_modes": [
+          "PRODUCT",
           "DEVELOPER"
         ],
         "product_pass_authority": false,
@@ -232,6 +236,7 @@
       "entry_module": "compiler.realsas_compiler_services.platform_worker.rss_vnext_skin_executor_v3",
       "policy": {
         "allowed_modes": [
+          "PRODUCT",
           "DEVELOPER"
         ],
         "product_pass_authority": false,
@@ -282,6 +287,7 @@
       "entry_module": "compiler.realsas_compiler_services.platform_worker.mechanics_executor_v1",
       "policy": {
         "allowed_modes": [
+          "PRODUCT",
           "DEVELOPER"
         ],
         "product_pass_authority": false,
@@ -332,6 +338,7 @@
       "entry_module": "compiler.realsas_compiler_services.platform_worker.product_downstream_executor_v1",
       "policy": {
         "allowed_modes": [
+          "PRODUCT",
           "DEVELOPER"
         ],
         "product_pass_authority": false,
@@ -382,6 +389,7 @@
       "entry_module": "compiler.realsas_compiler_services.platform_worker.product_downstream_executor_v1",
       "policy": {
         "allowed_modes": [
+          "PRODUCT",
           "DEVELOPER"
         ],
         "product_pass_authority": false,
@@ -413,6 +421,7 @@
       "entry_module": "compiler.realsas_compiler_services.platform_worker.product_downstream_executor_v1",
       "policy": {
         "allowed_modes": [
+          "PRODUCT",
           "DEVELOPER"
         ],
         "product_pass_authority": true,

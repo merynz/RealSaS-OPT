@@ -27,7 +27,7 @@ func downstreamDescriptor(role ProductRoleID, dependencies []string, metadata ma
 	row.OwnerModuleID = "product." + string(role)
 	row.ExecutorActivity = "engine.execute_capability.v1"
 	row.Dependencies = dependencies
-	row.AllowedModes = []Mode{ModeDeveloper}
+	row.AllowedModes = []Mode{ModeProduct, ModeDeveloper}
 	row.ProductPassAuthority = role == ProductRoleProof
 	row.Metadata = metadata
 	return []Descriptor{row}, nil

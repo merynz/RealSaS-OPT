@@ -25,7 +25,7 @@ func (RSSvNextInputCandidateProvider) Capabilities(context.Context) ([]Descripto
 		Kind:                 KindModule,
 		OwnerModuleID:        "product.input",
 		ExecutorActivity:     "engine.execute_capability.v1",
-		AllowedModes:         []Mode{ModeDeveloper},
+		AllowedModes:         []Mode{ModeProduct, ModeDeveloper},
 		ProductPassAuthority: false,
 		Aliases:              []string{"RSS vNext Input", "Two Original Views"},
 		Metadata: map[string]any{
@@ -65,7 +65,7 @@ func (RSSvNextShapeCandidateProvider) Capabilities(context.Context) ([]Descripto
 		OwnerModuleID:        "product.shape",
 		ExecutorActivity:     "engine.execute_capability.v1",
 		Dependencies:         []string{ProductInputCapabilityID},
-		AllowedModes:         []Mode{ModeDeveloper},
+		AllowedModes:         []Mode{ModeProduct, ModeDeveloper},
 		ProductPassAuthority: false,
 		Aliases:              []string{"RSS vNext Unified", "Geometry", "Mechanics", "Semantic", "Graphics"},
 		Metadata: map[string]any{
@@ -123,7 +123,7 @@ func (RSSvNextMeshCandidateProvider) Capabilities(context.Context) ([]Descriptor
 		OwnerModuleID:        "product.mesh",
 		ExecutorActivity:     "engine.execute_capability.v1",
 		Dependencies:         []string{ProductShapeCapabilityID},
-		AllowedModes:         []Mode{ModeDeveloper},
+		AllowedModes:         []Mode{ModeProduct, ModeDeveloper},
 		ProductPassAuthority: false,
 		Aliases:              []string{"RSS vNext Mesh Compiler", "Topology Replay"},
 		Metadata: map[string]any{

@@ -371,7 +371,11 @@
         "input_fanout_schema_version": "v1",
         "same_shape_inference_graphics_consumed": true,
         "source_visibility_qualified_by_graphics": false,
-        "attachment_socket_qualified_by_graphics": false
+        "attachment_socket_qualified_by_graphics": false,
+        "input_mechanics_intervention_artifact_type": "RealSaS.MechanicsInterventionCourt",
+        "input_mechanics_intervention_schema_version": "v1",
+        "mechanics_intervention_required": true,
+        "mechanics_intervention_not_source_contact": true
       }
     },
     "product.motion": {

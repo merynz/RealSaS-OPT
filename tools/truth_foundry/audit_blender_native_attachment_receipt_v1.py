@@ -92,6 +92,45 @@ def audit_native_blender_attachment_receipt_v1(
             !="SOURCE_WORLD_NOT_REALSAS_CANONICAL"
     ):
         _fail("PARENT_OR_AUTHORITY_DRIFT")
+    graph=receipt.get("native_armature_bone_constraint_graph")
+    graph_hash=receipt.get("native_armature_bone_constraint_graph_sha256")
+    if (
+        type(graph) is not list or not graph
+        or type(graph_hash) is not str
+        or sha256(json.dumps(graph,sort_keys=True,separators=(",",":"),
+                             allow_nan=False).encode()).hexdigest()!=graph_hash
+    ):
+        _fail("NATIVE_SOURCE_RIG_GRAPH_HASH_DRIFT")
+    rig_names=set()
+    for armature in graph:
+        if (
+            type(armature) is not dict
+            or type(armature.get("armature_name")) is not str
+            or not armature["armature_name"]
+            or armature["armature_name"] in rig_names
+            or armature.get("native_graph_authority")
+               !="DIAGNOSTIC_ONLY_NO_HOLDER_FACE_OR_SOCKET_ID"
+            or type(armature.get("bones")) is not list
+            or type(armature.get("object_constraints")) is not list
+        ):
+            _fail("SOURCE_RIG_GRAPH_SCHEMA_DRIFT")
+        rig_names.add(armature["armature_name"])
+        bones=armature["bones"]
+        known={item.get("name") for item in bones if type(item) is dict}
+        if len(known)!=len(bones):
+            _fail("SOURCE_RIG_BONE_DUPLICATE_NAME")
+        for bone in bones:
+            if (
+                bone.get("parent") is not None and bone["parent"] not in known
+                or type(bone.get("constraints")) is not list
+            ):
+                _fail("SOURCE_RIG_PARENT_OR_CONSTRAINT_DRIFT")
+            matrix=np.asarray(bone.get("native_rest_matrix_local"),dtype=np.float64)
+            if matrix.shape!=(4,4) or not np.isfinite(matrix).all():
+                _fail("SOURCE_RIG_REST_MATRIX_DOMAIN")
+    if any(row.get("armature") not in rig_names
+           for row in receipt["original_teacher_frame_rows"]):
+        _fail("SOURCE_RIG_ACTION_OWNER_UNRESOLVED")
     if (
         teacher_receipt.get("source",{}).get("sha256")!=source_asset_sha256
         or teacher_receipt.get("output",{}).get("sha256")!=teacher_npz_sha256
@@ -191,6 +230,8 @@ def audit_native_blender_attachment_receipt_v1(
         "source_asset_sha256":source_asset_sha256,
         "inventory_sha256":inventory.inventory_sha256,
         "owner_count":nown,
+        "native_source_armature_count":len(graph),
+        "native_source_bone_count":sum(len(arm["bones"]) for arm in graph),
         "original_teacher_frame_count":nframe,
         "bone_link_candidate_count":sum(o.state==_CANDIDATE for o in inventory.owners),
         "parent_root_available_samples":int(available.sum()),

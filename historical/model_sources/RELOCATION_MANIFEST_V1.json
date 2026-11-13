@@ -1,0 +1,282 @@
+{
+  "schema": "RealSaS.HistoricalModelSourceRelocation.v1",
+  "source_ref": "40aa72d10a9ddc575be9e490f77ae0a65b8b3498",
+  "intent": "PRESERVE_BYTES_AND_PYTHON_IMPORT_IDENTITY_NOT_PRODUCT_AUTHORITY",
+  "paths": [
+    {
+      "old_path": "models/arachne/README.md",
+      "new_path": "historical/model_sources/arachne/README.md",
+      "git_blob_sha1": "f0110cd6375b7f34bbfa2703d2d40b6c5939dbf6"
+    },
+    {
+      "old_path": "models/arachne/__init__.py",
+      "new_path": "historical/model_sources/arachne/__init__.py",
+      "git_blob_sha1": "7abeef5b9d6a33f9e22302a14b1c79be8b3d1ee8"
+    },
+    {
+      "old_path": "models/arachne/v2/__init__.py",
+      "new_path": "historical/model_sources/arachne/v2/__init__.py",
+      "git_blob_sha1": "c027dde730b7f42adc7020c5c4b2ec7e043f1ed8"
+    },
+    {
+      "old_path": "models/arachne/v2/arachne_candidate_v2.py",
+      "new_path": "historical/model_sources/arachne/v2/arachne_candidate_v2.py",
+      "git_blob_sha1": "ba5bf0a2757e8d702176332fcfa91f804e0d545e"
+    },
+    {
+      "old_path": "models/arachne/v2/arachne_checkpoint_v2.py",
+      "new_path": "historical/model_sources/arachne/v2/arachne_checkpoint_v2.py",
+      "git_blob_sha1": "3eb06ddbe3ed61bc94c62d7bcf47a51b71adc72c"
+    },
+    {
+      "old_path": "models/arachne/v2/arachne_geometry_v2.py",
+      "new_path": "historical/model_sources/arachne/v2/arachne_geometry_v2.py",
+      "git_blob_sha1": "0a39450b69de48da3b7748cb08972d0b69ff9700"
+    },
+    {
+      "old_path": "models/arachne/v2/arachne_tail_objective_v1.py",
+      "new_path": "historical/model_sources/arachne/v2/arachne_tail_objective_v1.py",
+      "git_blob_sha1": "0abfe7c8e85135d0ce613df6463c5d4def220717"
+    },
+    {
+      "old_path": "models/arachne/v2/codec_deformation_loss_v1.py",
+      "new_path": "historical/model_sources/arachne/v2/codec_deformation_loss_v1.py",
+      "git_blob_sha1": "94bec14810d0d2556dfb555530482f5e9a564e25"
+    },
+    {
+      "old_path": "models/arachne/v2/conditioning_v1.py",
+      "new_path": "historical/model_sources/arachne/v2/conditioning_v1.py",
+      "git_blob_sha1": "b3539ed6c4580ac69338bdb9bd4b93c6e78a262c"
+    },
+    {
+      "old_path": "models/arachne/v2/conditioning_v2.py",
+      "new_path": "historical/model_sources/arachne/v2/conditioning_v2.py",
+      "git_blob_sha1": "3383cb7801b22aeb634f05551a847a04e674c7c8"
+    },
+    {
+      "old_path": "models/arachne/v2/eval_arachne_r6_a1_v1.py",
+      "new_path": "historical/model_sources/arachne/v2/eval_arachne_r6_a1_v1.py",
+      "git_blob_sha1": "daf233904f31161f4c504179f28d9917932c3514"
+    },
+    {
+      "old_path": "models/arachne/v2/geppetto_conditioning_v2.py",
+      "new_path": "historical/model_sources/arachne/v2/geppetto_conditioning_v2.py",
+      "git_blob_sha1": "35a63245799710ff7ede082d0f8ffcf19f6af505"
+    },
+    {
+      "old_path": "models/arachne/v2/skin_field_codec_v1.py",
+      "new_path": "historical/model_sources/arachne/v2/skin_field_codec_v1.py",
+      "git_blob_sha1": "70cc805c728f011480966af6299ee7edf632b528"
+    },
+    {
+      "old_path": "models/arachne/v2/train_arachne_r6_a1_v1.py",
+      "new_path": "historical/model_sources/arachne/v2/train_arachne_r6_a1_v1.py",
+      "git_blob_sha1": "5db5a7b6c7e8d14e9c33bcf3127c78a445e8ca90"
+    },
+    {
+      "old_path": "models/arachne/v2/train_codec_r6_a0_v1.py",
+      "new_path": "historical/model_sources/arachne/v2/train_codec_r6_a0_v1.py",
+      "git_blob_sha1": "a5c7c4a0c2f982df89b191d6e4cf7d06c6c6a2dc"
+    },
+    {
+      "old_path": "models/arachne/v3/__init__.py",
+      "new_path": "historical/model_sources/arachne/v3/__init__.py",
+      "git_blob_sha1": "026be58ebeab43eb87b03e110c41a67472bb36ca"
+    },
+    {
+      "old_path": "models/arachne/v3/conditioning_v3.py",
+      "new_path": "historical/model_sources/arachne/v3/conditioning_v3.py",
+      "git_blob_sha1": "8916db43ca3d33787745aaa62fbd85047f918799"
+    },
+    {
+      "old_path": "models/arachne/v4/__init__.py",
+      "new_path": "historical/model_sources/arachne/v4/__init__.py",
+      "git_blob_sha1": "48001f18bacf3760c0754cd9f0a9a1415eef0956"
+    },
+    {
+      "old_path": "models/arachne/v4/arachne_candidate_v4.py",
+      "new_path": "historical/model_sources/arachne/v4/arachne_candidate_v4.py",
+      "git_blob_sha1": "8ae3a27cd2bed0a6ff4f5671dcf676572c005517"
+    },
+    {
+      "old_path": "models/arachne/v4/articulated_probe_v1.py",
+      "new_path": "historical/model_sources/arachne/v4/articulated_probe_v1.py",
+      "git_blob_sha1": "4fa8f38bb686fee80e5609402b85814edc2e5183"
+    },
+    {
+      "old_path": "models/arachne/v4/loss_v4.py",
+      "new_path": "historical/model_sources/arachne/v4/loss_v4.py",
+      "git_blob_sha1": "7b57eb28f9cbcba14a4982655595c452e62918bf"
+    },
+    {
+      "old_path": "models/arachne/v4/proposal_v4.py",
+      "new_path": "historical/model_sources/arachne/v4/proposal_v4.py",
+      "git_blob_sha1": "96f90686a054a7a2164153a94d0188a9e280a013"
+    },
+    {
+      "old_path": "models/arachne/v5/FROZEN_MAGE_FIT1_CHECKPOINT_V1.json",
+      "new_path": "historical/model_sources/arachne/v5/FROZEN_MAGE_FIT1_CHECKPOINT_V1.json",
+      "git_blob_sha1": "f466a9d00126283056973f0e8ad5eb0529c444a4"
+    },
+    {
+      "old_path": "models/arachne/v5/PROMOTED_MAGE_FIT_WITNESS_V1.json",
+      "new_path": "historical/model_sources/arachne/v5/PROMOTED_MAGE_FIT_WITNESS_V1.json",
+      "git_blob_sha1": "f851024c41be6a7086d6f2f3d940851e538b9927"
+    },
+    {
+      "old_path": "models/arachne/v5/README.md",
+      "new_path": "historical/model_sources/arachne/v5/README.md",
+      "git_blob_sha1": "b4e735fda5bedada3c43e736c3dc9677fd11bf8f"
+    },
+    {
+      "old_path": "models/arachne/v5/__init__.py",
+      "new_path": "historical/model_sources/arachne/v5/__init__.py",
+      "git_blob_sha1": "827e4428bdc05f83bd51de3863db298fd57198bf"
+    },
+    {
+      "old_path": "models/arachne/v5/arachne_candidate_v5.py",
+      "new_path": "historical/model_sources/arachne/v5/arachne_candidate_v5.py",
+      "git_blob_sha1": "b5f39727abbeeeb0f461508cae5487d2d700cd3d"
+    },
+    {
+      "old_path": "models/arachne/v5/checkpoint_authority_v1.py",
+      "new_path": "historical/model_sources/arachne/v5/checkpoint_authority_v1.py",
+      "git_blob_sha1": "eddea62e1a81cbddbc9bfd633bb49283d4da171c"
+    },
+    {
+      "old_path": "models/geppetto/README.md",
+      "new_path": "historical/model_sources/geppetto/README.md",
+      "git_blob_sha1": "7d7f35fcfc922dfe1f1ad203ac9e44eb890ef68f"
+    },
+    {
+      "old_path": "models/geppetto/__init__.py",
+      "new_path": "historical/model_sources/geppetto/__init__.py",
+      "git_blob_sha1": "f5ea547215a0819c53907621a43ca0849c89ea59"
+    },
+    {
+      "old_path": "models/geppetto/reference_strength_v1/README.md",
+      "new_path": "historical/model_sources/geppetto/reference_strength_v1/README.md",
+      "git_blob_sha1": "18263919f00976d99d0eced9ce57dac0cdfd0ade"
+    },
+    {
+      "old_path": "models/geppetto/reference_strength_v1/__init__.py",
+      "new_path": "historical/model_sources/geppetto/reference_strength_v1/__init__.py",
+      "git_blob_sha1": "0c7b1062e93ca8fe35d42797f9ca1ff9ab7edfee"
+    },
+    {
+      "old_path": "models/geppetto/reference_strength_v1/checkpoint_authority_v1.py",
+      "new_path": "historical/model_sources/geppetto/reference_strength_v1/checkpoint_authority_v1.py",
+      "git_blob_sha1": "d26f02ce46b602d18f662e9c0748e984bd11c244"
+    },
+    {
+      "old_path": "models/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py",
+      "new_path": "historical/model_sources/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py",
+      "git_blob_sha1": "e9b626815c63a96ac1d390580e1aa19f8bf1cfb2"
+    },
+    {
+      "old_path": "models/geppetto/reference_strength_v1/geppetto_reference_strength_no_learned_slot_v1.py",
+      "new_path": "historical/model_sources/geppetto/reference_strength_v1/geppetto_reference_strength_no_learned_slot_v1.py",
+      "git_blob_sha1": "6f2505aa9e4169cec29c2c1508cde7264971073c"
+    },
+    {
+      "old_path": "models/geppetto/reference_strength_v1/rigging_surface_tensorization_v1.py",
+      "new_path": "historical/model_sources/geppetto/reference_strength_v1/rigging_surface_tensorization_v1.py",
+      "git_blob_sha1": "647fdcb98c305c3f7d3afd05dd61449999721034"
+    },
+    {
+      "old_path": "models/geppetto/v2/__init__.py",
+      "new_path": "historical/model_sources/geppetto/v2/__init__.py",
+      "git_blob_sha1": "59e91ee847a5d0e746f0e78e4b63b7b6f3eabcf8"
+    },
+    {
+      "old_path": "models/geppetto/v2/geppetto_candidate_v2.py",
+      "new_path": "historical/model_sources/geppetto/v2/geppetto_candidate_v2.py",
+      "git_blob_sha1": "48ec33b00f4b765111fcc53f0591eeb8c74736ea"
+    },
+    {
+      "old_path": "models/geppetto/v2/geppetto_checkpoint_v2.py",
+      "new_path": "historical/model_sources/geppetto/v2/geppetto_checkpoint_v2.py",
+      "git_blob_sha1": "4991038092cad88f2b1e11cbd486af3d925e235f"
+    },
+    {
+      "old_path": "models/geppetto/v2/geppetto_conditioning_v2.py",
+      "new_path": "historical/model_sources/geppetto/v2/geppetto_conditioning_v2.py",
+      "git_blob_sha1": "9a33ab34ce050842c77dfc64407123303c4bf456"
+    },
+    {
+      "old_path": "models/geppetto/v2/geppetto_eval_v2.py",
+      "new_path": "historical/model_sources/geppetto/v2/geppetto_eval_v2.py",
+      "git_blob_sha1": "dfdb2f3ab754ec1530a3d489fb9c3d1207c67232"
+    },
+    {
+      "old_path": "models/geppetto/v2/geppetto_loss_v2.py",
+      "new_path": "historical/model_sources/geppetto/v2/geppetto_loss_v2.py",
+      "git_blob_sha1": "bafcba5d98593fdc0b949dff42f7e9fc31263b5d"
+    },
+    {
+      "old_path": "models/geppetto/v2/geppetto_train_v2.py",
+      "new_path": "historical/model_sources/geppetto/v2/geppetto_train_v2.py",
+      "git_blob_sha1": "4453810f047cc62171ab16ccab3f4c1ead0169c7"
+    },
+    {
+      "old_path": "models/geppetto/v2/training_targets_v1.py",
+      "new_path": "historical/model_sources/geppetto/v2/training_targets_v1.py",
+      "git_blob_sha1": "facf3c4a22f27c11a7dec2f2a6bd531c7f97cc03"
+    },
+    {
+      "old_path": "models/geppetto/v2/training_targets_v2.py",
+      "new_path": "historical/model_sources/geppetto/v2/training_targets_v2.py",
+      "git_blob_sha1": "8caf6bcfc9c2cb10e2c7d0758913e550863df4f8"
+    },
+    {
+      "old_path": "models/skin_field_codec/README.md",
+      "new_path": "historical/model_sources/skin_field_codec/README.md",
+      "git_blob_sha1": "2d7c5f74f73bdb370d820092cc0396302ab2acd8"
+    },
+    {
+      "old_path": "models/skin_field_codec/__init__.py",
+      "new_path": "historical/model_sources/skin_field_codec/__init__.py",
+      "git_blob_sha1": "963d5ad02cae82acff62a464ae6d04c574cdfed5"
+    },
+    {
+      "old_path": "models/skin_field_codec/v1/__init__.py",
+      "new_path": "historical/model_sources/skin_field_codec/v1/__init__.py",
+      "git_blob_sha1": "b6f0355df85d9eeebb30488c6c2af500ddf19df8"
+    },
+    {
+      "old_path": "models/skin_field_codec/v1/candidate_config_v1.py",
+      "new_path": "historical/model_sources/skin_field_codec/v1/candidate_config_v1.py",
+      "git_blob_sha1": "c6501097a5c72809acff8d58b33ee1b685c1e82f"
+    },
+    {
+      "old_path": "models/skin_field_codec/v1/codec_deformation_loss_v1.py",
+      "new_path": "historical/model_sources/skin_field_codec/v1/codec_deformation_loss_v1.py",
+      "git_blob_sha1": "b0462467f8346f3883058c1c47a065f4d5be5adf"
+    },
+    {
+      "old_path": "models/skin_field_codec/v1/config_v1.py",
+      "new_path": "historical/model_sources/skin_field_codec/v1/config_v1.py",
+      "git_blob_sha1": "622aa895968d833595fed12a6f4211705b2f6240"
+    },
+    {
+      "old_path": "models/skin_field_codec/v1/eval_codec_r6_a0_v1.py",
+      "new_path": "historical/model_sources/skin_field_codec/v1/eval_codec_r6_a0_v1.py",
+      "git_blob_sha1": "c29161dca81d70209cf1dbfe1b9d99f3d5b99b3a"
+    },
+    {
+      "old_path": "models/skin_field_codec/v1/skin_field_codec_checkpoint_v1.py",
+      "new_path": "historical/model_sources/skin_field_codec/v1/skin_field_codec_checkpoint_v1.py",
+      "git_blob_sha1": "0365d4e1434443065487c6644a68ab07a60c6cda"
+    },
+    {
+      "old_path": "models/skin_field_codec/v1/skin_field_codec_v1.py",
+      "new_path": "historical/model_sources/skin_field_codec/v1/skin_field_codec_v1.py",
+      "git_blob_sha1": "01d064fdbf0df1e1efb09495b788665e582e2f42"
+    },
+    {
+      "old_path": "models/skin_field_codec/v1/train_codec_r6_a0_v1.py",
+      "new_path": "historical/model_sources/skin_field_codec/v1/train_codec_r6_a0_v1.py",
+      "git_blob_sha1": "18baa39c8178b0f5f16cece0aa78aa51aac6ca00"
+    }
+  ]
+}

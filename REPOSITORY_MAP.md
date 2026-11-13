@@ -18,7 +18,7 @@ This map is **human navigation**; it is not a competing architecture configurati
 
 | Path | Status |
 | --- | --- |
-| `models/arachne/`, `models/geppetto/`, `models/skin_field_codec/` | Old model lineage/compatibility. Some new expert modules still import these packages; never blind-move. |
+| `historical/model_sources/arachne/`, `historical/model_sources/geppetto/`, `historical/model_sources/skin_field_codec/` | Byte-preserved old model lineage with original `models.*` Python import aliases. Do not claim ProductRelease authority. |
 | `canonical/` | Legacy mixed namespace: historical experiment/forensic records **and** machine policies with path-bound consumers |
 | `historical/`, `restoration/` | Historic documentation and restoration records |
 | `experiments/`, `research/`, `notebooks/`, `prereg/`, `prospective/` | Research evidence, notebooks, proposals; no automatic product authority |

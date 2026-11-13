@@ -48,7 +48,7 @@ MAINLINE_PYTHON_ROOTS = (
 # models/ tensorization module before the candidate imports it. No other dated
 # experiments.* import is admitted anywhere in the current mainline.
 GEPPETTO_FROZEN_CANDIDATE = Path(
-    "models/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py"
+    "historical/model_sources/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py"
 )
 GEPPETTO_HISTORICAL_TENSORIZATION = (
     "experiments.geppetto_reference_strength_fullstack_v1."

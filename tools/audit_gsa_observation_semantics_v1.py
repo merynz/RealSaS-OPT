@@ -9,7 +9,7 @@ from compiler.realsas_compiler_core.substrate.scene_first_signed import (
 
 ROOT=Path(__file__).resolve().parents[1]
 src=(ROOT/"compiler/realsas_compiler_core/substrate/scene_first_signed.py").read_text()
-tensor=(ROOT/"models/geppetto/reference_strength_v1/rigging_surface_tensorization_v1.py").read_text()
+tensor=(ROOT/"historical/model_sources/geppetto/reference_strength_v1/rigging_surface_tensorization_v1.py").read_text()
 
 params=tuple(inspect.signature(rigging_surface_from_scene_first_zero_mesh_v1).parameters)
 mask_inputs=[p for p in params if "mask" in p.lower() or "observation" in p.lower()]

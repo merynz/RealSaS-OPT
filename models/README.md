@@ -14,6 +14,6 @@ The nine-role RSS.vNext candidate is in [PR #485](https://github.com/merynz/Real
 
 ## Historical code and compatibility
 
-`geppetto/`, `arachne/`, `skin_field_codec/` and earlier numbered IRIS/TESSA branches preserve research/checkpoint behavior. Their presence does **not** imply a second active product model. **AXIS and MIRA still import some older model modules**; before relocating, audit direct + transitive Python imports, checkpoint keys, serialized paths, workflow callers and training scripts.
+`../historical/model_sources/geppetto/`, `../historical/model_sources/arachne/`, `../historical/model_sources/skin_field_codec/` and earlier numbered IRIS/TESSA branches preserve research/checkpoint behavior. Their presence does **not** imply a second active product model. **AXIS and MIRA retain compatibility imports of archived old model modules**; before relocating, audit direct + transitive Python imports, checkpoint keys, serialized paths, workflow callers and training scripts.
 
 Run `python tools/repository_clarity_audit_v1.py --json` to inspect direct static imports; this does not prove dynamic-load safety. Compiler validates and qualifies evidence; model files do not mint ProductRevision.

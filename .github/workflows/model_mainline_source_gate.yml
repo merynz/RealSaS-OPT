@@ -186,10 +186,10 @@ jobs:
           for root in (
               Path('models/iris/v2'),
               Path('models/iris/v3'),
-              Path('models/geppetto/reference_strength_v1'),
-              Path('models/geppetto/v2'),
-              Path('models/skin_field_codec/v1'),
-              Path('models/arachne/v2'),
+              Path('historical/model_sources/geppetto/reference_strength_v1'),
+              Path('historical/model_sources/geppetto/v2'),
+              Path('historical/model_sources/skin_field_codec/v1'),
+              Path('historical/model_sources/arachne/v2'),
               Path('experiments/family_selection_v1'),
           ):
               for path in sorted(root.glob('*.py')):

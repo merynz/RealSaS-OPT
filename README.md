@@ -19,7 +19,7 @@
 
 ## Research, compatibility and archive
 
-[`canonical/`](canonical/README.md) is an **inherited name**, not a claim that every old Knight/FIT artifact is active. It mixes sealed historical research with a few referenced machine policies. [`historical/`](historical/README.md), [`experiments/`](experiments/) and [`docs/`](docs/) preserve provenance. Older `models/geppetto/` and `models/arachne/` implementations are not independent RSS.vNext product releases, but still have compatibility imports; do not relocate without dependency checks.
+[`canonical/`](canonical/README.md) is an **inherited name**, not a claim that every old Knight/FIT artifact is active. It mixes sealed historical research with a few referenced machine policies. [`historical/`](historical/README.md), [`experiments/`](experiments/) and [`docs/`](docs/) preserve provenance. Older `models.geppetto` and `models.arachne` import identities (now stored under `historical/model_sources/`) are not independent RSS.vNext product releases, but still have compatibility imports; do not relocate without dependency checks.
 
 The repository contains many workflows. **Only 26** are explicitly named in the current RSS.vNext PR fast/full CI authority; other workflows require trigger, caller and coverage audit before consolidation. Run `python tools/repository_clarity_audit_v1.py --json` for a read-only live inventory.
 

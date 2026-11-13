@@ -10,14 +10,14 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 MAINLINE_ROOTS = (ROOT / "models", ROOT / "compiler", ROOT / "runtime")
 FROZEN_GEPPETTO_COMPAT_PATH = Path(
-    "models/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py"
+    "historical/model_sources/geppetto/reference_strength_v1/geppetto_reference_strength_candidate_v1.py"
 )
 FROZEN_GEPPETTO_COMPAT_MODULE = (
     "experiments.geppetto_reference_strength_fullstack_v1."
     "rigging_surface_tensorization_v1"
 )
 PROMOTED_GEPPETTO_TENSORIZATION = (
-    ROOT / "models/geppetto/reference_strength_v1/rigging_surface_tensorization_v1.py"
+    ROOT / "historical/model_sources/geppetto/reference_strength_v1/rigging_surface_tensorization_v1.py"
 )
 
 
@@ -25,9 +25,9 @@ class CanonicalMainReadinessV1(unittest.TestCase):
     def test_living_system_homes_exist(self) -> None:
         required = (
             "models/iris/v2/model_v2.py",
-            "models/geppetto/v2/geppetto_candidate_v2.py",
-            "models/skin_field_codec/v1/skin_field_codec_v1.py",
-            "models/arachne/v2/arachne_candidate_v2.py",
+            "historical/model_sources/geppetto/v2/geppetto_candidate_v2.py",
+            "historical/model_sources/skin_field_codec/v1/skin_field_codec_v1.py",
+            "historical/model_sources/arachne/v2/arachne_candidate_v2.py",
             "compiler/realsas_compiler_core/substrate/surface.py",
             "compiler/realsas_compiler_core/substrate/local_geometry.py",
             "compiler/realsas_compiler_core/substrate/iris_v2.py",

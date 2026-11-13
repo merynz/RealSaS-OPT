@@ -9,7 +9,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = ROOT / "canonical" / "GEPPETTO_FIT1_EVIDENCE_MANIFEST_V1.json"
-MODEL_HOME = ROOT / "models" / "geppetto" / "reference_strength_v1"
+MODEL_HOME = ROOT / "historical" / "model_sources" / "geppetto" / "reference_strength_v1"
 EXPERIMENT_HOME = ROOT / "experiments" / "geppetto_reference_strength_fullstack_v1"
 
 

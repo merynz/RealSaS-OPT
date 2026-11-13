@@ -1,5 +1,7 @@
 # Historical Record Index
 
+Old Geppetto, Arachne and SkinFieldCodec Python sources now live under [model_sources](model_sources/README.md), with byte-identical relocation receipts and preserved `models.*` import compatibility. This placement is historical storage, not product inference authority.
+
 Current work starts at [CURRENT_STATE.md](../CURRENT_STATE.md) and
 [Execution lanes](../docs/platform/EXECUTION_LANES.md). This index is
 navigation only; it does not grant execution or scientific authority.

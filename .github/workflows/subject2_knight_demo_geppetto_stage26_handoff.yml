@@ -223,7 +223,7 @@ jobs:
           qual_payload=json.loads(qualification.read_text())
           target=json.loads(target_report.read_text())
 
-          model_source_repo=repo/"models/geppetto/reference_strength_v1/geppetto_reference_strength_no_learned_slot_v1.py"
+          model_source_repo=repo/"historical/model_sources/geppetto/reference_strength_v1/geppetto_reference_strength_no_learned_slot_v1.py"
           model_source=inputs/"geppetto_reference_strength_no_learned_slot_v1.py"
           shutil.copyfile(model_source_repo,model_source)
 

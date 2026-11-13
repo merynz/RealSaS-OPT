@@ -5,7 +5,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "experiments" / "geppetto_arachne_r6_20260901"
-TARGET = ROOT / "models" / "arachne" / "v2"
+TARGET = ROOT / "historical" / "model_sources" / "arachne" / "v2"
 PROMOTED = (
     "arachne_candidate_v2.py",
     "conditioning_v2.py",

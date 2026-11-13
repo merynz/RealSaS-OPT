@@ -216,6 +216,42 @@ def _measure_source_views(
     return all(row["accepted"] for row in views), views
 
 
+def _quality_metrics(xyz: np.ndarray, faces: np.ndarray) -> dict[str, Any]:
+    tri = xyz[faces]
+    e01 = np.linalg.norm(tri[:, 1] - tri[:, 0], axis=-1)
+    e12 = np.linalg.norm(tri[:, 2] - tri[:, 1], axis=-1)
+    e20 = np.linalg.norm(tri[:, 0] - tri[:, 2], axis=-1)
+    long = np.maximum.reduce((e01, e12, e20))
+    area2 = np.linalg.norm(np.cross(
+        tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0],
+    ), axis=-1)
+    if (
+        len(faces) < 1 or np.any(area2 <= 1e-10)
+        or not np.isfinite(area2).all()
+        or not np.isfinite(long).all()
+    ):
+        return {"passed": False, "reason": "DEGENERATE_OR_NONFINITE_SURFACE"}
+    max_aspect = float((long * long / area2).max())
+    angles = []
+    for a, b, c in ((0, 1, 2), (1, 2, 0), (2, 0, 1)):
+        u = tri[:, b] - tri[:, a]
+        v = tri[:, c] - tri[:, a]
+        dot = np.einsum("ij,ij->i", u, v)
+        denominator = np.linalg.norm(u, axis=-1) * np.linalg.norm(v, axis=-1)
+        angle = np.degrees(np.arccos(
+            np.clip(dot / np.maximum(denominator, 1e-12), -1., 1.),
+        ))
+        angles.append(float(angle.min()))
+    minimum = min(angles)
+    return {
+        "passed": bool(minimum >= 7.5 and max_aspect <= 16.),
+        "minimum_angle_deg": minimum,
+        "maximum_aspect_longest_over_min_altitude": max_aspect,
+        "policy_min_angle_deg": 7.5,
+        "policy_max_aspect": 16.,
+    }
+
+
 def _candidate_from_tessa(
     *, xyz: np.ndarray, faces: np.ndarray, component_ids: np.ndarray,
     receipt: dict[str, Any], scene_digest: str,
@@ -341,7 +377,9 @@ def admit_raw_two_view_mesh_v1(
     xyz = scene["tessa_candidate_rest_vertices"][0].astype(np.float64)
     faces = scene["tessa_candidate_faces"].astype(np.int64)
     components = scene["tessa_candidate_vertex_components"].astype(np.int64)
+    quality = _quality_metrics(xyz, faces)
     qualified, views = _measure_source_views(source, xyz, faces)
+    qualified = bool(qualified and quality["passed"])
     witness = {
         "schema": "RealSaS.RSSvNext.RawTwoObservedViewStaticAdmission.v1",
         "source_binding_sha256": source.source_binding_sha256,
@@ -354,6 +392,7 @@ def admit_raw_two_view_mesh_v1(
         "source_rgb_surface_ownership_qualified": False,
         "hidden_geometry_qualified": False,
         "view_results": views,
+        "mesh_static_conditioning": quality,
         "source_static_silhouette_qualified": bool(qualified),
         "product_revision_minted": False,
     }
@@ -372,7 +411,7 @@ def admit_raw_two_view_mesh_v1(
         partition_binding_hash=candidate.partition_binding_hash,
         qualification_report={
             "status": "PASS_STATIC_CANONICAL_CARRIER",
-            "static_quality_policy_passed": True,
+            "static_quality_policy_passed": quality["passed"],
             "source_fidelity_qualification_passed": True,
             "source_fidelity_scope": "TWO_ORIGINAL_ALPHA_MASKS_WITH_FITTED_CAMERA_HYPOTHESES",
             "source_3d_geometry_qualified": False,

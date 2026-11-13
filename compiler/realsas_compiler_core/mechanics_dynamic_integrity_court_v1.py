@@ -124,7 +124,11 @@ def compile_mechanics_dynamic_integrity_court_v1(
     validate_canonical_mesh_domain_v1(mesh)
     # Too-large meshes are explicitly censored, not "sampled and passed".
     # Full-collision qualification needs every canonical face and control.
-    if len(mesh.faces) > max_faces or len(rig.controls) > max_controls:
+    if (
+        len(mesh.faces) > max_faces or len(rig.controls) > max_controls
+        or len(mesh.faces) * max(1, len(rig.controls)) * len(intervention_steps)
+        > 32_768
+    ):
         result = MechanicsDynamicIntegrityCourtV1(
             canonical_mesh_lineage_hash=mesh.mesh_lineage_hash,
             canonical_rig_lineage_hash=rig.rig_lineage_hash,

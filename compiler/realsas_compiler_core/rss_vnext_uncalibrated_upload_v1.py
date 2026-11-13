@@ -2,12 +2,12 @@ from __future__ import annotations
 
 """Lossless pre-canonicalization two-image intake: scene, pose, camera UNKNOWN.
 
-This is upstream of existing RSSvNextTwoViewSourceObservationV1, which requires
-two measured antipodal 13D cameras. An arbitrary user upload cannot be
-silently cast into that calibrated source schema. Published character-reconstruction methods apply learned canonicalization
-and multiview diffusion before scene reconstruction. Our generic two-view LoRA candidate will need jointly
-conditioned pose/camera estimation; this source envelope preserves both input
-files until trained canonicalization exists.
+The calibrated RSSvNextTwoViewSourceObservationV1 is a distinct upstream
+contract, requiring real observed camera data. Arbitrary user uploads are
+preserved as two image bytes; neural canonicalization and camera-conditioned
+generated views follow. Virtual target cameras are never source measurements.
+The common H(x) reconstruction operates on generated views without pretending
+the two customer cameras were calibrated.
 
 Original uploaded file bytes take precedence over any derived resize, matte,
 future diffusion view or 3D inference. View names are USER CLAIMS only.

@@ -35,12 +35,13 @@ class RSSvNextTwoSourceConstructionV1:
     generated_view_count: int = 6
     generated_is_observed: bool = False
     product_revision_minted: bool = False
+    original_camera_calibrated: bool = False
 
 
 @torch.no_grad()
 def run_two_source_neural_construction_v1(
     *, model: RSSvNextUnifiedCharacterModel,
-    observed_rgba: Tensor, original_camera_features: Tensor,
+    observed_rgba: Tensor, original_camera_features: Tensor | None,
     source_binding_sha256: str,
     canonical_cameras: Tensor, six_view_cameras: Tensor,
     canonical_sampler: RSSvNextPinnedDiffusionStageV1,
@@ -67,9 +68,12 @@ def run_two_source_neural_construction_v1(
         or multiview_sampler.checkpoint_sha256 is None
     ):
         raise RuntimeError("RSS_VNEXT_CONSTRUCTION_MODEL_OR_TASK_RELEASE_UNQUALIFIED")
-    tokens, _, _ = model._original_source_tokens(
-        observed_rgba, original_camera_features,
-    )
+    if original_camera_features is None:
+        tokens, _, _ = model._observed_pixel_tokens_without_camera(observed_rgba)
+    else:
+        tokens, _, _ = model._original_source_tokens(
+            observed_rgba, original_camera_features,
+        )
     b = observed_rgba.shape[0]
     if (
         canonical_cameras.shape != (b, 2, 13)
@@ -142,6 +146,14 @@ def run_two_source_neural_construction_v1(
         != "GENERATED_SIX_VIEW_SHARED_SCENE"
         or prediction["state"].generated_view_count != 6
         or prediction["state"].observed_image_tokens.shape[1] != 2
+        or (
+            original_camera_features is None
+            and (
+                prediction["state"].camera_features is not None
+                or prediction["state"].source_camera_authority
+                != "UNKNOWN_NO_ORIGINAL_CAMERA_PROJECTION"
+            )
+        )
     ):
         raise RuntimeError("RSS_VNEXT_CONSTRUCTION_SOURCE_OR_SCENE_DRIFT")
     return RSSvNextTwoSourceConstructionV1(
@@ -153,6 +165,7 @@ def run_two_source_neural_construction_v1(
         canonical_checkpoint_sha256=canonical.checkpoint_sha256,
         multiview_checkpoint_sha256=generated.checkpoint_sha256,
         construction_checkpoint_binding_sha256=combined,
+        original_camera_calibrated=original_camera_features is not None,
     )
 
 

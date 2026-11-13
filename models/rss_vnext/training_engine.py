@@ -39,6 +39,7 @@ from .flexicubes_animation_supervision import (
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 from .attachment_face_correspondence_v1 import (
     source_qualified_socket_face_loss_v1, axis_sequence_digest_v1,
+    mesh_topology_digest_v1,
 )
 from .early_semantic_field import (
     masked_source_semantic_evidence_loss,
@@ -235,6 +236,7 @@ class RSSvNextTrainingResult:
     eligible_source_inside_sign_queries: int = 0
     axis_rig_skin_loss: Tensor | None = None
     eligible_axis_sequences: int = 0
+    axis_training_conditioning: str = "NO_AXIS_OBJECTIVE"
     anchor_face_correspondence_loss: Tensor | None = None
     eligible_anchor_held_faces: int = 0
     eligible_anchor_holder_faces: int = 0
@@ -305,6 +307,10 @@ class RSSvNextStructuralTrainer:
         dataset_manifest_sha256: str,
         weights: RSSvNextTrainingWeights = RSSvNextTrainingWeights(),
         preference: RSSvNextTopologyPreferenceConfig = RSSvNextTopologyPreferenceConfig(),
+        # Product AXIS must consume the SAME TESSA-indexed mesh stream in
+        # source training and teacher-free inference. Rig-only is explicitly
+        # a research pretrain lane, never mesh-conditioned product parity.
+        axis_training_policy: str = "PRODUCT_MESH_MATCHED_REQUIRED",
         trusted_render_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_surface_role_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_semantic_patch_registry: Mapping[str, Mapping[str, object]] | None = None,
@@ -325,6 +331,11 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_NOT_HEX") from exc
         weights.validate()
         preference.validate()
+        if axis_training_policy not in (
+            "PRODUCT_MESH_MATCHED_REQUIRED","RIG_ONLY_PRETRAIN",
+        ):
+            raise ValueError("RSS_VNEXT_AXIS_TRAINING_CONDITIONING_POLICY_UNKNOWN")
+        self.axis_training_policy=axis_training_policy
         self.model = model
         self.optimizer = optimizer
         self.weights = weights
@@ -335,6 +346,7 @@ class RSSvNextStructuralTrainer:
         self.objective_policy_sha256 = hashlib.sha256(json.dumps({
             "weights": asdict(weights),
             "preference": asdict(preference),
+            "axis_training_policy": self.axis_training_policy,
         }, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf8")).hexdigest()
         self.dataset_manifest_sha256 = dataset_manifest_sha256.lower()
         # The trusted training launcher supplies this, not the data batch.
@@ -1114,6 +1126,9 @@ class RSSvNextStructuralTrainer:
             n_graphics_rgb = int(source_mask.sum().item())
         axis_loss = None
         n_axis = 0
+        axis_training_conditioning = "NO_AXIS_OBJECTIVE"
+        matched_axis_mesh = None
+        matched_axis_memory = None
         axis_requested = batch.axis_teacher_sequence is not None or bool(batch.axis_teacher_admission_key)
         if axis_requested:
             if batch.axis_teacher_sequence is None or not batch.axis_teacher_admission_key:
@@ -1140,9 +1155,57 @@ class RSSvNextStructuralTrainer:
                 or any(parameter.requires_grad for parameter in self.model.mira.codec.parameters())
             ):
                 raise ValueError("RSS_VNEXT_AXIS_TEACHER_SOURCE_CODEC_OR_SEQUENCE_DRIFT")
+            if self.axis_training_policy=="PRODUCT_MESH_MATCHED_REQUIRED":
+                if (
+                    batch.topology_teacher_tokens is None
+                    or batch.topology_valid_mask is None
+                    or state.scene_triplanes.shape[0]!=1
+                    or batch.topology_teacher_tokens.ndim!=2
+                    or batch.topology_teacher_tokens.shape[0]!=1
+                    or batch.topology_teacher_tokens.dtype!=torch.long
+                    or batch.topology_valid_mask.shape!=(1,)
+                    or batch.topology_valid_mask.dtype!=torch.bool
+                    or not bool(batch.topology_valid_mask[0])
+                ):
+                    raise ValueError("RSS_VNEXT_AXIS_PRODUCT_MATCHED_TESSA_MESH_REQUIRED")
+                # A byte-bound, source-admitted TESSA teacher mesh, NOT an
+                # anonymous token list, must condition product rig training.
+                # Both AXIS rig-token CE and the anchor-face CE will reuse
+                # exactly this mesh and the same control memory.
+                if (
+                    receipt.get("mesh_teacher_semantics")
+                    != "SOURCE_NATIVE_TESSA_TEACHER_TOPOLOGY_FOR_AXIS_PRODUCT"
+                    or receipt.get("mesh_teacher_source_reindex_proven") is not True
+                    or receipt.get("mesh_teacher_tokens_sha256")
+                    != source_surface_tensor_sha256(batch.topology_teacher_tokens)
+                    or receipt.get("mesh_teacher_valid_mask_sha256")
+                    != source_surface_tensor_sha256(batch.topology_valid_mask)
+                    or receipt.get("observed_rgba_sha256")
+                    != source_surface_tensor_sha256(batch.rgba)
+                    or receipt.get("observed_camera_sha256")
+                    != source_surface_tensor_sha256(batch.camera_features)
+                ):
+                    raise ValueError("RSS_VNEXT_AXIS_PRODUCT_TESSA_SOURCE_BINDING_DRIFT")
+                matched_axis_mesh=self.model.build_mesh_candidate(
+                    state,batch.topology_teacher_tokens[0],
+                    source_authority="TEACHER_FORCED_TRAINING_ONLY",
+                )
+                if receipt.get("mesh_teacher_topology_digest")!=mesh_topology_digest_v1(
+                    matched_axis_mesh
+                ):
+                    raise ValueError("RSS_VNEXT_AXIS_PRODUCT_TESSA_FACE_REINDEX_DRIFT")
+                matched_axis_memory=self.model._control_memory(
+                    state,memory,matched_axis_mesh,
+                )
+                axis_training_conditioning="PRODUCT_MESH_MATCHED_TESSA_H"
+            else:
+                if bool((teacher.kind_ids==int(RigTokenKindV6.ANCHOR)).any()):
+                    raise ValueError("RSS_VNEXT_AXIS_RIG_ONLY_ANCHOR_REQUIRES_MESH")
+                matched_axis_memory=self.model._control_memory(state,memory)
+                axis_training_conditioning="RIG_ONLY_PRETRAIN_NOT_PRODUCT_PARITY"
             axis_loss, _axis_components = qualified_axis_rig_skin_sequence_loss_v6(
                 self.model.axis,
-                self.model._control_memory(state, memory),
+                matched_axis_memory,
                 teacher,
                 tokens_per_joint=self.model.cfg.skin_tokens_per_joint,
                 executable_constraint_operators=RIG_CONSTRAINT_OPERATOR_IDS_V1,
@@ -1170,6 +1233,8 @@ class RSSvNextStructuralTrainer:
                 raise ValueError("RSS_VNEXT_SOCKET_FACE_TRAIN_TEACHER_INCOMPLETE")
             if self.weights.anchor_face_correspondence <= 0:
                 raise ValueError("RSS_VNEXT_SOCKET_FACE_TRAIN_WEIGHT_REQUIRED")
+            if self.axis_training_policy!="PRODUCT_MESH_MATCHED_REQUIRED":
+                raise ValueError("RSS_VNEXT_SOCKET_FACE_MESH_MATCHED_PRODUCT_POLICY_REQUIRED")
             if (
                 state.scene_triplanes.shape[0] != 1
                 or batch.topology_teacher_tokens.ndim != 2
@@ -1205,15 +1270,15 @@ class RSSvNextStructuralTrainer:
             # Here TESSA tokens are a teacher-forced TRAINING candidate only.
             # Source face IDs are eligible if a separate foundry receipt
             # proves exact reindexing into THIS candidate face namespace.
-            mesh = self.model.build_mesh_candidate(
-                state,batch.topology_teacher_tokens[0],
-                source_authority="TEACHER_FORCED_TRAINING_ONLY",
-            )
+            if matched_axis_mesh is None or matched_axis_memory is None:
+                raise ValueError("RSS_VNEXT_SOCKET_FACE_MATCHED_AXIS_MEMORY_MISSING")
+            # The same mesh *object* and control memory, not a second
+            # independently sampled encoder/mesh/conditioning pass.
             control_hidden = self.model.axis(
-                self.model._control_memory(state,memory,mesh),teacher,
+                matched_axis_memory,teacher,
             )["hidden"]
             predicted = self.model.anchor_face_correspondence(
-                mesh=mesh,axis_hidden=control_hidden,axis_sequence=teacher,
+                mesh=matched_axis_mesh,axis_hidden=control_hidden,axis_sequence=teacher,
                 region_relation_logits=state.region_relation_logits,
             )
             face_objective=source_qualified_socket_face_loss_v1(
@@ -1337,6 +1402,7 @@ class RSSvNextStructuralTrainer:
             eligible_source_inside_sign_queries=n_source_inside_sign,
             axis_rig_skin_loss=axis_loss,
             eligible_axis_sequences=n_axis,
+            axis_training_conditioning=axis_training_conditioning,
             anchor_face_correspondence_loss=anchor_face_loss,
             eligible_anchor_held_faces=eligible_anchor_held,
             eligible_anchor_holder_faces=eligible_anchor_holder,

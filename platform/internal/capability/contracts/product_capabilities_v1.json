@@ -348,8 +348,9 @@
         "output_artifact_type": "RealSaS.CanonicalMotionIR",
         "output_schema_version": "v2",
         "required_models": [],
-        "animation_source_input_required": true,
-        "can_mint_product_revision": false
+        "animation_source_input_required": false,
+        "can_mint_product_revision": false,
+        "default_rest_hold_policy": "DETERMINISTIC_ZERO_TRACK_REST_HOLD_V1"
       }
     },
     "product.proof": {

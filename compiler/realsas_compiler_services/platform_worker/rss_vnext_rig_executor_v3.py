@@ -29,7 +29,7 @@ from compiler.realsas_compiler_core.rss_vnext_source_evidence_binding_v1 import 
     validate_rss_vnext_source_evidence_binding_v1,
 )
 from compiler.realsas_compiler_core.rss_vnext_surface_decisions_v1 import (
-    RSSvNextComputedCandidateSurfaceV1,
+    rss_vnext_computed_surface_from_dict_v1,
 )
 from compiler.realsas_compiler_services.platform_worker.rss_vnext_product_fanout_v1 import (
     bind_rss_vnext_fanout_refs_v1,
@@ -162,7 +162,7 @@ def execute_rss_vnext_rig_capability_v3(
     surface_payload = _json(
         request, "RealSaS.RSSvNextComputedCandidateSurface", "v1", read_object,
     )
-    surface = RSSvNextComputedCandidateSurfaceV1(**surface_payload)
+    surface = rss_vnext_computed_surface_from_dict_v1(surface_payload)
     basis = build_rss_vnext_neural_mesh_candidate_basis_v1(
         evidence=evidence, computed_surface=surface, model_config=cfg,
     )

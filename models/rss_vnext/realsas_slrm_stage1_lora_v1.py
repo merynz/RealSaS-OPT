@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-"""Clean-room Stage1 attention LoRA for the published RealSaS S-LRM recipe.
+"""RealSaS-owned Stage1 attention LoRA for the neural reconstruction trunk.
 
 the CVPR 2025 multi-view reference uses pretrained InstantNeRF, LoRA in each self/cross
 attention, learned triplane position/deconv and a new semantic decoder.
-The source-released RealSaS uses loratorch; this is independently written
+The published reference implementation uses loratorch; this is independently written
 using PyTorch parametrization and DOES NOT import proprietary NVIDIA code.
 
 This adapter is for the existing IRIS TransformerDecoder. It is NOT
 compatible with released InstantNeRF checkpoints and is NOT proof that
 such a pretrained model was loaded. Do not freeze randomly initialized
-IRIS and claim RealSaS parity. Install AFTER trusted 3D pretraining and
+IRIS and claim upstream reconstruction parity. Install AFTER trusted 3D pretraining and
 BEFORE creating the optimizer.
 """
 
@@ -109,6 +109,9 @@ def install_rss_realsas_stage1_attention_lora_v1(
             owner,attr,RealSaSAttentionWeightLoRAV1(shape,rank=rank,alpha=alpha),
         )
     model.presentation_role_head.requires_grad_(True)
+    # The six-view reconstructor must LEARN how predicted normals contribute
+    # to the same H(x). Keeping this zero-init adapter frozen erases normals.
+    model.normal_condition_proj.requires_grad_(True)
     model.iris.scene.scene_queries.requires_grad_(True)
     model.iris.scene.upsample.requires_grad_(True)
     model.realsas_stage1_lora_adapter_installed=True

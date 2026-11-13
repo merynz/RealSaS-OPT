@@ -235,6 +235,7 @@ def save_product_neural_bundle_v1(
         or not 4 <= denoise_steps <= 80
         or canonical.conditioner.source_projection.in_features != model.cfg.iris.image_token_dim
         or multiview.conditioner.source_projection.in_features != model.cfg.iris.image_token_dim
+        or not bool((model.normal_condition_proj.weight.detach().abs() > 1e-10).any())
     ):
         raise RuntimeError("RSS_VNEXT_BUNDLE_NEURAL_ARCHITECTURE_OR_POLICY_INVALID")
     spec_a, spec_b = _stage_spec(canonical), _stage_spec(multiview)

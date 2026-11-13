@@ -138,15 +138,35 @@ def bind_rss_vnext_fanout_refs_v1(
     """Read-only source/child index court, no expensive neural-scene load."""
     if not isinstance(index, Mapping) or index.get("schema") != SCHEMA:
         raise RuntimeError("RSS_VNEXT_FANOUT_READ_UNVALIDATED_INDEX")
+    # Go Platform's execution_artifacts assigns immutable transport labels
+    # input:0000 ... instead of producer output roles. The *indexed* artifact
+    # type/schema + CAS bytes, not this ephemeral ordinal, are the source of
+    # the seven child identities. Direct standalone Compiler calls may retain
+    # the original semantic role labels. Do not trust a mutable role string to
+    # replace the independently sealed Shape fanout manifest.
     by_role: dict[str, dict[str, Any]] = {}
+    type_to_role = {value: role for role, value in _CHILDREN.items()}
     for row in input_artifacts:
         if type(row) is not dict:
             raise RuntimeError("RSS_VNEXT_FANOUT_READ_CHILD_TYPE")
-        role = row.get("role")
-        if role in _CHILDREN:
-            if role in by_role:
-                raise RuntimeError("RSS_VNEXT_FANOUT_READ_DUPLICATE_CHILD")
-            by_role[role] = row
+        claimed_role = row.get("role")
+        kind = (row.get("artifact_type"), row.get("schema_version"))
+        if claimed_role in _CHILDREN:
+            role = claimed_role
+        elif (
+            type(claimed_role) is str
+            and claimed_role.startswith("input:")
+            and len(claimed_role) == 10
+            and claimed_role[6:].isdigit()
+        ):
+            role = type_to_role.get(kind)
+        else:
+            role = None
+        if role is None:
+            continue
+        if role in by_role:
+            raise RuntimeError("RSS_VNEXT_FANOUT_READ_DUPLICATE_CHILD")
+        by_role[role] = row
     if set(by_role) != set(_CHILDREN):
         raise RuntimeError("RSS_VNEXT_FANOUT_READ_MISSING_CHILD")
     for indexed in index["children"]:

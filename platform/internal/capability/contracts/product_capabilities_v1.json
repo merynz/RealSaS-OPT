@@ -251,6 +251,140 @@
         "axis_rerun_allowed": false,
         "codec_checkpoint_must_match_axis_skin_code": true
       }
+    },
+    "product.mechanics": {
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.mechanics_executor_v1",
+      "policy": {
+        "allowed_modes": [
+          "DEVELOPER"
+        ],
+        "product_pass_authority": false,
+        "dependencies": [
+          "product.mesh",
+          "product.rig",
+          "product.skin"
+        ]
+      },
+      "metadata": {
+        "product_role_id": "mechanics",
+        "implementation_class": "COMPILER",
+        "interface_contract": "RealSaS.ProductMechanicsCompile.v1",
+        "executor_contract": "RealSaS.ProductMechanicsCompile.v1",
+        "input_mesh_artifact_type": "RealSaS.CanonicalMeshIR",
+        "input_mesh_schema_version": "v1",
+        "input_rig_artifact_type": "RealSaS.CanonicalRigIR",
+        "input_rig_schema_version": "v2",
+        "input_skin_artifact_type": "RealSaS.CanonicalSkinIR",
+        "input_skin_schema_version": "v2",
+        "output_artifact_type": "RealSaS.CanonicalMechanicsIR",
+        "output_schema_version": "v1",
+        "required_models": [],
+        "rest_qualification": {
+          "max_position_drift": 0.00001,
+          "max_constraint_residual": 0.0001
+        },
+        "can_mint_product_revision": false
+      }
+    },
+    "product.graphics": {
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.product_downstream_executor_v1",
+      "policy": {
+        "allowed_modes": [
+          "DEVELOPER"
+        ],
+        "product_pass_authority": false,
+        "dependencies": [
+          "product.mesh",
+          "product.rig",
+          "product.skin",
+          "product.mechanics"
+        ]
+      },
+      "metadata": {
+        "product_role_id": "graphics",
+        "implementation_class": "COMPILER",
+        "interface_contract": "RealSaS.ProductGraphicsCompile.v1",
+        "executor_contract": "RealSaS.ProductGraphicsCompile.v1",
+        "input_mesh_artifact_type": "RealSaS.CanonicalMeshIR",
+        "input_mesh_schema_version": "v1",
+        "input_rig_artifact_type": "RealSaS.CanonicalRigIR",
+        "input_rig_schema_version": "v2",
+        "input_skin_artifact_type": "RealSaS.CanonicalSkinIR",
+        "input_skin_schema_version": "v2",
+        "input_mechanics_artifact_type": "RealSaS.CanonicalMechanicsIR",
+        "input_mechanics_schema_version": "v1",
+        "input_evidence_artifact_type": "RealSaS.GraphicsEvidence",
+        "input_evidence_schema_version": "v1",
+        "output_artifact_type": "RealSaS.CompiledGraphics",
+        "output_schema_version": "v1",
+        "required_models": [],
+        "source_appearance_qualified_by_graphics_evidence": false,
+        "can_mint_product_revision": false
+      }
+    },
+    "product.motion": {
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.product_downstream_executor_v1",
+      "policy": {
+        "allowed_modes": [
+          "DEVELOPER"
+        ],
+        "product_pass_authority": false,
+        "dependencies": [
+          "product.rig",
+          "product.mechanics"
+        ]
+      },
+      "metadata": {
+        "product_role_id": "motion",
+        "implementation_class": "COMPILER",
+        "interface_contract": "RealSaS.ProductMotionCompile.v2",
+        "executor_contract": "RealSaS.ProductMotionCompile.v2",
+        "input_rig_artifact_type": "RealSaS.CanonicalRigIR",
+        "input_rig_schema_version": "v2",
+        "input_mechanics_artifact_type": "RealSaS.CanonicalMechanicsIR",
+        "input_mechanics_schema_version": "v1",
+        "input_proposal_artifact_type": "RealSaS.ControlMotionClipProposalIR",
+        "input_proposal_schema_version": "v1",
+        "output_artifact_type": "RealSaS.CanonicalMotionIR",
+        "output_schema_version": "v2",
+        "required_models": [],
+        "animation_source_input_required": true,
+        "can_mint_product_revision": false
+      }
+    },
+    "product.proof": {
+      "entry_module": "compiler.realsas_compiler_services.platform_worker.product_downstream_executor_v1",
+      "policy": {
+        "allowed_modes": [
+          "DEVELOPER"
+        ],
+        "product_pass_authority": false,
+        "dependencies": [
+          "product.mesh",
+          "product.rig",
+          "product.skin",
+          "product.mechanics",
+          "product.graphics",
+          "product.motion"
+        ]
+      },
+      "metadata": {
+        "product_role_id": "proof",
+        "implementation_class": "COMPILER",
+        "interface_contract": "RealSaS.ProductProofCompile.v1",
+        "executor_contract": "RealSaS.ProductProofCompile.v1",
+        "input_mechanics_artifact_type": "RealSaS.CanonicalMechanicsIR",
+        "input_mechanics_schema_version": "v1",
+        "input_graphics_artifact_type": "RealSaS.CompiledGraphics",
+        "input_graphics_schema_version": "v1",
+        "input_motion_artifact_type": "RealSaS.CanonicalMotionIR",
+        "input_motion_schema_version": "v2",
+        "output_artifact_type": "RealSaS.ProductProofDiagnostic",
+        "output_schema_version": "v1",
+        "required_models": [],
+        "product_revision_requires_independent_admission": true,
+        "can_mint_product_revision": false
+      }
     }
   }
 }

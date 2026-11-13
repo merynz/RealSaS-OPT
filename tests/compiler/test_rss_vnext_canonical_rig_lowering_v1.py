@@ -90,7 +90,7 @@ def _fixture():
         ))
     candidate = CanonicalMeshCandidateIR(
         vertices=tuple(candidates),
-        faces=tuple(tuple(v.candidate_vertex_id for v in candidates),),
+        faces=(tuple(v.candidate_vertex_id for v in candidates),),
         edges=tuple(sorted({
             tuple(sorted((candidates[a].candidate_vertex_id,
                           candidates[b].candidate_vertex_id)))

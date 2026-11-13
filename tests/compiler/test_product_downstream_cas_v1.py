@@ -94,7 +94,8 @@ def test_graphics_and_motion_are_real_replayed_cas_consumers_and_proof_abstains(
     proof = execute_proof_capability_v1(
         proof_req,read_object=cas.read_object,put_bytes=cas.put_bytes,
     )
-    assert proof["status"] == "WAITING_EXTERNAL_EVIDENCE"
+    assert proof["status"] == "FAIL"
+    assert proof["failure"]["code"] == "PRODUCT_PROOF_INDEPENDENT_WITNESSES_MISSING"
     assert proof["outputs"] == []
     assert proof["diagnostics"]["product_pass_authority"] is False
     assert proof["diagnostics"]["product_revision_minted"] is False

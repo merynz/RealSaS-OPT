@@ -491,7 +491,7 @@ def _transport_only_base_rss(tmp_path):
     write_rss_v2(path, OrderedDict((
         ("mesh.bin", b"fixed-source-mesh-fixture"),
         ("cameras.bin", b"fixed-source-cameras-fixture"),
-        ("manifest.txt", b"schema=RealSaS.RuntimePackage.v2\\n"),
+        ("manifest.txt", b"schema=RealSaS.RuntimePackage.v2\n"),
     )))
     return path
 
@@ -558,7 +558,7 @@ def test_editor_rss_reopen_rejects_modified_state_source_and_foreign_bundle(tmp_
     altered["view_index"] = 2
     modified = OrderedDict(entries)
     modified[EDITOR_ENTRY] = (
-        json.dumps(altered, sort_keys=True, separators=(",", ":")) + "\\n"
+        json.dumps(altered, sort_keys=True, separators=(",", ":")) + "\n"
     ).encode()
     tampered = tmp_path / "tampered.rss"
     write_rss_v2(tampered, modified)

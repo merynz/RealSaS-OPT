@@ -37,7 +37,7 @@ def _npz(**arrays):
     return output.getvalue()
 
 
-def _positive_fixture(tmp_path):
+def _positive_fixture(tmp_path, *, with_discrete_skin=False):
     source, scene, receipt = _triangle_source_and_scene()
     cas = MemoryCAS()
     def ref(blob, artifact_type, version="v1"):
@@ -69,7 +69,7 @@ def _positive_fixture(tmp_path):
         "graphics_logits": np.zeros((1, 3, 5), np.float32),
         "presentation_role_logits": np.zeros((1, 3, 4), np.float32),
         "region_relation_logits": np.zeros((1, 3, 3), np.float32),
-        "tessa_candidate_local_features": np.zeros((1, n, 8), np.float32),
+        "tessa_candidate_local_features": np.zeros((1, n, 32 if with_discrete_skin else 8), np.float32),
         "tessa_candidate_normals": np.ones((1, n, 3), np.float32),
         "tessa_candidate_semantic_logits": np.zeros((1, n, 4), np.float32),
         "tessa_candidate_presentation_role_logits": np.zeros((1, n, 4), np.float32),
@@ -79,6 +79,30 @@ def _positive_fixture(tmp_path):
         "tessa_candidate_unsigned_distance": np.ones((1, n), np.float32),
         "tessa_candidate_sign_logits": np.zeros((1, n), np.float32),
     })
+    if with_discrete_skin:
+        # Compute the hard weights through the actual pinned MIRA decoder.
+        # Synthetic hidden AXIS states are explicit; no learned success claim.
+        jhidden = torch.zeros(1, 1, bundle.model.cfg.control_hidden_dim)
+        fsq = torch.full(
+            (1, 1, bundle.model.cfg.skin_tokens_per_joint),
+            7, dtype=torch.int64,
+        )
+        with torch.no_grad():
+            hard = bundle.model.mira.decode_discrete_skin_v1(
+                torch.tensor(scene["tessa_candidate_local_features"]),
+                torch.tensor(scene["tessa_candidate_rest_vertices"]),
+                jhidden, fsq,
+                vertex_normals=torch.tensor(scene["tessa_candidate_normals"]),
+            ).detach().numpy().astype(np.float32)
+        scene.update({
+            "axis_mira_dynamic_vertices": scene["tessa_candidate_rest_vertices"].copy(),
+            "axis_mira_soft_skin_weights": hard.copy(),
+            "axis_mira_discrete_skin_weights": hard,
+            "axis_mira_joint_hidden_states": jhidden.numpy(),
+            "axis_mira_dynamic_displacement": np.zeros((1, n, 3), np.float32),
+            "axis_mira_readiness_logits": np.zeros((1, n, 4), np.float32),
+            "axis_mira_joint_valid_mask": np.ones((1, 1), np.uint8),
+        })
     scene_ref = ref(_npz(**scene), RAW_SCENE)
     view_ref = ref(b"generated-view-non-authoritative-fixture", RAW_VIEWS)
     receipt.update({
@@ -103,7 +127,7 @@ def _positive_fixture(tmp_path):
         "axis_mira_control_events": events,
         "axis_mira_control_event_count": len(events),
         "axis_mira_control_events_sha256": sha256(rows).hexdigest(),
-        "axis_mira_discrete_skin_candidate_present": False,
+        "axis_mira_discrete_skin_candidate_present": with_discrete_skin,
         "axis_mira_control_authority": "LEARNED_CAUSAL_CONTROL_NOT_CANONICAL_RIG_SKIN",
     })
     receipt_ref = ref(json.dumps(receipt, sort_keys=True).encode(), RAW_RECEIPT)

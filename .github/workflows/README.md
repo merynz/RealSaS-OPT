@@ -1,8 +1,10 @@
+> **Main workflow reduction — 13 November 2026.** Archived **207 unchanged** VF11/Knight September 2026 branch-only YAML workflows under [historical/ci_workflows/vf11_20260921](../../historical/ci_workflows/vf11_20260921/README.md). They are intentionally **inactive** on new main heads. A SHA-1 manifest preserves every original blob; tests prove the only automatic trigger was the sealed research branch. All RSS.vNext PR fast/full courts and production workflows remain active.
+
 # GitHub Actions inventory — code CI, not product architecture
 
-> As of 13 November 2026, **429 YAML workflow files** live under `.github/workflows/`; an additional Markdown README brings that directory to 430 tracked files. The RSS.vNext machine CI policy names **10 fast + 16 full courts**. The remaining workflows are NOT automatically unused, but they should not be mistaken for current product paths.
+> As of 13 November 2026, **222 YAML workflow files** live under `.github/workflows/`; an additional Markdown README brings that directory to 223 tracked files. The RSS.vNext machine CI policy names **10 fast + 16 full courts**. The remaining workflows are NOT automatically unused, but they should not be mistaken for current product paths.
 
-**Active trigger/dispatch policy** is `canonical/CI_EXECUTION_AUTHORITY_V1.json`. `canonical/PLATFORM_CI_OPERATIONS_AUTHORITY_V1.json` has `max_workflow_files: 430`; that value is a ceiling inherited from the existing tree, **not a recommended permanent workflow count**.
+**Active trigger/dispatch policy** is `canonical/CI_EXECUTION_AUTHORITY_V1.json`. `canonical/PLATFORM_CI_OPERATIONS_AUTHORITY_V1.json` has `max_workflow_files: 230`; that value is a ceiling inherited from the existing tree, **not a recommended permanent workflow count**.
 
 Run `python tools/repository_clarity_audit_v1.py --json` to enumerate names, triggers, and legacy workflow candidates from the exact checked-out tree. Triggers alone do not establish a workflow's retained scientific value. Do not delete or move until the actual callers (including manual dispatch), unique tests and historical evidence references are identified. Moving a file out of `.github/workflows` makes it undiscoverable by GitHub Actions.
 

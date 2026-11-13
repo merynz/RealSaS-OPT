@@ -16,7 +16,7 @@
     "workflow_state": "Go Platform/Temporal and immutable CAS; Actions only code and reproducibility checks"
   },
   "workflow_budget": {
-    "max_workflow_files": 430,
+    "max_workflow_files": 230,
     "workflow_budget_changes_require_policy_update": true,
     "pr_concurrency_and_cancel_required": true,
     "avoid_routine_old_scientific_workflow_auto_fanout": true,

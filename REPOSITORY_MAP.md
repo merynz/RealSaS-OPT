@@ -24,7 +24,8 @@ This map is **human navigation**; it is not a competing architecture configurati
 | `historical/`, `restoration/` | Historic documentation and restoration records |
 | `experiments/`, `research/`, `notebooks/`, `prereg/`, `prospective/` | Research evidence, notebooks, proposals; no automatic product authority |
 | `docs/` | Guidance and reference; dated narratives can be stale |
-| `.github/workflows/` | GitHub Actions; not a mirror of the active product DAG |
+| `.github/workflows/` | Live GitHub Actions (~222), active RSS.vNext courts and still-referenced operators |
+| `historical/ci_workflows/` | Disabled, byte-preserved 2026 scientific workflow definitions and original SHA manifests |
 
 The inherited `canonical/` directory name should not be used as an assertion of present authority. However `canonical/CI_EXECUTION_AUTHORITY_V1.json` and `canonical/PLATFORM_CI_OPERATIONS_AUTHORITY_V1.json` are still referenced by active tests, workflows and operators. Preserve their exact paths until atomic migration.
 

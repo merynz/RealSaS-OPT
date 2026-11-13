@@ -34,7 +34,7 @@ jobs:
           from pathlib import Path
 
           expected = {
-              'models/iris/training/cohort_v1.py': '0789b29da0cf489da5b4d5d09d5447f40651aa5fe3c5e84e2a9b4df57f4cd8b5',
+              'historical/model_sources/iris/training/cohort_v1.py': '0789b29da0cf489da5b4d5d09d5447f40651aa5fe3c5e84e2a9b4df57f4cd8b5',
               'models/iris/v4/scene_first_signed_v4.py': 'e9c2432ead4b6fa13ecad5a32837ea9cbb9c9cd38bd523cc70adef9ed8d48a1c',
               'models/iris/v2/dinov2_foundation_v2.py': '9c5ca29a74b8b3fb2d6e546c19d6756e4383c5fa042d08caea9e2237ac032d36',
               'models/iris/v5/source_signed_field_v5.py': 'ae109ec57c9e0b74ff1e11fccc573a944449b67ecd635e3a105878f8b5115c10',

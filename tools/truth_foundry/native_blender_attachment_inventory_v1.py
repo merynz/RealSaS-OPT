@@ -83,6 +83,8 @@ def _rigid_constraint_link(row: Mapping[str, object]) -> tuple[str,str,str] | No
     if (
         row.get("type") not in ("CHILD_OF", "COPY_TRANSFORMS")
         or row.get("mute") is not False
+        or row.get("enabled") is not True
+        or row.get("is_valid") is not True
         or type(row.get("influence")) not in (int, float)
         or abs(float(row["influence"]) - 1.) > 1.e-7
         or row.get("target_type") != "ARMATURE"

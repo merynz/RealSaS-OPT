@@ -45,24 +45,24 @@ func TestStageOnlyResearchReleaseRetainsFullRSSProductDescriptorGraph(t *testing
 	for _, capabilityID := range []string{
 		ProductInputCapabilityID, ProductShapeCapabilityID,
 		ProductMeshCapabilityID, ProductRigCapabilityID,
-		ProductSkinCapabilityID, ProductMechanicsCapabilityID,
-		ProductGraphicsCapabilityID, ProductMotionCapabilityID,
-		ProductProofCapabilityID,
+		ProductSkinCapabilityID, "product.mechanics",
+		"product.graphics", "product.motion",
+		"product.proof",
 	} {
 		row, ok := registry.Get(capabilityID)
 		if !ok {
 			t.Fatalf("research source catalog lost RSS role %s", capabilityID)
 		}
-		if row.ProductPassAuthority && capabilityID != ProductProofCapabilityID {
+		if row.ProductPassAuthority && capabilityID != "product.proof" {
 			t.Fatalf("non-Proof role claimed ProductPASS: %s", capabilityID)
 		}
 	}
 	expected := []string{
 		ProductInputCapabilityID, ProductShapeCapabilityID,
 		ProductMeshCapabilityID, ProductRigCapabilityID,
-		ProductSkinCapabilityID, ProductMechanicsCapabilityID,
-		ProductGraphicsCapabilityID, ProductMotionCapabilityID,
-		ProductProofCapabilityID,
+		ProductSkinCapabilityID, "product.mechanics",
+		"product.graphics", "product.motion",
+		"product.proof",
 	}
 	for _, role := range expected {
 		closure, err := registry.Resolve(role)

@@ -446,7 +446,55 @@ def execute_rss_vnext_mesh_capability_v3(
         **measured,
         **controls_measured,
     }
-    # Shape already retained every candidate CAS artifact. No inferred
+    if (
+        measured["mesh_state"] == "UNQUALIFIED_MESH_CANDIDATE"
+        and measured["component_id_continuity"]
+        and measured["geometric_face_area_positive"]
+    ):
+        from compiler.realsas_compiler_core.types import QualificationError
+        from .rss_vnext_raw_mesh_admission_v1 import admit_raw_two_view_mesh_v1
+        from .rss_vnext_mesh_executor_v2 import _store_json
+        try:
+            canonical, static, witness = admit_raw_two_view_mesh_v1(
+                source=original, scene=scene, receipt=receipt,
+                scene_digest=scene_ref["content_sha256"],
+            )
+        except (RuntimeError, ValueError, QualificationError) as exc:
+            diagnostics["static_mesh_admission_blocker"] = str(exc)
+            canonical, static, witness = None, None, None
+        if witness is not None:
+            diagnostics["real_source_static_witness"] = witness
+        if canonical is not None and static is not None:
+            outputs = [
+                _store_json(
+                    static.to_dict(),
+                    role="rss_two_view_static_qualification",
+                    artifact_type="RealSaS.StaticCanonicalMeshQualificationIR",
+                    put_bytes=put_bytes,
+                    authority_class="REAL_SOURCE_ALPHA_STATIC_WITH_INFERRED_CAMERA_NOT_ORIGINAL_RAY",
+                ),
+                _store_json(
+                    canonical.to_dict(),
+                    role="canonical_mesh",
+                    artifact_type="RealSaS.CanonicalMeshIR",
+                    put_bytes=put_bytes,
+                    authority_class="COMPILER_CANONICAL_MESH_TWO_ORIGINAL_ALPHA_VIEWS",
+                ),
+            ]
+            diagnostics["canonical_mesh_minted"] = True
+            diagnostics["canonical_mesh_lineage_hash"] = canonical.mesh_lineage_hash
+            diagnostics["original_camera_observed"] = False
+            diagnostics["source_3d_geometry_observed"] = False
+            diagnostics["source_appearance_qualified"] = False
+            return {
+                "capability_id": "product.mesh",
+                "status": "PASS",
+                "outputs": outputs,
+                "diagnostics": diagnostics,
+                "failure": None,
+            }
+    # A failed or absent measured source fit cannot be silently converted
+    # into canonical geometry. Preserve the entire Shape scene CAS for repair.
     # camera, candidate triangle or generated normal is an independently
     # qualified original-source position/ray/appearance correspondence.
     # This is a measured compiler boundary, NOT a second pseudo-product lane.

@@ -51,6 +51,17 @@ func (ProductMechanicsProvider) Capabilities(context.Context) ([]Descriptor, err
 	policy["max_position_drift"] = 0.00001
 	policy["max_constraint_residual"] = 0.0001
 	metadata["rest_qualification"] = policy
+	intervention := map[string]any{}
+	intervention["enabled"] = true
+	intervention["max_probed_controls"] = 128
+	intervention["relative_translation"] = 0.02
+	intervention["max_constraint_residual"] = 0.001
+	metadata["control_intervention_policy"] = intervention
+	metadata["auxiliary_outputs"] = []any{
+		map[string]any{"role": "mechanics_intervention_court", "artifact_type": "RealSaS.MechanicsInterventionCourt", "schema_version": "v1"},
+	}
+	metadata["source_contact_qualified_by_intervention"] = false
+	metadata["learned_secondary_motion_qualified_by_intervention"] = false
 	metadata["can_mint_product_revision"] = false
 	return downstreamDescriptor(ProductRoleMechanics, []string{"product.mesh", "product.rig", "product.skin"}, metadata)
 }

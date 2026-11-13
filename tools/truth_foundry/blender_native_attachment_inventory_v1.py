@@ -119,6 +119,35 @@ def _source_row(obj,owner_index:int)->dict:
     }
 
 
+def _authored_rig_graph()->list[dict]:
+    # Source object/mesh constraints are NOT the entire rig. Keep pose-bone
+    # constraints and parent topology as a separate diagnostic graph.
+    # Even a fully captured graph cannot prove authoring *socket* semantics.
+    graph=[]
+    for arm in sorted(
+        (obj for obj in bpy.context.scene.objects if obj.type=="ARMATURE"),
+        key=lambda obj:obj.name,
+    ):
+        bones=[]
+        for bone in sorted(arm.pose.bones,key=lambda b:b.name):
+            bones.append({
+                "name":str(bone.name),
+                "parent":None if bone.parent is None else str(bone.parent.name),
+                "native_rest_matrix_local":[
+                    [float(v) for v in row] for row in bone.bone.matrix_local
+                ],
+                "constraints":[_constraint_row(c) for c in bone.constraints],
+            })
+        graph.append({
+            "armature_name":str(arm.name),
+            "object_parent":None if arm.parent is None else str(arm.parent.name),
+            "object_constraints":[_constraint_row(c) for c in arm.constraints],
+            "bones":bones,
+            "native_graph_authority":"DIAGNOSTIC_ONLY_NO_HOLDER_FACE_OR_SOCKET_ID",
+        })
+    return graph
+
+
 def _frames_for_owner(candidate)->tuple[str,str]|None:
     if candidate.parent_armature_name and candidate.parent_bone_name:
         return candidate.parent_armature_name,candidate.parent_bone_name
@@ -218,6 +247,7 @@ def run()->None:
     ):
         _fail("NATIVE_TEACHER_RENDERABLE_MESH_OWNER_DRIFT")
     rows=[_source_row(obj,index) for index,obj in enumerate(objects)]
+    authored_rig_graph=_authored_rig_graph()
     native._neutralize_animation()
     exact_rest=native._extract_world_mesh(objects)
     _assert_same_mesh(exact_rest,dict(
@@ -307,6 +337,11 @@ def run()->None:
         "importer_policy":imported,
         "original_teacher_frame_rows":samples,
         "source_owner_inventory":rows,
+        "native_armature_bone_constraint_graph":authored_rig_graph,
+        "native_armature_bone_constraint_graph_sha256":sha256(
+            json.dumps(authored_rig_graph,sort_keys=True,
+                       separators=(",",":"),allow_nan=False).encode()
+        ).hexdigest(),
         "source_link_candidates":asdict(inventory),
         "parent_root_npz_sha256":_sha(arrays_path),
         "parent_root_npz_filename":arrays_path.name,

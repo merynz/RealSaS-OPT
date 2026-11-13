@@ -54,6 +54,6 @@ func (RSSvNextRigCandidateProvider) Capabilities(context.Context) ([]Descriptor,
 		AllowedModes:         []Mode{ModeDeveloper},
 		ProductPassAuthority: false,
 		Aliases:              []string{"RSS vNext Canonical Rig", "Unified AXIS Controls"},
-		Metadata: metadata,
+		Metadata:             metadata,
 	}}, nil
 }

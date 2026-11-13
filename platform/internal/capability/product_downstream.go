@@ -80,6 +80,10 @@ func (ProductGraphicsProvider) Capabilities(context.Context) ([]Descriptor, erro
 	metadata["input_skin_schema_version"] = "v2"
 	metadata["input_mechanics_artifact_type"] = "RealSaS.CanonicalMechanicsIR"
 	metadata["input_mechanics_schema_version"] = "v1"
+	metadata["input_mechanics_intervention_artifact_type"] = "RealSaS.MechanicsInterventionCourt"
+	metadata["input_mechanics_intervention_schema_version"] = "v1"
+	metadata["mechanics_intervention_required"] = true
+	metadata["mechanics_intervention_not_source_contact"] = true
 	metadata["input_evidence_artifact_type"] = "RealSaS.GraphicsEvidence"
 	metadata["input_evidence_schema_version"] = "v1"
 	metadata["input_evidence_optional_legacy"] = true

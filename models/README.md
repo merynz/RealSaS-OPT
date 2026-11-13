@@ -1,28 +1,19 @@
-# RealSaS Learned Models
+# Models · unified RSS.vNext
 
-`models/` is the semantic home of current learned mainline implementations. Models emit evidence/proposals; the Compiler owns canonical IDs and qualified product truth.
+The current product target is **one RSSVNEXT release, one inference**, with independently addressable specialist evidence. **Model proposals are not canonical compiler output.** The exact runtime model selection comes from `../platform/internal/capability/contracts/product_capabilities_v1.json` on the checked-out branch.
 
-## Current learned stack
+| Specialist | Current source | Role |
+| --- | --- | --- |
+| Shared model / fanout | `rss_vnext/` | Unified backbone and typed evidence |
+| IRIS | `iris/vnext/` plus supporting modules | Geometry and shared 3D scene evidence |
+| TESSA | `tessa/` | Surface/topology proposal |
+| AXIS | `axis/` | Learned control and articulation structure |
+| MIRA | `mira/` | Influence/skin evidence tied to the same mesh and rig |
 
-| Subsystem | Current package | Current state |
-|---|---|---|
-| IRIS observation/foundation | `models/iris/v2/` | promoted supporting evidence layer |
-| IRIS signed geometry | `models/iris/v3/` | promoted Mage FIT1 signed-geometry witness |
-| Geppetto | `models/geppetto/reference_strength_v1/` | FIT1-frozen/promoted skeleton proposal; generalization not claimed |
-| SkinFieldCodec | `models/skin_field_codec/v1/` | retained representation/research lineage; not an Arachne V5 runtime dependency |
-| Arachne | `models/arachne/v5/` | **FIT1-frozen/promoted K4-Z direct-simplex skin proposal** |
+The nine-role RSS.vNext candidate is in [PR #485](https://github.com/merynz/RealSaS-OPT/pull/485), not yet the `main` execution graph. Checkpoint training and unseen qualification are **not** established by source availability.
 
-Historical packages remain source/provenance and do not become co-current merely by existing.
+## Historical code and compatibility
 
-## Arachne V5
+`geppetto/`, `arachne/`, `skin_field_codec/` and earlier numbered IRIS/TESSA branches preserve research/checkpoint behavior. Their presence does **not** imply a second active product model. **AXIS and MIRA still import some older model modules**; before relocating, audit direct + transitive Python imports, checkpoint keys, serialized paths, workflow callers and training scripts.
 
-`RiggingSurfaceIR + QualifiedSkeletonIR -> V4 backbone -> K4x512 Z -> direct row-simplex decoder -> SkinProposalIR`
-
-The frozen Mage FIT1 checkpoint is a hash-bound composite of the exact V4 backbone and V5 decoder delta. See `models/arachne/v5/checkpoint_authority_v1.py` and `models/arachne/v5/FROZEN_MAGE_FIT1_CHECKPOINT_V1.json`.
-
-## Import / authority firewall
-
-- experiments may import current `models/`;
-- current model packages should not depend permanently on dated experiment semantic owners;
-- learned modules may create typed proposal/evidence objects but cannot claim Compiler qualification;
-- source existence != scientific evidence != promotion != generalization.
+Run `python tools/repository_clarity_audit_v1.py --json` to inspect direct static imports; this does not prove dynamic-load safety. Compiler validates and qualifies evidence; model files do not mint ProductRevision.

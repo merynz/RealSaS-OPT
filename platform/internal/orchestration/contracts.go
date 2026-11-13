@@ -117,6 +117,9 @@ type EngineCapabilityRequest struct {
 	CapabilityMetadata        map[string]any       `json:"capability_metadata,omitempty"`
 	GoalParameters            map[string]any       `json:"goal_parameters"`
 	InputArtifacts            []ArtifactRef        `json:"input_artifacts"`
+	// Immutable source/checkpoint/behavior binding for RSS.vNext Mesh v2 only.
+	// Produced by Go from the Attempt snapshot; never client-supplied.
+	ShapeParentBinding        map[string]any       `json:"shape_parent_binding,omitempty"`
 	ModelReleases             []ModelReleaseRef    `json:"model_releases,omitempty"`
 }
 

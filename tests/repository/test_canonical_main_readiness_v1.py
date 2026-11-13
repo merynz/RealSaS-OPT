@@ -176,10 +176,23 @@ class CanonicalMainReadinessV1(unittest.TestCase):
         self.assertIn("SurfaceAddressing", state)
         self.assertIn("Complete Appearance Authority", state)
         self.assertIn("43-stage", state)
-        self.assertIn("Canonical mesh domain", index)
-        self.assertIn("Appearance / CAA", index)
-        self.assertIn("surface_addressing_v1.py", index)
-        self.assertIn("dependency DAG", index)
+        # Product ownership is read from the executable catalog; the old
+        # V2/StageGraph narrative remains scientific provenance only.
+        catalog = json.loads(
+            (ROOT / "platform/internal/capability/contracts/product_capabilities_v1.json")
+            .read_text(encoding="utf-8")
+        )
+        self.assertIn("product.mesh", catalog["capabilities"])
+        self.assertIn("product.shape", catalog["capabilities"])
+        self.assertIn("RSS.vNext", index)
+        self.assertIn("product_capabilities_v1.json", index)
+        historical = ROOT / "historical/repository/SYSTEM_INDEX_20261011.md"
+        self.assertTrue(historical.is_file())
+        old_index = historical.read_text(encoding="utf-8")
+        self.assertIn("Canonical mesh domain", old_index)
+        self.assertIn("Appearance / CAA", old_index)
+        self.assertIn("surface_addressing_v1.py", old_index)
+        self.assertIn("dependency DAG", old_index)
 
     def test_v2_first_witness_presentation_runtime_capability_is_explicitly_excluded(self) -> None:
         plan = json.loads(

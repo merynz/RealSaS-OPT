@@ -1,0 +1,128 @@
+name: R29 R15 FINAL existing-corpus rights sweep (hosted CPU)
+on:
+  push:
+    branches: [audit/rights-metadata-r4-20261113]
+    paths: [.github/workflows/rights_existing_corpus_r15.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: r29-r15-final-rights-sweep
+  cancel-in-progress: false
+env:
+  RCLONE_CONFIG: /tmp/r29r15-rclone.conf
+  DRIVE_ROOT: "gdrive:RSS.vNext Corpus/Part2_R2_9_COMMERCIAL_TRAINING_RIGHTS/R29_R15_FINAL_LICENSE_GATE"
+  SNAPSHOT_SHA256: e5cef36fb5aff508288a9c61873b3b5ff7f16030915eb8d545cb0ca326f63de8
+jobs:
+  scan:
+    name: Rights source scan shard ${{ matrix.shard }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    steps:
+      - name: Download pinned source-rights input snapshot, not original models
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$DRIVE_CONFIG_B64" || { echo NO_DRIVE_SECRET; exit 2; }
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone unzip
+          python -m pip install --quiet "requests>=2.31,<3"
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          mkdir -p "$RUNNER_TEMP/r15/input" "$RUNNER_TEMP/r15/out"
+          rclone copyto "$DRIVE_ROOT/R15_SOURCE_INPUT_SNAPSHOT.zip" "$RUNNER_TEMP/r15/snapshot.zip" --retries 3
+          test "$(sha256sum "$RUNNER_TEMP/r15/snapshot.zip" | cut -d' ' -f1)" = "$SNAPSHOT_SHA256"
+          unzip -q "$RUNNER_TEMP/r15/snapshot.zip" -d "$RUNNER_TEMP/r15/input"
+          python - "$RUNNER_TEMP/r15/input" <<'PY'
+          import sys,hashlib,json
+          from pathlib import Path
+          p=Path(sys.argv[1]);d=json.loads((p/'MANIFEST_SHA256.json').read_text())
+          for name,info in d['files'].items():
+              if hashlib.sha256((p/name).read_bytes()).hexdigest()!=info['sha256']:raise SystemExit('SOURCE_PIN_MISMATCH:'+name)
+          print('R15 SHA pins PASS:',len(d['files']))
+          PY
+          cd "$RUNNER_TEMP/r15/input"
+          PYTHONPATH=. python -m unittest -v test_r15_rights_closure
+      - name: Audit exact-source asset license documents
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          python "$RUNNER_TEMP/r15/input/r15_rights_closure.py" \
+            --input-dir "$RUNNER_TEMP/r15/input" --out "$RUNNER_TEMP/r15/out" \
+            --scan --github-token "$GH_TOKEN" --shard-index "$SHARD" --shard-count 8 \
+            | tee "$RUNNER_TEMP/r15/shard_summary.json"
+          python - "$RUNNER_TEMP/r15/out/R15_CLOSEOUT.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          x=json.load(open(sys.argv[1]));assert x['corpus_rows']==20847 and x['training_admitted']==0
+          print('## R15 shard source-rights evidence')
+          print(x['remote_repo_scan'])
+          print('No source assets deleted or downloaded. No GPU or model training.')
+          PY
+      - name: Save rights receipts for this shard
+        if: always()
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          test -f "$RCLONE_CONFIG" || exit 0
+          test -d "$RUNNER_TEMP/r15/out/repo_commit_receipts" || exit 0
+          tar -C "$RUNNER_TEMP/r15/out" -czf "$RUNNER_TEMP/r15/shard-$SHARD.tar.gz" repo_commit_receipts
+          rclone copyto "$RUNNER_TEMP/r15/shard-$SHARD.tar.gz" \
+            "$DRIVE_ROOT/R15_RUNS/$GITHUB_RUN_ID/shard-$SHARD.tar.gz" --retries 3
+  merge:
+    needs: scan
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Merge and verify full 20,847 source-rights court
+        env:
+          DRIVE_CONFIG_B64: ${{ secrets.REALSAS_HOSTED_DRIVE_RCLONE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends rclone unzip
+          printf %s "$DRIVE_CONFIG_B64" | base64 -d > "$RCLONE_CONFIG"
+          mkdir -p "$RUNNER_TEMP/r15/input" "$RUNNER_TEMP/r15/merge"
+          rclone copyto "$DRIVE_ROOT/R15_SOURCE_INPUT_SNAPSHOT.zip" "$RUNNER_TEMP/r15/snapshot.zip" --retries 3
+          test "$(sha256sum "$RUNNER_TEMP/r15/snapshot.zip" | cut -d' ' -f1)" = "$SNAPSHOT_SHA256"
+          unzip -q "$RUNNER_TEMP/r15/snapshot.zip" -d "$RUNNER_TEMP/r15/input"
+          for i in 0 1 2 3 4 5 6 7; do
+            rclone copyto "$DRIVE_ROOT/R15_RUNS/$GITHUB_RUN_ID/shard-$i.tar.gz" \
+              "$RUNNER_TEMP/r15/shard-$i.tar.gz" --retries 2 || { echo "MISSING_SHARD_$i"; exit 4; }
+            tar -xzf "$RUNNER_TEMP/r15/shard-$i.tar.gz" -C "$RUNNER_TEMP/r15/merge"
+          done
+          python "$RUNNER_TEMP/r15/input/r15_rights_closure.py" \
+            --input-dir "$RUNNER_TEMP/r15/input" --out "$RUNNER_TEMP/r15/merge" \
+            | tee "$RUNNER_TEMP/r15/final_summary.json"
+          python - "$RUNNER_TEMP/r15/merge/R15_CLOSEOUT.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json,sys
+          x=json.load(open(sys.argv[1]));assert x['corpus_rows']==20847 and x['training_admitted']==0
+          print('## R15 existing-corpus rights closeout')
+          print('Source/file identity upper bound:',x['source_identity_conservative_upper_bound'])
+          print('Minimum gap to 10K before R2.8:',x['minimum_gap_to_10000_before_morphology'])
+          print('Remote scan:',x['remote_repo_scan'])
+          print('Licensing evidence is not a certified count of distinct characters.')
+          PY
+          dst="$DRIVE_ROOT/R15_RUNS/$GITHUB_RUN_ID/FINAL"
+          for file in R15_CLOSEOUT.json R15_ALL_20847_ASSET_RIGHTS.csv R15_RESERVE_PRIORITY_NO_DOWNLOAD.csv; do
+            rclone copyto "$RUNNER_TEMP/r15/merge/$file" "$dst/$file" --retries 3
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: R29-R15-FINAL-LICENSE-GATE
+          path: |
+            ${{ runner.temp }}/r15/merge/R15_CLOSEOUT.json
+            ${{ runner.temp }}/r15/merge/R15_RESERVE_PRIORITY_NO_DOWNLOAD.csv
+          if-no-files-found: ignore
+          retention-days: 30

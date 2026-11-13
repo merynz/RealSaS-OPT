@@ -77,8 +77,8 @@ func (a Activities) ResolveCapabilityGoal(ctx context.Context, in orchestration.
 		return orchestration.ResolvedCapabilityGoal{}, err
 	}
 	resolved, err := (capability.Goal{
-		Type: capability.GoalType(goalType),
-		Targets: targets,
+		Type:            capability.GoalType(goalType),
+		Targets:         targets,
 		PromotionPolicy: capability.PromotionPolicy(promotionPolicy),
 	}).Validate(snapshot.Registry)
 	if err != nil {

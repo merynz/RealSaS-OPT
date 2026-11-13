@@ -113,9 +113,9 @@ func SubmitProductCapabilityCompile(
 	}
 	subjectID := req.SubjectID
 	return submitCapabilityGoal(ctx, pool, CapabilityRunRequest{
-		EngineReleaseID: req.EngineReleaseID,
-		SubjectID: &subjectID,
-		Targets: []string{"product.proof"},
+		EngineReleaseID:  req.EngineReleaseID,
+		SubjectID:        &subjectID,
+		Targets:          []string{"product.proof"},
 		InputArtifactIDs: append([]uuid.UUID(nil), loaded.ArtifactIDs...),
 		IdempotencyKey: req.IdempotencyKey,
 		RequestedBy: req.RequestedBy,

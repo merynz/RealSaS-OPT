@@ -38,7 +38,6 @@ func TestCapabilityRunHandlerPreservesExistingReadRoutes(t *testing.T) {
 	}
 }
 
-
 func TestProductCapabilityCompileRejectsIncompleteEnvelopeBeforeDatabase(t *testing.T) {
 	handler := (API{}).HandlerWithCapabilityRun()
 	for _, body := range []string{

@@ -168,6 +168,69 @@ def _read_graphics_mechanics_intervention_v1(request, read_object, mesh, rig, sk
     return receipt
 
 
+def _raw_source_rgb_candidate_from_cas_v1(
+    request: dict, read_object: Callable, mesh,
+) -> tuple[bytes, dict[str, Any]]:
+    """Read original upload CAS and derive an explicitly unqualified
+    image-plane color/face correspondence, not a rendered UV texture."""
+    from compiler.realsas_compiler_core.rss_vnext_uncalibrated_upload_v1 import (
+        decode_uncalibrated_two_image_source_v1,
+    )
+    from compiler.realsas_compiler_services.platform_worker.rss_vnext_cas_parent_v1 import (
+        read_rss_vnext_parent_cas_v1,
+    )
+    from compiler.rss_vnext.workers.rss_vnext_source_rgb_projection_candidate_v1 import (
+        build_raw_source_rgb_image_plane_candidates_v1,
+    )
+    source_type = "RealSaS.RSSvNextUncalibratedTwoImageSource"
+    refs = [
+        row for row in request.get("input_artifacts") or ()
+        if type(row) is dict and row.get("artifact_type") == source_type
+    ]
+    if (
+        len(refs) not in (1, 2)
+        or any(ref.get("schema_version") != "v1" for ref in refs)
+        or any(
+            (r.get("content_sha256"), r.get("size_bytes"), r.get("storage_key"))
+            != (refs[0].get("content_sha256"), refs[0].get("size_bytes"),
+                refs[0].get("storage_key"))
+            for r in refs[1:]
+        )
+    ):
+        raise RuntimeError("PRODUCT_GRAPHICS_ORIGINAL_RGB_CAS_SOURCE_CARDINALITY")
+    source = decode_uncalibrated_two_image_source_v1(
+        read_rss_vnext_parent_cas_v1(
+            refs[0], read_object, limit=70 * 1024 * 1024,
+        )
+    )
+    return build_raw_source_rgb_image_plane_candidates_v1(source=source, mesh=mesh)
+
+
+def _seal_binary_candidate_v1(
+    body: bytes, *, role: str, kind: str, put_bytes: Callable,
+) -> dict[str, Any]:
+    from compiler.rss_vnext.workers.rss_vnext_source_rgb_projection_candidate_v1 import (
+        MAX_ARTIFACT_BYTES,
+    )
+    if not body or len(body) > MAX_ARTIFACT_BYTES:
+        raise RuntimeError("PRODUCT_GRAPHICS_SOURCE_RGB_CAS_BUDGET")
+    ref = put_bytes(body)
+    if (
+        type(ref) is not dict
+        or ref.get("content_sha256") != sha256(body).hexdigest()
+        or ref.get("size_bytes") != len(body)
+        or type(ref.get("storage_key")) is not str
+    ):
+        raise RuntimeError("PRODUCT_GRAPHICS_SOURCE_RGB_CAS_WRITE_DRIFT")
+    return {
+        "role": role, "artifact_type": kind, "schema_version": "v1",
+        "storage_key": ref["storage_key"],
+        "content_sha256": ref["content_sha256"],
+        "size_bytes": ref["size_bytes"],
+        "authority_class": "COMPILER_CANDIDATE_NOT_PRODUCT_REVISION",
+    }
+
+
 def _read_dynamic_integrity_proof_v1(
     request: dict, read_object: Callable, mesh, rig, skin, mechanics,
 ):
@@ -221,6 +284,12 @@ def _replay_raw_source_graphics_proof_v1(
         and r.get("artifact_type") == receipt_type
     ]
     if not raws:
+        if any(
+            type(row) is dict and row.get("artifact_type")
+            == "RealSaS.RSSvNextSourceRGBImagePlaneCandidates"
+            for row in refs
+        ):
+            raise RuntimeError("PRODUCT_PROOF_ORPHAN_RAW_SOURCE_RGB_CANDIDATE")
         if supplied or compiled.metadata.get("origin") == (
             "RAW_TWO_IMAGE_UNIFIED_H_TYPED_GRAPHICS_CANDIDATES"
         ):
@@ -288,9 +357,39 @@ def _replay_raw_source_graphics_proof_v1(
         or claimed_receipt.get("product_revision_minted") is not False
     ):
         raise RuntimeError("PRODUCT_PROOF_RAW_GRAPHICS_RECEIPT_REPLAY_MISMATCH")
+    from compiler.realsas_compiler_services.platform_worker.rss_vnext_cas_parent_v1 import (
+        read_rss_vnext_parent_cas_v1,
+    )
+    from compiler.rss_vnext.workers.rss_vnext_source_rgb_projection_candidate_v1 import (
+        ARTIFACT_TYPE, MAX_ARTIFACT_BYTES,
+        decode_raw_source_rgb_image_plane_candidates_v1,
+    )
+    rgb_refs = [
+        row for row in request.get("input_artifacts") or ()
+        if type(row) is dict and row.get("artifact_type") == ARTIFACT_TYPE
+    ]
+    if len(rgb_refs) != 1 or rgb_refs[0].get("schema_version") != "v1":
+        raise RuntimeError("PRODUCT_PROOF_RAW_SOURCE_RGB_CAS_CARDINALITY")
+    raw_rgb = read_rss_vnext_parent_cas_v1(
+        rgb_refs[0], read_object, limit=MAX_ARTIFACT_BYTES,
+    )
+    _, claimed_rgb_manifest = decode_raw_source_rgb_image_plane_candidates_v1(raw_rgb)
+    expected_rgb, expected_rgb_manifest = _raw_source_rgb_candidate_from_cas_v1(
+        request, read_object, mesh,
+    )
+    if (
+        raw_rgb != expected_rgb
+        or claimed_rgb_manifest != expected_rgb_manifest
+        or claimed_rgb_manifest.get("mesh_lineage_hash") != mesh.mesh_lineage_hash
+    ):
+        raise RuntimeError("PRODUCT_PROOF_RAW_SOURCE_RGB_PIXEL_FACE_REPLAY_MISMATCH")
     return {
         "original_two_image_source_binding_replayed": True,
         "original_alpha_static_mesh_qualification_recomputed": True,
+        "original_rgb_source_pixel_face_candidates_recomputed": True,
+        "original_rgb_image_plane_sample_count": expected_rgb_manifest["sample_count"],
+        "original_rgb_image_plane_cas_sha256": sha256(raw_rgb).hexdigest(),
+        "original_rgb_surface_owner_source_qualified": False,
         "same_checkpoint_typed_graphics_recomputed": True,
         "original_source_rgb_appearance_qualified": False,
         "source_camera_observed": False,
@@ -396,6 +495,12 @@ def execute_graphics_capability_v1(
             }
             native_receipt.pop("receipt_hash", None)
             native_receipt["receipt_hash"] = content_sha256(native_receipt)
+    raw_source_rgb = None
+    raw_source_rgb_summary = None
+    if compiled.metadata.get("origin") == "RAW_TWO_IMAGE_UNIFIED_H_TYPED_GRAPHICS_CANDIDATES":
+        raw_source_rgb, raw_source_rgb_summary = _raw_source_rgb_candidate_from_cas_v1(
+            request, read_object, mesh,
+        )
     rendered = build_runtime_graphics_v1(compiled,face_count=len(mesh.faces))
     outputs = [
         _seal(compiled,role="compiled_graphics",kind="RealSaS.CompiledGraphics",
@@ -410,6 +515,13 @@ def execute_graphics_capability_v1(
             kind="RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
             version="v1", put_bytes=put_bytes,
         ))
+    if raw_source_rgb is not None:
+        outputs.append(_seal_binary_candidate_v1(
+            raw_source_rgb,
+            role="rss_original_rgb_fitted_face_candidates",
+            kind="RealSaS.RSSvNextSourceRGBImagePlaneCandidates",
+            put_bytes=put_bytes,
+        ))
     return {
         "capability_id":"product.graphics","status":"PASS",
         "outputs":outputs,"failure":None,
@@ -420,6 +532,12 @@ def execute_graphics_capability_v1(
             "graphics_graph_hash":compiled.graph_hash,
             "graphics_runtime_hash":rendered.runtime_graphics_hash,
             "source_appearance_qualified":False,
+            "source_original_rgb_image_plane_candidate_present": raw_source_rgb is not None,
+            "source_original_rgb_image_plane_sample_count": (
+                raw_source_rgb_summary["sample_count"]
+                if raw_source_rgb_summary is not None else 0
+            ),
+            "source_rgb_surface_ownership_qualified": False,
             "graphics_source_kind":source_kind,
             "mechanics_intervention_court_hash": (
                 intervention["court_hash"] if intervention is not None else None

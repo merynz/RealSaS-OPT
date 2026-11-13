@@ -104,6 +104,10 @@ func (ProductGraphicsProvider) Capabilities(context.Context) ([]Descriptor, erro
 	metadata["raw_construction_receipt_artifact_type"] = "RealSaS.RSSvNextUncalibratedConstructionReceipt"
 	metadata["raw_typed_region_relation_mask_required"] = true
 	metadata["raw_source_alpha_static_mesh_replay_required"] = true
+	metadata["raw_source_rgb_image_plane_candidate_artifact_type"] = "RealSaS.RSSvNextSourceRGBImagePlaneCandidates"
+	metadata["raw_source_rgb_image_plane_candidate_schema_version"] = "v1"
+	metadata["raw_source_rgb_source_surface_ownership_qualified"] = false
+	metadata["raw_source_rgb_source_camera_observed"] = false
 	metadata["input_source_schema_version"] = "v1"
 	metadata["input_fanout_artifact_type"] = "RealSaS.RSSvNextProductEvidenceFanout"
 	metadata["input_fanout_schema_version"] = "v1"
@@ -152,6 +156,9 @@ func (ProductProofProvider) Capabilities(context.Context) ([]Descriptor, error) 
 	metadata["input_runtime_graphics_artifact_type"] = "RealSaS.RuntimeGraphics"
 	metadata["input_runtime_graphics_schema_version"] = "v1"
 	metadata["runtime_graphics_required"] = true
+	metadata["input_raw_source_rgb_image_plane_artifact_type"] = "RealSaS.RSSvNextSourceRGBImagePlaneCandidates"
+	metadata["input_raw_source_rgb_image_plane_schema_version"] = "v1"
+	metadata["raw_source_rgb_independent_pixel_replay_required"] = true
 	metadata["input_mechanics_intervention_artifact_type"] = "RealSaS.MechanicsInterventionCourt"
 	metadata["input_mechanics_intervention_schema_version"] = "v1"
 	metadata["mechanics_intervention_required"] = true

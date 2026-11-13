@@ -80,6 +80,15 @@ def test_two_original_images_through_motion_and_independent_proof_source_replay(
     assert d["persisted_graphics_runtime_replayed"]
     assert d["dynamic_integrity_recomputed_in_proof"]
     assert d["raw_two_image_replay_completed"]
+    assert d["raw_original_source_graphics_replay"][
+        "original_rgb_source_pixel_face_candidates_recomputed"
+    ] is True
+    assert d["raw_original_source_graphics_replay"][
+        "original_rgb_image_plane_sample_count"
+    ] > 0
+    assert d["raw_original_source_graphics_replay"][
+        "original_rgb_surface_owner_source_qualified"
+    ] is False
     assert d["raw_original_source_graphics_replay"] == {
         **d["raw_original_source_graphics_replay"],
         "original_two_image_source_binding_replayed": True,
@@ -121,6 +130,40 @@ def test_raw_proof_rejects_rehashed_altered_graphics_candidate_receipt(
         forged if ref is old else ref for ref in request["input_artifacts"]
     ]
     with pytest.raises(RuntimeError, match="RAW_GRAPHICS_RECEIPT_REPLAY_MISMATCH"):
+        _proof(cas, request)
+
+
+def test_raw_proof_rejects_changed_original_rgb_even_if_rehashed_CAS(
+    tmp_path,
+):
+    cas, request, _, _ = _complete_product_preflight(tmp_path)
+    old = next(
+        row for row in request["input_artifacts"]
+        if row["artifact_type"] == "RealSaS.RSSvNextSourceRGBImagePlaneCandidates"
+    )
+    payload = bytearray(cas.read_object(old))
+    payload[len(payload) // 2] ^= 1
+    forged = {
+        **cas.put_bytes(bytes(payload)),
+        "artifact_type": old["artifact_type"],
+        "schema_version": "v1",
+    }
+    request["input_artifacts"] = [
+        forged if row is old else row for row in request["input_artifacts"]
+    ]
+    with pytest.raises(Exception, match="SOURCE_RGB|INVALID_ARCHIVE"):
+        _proof(cas, request)
+
+
+def test_raw_proof_requires_rgb_candidate_companion_on_active_product_path(
+    tmp_path,
+):
+    cas, request, _, _ = _complete_product_preflight(tmp_path)
+    request["input_artifacts"] = [
+        row for row in request["input_artifacts"]
+        if row["artifact_type"] != "RealSaS.RSSvNextSourceRGBImagePlaneCandidates"
+    ]
+    with pytest.raises(RuntimeError, match="RAW_SOURCE_RGB_CAS_CARDINALITY"):
         _proof(cas, request)
 
 
@@ -167,5 +210,5 @@ def test_raw_proof_refuses_source_and_receipt_downgrade_to_legacy(
             "RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
         }
     ]
-    with pytest.raises(RuntimeError, match="ORPHAN_RAW_GRAPHICS_RECEIPT"):
+    with pytest.raises(RuntimeError, match="ORPHAN_RAW_SOURCE_RGB_CANDIDATE"):
         _proof(cas, request)

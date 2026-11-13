@@ -455,7 +455,11 @@
         "raw_construction_receipt_artifact_type": "RealSaS.RSSvNextUncalibratedConstructionReceipt",
         "raw_typed_region_relation_mask_required": true,
         "raw_source_alpha_static_mesh_replay_required": true,
-        "raw_scene_schema_version": "v1"
+        "raw_scene_schema_version": "v1",
+        "raw_source_rgb_image_plane_candidate_artifact_type": "RealSaS.RSSvNextSourceRGBImagePlaneCandidates",
+        "raw_source_rgb_image_plane_candidate_schema_version": "v1",
+        "raw_source_rgb_source_surface_ownership_qualified": false,
+        "raw_source_rgb_source_camera_observed": false
       }
     },
     "product.motion": {
@@ -534,7 +538,10 @@
         "canonical_cross_expert_parent_reopen_required": true,
         "dynamic_integrity_court_required": true,
         "input_dynamic_integrity_artifact_type": "RealSaS.MechanicsDynamicIntegrityCourt",
-        "input_dynamic_integrity_schema_version": "v1"
+        "input_dynamic_integrity_schema_version": "v1",
+        "input_raw_source_rgb_image_plane_artifact_type": "RealSaS.RSSvNextSourceRGBImagePlaneCandidates",
+        "input_raw_source_rgb_image_plane_schema_version": "v1",
+        "raw_source_rgb_independent_pixel_replay_required": true
       }
     }
   }

@@ -74,13 +74,26 @@ def test_two_original_images_neural_shape_mesh_rig_skin_mechanics_graphics_runti
         req, read_object=cas.read_object, put_bytes=cas.put_bytes,
     )
     assert out["status"] == "PASS"
-    assert len(out["outputs"]) == 3
+    assert len(out["outputs"]) == 4
     assert set(x["artifact_type"] for x in out["outputs"]) == {
         "RealSaS.CompiledGraphics", "RealSaS.RuntimeGraphics",
         "RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
+        "RealSaS.RSSvNextSourceRGBImagePlaneCandidates",
     }
     diagnostics = out["diagnostics"]
     assert diagnostics["source_appearance_qualified"] is False
+    assert diagnostics["source_original_rgb_image_plane_candidate_present"] is True
+    assert diagnostics["source_original_rgb_image_plane_sample_count"] > 0
+    assert diagnostics["source_rgb_surface_ownership_qualified"] is False
+    from compiler.rss_vnext.workers.rss_vnext_source_rgb_projection_candidate_v1 import (
+        decode_raw_source_rgb_image_plane_candidates_v1,
+    )
+    _, rgb = decode_raw_source_rgb_image_plane_candidates_v1(
+        cas.read_object(out["outputs"][3])
+    )
+    assert rgb["sample_count"] > 0
+    assert rgb["source_rgb_surface_ownership_qualified"] is False
+    assert rgb["source_camera_observed"] is False
     assert diagnostics["source_visibility_qualified"] is False
     assert diagnostics["pose_conditioned_occlusion_qualified"] is False
     graphics = json.loads(cas.read_object(out["outputs"][0]))

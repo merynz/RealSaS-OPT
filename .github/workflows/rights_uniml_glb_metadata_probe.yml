@@ -1,0 +1,37 @@
+name: R29 R7 UniML converted GLB provenance metadata probe
+on:
+  push:
+    branches: [audit/rights-metadata-r4-20261113]
+    paths: [.github/workflows/rights_uniml_glb_metadata_probe.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+    - name: Inspect only glTF JSON header of three representative derived assets
+      run: |
+        python - <<'PY'
+        import requests,json,struct
+        ids=['669a635757bbceb71e59feba_fbx','669a635e57bbceb71e5a0068_fbx','669a636457bbceb71e5a01f9_gltf']
+        for uid in ids:
+         url='https://huggingface.co/datasets/Linzhan/UniML3D/resolve/d0f19d943038fb782a26c2a615bd9b3d4f3a8728/canonical_assets/objaverse/'+uid+'.glb'
+         try:
+          r=requests.get(url,stream=True,headers={'Range':'bytes=0-3145727','User-Agent':'RealSaS-Source-Provenance/7.0'},timeout=(15,50));r.raise_for_status()
+          data=bytearray()
+          for chunk in r.iter_content(256*1024):
+           data.extend(chunk)
+           if len(data)>=3200000:break
+          if data[:4]!=b'glTF':print('GLB_NOT_GLB',uid,r.status_code,data[:60].hex(),flush=True);continue
+          n=struct.unpack_from('<I',data,12)[0]
+          if n>len(data)-20:print('GLB_JSON_TRUNCATED',uid,n,len(data),flush=True);continue
+          d=json.loads(bytes(data[20:20+n]))
+          hit={}
+          for label,obj in [('asset',d.get('asset',{})),('extras',d.get('extras',{}))]:
+           if isinstance(obj,dict):hit[label]={k:str(v)[:180] for k,v in obj.items() if 'source' in k.lower() or 'licen' in k.lower() or 'copyright' in k.lower() or 'author' in k.lower() or 'origin' in k.lower() or k=='generator'}
+          extras_count=sum(1 for obj in d.get('nodes',[]) if isinstance(obj,dict) and 'extras' in obj)
+          print('GLB_PROVENANCE',json.dumps({'uid':uid,'http':r.status_code,'json_bytes':n,'source_fields':hit,'extra_nodes':extras_count,
+               'asset_keys':list(d.get('asset',{})),'top_keys':list(d.keys())}),flush=True)
+         except Exception as e:print('GLB_PROBE_ERROR',uid,type(e).__name__,str(e)[:240],flush=True)
+        PY

@@ -480,3 +480,98 @@ def test_live_graphics_consumer_refuses_rehashed_foreign_mesh_or_face_assignment
     with pytest.raises(QualificationError,match="RUNTIME_GRAPHICS_UNSUPPORTED_AUTHORITY"):
         ControllablePuppetSessionV1(replace(bundle,graphics=promoted))
 
+
+
+def _transport_only_base_rss(tmp_path):
+    """Minimal RSS container for editor transport, not a native presentation fixture."""
+    from collections import OrderedDict
+    from compiler.realsas_compiler_core.runtime_package_v2 import write_rss_v2
+
+    path = tmp_path / "source.rss"
+    write_rss_v2(path, OrderedDict((
+        ("mesh.bin", b"fixed-source-mesh-fixture"),
+        ("cameras.bin", b"fixed-source-cameras-fixture"),
+        ("manifest.txt", b"schema=RealSaS.RuntimePackage.v2\\n"),
+    )))
+    return path
+
+
+def test_editor_rss_save_reopen_preserves_canonical_pose_and_source_bytes(tmp_path):
+    from compiler.realsas_compiler_core.puppet_editor_rss_reopen_v1 import (
+        EDITOR_ENTRY, write_edited_rss_v1, reopen_edited_rss_v1,
+    )
+    from compiler.realsas_compiler_core.runtime_package_v2 import read_rss_v2
+
+    bundle = qualified_synthetic_bundle()
+    original = ControllablePuppetSessionV1(bundle)
+    rest = original.frame()
+    original.drag_screen("C_IK", 80., 16.)
+    original.set_view_index(1)
+    altered = original.frame()
+    assert altered.deformed.positions != rest.deformed.positions
+    base = _transport_only_base_rss(tmp_path)
+    archive = tmp_path / "edited.rss"
+    receipt = write_edited_rss_v1(original, source_path=base, destination_path=archive)
+    assert receipt["product_revision_minted"] is False
+    assert receipt["native_renderer_parity_claimed"] is False
+    before = read_rss_v2(base)
+    after = read_rss_v2(archive)
+    assert list(after) == [*list(before), EDITOR_ENTRY]
+    for key in before:
+        assert after[key] == before[key], key
+
+    reopened = reopen_edited_rss_v1(archive, bundle)
+    restored = reopened.frame()
+    assert reopened.view_index == 1
+    assert restored.pose.joints == altered.pose.joints
+    assert restored.deformed.positions == altered.deformed.positions
+    assert restored.composition == altered.composition
+    assert reopened.bundle is bundle
+    # Save again, retaining the unmodified source archive and new edit inputs.
+    reopened.drag_world("C_IK", (.25, 1.75, 0.))
+    second = tmp_path / "edited_second.rss"
+    write_edited_rss_v1(reopened, source_path=archive, destination_path=second)
+    again = reopen_edited_rss_v1(second, bundle)
+    assert again.frame().deformed.positions == reopened.frame().deformed.positions
+    assert read_rss_v2(second)["mesh.bin"] == before["mesh.bin"]
+
+
+def test_editor_rss_reopen_rejects_modified_state_source_and_foreign_bundle(tmp_path):
+    from collections import OrderedDict
+    import json
+    from compiler.realsas_compiler_core.puppet_editor_rss_reopen_v1 import (
+        EDITOR_ENTRY, reopen_edited_rss_v1, write_edited_rss_v1,
+    )
+    from compiler.realsas_compiler_core.runtime_package_v2 import (
+        read_rss_v2, write_rss_v2,
+    )
+
+    bundle = qualified_synthetic_bundle()
+    session = ControllablePuppetSessionV1(bundle)
+    session.drag_screen("C_IK", 80., 16.)
+    base = _transport_only_base_rss(tmp_path)
+    archive = tmp_path / "edited.rss"
+    write_edited_rss_v1(session, source_path=base, destination_path=archive)
+
+    entries = read_rss_v2(archive)
+    altered = dict(json.loads(entries[EDITOR_ENTRY]))
+    altered["view_index"] = 2
+    modified = OrderedDict(entries)
+    modified[EDITOR_ENTRY] = (
+        json.dumps(altered, sort_keys=True, separators=(",", ":")) + "\\n"
+    ).encode()
+    tampered = tmp_path / "tampered.rss"
+    write_rss_v2(tampered, modified)
+    with pytest.raises(QualificationError, match="HASH_OR_CANONICAL_BYTES_DRIFT"):
+        reopen_edited_rss_v1(tampered, bundle)
+
+    modified = OrderedDict(entries)
+    modified["mesh.bin"] = b"modified-forged-source-mesh"
+    wrong_source = tmp_path / "wrong_source.rss"
+    write_rss_v2(wrong_source, modified)
+    with pytest.raises(QualificationError, match="BASE_PACKAGE_CHANGED"):
+        reopen_edited_rss_v1(wrong_source, bundle)
+
+    foreign_bundle = replace(bundle, product_revision_id="OTHER_PUPPET")
+    with pytest.raises(QualificationError, match="CANONICAL_PARENT_DRIFT"):
+        reopen_edited_rss_v1(archive, foreign_bundle)

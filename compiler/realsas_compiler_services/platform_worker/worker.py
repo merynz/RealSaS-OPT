@@ -566,6 +566,19 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
 
     if (
         str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductSkinInference.v4"
+    ):
+        from compiler.rss_vnext.workers.rss_vnext_skin_executor_v4 import (
+            execute_rss_vnext_skin_capability_v4,
+        )
+        return await _with_heartbeat(
+            lambda value: execute_rss_vnext_skin_capability_v4(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            ), request,
+        )
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
         and metadata.get("executor_contract") == "RealSaS.ProductSkinInference.v3"
     ):
         from compiler.realsas_compiler_services.platform_worker.rss_vnext_skin_executor_v3 import (

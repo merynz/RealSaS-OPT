@@ -7,7 +7,10 @@ import "context"
 // independent MIRA ModelRelease provider, never runs another neural release.
 type RSSvNextSkinCandidateProvider struct{}
 
-const RSSvNextSkinContractV3 = "RealSaS.ProductSkinInference.v3"
+const (
+	RSSvNextSkinContractV3 = "RealSaS.ProductSkinInference.v3"
+	RSSvNextSkinContractV4 = "RealSaS.ProductSkinInference.v4"
+)
 
 func (RSSvNextSkinCandidateProvider) Capabilities(context.Context) ([]Descriptor, error) {
 	responsibilities, err := responsibilityIDsForRole(ProductRoleSkin)
@@ -22,10 +25,15 @@ func (RSSvNextSkinCandidateProvider) Capabilities(context.Context) ([]Descriptor
 	metadata := map[string]any{}
 	metadata["product_role_id"] = string(ProductRoleSkin)
 	metadata["implementation_class"] = string(ImplementationCompiler)
-	metadata["interface_contract"] = RSSvNextSkinContractV3
-	metadata["executor_contract"] = RSSvNextSkinContractV3
+	metadata["interface_contract"] = RSSvNextSkinContractV4
+	metadata["executor_contract"] = RSSvNextSkinContractV4
 	metadata["required_models"] = []any{}
-	metadata["input_source_artifact_type"] = "RealSaS.RSSvNextTwoViewSource"
+	metadata["input_source_artifact_type"] = "RealSaS.RSSvNextUncalibratedTwoImageSource"
+	metadata["alternate_calibrated_source_artifact_type"] = "RealSaS.RSSvNextTwoViewSource"
+	metadata["raw_scene_artifact_type"] = "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier"
+	metadata["raw_model_config_artifact_type"] = "RealSaS.RSSvNextUnifiedModelConfig"
+	metadata["raw_embedded_mira_decoder_artifact_type"] = "RealSaS.RSSvNextEmbeddedMIRADecoder"
+	metadata["raw_source_static_replay_required"] = true
 	metadata["input_source_schema_version"] = "v1"
 	metadata["input_fanout_artifact_type"] = "RealSaS.RSSvNextProductEvidenceFanout"
 	metadata["input_fanout_schema_version"] = "v1"

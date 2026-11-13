@@ -58,7 +58,7 @@ def test_detects_producer_consumer_schema_drift_even_if_both_have_valid_names():
 def test_detects_missing_real_worker_route_not_just_importable_python_module():
     snapshot = deepcopy(read_snapshot())
     snapshot["worker"] = snapshot["worker"].replace(
-        '"RealSaS.ProductSkinInference.v3"', '"RealSaS.ProductSkinInference.test_removed"', 1
+        '"RealSaS.ProductSkinInference.v4"', '"RealSaS.ProductSkinInference.test_removed"', 1
     )
     report = evaluate(snapshot)
     assert "REGISTERED_EXECUTOR_DISPATCH_MISSING:product.skin" in report["registered_issues"]

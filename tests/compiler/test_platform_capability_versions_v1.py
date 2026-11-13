@@ -76,8 +76,8 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert skin["policy"]["dependencies"] == [
         "product.shape", "product.mesh", "product.rig",
     ]
-    assert skin["entry_module"] == "compiler.realsas_compiler_services.platform_worker.rss_vnext_skin_executor_v3"
-    assert skin["parameters"]["executor_contract"] == "RealSaS.ProductSkinInference.v3"
+    assert skin["entry_module"] == "compiler.rss_vnext.workers.rss_vnext_skin_executor_v4"
+    assert skin["parameters"]["executor_contract"] == "RealSaS.ProductSkinInference.v4"
     assert skin["parameters"]["required_models"] == []
     assert skin["parameters"]["single_checkpoint_inference_reused"] is True
     assert skin["parameters"]["exact_embedded_mira_decoder_replayed"] is True

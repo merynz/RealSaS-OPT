@@ -115,7 +115,7 @@ func TestProductProvidersAreSingleSourceOfNonStageProductGraph(t *testing.T) {
 		{ProductShapeCapabilityID, []string{ProductInputCapabilityID}, RSSvNextShapeContractV4, 1},
 		{ProductMeshCapabilityID, []string{ProductShapeCapabilityID}, RSSvNextMeshContractV3, 0},
 		{ProductRigCapabilityID, []string{ProductShapeCapabilityID, ProductMeshCapabilityID}, RSSvNextRigContractV4, 0},
-		{ProductSkinCapabilityID, []string{ProductShapeCapabilityID, ProductMeshCapabilityID, ProductRigCapabilityID}, RSSvNextSkinContractV3, 0},
+		{ProductSkinCapabilityID, []string{ProductShapeCapabilityID, ProductMeshCapabilityID, ProductRigCapabilityID}, RSSvNextSkinContractV4, 0},
 	} {
 		row, ok := registry.Get(testcase.id)
 		if !ok {

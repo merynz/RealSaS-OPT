@@ -372,6 +372,10 @@ def execute_rss_vnext_shape_capability_v4(
         graphics_logits=state.graphics_logits,
         presentation_role_logits=state.presentation_role_logits,
         region_relation_logits=state.region_relation_logits,
+        region_relation_valid_mask=state.region_relation_valid_mask.to(dtype=__import__("torch").uint8),
+        presentation_role_probabilities=state.presentation_role_probabilities,
+        source_semantic_patch_logits=state.source_semantic_patch_logits,
+        source_semantic_log_uncertainty=state.source_semantic_log_uncertainty,
     )
     generated_bytes = _tensor_archive(
         canonical_rgba=construction.construction.canonical_rgba,

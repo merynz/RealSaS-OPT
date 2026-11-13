@@ -36,7 +36,8 @@ class MechanicsInterventionProbeV1:
     mode: str
     input_translation_xyz: tuple[float, float, float]
     joint_motion_max: float
-    vertex_motion_max: float
+    vertex_motion_max: float | None
+    full_mesh_deformation_tested: bool
     max_constraint_residual: float
     anchor_motion_max: float
     anchor_count: int
@@ -56,6 +57,8 @@ class MechanicsInterventionCourtV1:
     observed_mesh_motion: bool
     control_count: int
     anchor_count: int
+    full_mesh_deformation_probe_count: int
+    full_mesh_deformation_complete: bool
     max_constraint_residual: float
     status: str
     court_hash: str
@@ -119,6 +122,7 @@ def compile_mechanics_intervention_court_v1(
     mechanics: CanonicalMechanicsIRV1,
     *,
     max_probed_controls: int = 128,
+    max_full_mesh_deformation_probes: int = 4,
     relative_translation: float = 0.02,
     max_constraint_residual: float = 1e-3,
 ) -> MechanicsInterventionCourtV1:
@@ -137,6 +141,8 @@ def compile_mechanics_intervention_court_v1(
     if (
         type(max_probed_controls) is not int
         or not 1 <= max_probed_controls <= 512
+        or type(max_full_mesh_deformation_probes) is not int
+        or not 1 <= max_full_mesh_deformation_probes <= 8
         or not rig.controls
         or len(rig.controls) > max_probed_controls
         or type(relative_translation) not in (float, int)
@@ -169,29 +175,41 @@ def compile_mechanics_intervention_court_v1(
     probes = []
     maximum_residual = 0.0
     any_joint_motion, any_mesh_motion = False, False
-    for control in rig.controls:
+    for index, control in enumerate(rig.controls):
         state = (ControlTransformIRV1(control.canonical_control_id, translation=shift),)
         pose = solve_control_pose_v1(rig, state)
-        deformed = deform_mesh_lbs_v1(mesh, rig, skin, pose)
         if (
-            deformed.canonical_mesh_vertex_ids != baseline.canonical_mesh_vertex_ids
-            or deformed.mesh_lineage_hash != mesh.mesh_lineage_hash
-            or deformed.skin_lineage_hash != skin.skin_lineage_hash
-            or pose.rig_lineage_hash != rig.rig_lineage_hash
+            pose.rig_lineage_hash != rig.rig_lineage_hash
             or pose.control_program_hash != rig.control_program_hash
         ):
             raise QualificationError("INTERVENTION_POSED_PARENT_OR_VERTEX_ORDER_DRIFT")
-        xyz = np.asarray(deformed.positions, dtype=np.float64)
-        if xyz.shape != rest.shape or not np.isfinite(xyz).all():
-            raise QualificationError("INTERVENTION_DEFORMATION_NONFINITE")
+        # Full Python LBS is O(vertex_count * influence_count). Testing all
+        # controls on a 250k-vertex subject would exceed worker budgets.
+        # The solver and socket transport cover EVERY control, while a fixed,
+        # disclosed prefix gets full vertex-level deformation replay. This
+        # court never claims all-control deformation coverage from samples.
+        tested = index < max_full_mesh_deformation_probes
+        xyz = None
+        if tested:
+            deformed = deform_mesh_lbs_v1(mesh, rig, skin, pose)
+            if (
+                deformed.canonical_mesh_vertex_ids != baseline.canonical_mesh_vertex_ids
+                or deformed.mesh_lineage_hash != mesh.mesh_lineage_hash
+                or deformed.skin_lineage_hash != skin.skin_lineage_hash
+            ):
+                raise QualificationError("INTERVENTION_DEFORMATION_PARENT_OR_VERTEX_ORDER_DRIFT")
+            xyz = np.asarray(deformed.positions, dtype=np.float64)
+            if xyz.shape != rest.shape or not np.isfinite(xyz).all():
+                raise QualificationError("INTERVENTION_DEFORMATION_NONFINITE")
         joint_poses = {row.canonical_joint_id: np.asarray(row.solved_P, dtype=np.float64)
                        for row in pose.joints}
         if set(joint_poses) != set(baseline_joint):
             raise QualificationError("INTERVENTION_JOINT_IDENTITY_DRIFT")
         jm = max(float(np.linalg.norm(joint_poses[jid] - p))
                  for jid, p in baseline_joint.items())
-        vm = float(np.max(np.linalg.norm(xyz - baseline_vertices, axis=1)))
-        if not math.isfinite(jm) or not math.isfinite(vm):
+        vm = (float(np.max(np.linalg.norm(xyz - baseline_vertices, axis=1)))
+              if xyz is not None else None)
+        if not math.isfinite(jm) or (vm is not None and not math.isfinite(vm)):
             raise QualificationError("INTERVENTION_DISPLACEMENT_NONFINITE")
         residual = max((float(v) for _, v in pose.constraint_residuals), default=0.)
         if not math.isfinite(residual) or residual > max_constraint_residual:
@@ -206,13 +224,14 @@ def compile_mechanics_intervention_court_v1(
         probes.append(MechanicsInterventionProbeV1(
             control_id=control.canonical_control_id, mode="TRANSLATE_CANONICAL_CONTROL",
             input_translation_xyz=shift, joint_motion_max=jm, vertex_motion_max=vm,
+            full_mesh_deformation_tested=tested,
             max_constraint_residual=residual, anchor_motion_max=am,
             anchor_count=len(sockets), pose_hash=content_sha256(pose.to_dict()),
             socket_pose_hash=content_sha256(sockets),
         ))
         maximum_residual = max(maximum_residual, residual)
         any_joint_motion |= jm > 1e-9
-        any_mesh_motion |= vm > 1e-9
+        any_mesh_motion |= vm is not None and vm > 1e-9
     receipt = MechanicsInterventionCourtV1(
         canonical_mesh_lineage_hash=mesh.mesh_lineage_hash,
         canonical_rig_lineage_hash=rig.rig_lineage_hash,
@@ -221,6 +240,8 @@ def compile_mechanics_intervention_court_v1(
         baseline_socket_pose_hash=baseline_socket_hash, probes=tuple(probes),
         observed_joint_motion=any_joint_motion, observed_mesh_motion=any_mesh_motion,
         control_count=len(rig.controls), anchor_count=len(rig.attachment_anchors),
+        full_mesh_deformation_probe_count=min(len(rig.controls), max_full_mesh_deformation_probes),
+        full_mesh_deformation_complete=(len(rig.controls) <= max_full_mesh_deformation_probes),
         max_constraint_residual=maximum_residual,
         status="MEASURED_COMPILER_CONTROL_INTERVENTIONS_NOT_SOURCE_BEHAVIOR",
         court_hash="",

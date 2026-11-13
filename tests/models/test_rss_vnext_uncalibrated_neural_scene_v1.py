@@ -194,7 +194,7 @@ def test_source_cas_tamper_fails_before_inference(tmp_path):
         )
 
 
-def test_unknown_source_camera_cannot_enter_legacy_source_ray_or_control_mode(tmp_path):
+def test_unknown_source_camera_refuses_unbound_control_mode_without_generated_scene(tmp_path):
     torch.manual_seed(833)
     net = _bundle(tmp_path).model
     original = torch.rand(1, 2, 4, 64, 64)
@@ -202,7 +202,7 @@ def test_unknown_source_camera_cannot_enter_legacy_source_ray_or_control_mode(tm
         net.propose_teacher_free(
             original, None, max_topology_tokens=6,
         )
-    with pytest.raises(RuntimeError, match="UNCALIBRATED_CONTROL_PROOF_NOT_READY"):
+    with pytest.raises(RuntimeError, match="RAW_CONTROLS_REQUIRE_PINNED_GENERATED_SCENE"):
         net.propose_teacher_free(
             original, None, max_topology_tokens=6,
             generate_controls=True, executable_constraint_operators=("NO_OP",),

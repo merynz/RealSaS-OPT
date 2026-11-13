@@ -48,7 +48,7 @@ func (RSSvNextInputCandidateProvider) Capabilities(context.Context) ([]Descripto
 			"platform_view_count_invariant":                false,
 			"source_rights_verified_by_input":              false,
 			"stable_product_role_survives_rewiring":        true,
-			"responsibility_ids":                 responsibilities,
+			"responsibility_ids":                           responsibilities,
 		},
 	}}, nil
 }
@@ -111,7 +111,7 @@ func (RSSvNextShapeCandidateProvider) Capabilities(context.Context) ([]Descripto
 			"neural_scene_survives_mesh_abstain": true,
 			"learned_model_results_not_product":  true,
 			"independent_iris_tessa_forbidden":   true,
-			"responsibility_ids":                         responsibilities,
+			"responsibility_ids":                 responsibilities,
 		},
 	}}, nil
 }
@@ -185,8 +185,8 @@ func (RSSvNextMeshCandidateProvider) Capabilities(context.Context) ([]Descriptor
 			"learned_evidence_retained_by_reference": true,
 			"independent_model_inference_forbidden":  true,
 			"requires_legacy_eight_view_stages":      false,
-			"required_models": []any{},
-			"responsibility_ids":                            responsibilities,
+			"required_models":                        []any{},
+			"responsibility_ids":                     responsibilities,
 		},
 	}}, nil
 }

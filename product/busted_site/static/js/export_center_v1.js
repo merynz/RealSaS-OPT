@@ -1,5 +1,6 @@
-/* Truthful native export reference: no fake file download or unsupported format promises. */
+/* Download only the verified, proof-gated existing native RSS package. */
 import {apiFetch} from './api_gateway_v1.js';
+import {downloadQualifiedNativeRSS} from './native_export_v1.js';
 (() => {
   'use strict';
   const $=s=>document.querySelector(s);
@@ -44,12 +45,11 @@ import {apiFetch} from './api_gateway_v1.js';
     if(!qualified)return;
     $('#prepareExport').disabled=true;$('#exportResult').textContent='Checking native runtime package…';
     try{
-      const result=await json('/api/export',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({bundle})});
-      if(result.authority!=='EXISTING_PROOF_GATED_NATIVE_RUNTIME'||!String(result.package_path||'').endsWith('.rss'))throw Error('Server returned no verified native package');
+      const result=await downloadQualifiedNativeRSS(bundle);
       $('#exportPackage').textContent='VERIFIED .RSS';
       $('#exportResult').classList.add('success');
-      $('#exportResult').textContent='Native .rss package verified on the product server. Direct browser download is not yet connected; no file was downloaded.';
-      message('NATIVE PACKAGE FOUND · DELIVERY ENDPOINT NOT CONNECTED');
+      $('#exportResult').textContent='Downloaded verified native .rss ('+result.size_bytes+' bytes, SHA-256 '+result.content_sha256.slice(0,12)+'…). Studio edits are not included.';
+      message('QUALIFIED NATIVE RSS DOWNLOAD');
     }catch(e){$('#exportPackage').textContent='NOT AVAILABLE';$('#exportResult').textContent='Export unavailable: '+e.message;message('NATIVE PACKAGE NOT AVAILABLE')}
     finally{$('#prepareExport').disabled=!qualified}
   });

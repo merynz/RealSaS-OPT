@@ -6,6 +6,9 @@ These tests prove routing, source preservation and public workspace isolation.
 They never claim an RSS.vNext learned checkpoint or a qualified public compile.
 """
 from dataclasses import replace
+from hashlib import sha256
+from urllib.parse import parse_qs, urlsplit
+from zipfile import ZipFile
 import json
 from pathlib import Path
 from threading import Thread
@@ -138,3 +141,63 @@ def test_cross_origin_preflight_only_for_exact_authorized_pages_origin(tmp_path)
         server.shutdown()
         server.server_close()
         thread.join(timeout=3)
+
+
+def test_public_native_rss_delivery_is_proof_gated_scoped_and_byte_verified(tmp_path):
+    token = "QualifiedNative123456"
+    workspace = tmp_path / token
+    workspace.mkdir()
+    legacy_fixture(workspace)
+    native = workspace / "native" / "realsas_runtime.rss"
+    native.parent.mkdir()
+    with ZipFile(native, "w") as archive:
+        archive.writestr("manifest.txt", "real-native-test-fixture\n")
+        archive.writestr("motion.bin", b"provenance-aware-fixture")
+    raw = native.read_bytes()
+    app = BustedApplication(SITE, tmp_path, "https://merynz.github.io", True)
+    code, receipt, mime = app.dispatch("POST", "/api/export", {"bundle": token})
+    assert code == 200 and mime == "application/json"
+    assert receipt["schema_version"] == "RealSaS.BustedQualifiedNativeDownload.v1"
+    assert receipt["authority"] == "EXISTING_PROOF_GATED_NATIVE_RUNTIME"
+    assert receipt["content_sha256"] == sha256(raw).hexdigest()
+    assert receipt["size_bytes"] == len(raw)
+    assert receipt["edited_studio_state_included"] is False
+    assert str(workspace) not in json.dumps(receipt)
+    parsed = urlsplit(receipt["download_url"])
+    assert parsed.path == "/api/blob"
+    assert parse_qs(parsed.query) == {
+        "bundle": [token], "path": ["native/realsas_runtime.rss"],
+    }
+    got_status, data, got_mime = app.dispatch("GET", receipt["download_url"])
+    assert got_status == 200 and data == raw
+    assert got_mime == "application/octet-stream"
+
+    proof_path = workspace / "proof" / "product_proof_bundle_ir.json"
+    proof = json.loads(proof_path.read_text())
+    proof["overall_status"] = "FAIL"
+    proof_path.write_text(json.dumps(proof))
+    with pytest.raises(LivingCompileError, match="PROOF_PASS_REQUIRED"):
+        app.dispatch("POST", "/api/export", {"bundle": token})
+    with pytest.raises(LivingCompileError, match="PROOF_PASS_REQUIRED"):
+        app.dispatch("GET", receipt["download_url"])
+    with pytest.raises(LivingCompileError):
+        app.dispatch("GET", "/api/blob?bundle=../QualifiedNative123456&path=native/realsas_runtime.rss")
+
+
+def test_native_export_rejects_corrupt_archive_and_outside_symlink(tmp_path):
+    token = "QualifiedNative123456"
+    workspace = tmp_path / token
+    workspace.mkdir()
+    legacy_fixture(workspace)
+    native = workspace / "native" / "realsas_runtime.rss"
+    native.parent.mkdir()
+    native.write_bytes(b"not-a-valid-native-rss")
+    app = BustedApplication(SITE, tmp_path, "https://merynz.github.io", True)
+    with pytest.raises(LivingCompileError, match="RSS_DECODE_INVALID"):
+        app.dispatch("POST", "/api/export", {"bundle": token})
+    native.unlink()
+    outside = tmp_path / "elsewhere.rss"
+    outside.write_bytes(b"exfiltration")
+    native.symlink_to(outside)
+    with pytest.raises(LivingCompileError, match="path escapes bundle root"):
+        app.dispatch("POST", "/api/export", {"bundle": token})

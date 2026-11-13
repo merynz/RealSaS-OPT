@@ -210,5 +210,5 @@ def test_raw_proof_refuses_source_and_receipt_downgrade_to_legacy(
             "RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
         }
     ]
-    with pytest.raises(RuntimeError, match="ORPHAN_RAW_GRAPHICS_RECEIPT"):
+    with pytest.raises(RuntimeError, match="ORPHAN_RAW_SOURCE_RGB_CANDIDATE"):
         _proof(cas, request)

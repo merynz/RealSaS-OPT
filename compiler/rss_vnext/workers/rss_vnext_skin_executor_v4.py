@@ -43,7 +43,7 @@ from compiler.realsas_compiler_services.platform_worker.skin_executor_v2 import 
 )
 from compiler.rss_vnext.workers.rss_vnext_mesh_executor_v3 import (
     RAW_SOURCE, RAW_SCENE, RAW_VIEWS, RAW_RECEIPT, RAW_CONFIG, RAW_DECODER,
-    SCENE_REQUIRED, MESH_KEYS, AXIS_MIRA_KEYS,
+    SCENE_REQUIRED, MESH_KEYS, AXIS_MIRA_KEYS, RAW_GRAPHICS_KEYS,
     _archive, _validate_candidate, _validate_raw_axis_mira,
 )
 from compiler.rss_vnext.workers.rss_vnext_rig_executor_v4 import (
@@ -159,7 +159,7 @@ def execute_rss_vnext_skin_capability_v4(
         raise RuntimeError("RSS_VNEXT_SKIN_V4_SOURCE_AND_CHECKPOINT_BINDING_DRIFT")
     scene = _archive(
         _bytes(scene_ref, read_object),
-        required=SCENE_REQUIRED, allowed=SCENE_REQUIRED | MESH_KEYS | AXIS_MIRA_KEYS,
+        required=SCENE_REQUIRED, allowed=SCENE_REQUIRED | MESH_KEYS | AXIS_MIRA_KEYS | RAW_GRAPHICS_KEYS,
     )
     geometry = _validate_candidate(scene, receipt)
     controls = _validate_raw_axis_mira(scene, receipt, geometry)

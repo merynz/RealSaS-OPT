@@ -39,7 +39,7 @@ class NativeTESSAFaceReindexCandidateV1:
     source_face_winding_parity:tuple[int,...]  # 0 even / 1 odd; not render winding authority
     source_face_components:tuple[int,...]
     tessa_face_components:tuple[int,...]
-    source_mesh_bytes_sha256:str
+    normalized_source_mesh_canonical_sha256:str
     tessa_teacher_token_sha256:str
     tessa_mesh_topology_digest:str
     candidate_sha256:str
@@ -228,7 +228,7 @@ def reindex_source_faces_to_tessa_teacher_v1(
         "source_face_winding_parity":tuple(parity),
         "source_face_components":source_face_comp,
         "tessa_face_components":tessa_face_comp,
-        "source_mesh_bytes_sha256":original_digest,
+        "normalized_source_mesh_canonical_sha256":original_digest,
         "tessa_teacher_token_sha256":sha256(json.dumps(
             list(tessa_teacher_token_ids),separators=(",",":"),
         ).encode()).hexdigest(),

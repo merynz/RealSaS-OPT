@@ -91,6 +91,8 @@ def _rigid_constraint_link(row: Mapping[str, object]) -> tuple[str,str,str] | No
         or not row["subtarget"]
     ):
         return None
+    if row["type"] == "COPY_TRANSFORMS" and row.get("mix_mode") != "REPLACE":
+        return None
     if row["type"] == "CHILD_OF" and any(
         row.get(k) is not True
         for k in (
@@ -171,6 +173,10 @@ def compile_blender_native_attachment_inventory_candidate_v1(
                 links.append((record["parent_name"],record["parent_bone"],"BONE_PARENT"))
             else:
                 unresolved+=1
+        elif record["parent_type"]=="OBJECT" and record.get("parent_name"):
+            # Object parenting may be a source attachment, but it is not
+            # automatically a bone or a known holder surface.
+            unresolved+=1
         elif record["parent_type"] not in ("OBJECT","", "NONE"):
             unresolved+=1
         for item in constraints:

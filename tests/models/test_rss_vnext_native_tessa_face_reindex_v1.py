@@ -192,7 +192,9 @@ def test_teacher_change_is_not_overridden_by_same_source_index_map():
     net,xyz,faces,comps,tokens=_native()
     # Wrong coordinate bins make even the same token values a different
     # geometry. Reindex must reject rather than inherit source addresses.
-    with pytest.raises(ValueError,match="NATIVE_TESSA_TRIANGLE_KEY_BIJECTION_MISSING"):
+    # The TESSA grammar's special IDs depend on coordinate_bins; replaying
+    # a 128-bin teacher in a 256-bin decoder must fail at the BOS grammar.
+    with pytest.raises(ValueError,match="TESSA_DECODE_BOS_MISSING"):
         reindex_source_faces_to_tessa_teacher_v1(
             source_vertices_normalized=xyz,source_faces=faces,
             source_face_component_indices=comps,

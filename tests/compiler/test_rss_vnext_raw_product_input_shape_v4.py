@@ -14,11 +14,11 @@ from compiler.realsas_compiler_core.rss_vnext_uncalibrated_upload_v1 import (
     RSSvNextUncalibratedTwoImageSourceV1,
     encode_uncalibrated_two_image_source_v1,
 )
-from compiler.realsas_compiler_services.platform_worker.rss_vnext_input_executor_v3 import (
+from compiler.rss_vnext.workers.rss_vnext_input_executor_v3 import (
     RAW_ARTIFACT_TYPE, EXECUTOR_CONTRACT as INPUT_V3,
     execute_rss_vnext_input_capability_v3,
 )
-from compiler.realsas_compiler_services.platform_worker.rss_vnext_shape_executor_v4 import (
+from compiler.rss_vnext.workers.rss_vnext_shape_executor_v4 import (
     EXECUTOR_CONTRACT as SHAPE_V4,
     execute_rss_vnext_shape_capability_v4,
 )
@@ -131,7 +131,7 @@ def test_raw_shape_runs_two_actual_generators_and_persists_only_candidate_cas(
             "content_sha256": "b" * 64,
         },
     }]
-    import compiler.realsas_compiler_services.platform_worker.rss_vnext_shape_executor_v4 as executor
+    import compiler.rss_vnext.workers.rss_vnext_shape_executor_v4 as executor
     import models.rss_vnext.inference_checkpoint_v1 as loader
 
     monkeypatch.setattr(executor, "materialize_model_releases", lambda **kwargs: release)
@@ -205,7 +205,7 @@ def test_raw_source_cas_tampering_is_rejected_before_checkpoint_loading():
 
 
 def test_calibrated_source_delegates_to_exact_v3_path(monkeypatch):
-    import compiler.realsas_compiler_services.platform_worker.rss_vnext_shape_executor_v4 as executor
+    import compiler.rss_vnext.workers.rss_vnext_shape_executor_v4 as executor
     sentinel = {"capability_id": "product.shape", "status": "PASS", "outputs": []}
     calls = []
 

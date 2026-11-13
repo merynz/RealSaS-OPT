@@ -96,6 +96,18 @@ def test_product_capability_implementations_are_complete_and_semantic():
     assert rig["parameters"]["output_artifact_type"] == "RealSaS.CanonicalRigIR"
     assert rig["parameters"]["output_schema_version"] == "v2"
 
+    graphics = specs["product.graphics"]
+    assert graphics["parameters"]["raw_source_rgb_image_plane_candidate_artifact_type"] == (
+        "RealSaS.RSSvNextSourceRGBImagePlaneCandidates"
+    )
+    assert graphics["parameters"]["raw_source_rgb_source_surface_ownership_qualified"] is False
+    assert graphics["parameters"]["raw_source_rgb_source_camera_observed"] is False
+    proof = specs["product.proof"]
+    assert proof["parameters"]["input_raw_source_rgb_image_plane_artifact_type"] == (
+        "RealSaS.RSSvNextSourceRGBImagePlaneCandidates"
+    )
+    assert proof["parameters"]["raw_source_rgb_independent_pixel_replay_required"] is True
+
     skin = specs["product.skin"]
     assert skin["policy"]["dependencies"] == [
         "product.shape", "product.mesh", "product.rig",

@@ -20,11 +20,11 @@ import (
 // of inventing a second registry or a parallel operational graph.
 func ProductProviders() []Provider {
 	return []Provider{
-		ProductInputProvider{},
-		ProductShapeProvider{},
-		ProductMeshProvider{},
-		ProductRigProvider{},
-		ProductSkinProvider{},
+		RSSvNextInputCandidateProvider{},
+		RSSvNextShapeCandidateProvider{},
+		RSSvNextMeshCandidateProvider{},
+		RSSvNextRigCandidateProvider{},
+		RSSvNextSkinCandidateProvider{},
 		ProductMechanicsProvider{},
 		ProductGraphicsProvider{},
 		ProductMotionProvider{},

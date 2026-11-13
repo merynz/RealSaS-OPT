@@ -67,7 +67,7 @@ jobs:
           import pathlib, subprocess, tarfile
           roots = ("models/", "compiler/", "runtime/", "tools/", "tests/", "platform/", ".github/workflows/")
           suffixes = {".py", ".go", ".js", ".ts", ".c", ".cpp", ".h", ".hpp", ".json", ".md", ".yml", ".yaml", ".sh", ".sql", ".toml", ".txt"}
-          src = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\\x00")
+          src = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\x00")
           output = pathlib.Path("architecture-view/repo-layout-source.tar.gz")
           with tarfile.open(output, "w:gz") as tar:
               for item in src:

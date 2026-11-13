@@ -14,14 +14,16 @@ from hashlib import sha256
 import io
 import json
 import math
+import zlib
 from typing import Any
-from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
+from zipfile import ZIP_DEFLATED, BadZipFile, ZipFile, ZipInfo
 
 import numpy as np
 from PIL import Image
 
 from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import (
-    CanonicalMeshIR, validate_canonical_mesh_domain_v1,
+    CanonicalMeshIR, canonical_mesh_lineage_hash_v1,
+    validate_canonical_mesh_domain_v1,
 )
 from compiler.realsas_compiler_core.rss_vnext_uncalibrated_upload_v1 import (
     RSSvNextUncalibratedTwoImageSourceV1,
@@ -143,6 +145,8 @@ def build_raw_source_rgb_image_plane_candidates_v1(
     """
     source.validate()
     validate_canonical_mesh_domain_v1(mesh)
+    if mesh.mesh_lineage_hash != canonical_mesh_lineage_hash_v1(mesh):
+        raise RuntimeError("SOURCE_RGB_CANONICAL_MESH_LINEAGE_DRIFT")
     if source.view_claims != ("FRONT", "BACK"):
         raise RuntimeError("SOURCE_RGB_FRONT_BACK_CLAIMS_REQUIRED")
     if len(mesh.faces) > 32768 or len(mesh.vertices) > 32768:
@@ -257,7 +261,7 @@ def decode_raw_source_rgb_image_plane_candidates_v1(
                 raise RuntimeError("SOURCE_RGB_REOPEN_ARRAY_KEYS")
             arrays = {key: archive[key] for key in sorted(_KEYS)}
         manifest = json.loads(arrays["manifest_utf8"].tobytes().decode("utf-8"))
-    except (ValueError, OSError, KeyError, UnicodeDecodeError) as exc:
+    except (ValueError, OSError, KeyError, UnicodeDecodeError, BadZipFile, EOFError, zlib.error) as exc:
         raise RuntimeError("SOURCE_RGB_REOPEN_INVALID_ARCHIVE") from exc
     count = manifest.get("sample_count") if type(manifest) is dict else None
     if (

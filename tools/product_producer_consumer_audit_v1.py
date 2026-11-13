@@ -18,12 +18,19 @@ ROOT = Path(__file__).resolve().parents[1]
 
 # These are interface relationships, not another authority for version numbers:
 # exact artifact types and versions always come from the live Platform descriptors.
-EDGES: dict[str, dict[str, tuple[str, str]]] = {
+# All DAG dependency edges are checked. An ARTIFACT edge validates exact
+# producer bytes schema; LINEAGE_ONLY edges have no direct input artifact
+# descriptor and must never be mislabeled as pixel/behavior proof.
+EDGES: dict[str, dict[str, tuple[str | None, str | None]]] = {
     "product.input": {},
     "product.shape": {"product.input": ("input_artifact_type", "input_schema_version")},
     "product.mesh": {"product.shape": ("input_shape_artifact_type", "input_shape_schema_version")},
-    "product.rig": {"product.mesh": ("input_mesh_artifact_type", "input_mesh_schema_version")},
+    "product.rig": {
+        "product.shape": ("input_fanout_artifact_type", "input_fanout_schema_version"),
+        "product.mesh": ("input_mesh_artifact_type", "input_mesh_schema_version"),
+    },
     "product.skin": {
+        "product.shape": ("input_fanout_artifact_type", "input_fanout_schema_version"),
         "product.mesh": ("input_mesh_artifact_type", "input_mesh_schema_version"),
         "product.rig": ("input_rig_artifact_type", "input_rig_schema_version"),
     },
@@ -33,8 +40,9 @@ EDGES: dict[str, dict[str, tuple[str, str]]] = {
         "product.skin": ("input_skin_artifact_type", "input_skin_schema_version"),
     },
     "product.graphics": {
-        "product.rig": ("input_rig_artifact_type", "input_rig_schema_version"),
+        "product.shape": ("input_fanout_artifact_type", "input_fanout_schema_version"),
         "product.mesh": ("input_mesh_artifact_type", "input_mesh_schema_version"),
+        "product.rig": ("input_rig_artifact_type", "input_rig_schema_version"),
         "product.skin": ("input_skin_artifact_type", "input_skin_schema_version"),
         "product.mechanics": ("input_mechanics_artifact_type", "input_mechanics_schema_version"),
     },
@@ -43,6 +51,11 @@ EDGES: dict[str, dict[str, tuple[str, str]]] = {
         "product.mechanics": ("input_mechanics_artifact_type", "input_mechanics_schema_version"),
     },
     "product.proof": {
+        "product.input": (None, None),
+        "product.shape": (None, None),
+        "product.mesh": (None, None),
+        "product.rig": (None, None),
+        "product.skin": (None, None),
         "product.mechanics": ("input_mechanics_artifact_type", "input_mechanics_schema_version"),
         "product.graphics": ("input_graphics_artifact_type", "input_graphics_schema_version"),
         "product.motion": ("input_motion_artifact_type", "input_motion_schema_version"),
@@ -120,10 +133,11 @@ def _go_registered_roles(source: str) -> set[str]:
     end = source.find("func productProviderCatalog(", start)
     if start < 0 or end < 0:
         raise ValueError("GO_PRODUCT_PROVIDER_CATALOG_MISSING")
-    return {
-        "product." + match.lower()
-        for match in re.findall(r"\bProduct([A-Za-z]+)Provider\{\}", source[start:end])
-    }
+    declared = re.findall(
+        r"\\b(?:Product|RSSvNext)(Input|Shape|Mesh|Rig|Skin|Mechanics|Graphics|Motion|Proof)(?:Candidate)?Provider\\{\\}",
+        source[start:end],
+    )
+    return {"product." + role.lower() for role in declared}
 
 
 def _sealed_output_types(source: str) -> set[tuple[str, str]]:
@@ -199,10 +213,31 @@ def evaluate(snapshot: Mapping[str, Any]) -> dict[str, Any]:
                 issues.append("REGISTERED_PARENT_MISSING:" + capability_id + ":" + parent_id)
                 continue
             producer_meta = producer["metadata"]
+            if input_type_key is None:
+                edges.append({
+                    "producer": parent_id, "consumer": capability_id,
+                    "produces": "PARENT_LINEAGE_ONLY",
+                    "consumes": "PARENT_LINEAGE_ONLY",
+                    "verification": "DECLARED_DAG_PARENT_ONLY_NO_DIRECT_ARTIFACT_SCHEMA",
+                    "status": "LINEAGE_ONLY",
+                })
+                continue
             consumer_type = str(meta.get(input_type_key) or "")
             consumer_version = str(meta.get(input_version_key) or "")
             parent_type = str(producer_meta.get("output_artifact_type") or "")
             parent_version = str(producer_meta.get("output_schema_version") or "")
+            # Shape distributes an independently CAS-addressed fanout child,
+            # not its primary inference-evidence artifact.
+            if input_type_key == "input_fanout_artifact_type" and parent_id == "product.shape":
+                alternatives = [
+                    x for x in producer_meta.get("auxiliary_outputs", ())
+                    if x.get("role") == "rss_evidence_fanout"
+                ]
+                if len(alternatives) == 1:
+                    parent_type = str(alternatives[0].get("artifact_type") or "")
+                    parent_version = str(alternatives[0].get("schema_version") or "")
+                else:
+                    parent_type, parent_version = "", ""
             status = (
                 "MATCH"
                 if consumer_type and consumer_version
@@ -214,6 +249,7 @@ def evaluate(snapshot: Mapping[str, Any]) -> dict[str, Any]:
                 "consumer": capability_id,
                 "produces": parent_type + "/" + parent_version,
                 "consumes": consumer_type + "/" + consumer_version,
+                "verification": "ARTIFACT_TYPE_AND_SCHEMA",
                 "status": status,
             })
             if status != "MATCH":

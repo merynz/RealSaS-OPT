@@ -77,6 +77,10 @@ def _constraint_row(c)->dict:
         "target":None if owner is None else str(owner.name),
         "target_type":None if owner is None else str(owner.type),
         "subtarget":str(getattr(c,"subtarget","") or ""),
+        "mix_mode":(
+            str(getattr(c,"mix_mode",""))
+            if str(c.type)=="COPY_TRANSFORMS" else None
+        ),
     }
     if str(c.type)=="CHILD_OF":
         for name in (

@@ -161,3 +161,56 @@ def test_policy_rest_hold_is_explicitly_not_synthetic_animation_or_source_truth(
     assert value.control_tracks == ()
     assert value.metadata["editable_motion_space"] == "ANIMATOR_CONTROLS"
     assert result["diagnostics"]["source_motion_independently_verified"] is False
+
+
+def test_graphics_native_one_trigger_path_uses_shape_inference_without_manual_evidence(monkeypatch):
+    """Transport E2E. Full neural face replay has its own compiler court."""
+    from compiler.realsas_compiler_core.graphics_v1 import (
+        compile_graphics_on_canonical_puppet_v1,
+    )
+    import compiler.realsas_compiler_services.platform_worker.rss_vnext_graphics_consumer_v1 as native
+    cas, mesh, rig, skin, mechanics, request = _requests()
+    req = request("graphics", GRAPHICS_CONTRACT)
+    req["input_artifacts"] = [
+        row for row in req["input_artifacts"]
+        if row["artifact_type"] != "RealSaS.GraphicsEvidence"
+    ]
+    call = {"count": 0}
+    def native_compile(request, *, canonical_mesh, canonical_rig, canonical_skin, read_object):
+        assert canonical_mesh.mesh_lineage_hash == mesh.mesh_lineage_hash
+        assert canonical_rig.rig_lineage_hash == rig.rig_lineage_hash
+        assert canonical_skin.skin_lineage_hash == skin.skin_lineage_hash
+        call["count"] += 1
+        evidence = build_graphics_evidence_v1(
+            mesh_binding_hash=mesh.mesh_lineage_hash,
+            static_relations=(), view_relations=(),
+        )
+        compiled = compile_graphics_on_canonical_puppet_v1(
+            mesh=mesh, rig=rig, skin=skin,
+            source_graphics_binding_hash=evidence.evidence_hash,
+            evidence=evidence,
+        )
+        return compiled, {
+            "schema": "RealSaS.RSSvNext.GraphicsNativeCandidateReceipt.v1",
+            "graph_hash": compiled.graph_hash,
+            "source_appearance_qualified": False,
+            "product_revision_minted": False,
+        }
+    monkeypatch.setattr(native, "compile_rss_vnext_shape_native_graphics_v1", native_compile)
+    result = execute_graphics_capability_v1(
+        req, read_object=cas.read_object, put_bytes=cas.put_bytes,
+    )
+    assert call["count"] == 1
+    assert result["status"] == "PASS"
+    assert result["diagnostics"]["graphics_source_kind"] == (
+        "SINGLE_RSSVNEXT_SHAPE_INFERENCE_REGION_CANDIDATES"
+    )
+    assert result["diagnostics"]["source_appearance_qualified"] is False
+    assert result["diagnostics"]["pose_conditioned_occlusion_qualified"] is False
+    assert result["diagnostics"]["attachment_socket_qualified"] is False
+    assert result["diagnostics"]["product_revision_minted"] is False
+    assert [r["artifact_type"] for r in result["outputs"]] == [
+        "RealSaS.CompiledGraphics",
+        "RealSaS.RuntimeGraphics",
+        "RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
+    ]

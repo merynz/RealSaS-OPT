@@ -107,6 +107,15 @@ def test_product_capability_implementations_are_complete_and_semantic():
         "RealSaS.RSSvNextSourceRGBImagePlaneCandidates"
     )
     assert proof["parameters"]["raw_source_rgb_independent_pixel_replay_required"] is True
+    assert graphics["parameters"]["raw_mesh_uv_texture_atlas_artifact_type"] == (
+        "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
+    )
+    assert graphics["parameters"]["raw_mesh_uv_texture_surface_ownership_qualified"] is False
+    assert graphics["parameters"]["raw_mesh_uv_2d_draw_order_independent"] is True
+    assert proof["parameters"]["input_raw_mesh_uv_texture_atlas_artifact_type"] == (
+        "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
+    )
+    assert proof["parameters"]["raw_mesh_uv_texture_atlas_replay_required"] is True
 
     skin = specs["product.skin"]
     assert skin["policy"]["dependencies"] == [

@@ -320,6 +320,7 @@
         ],
         "product_pass_authority": false,
         "dependencies": [
+          "product.shape",
           "product.mesh",
           "product.rig",
           "product.skin",
@@ -345,7 +346,16 @@
         "output_schema_version": "v1",
         "required_models": [],
         "source_appearance_qualified_by_graphics_evidence": false,
-        "can_mint_product_revision": false
+        "can_mint_product_revision": false,
+        "input_evidence_optional_legacy": true,
+        "manual_graphics_evidence_required": false,
+        "input_source_artifact_type": "RealSaS.RSSvNextTwoViewSource",
+        "input_source_schema_version": "v1",
+        "input_fanout_artifact_type": "RealSaS.RSSvNextProductEvidenceFanout",
+        "input_fanout_schema_version": "v1",
+        "same_shape_inference_graphics_consumed": true,
+        "source_visibility_qualified_by_graphics": false,
+        "attachment_socket_qualified_by_graphics": false
       }
     },
     "product.motion": {

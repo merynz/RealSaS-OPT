@@ -211,7 +211,33 @@ def _raw_two_image_graphics_v1(
         source_graphics_binding_hash=source_evidence_hash,
         evidence=evidence,
     )
-    bound = replace(compiled, metadata={
+    from compiler.realsas_compiler_core.graphics_v1 import GraphicsViewStateV1
+    if compiled.views:
+        raise RuntimeError("RSS_VNEXT_RAW_GRAPHICS_UNOBSERVED_VIEW_LABEL_DRIFT")
+    # The C++ Graphics transport requires a complete ordered view domain.
+    # The two user image claims and the six *predicted* source-normalized
+    # directions are not measured camera rays or source occlusion. Every
+    # canonical fragment stays eligible for geometry-depth evaluation:
+    # visible_fragment_ids is a candidate execution mask, not a learned
+    # visibility label or measured per-view alpha ownership.
+    candidates = tuple(sorted(f.fragment_id for f in compiled.fragments))
+    virtual_views = tuple(
+        GraphicsViewStateV1(
+            view_index=i,
+            visible_fragment_ids=candidates,
+            order_edges=(),
+            metadata={
+                "camera_authority": "VIRTUAL_PRODUCT_DIRECTION_NOT_SOURCE_CAMERA",
+                "visibility_known_from_original_source": False,
+                "visibility_unknown_fragment_ids": candidates,
+                "unobserved_visibility_raster_policy": "DRAW_GEOMETRY_AND_DEFER_OCCLUSION_TO_DEPTH",
+                "source_order_edges_observed": False,
+                "pose_conditioned_source_visibility_qualified": False,
+                "view_was_generated_or_hypothesized": True,
+            },
+        ) for i in range(8)
+    )
+    bound = replace(compiled, views=virtual_views, metadata={
         **compiled.metadata,
         "origin": "RAW_TWO_IMAGE_UNIFIED_H_TYPED_GRAPHICS_CANDIDATES",
         "source_static_silhouette_passed": True,
@@ -222,6 +248,9 @@ def _raw_two_image_graphics_v1(
         "source_pixels_win_where_observed": False,
         "source_rgb_surface_owner_qualified": False,
         "camera_hypotheses_not_observations": True,
+        "eight_virtual_runtime_views_not_source_observations": True,
+        "source_view_visibility_unqualified": True,
+        "unobserved_draw_order_deferred_to_geometry_depth": True,
         "typed_candidate_pair_coverage": coverage,
     }, graph_hash="")
     compiled = replace(bound, graph_hash=compiled_graphics_hash_v1(bound))
@@ -238,6 +267,8 @@ def _raw_two_image_graphics_v1(
         "graphics_source_observation_qualified": False,
         "source_hidden_surface_qualified": False,
         "pose_conditioned_visibility_qualified": False,
+        "virtual_runtime_view_count": 8,
+        "virtual_runtime_views_are_original_observations": False,
         "attachment_socket_authority": False,
         "product_revision_minted": False,
     }

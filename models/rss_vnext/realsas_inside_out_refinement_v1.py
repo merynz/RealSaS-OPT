@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""RealSaS CVPR2025 §3.3, Eqs.(12-13): inside-out mesh refinement.
+"""Independent inside-out mesh refinement, with CVPR 2025 §3.3 as reference.
 
 Unlike S-LRM Stage3 training, this is an inference-time, per-character
 differentiable mesh optimization. The GENERATED six-view normal/mask maps
@@ -11,7 +11,7 @@ frozen inner normal.
 
 No anatomy is hard-coded: the compiler/representation policy chooses
 layer order; this optimization does not infer joint or drawable identity.
-Published RealSaS additionally employs edge collapse/split/flip remeshing,
+The referenced paper additionally employs edge collapse/split/flip remeshing,
 high-resolution backprojection coloring and ExplicitTarget optimization;
 these remain independent operations and are NOT silently approximated.
 """

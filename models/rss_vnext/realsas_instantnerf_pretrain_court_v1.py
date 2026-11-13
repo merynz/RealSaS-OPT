@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Fail-closed ORIGINAL InstantNeRF ancestry court for RealSaS S-LRM.
 
-RealSaS CVPR2025 initializes NeRF S-LRM from the InstantMesh InstantNeRF
+The CVPR 2025 reference initializes NeRF S-LRM from InstantMesh InstantNeRF
 large model; source release uses DINO ViT-B/16 (not RSS DINOv2-S),
 transformer width 1024, 16 layers and heads, triplane 32->64, 80 channels,
 128 ray samples. The public model card for TencentARC/InstantMesh supplies

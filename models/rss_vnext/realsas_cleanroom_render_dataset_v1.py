@@ -10,7 +10,7 @@ See CleanroomDiffusionRenderRecordV1 for lineage, rigged/static pose
 eligibility and family-level train/val/unseen separation.
 
 Only the six-elevation=0-degree orthographic reference views are eligible
-for the RealSaS/Era3D baseline: azimuth [-90,-45,0,45,90,180]. Other camera
+for the published six-view research baseline: azimuth [-90,-45,0,45,90,180]. Other camera
 patterns require a different independently qualified model contract.
 """
 
@@ -110,7 +110,7 @@ class RealSaSCleanroomRenderedSixViewDatasetV1(Dataset):
     """Train/validation samples with verified 3D-source canonical supervision.
 
     The training reference is the *rendered canonical source* (not the user
-    image). This is RealSaS's 1-reference Era3D baseline. The existing
+    image). This is the one-reference multiview research baseline. The existing
     paired-user-source conditioner remains an ablation in another module.
     """
     def __init__(self, manifest: str | Path, *, split: str="train") -> None:

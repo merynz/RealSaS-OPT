@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Clean-room RealSaS task-training baseline, not a trained product model.
+"""First-party clean-room diffusion training baseline, not a trained product model.
 
 the CVPR 2025 multi-view reference §3.1: Stable Diffusion + ReferenceNet canonicalization,
 Era3D-derived joint RGB+normal multi-view diffusion. §3.2 trains S-LRM

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """RealSaS-owned Stage1 attention LoRA for the neural reconstruction trunk.
 
-the CVPR 2025 multi-view reference uses pretrained InstantNeRF, LoRA in each self/cross
+The CVPR 2025 reference uses pretrained InstantNeRF, LoRA in each self/cross
 attention, learned triplane position/deconv and a new semantic decoder.
 The published reference implementation uses loratorch; this is independently written
 using PyTorch parametrization and DOES NOT import proprietary NVIDIA code.

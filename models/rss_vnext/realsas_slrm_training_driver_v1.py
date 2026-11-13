@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""RealSaS S-LRM clean-room training driver with 1/6-view neural conditioning.
+"""First-party S-LRM clean-room training driver with 1/6-view neural conditioning.
 
 References: the CVPR 2025 multi-view reference §3.2, InstantNeRF/InstantMesh S-LRM.
 Stage1/2: jointly render RGB, opacity and semantic posterior through the
@@ -11,7 +11,7 @@ render authority stays with independently admitted source-3D data. An
 optional second observed image never becomes six 'source' observations.
 
 IMPORTANT: not a proof of pretrained InstantNeRF initialization, LoRA
-stage policy, full multiview refinement or RealSaS-level image quality.
+stage policy, full multiview refinement or published-reference-level image quality.
 """
 
 from dataclasses import dataclass,asdict
@@ -151,7 +151,7 @@ class RealSaSSLRMTrainerV1:
 
     def _verify_receipt(self,batch:RealSaSSLRMBatchV1) -> None:
         t=batch.source_3d_render_target
-        # Published RealSaS: ONE real product photo -> canonicalization ->
+        # Published CVPR 2025 baseline: ONE input -> canonicalization ->
         # SIX generated orthographic RGBs -> S-LRM. Direct one-view
         # S-LRM is BUSTED-specific ablation, never advertised as baseline.
         input_views=batch.conditioning_rgba.shape[1] if batch.conditioning_rgba.ndim==5 else -1

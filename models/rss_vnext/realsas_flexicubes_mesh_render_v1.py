@@ -2,12 +2,12 @@ from __future__ import annotations
 
 """Live RealSaS stage3: FlexiCubes layered mesh -> nvdiffrast RGB/semantic.
 
-Reference: RealSaS CVPR2025 §3.2 Stage3 Eq(10) uses semantic-equivalent SDF,
+Reference: CVPR 2025 §3.2 Stage3 Eq(10) uses semantic-equivalent SDF,
 FlexiCubes and mesh RGB/semantic/normal/depth raster supervision. This
 independently written adapter consumes the EXISTING PINNED NVIDIA
 FlexiCubes witness, queries the SAME IRIS H(x) for appearance and roles,
 then uses nvdiffrast's GPU differentiation primitives. It never copies
-released RealSaS code/weights and never mints source-surface ownership.
+released research code/weights and never mints source-surface ownership.
 
 Prerequisites for actual training: local trusted NVIDIA nvdiffrast runtime
 with GPU support, aligned source-render teacher with exact camera and

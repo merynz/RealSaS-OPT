@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-"""Audited RealSaS reference backbone ancestry; no RealSaS/Era3D weight reuse.
+"""Audited upstream backbone ancestry used as research references.
+
+RealSaS is an independently authored implementation; this module loads no
+published task-specific model weights or third-party project code.
 
 Sources (verified 2026-11-12):
   the CVPR 2025 multi-view reference §3.1/3.2:
@@ -11,10 +14,10 @@ Sources (verified 2026-11-12):
   Era3D configs/train-unclip-512-6view.yaml:
       pretrained_model_name_or_path: stabilityai/stable-diffusion-2-1-unclip
       6 views, full UNet train, CLIP+VAE frozen, 512 training.
-  RealSaS upgrades Era3D-style multiview to 1024 by progressive training.
+  The published CVPR 2025 method progressively increases resolution to 1024.
 
-The exact Stable Diffusion canonicalization base in the *RealSaS authors'
-private training* is NOT published. SD2.1 canonicalization provenance comes
+The exact Stable Diffusion canonicalization base in the *CVPR 2025 paper's*
+private training process is NOT published. SD2.1 canonicalization provenance comes
 from CharacterGen's released reference config, so it is explicitly marked
 inferred rather than certified as identical.
 No third-party checkpoint is downloaded or accepted without a locally
@@ -56,7 +59,7 @@ _REFERENCE = {
         ancestral_base_repo="stabilityai/stable-diffusion-2-1",
         adaptation="Stable Diffusion + independently trained ReferenceNet; "
                    "single arbitrary reference -> canonical reference",
-        original_training_provenance="CHARACTERGEN_REFERENCE_CONFIG; REALSAS_BASE_INFERRED_NOT_PROVEN",
+        original_training_provenance="CHARACTERGEN_REFERENCE_CONFIG; CVPR2025_BASE_INFERRED_NOT_PROVEN",
         evidence="https://github.com/zjp-shadow/CharacterGen/blob/main/2D_Stage/configs/infer.yaml",
         default_tuning_policy="TASK_TRAINED_REFERENCE_UNET_AND_DENOISER",
     ),
@@ -76,9 +79,8 @@ _REFERENCE = {
         adaptation="S-LRM initialized from InstantNeRF; ViT, triplane, "
                    "LoRA in attention linear layers, new semantic decoder, "
                    "NeRF single-layer -> NeRF layered -> FlexiCubes mesh",
-        original_training_provenance="REALSAS_PAPER_SECTION_3_2_DIRECT",
-        evidence="https://openaccess.thecvf.com/content/CVPR2025/papers/"
-                 "He_RealSaS_Semantic-Decomposed_3D_Character_Generation_from_Single_Images_CVPR_2025_paper.pdf",
+        original_training_provenance="CVPR2025_HE_ET_AL_SECTION_3_2_DIRECT",
+        evidence="https://arxiv.org/abs/2411.05738",
         default_tuning_policy="ATTENTION_LORA_AND_NEW_SEMANTIC_DECODER",
     ),
 }

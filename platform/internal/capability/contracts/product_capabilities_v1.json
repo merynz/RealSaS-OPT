@@ -110,7 +110,7 @@
       }
     },
     "product.mesh": {
-      "entry_module": "compiler.realsas_compiler_services.platform_worker.rss_vnext_mesh_executor_v2",
+      "entry_module": "compiler.rss_vnext.workers.rss_vnext_mesh_executor_v3",
       "policy": {
         "allowed_modes": [
           "PRODUCT",
@@ -124,11 +124,11 @@
       "metadata": {
         "product_role_id": "mesh",
         "implementation_class": "COMPILER",
-        "interface_contract": "RealSaS.ProductMeshCompile.v2",
-        "executor_contract": "RealSaS.ProductMeshCompile.v2",
+        "interface_contract": "RealSaS.ProductMeshCompile.v3",
+        "executor_contract": "RealSaS.ProductMeshCompile.v3",
         "input_shape_artifact_type": "RealSaS.RSSvNextInferenceEvidence",
         "input_shape_schema_version": "v1",
-        "input_source_artifact_type": "RealSaS.RSSvNextTwoViewSource",
+        "input_source_artifact_type": "RealSaS.RSSvNextUncalibratedTwoImageSource",
         "input_source_schema_version": "v1",
         "input_fanout_artifact_type": "RealSaS.RSSvNextProductEvidenceFanout",
         "input_fanout_schema_version": "v1",
@@ -195,7 +195,12 @@
         "learned_evidence_retained_by_reference": true,
         "independent_model_inference_forbidden": true,
         "requires_legacy_eight_view_stages": false,
-        "required_models": []
+        "required_models": [],
+        "alternate_calibrated_source_artifact_type": "RealSaS.RSSvNextTwoViewSource",
+        "raw_scene_candidate_artifact_type": "RealSaS.RSSvNextUncalibratedNeuralSceneCarrier",
+        "raw_generated_views_artifact_type": "RealSaS.RSSvNextGeneratedConditioningViews",
+        "raw_construction_receipt_artifact_type": "RealSaS.RSSvNextUncalibratedConstructionReceipt",
+        "raw_candidate_cannot_mint_canonical_mesh": true
       }
     },
     "product.rig": {

@@ -56,6 +56,9 @@ on:
       - 'tests/repository/test_fit1_mechanical_product_role_alignment_v1.py'
       - 'tests/compiler/test_mechanics_main_subtree_runtime_v1.py'
       - 'tests/compiler/test_control_motion_ik_integration_v1.py'
+      - 'tests/compiler/test_product_downstream_cas_v1.py'
+      - 'compiler/realsas_compiler_services/platform_worker/product_downstream_executor_v1.py'
+      - 'platform/internal/capability/product_downstream.go'
       - 'tests/compiler/test_rig_program_causal_linear_v1.py'
       - 'tests/compiler/test_v6_typed_rig_skin_main_integration_v1.py'
       - '.github/workflows/v6_main_contract_integration_v1.yml'
@@ -110,7 +113,8 @@ jobs:
             tests/compiler/test_platform_capability_versions_v1.py \
             tests/repository/test_fit1_mechanical_product_role_alignment_v1.py \
             tests/compiler/test_mechanics_main_subtree_runtime_v1.py \
-            tests/compiler/test_control_motion_ik_integration_v1.py
+            tests/compiler/test_control_motion_ik_integration_v1.py \
+            tests/compiler/test_product_downstream_cas_v1.py
       - name: Typed contracts do not mint product or training authority
         run: |
           python - <<'PY'

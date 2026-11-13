@@ -12,7 +12,8 @@ import (
 
 // rssVNextMeshParentBinding binds the source and learned checkpoint to the
 // immutable Attempt model selection. Mesh never loads or selects a second
-// ModelRelease. This is the missing Go->Python Shape v3/Mesh v2 handshake.
+// ModelRelease. The active V3 role accepts either calibrated observations
+// or uncalibrated originals, never a mixture of the two.
 //
 // The Shape fanout and inference receipt are still verified independently by
 // the Python Mesh court. This binding is NOT a grant of source 3D truth,
@@ -22,18 +23,33 @@ func rssVNextMeshParentBinding(
 	selected []modelselection.Selection,
 ) (map[string]any, error) {
 	var source *orchestration.ArtifactRef
+	var sourceCount int
+	var sourceType string
 	for i := range refs {
 		row := &refs[i]
-		if row.ArtifactType != "RealSaS.RSSvNextTwoViewSource" {
+		if row.ArtifactType != "RealSaS.RSSvNextTwoViewSource" &&
+			row.ArtifactType != "RealSaS.RSSvNextUncalibratedTwoImageSource" {
 			continue
 		}
-		if row.SchemaVersion != "v1" || source != nil {
+		if row.SchemaVersion != "v1" {
 			return nil, errors.New("RSS_VNEXT_MESH_SOURCE_ARTIFACT_CARDINALITY_OR_ABI")
 		}
 		if err := semantic.ValidateSHA256(row.ContentSHA256); err != nil {
 			return nil, fmt.Errorf("RSS_VNEXT_MESH_SOURCE_SHA_INVALID: %w", err)
 		}
-		source = row
+		if source == nil {
+			source = row
+			sourceType = row.ArtifactType
+		} else if row.ArtifactType != sourceType ||
+			row.ContentSHA256 != source.ContentSHA256 ||
+			row.SizeBytes != source.SizeBytes ||
+			row.StorageKey != source.StorageKey {
+			return nil, errors.New("RSS_VNEXT_MESH_SOURCE_ARTIFACT_CARDINALITY_OR_ABI")
+		}
+		sourceCount++
+		if sourceCount > 2 {
+			return nil, errors.New("RSS_VNEXT_MESH_SOURCE_ARTIFACT_CARDINALITY_OR_ABI")
+		}
 	}
 	if source == nil {
 		return nil, errors.New("RSS_VNEXT_MESH_SOURCE_ARTIFACT_REQUIRED")

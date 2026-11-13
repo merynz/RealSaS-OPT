@@ -59,17 +59,23 @@ def inventory(root: Path) -> dict:
             continue
         rel = encoded.decode("utf-8", errors="surrogateescape")
         path = root / rel
-        if not path.is_file() or path.is_symlink():
-            result["unreadable_tracked_paths"].append(rel)
-            continue
-        payload = path.read_bytes()
-        result["tracked_files"] += 1
-        result["tracked_bytes"] += len(payload)
         suffix = path.suffix.lower()
         source = suffix in SOURCE_SUFFIXES
         markdown = suffix in MARKDOWN_SUFFIXES
         workflow = (rel.startswith(".github/workflows/")
                     and suffix in WORKFLOW_SUFFIXES)
+        root_name = rel.split("/", 1)[0]
+        # Count tracked entries regardless of content decoding. A tracked
+        # Markdown file with non-UTF8/binary content is still a .md file.
+        result["tracked_files"] += 1
+        if markdown:
+            result["markdown_files"] += 1
+            md_roots[root_name] += 1
+        if not path.is_file() or path.is_symlink():
+            result["unreadable_tracked_paths"].append(rel)
+            continue
+        payload = path.read_bytes()
+        result["tracked_bytes"] += len(payload)
         if not (source or markdown or workflow):
             continue
         try:
@@ -77,7 +83,6 @@ def inventory(root: Path) -> dict:
         except (UnicodeDecodeError, ValueError):
             result["unreadable_tracked_paths"].append(rel)
             continue
-        root_name = rel.split("/", 1)[0]
         if source:
             result["source_files"] += 1
             result["source_physical_loc"] += physical
@@ -87,9 +92,7 @@ def inventory(root: Path) -> dict:
                 group["physical_loc"] += physical
                 group["nonblank_loc"] += nonblank
         if markdown:
-            result["markdown_files"] += 1
             result["markdown_physical_lines"] += physical
-            md_roots[root_name] += 1
         if workflow:
             result["workflow_files"] += 1
             result["workflow_physical_lines"] += physical

@@ -12,7 +12,9 @@ def test_all_four_experts_stored_beneath_unified_model_without_duplicates():
     assert len(manifest["paths"]) == manifest["count"] == 178
     for row in manifest["paths"]:
         original, target = ROOT / row["old_path"], ROOT / row["new_path"]
-        assert not original.exists(), row["old_path"]
+        assert original.is_file(), row["old_path"]
+        assert original.resolve() == target.resolve(), row["old_path"]
+        assert (ROOT / "models" / Path(row["old_path"]).parts[1]).is_symlink()
         raw = target.read_bytes()
         h = hashlib.sha1(b"blob " + str(len(raw)).encode() + bytes([0]) + raw).hexdigest()
         assert h == row["git_blob_sha1"], row["new_path"]

@@ -179,7 +179,9 @@ def test_teacher_sequence_and_topology_must_be_bound_without_silent_repair():
         trainer.objective(replace(batch,topology_teacher_tokens=None))
     altered=batch.axis_teacher_sequence.coord_indices.clone()
     altered[0,10,0]+=1
-    with pytest.raises(ValueError,match="SOURCE_OR_AXIS_TEACHER_RECEIPT_DRIFT"):
+    # Existing AXIS token/codec gate rejects tampering even earlier than
+    # the new face-correspondence gate; both must remain fail-closed.
+    with pytest.raises(ValueError,match="AXIS_TEACHER_SOURCE_CODEC_OR_SEQUENCE_DRIFT"):
         trainer.objective(replace(
             batch,axis_teacher_sequence=replace(
                 batch.axis_teacher_sequence,coord_indices=altered,

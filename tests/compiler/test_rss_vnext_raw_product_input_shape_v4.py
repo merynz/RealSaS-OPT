@@ -26,7 +26,7 @@ from compiler.rss_vnext.workers.rss_vnext_shape_executor_v4 import (
 from tests.models.test_rss_vnext_uncalibrated_neural_scene_v1 import _bundle
 from models.rss_vnext.animation_ready_mesh import RSSvNextStructuralMeshCandidate
 from compiler.rss_vnext.workers.rss_vnext_shape_executor_v4 import (
-    _tensor_archive, _tessa_candidate_tensors_v1,
+    _tensor_archive, _tessa_candidate_tensors_v1, _raw_axis_mira_candidates_v1,
 )
 
 
@@ -172,6 +172,12 @@ def test_raw_shape_runs_two_actual_generators_and_persists_only_candidate_cas(
     assert receipt["original_pixel_count"] == 2
     assert receipt["source_ray_evidence_qualified"] is False
     assert receipt["product_revision_minted"] is False
+    assert receipt["axis_mira_control_status"] in (
+        "ABSTAIN_NO_VALID_PREDICTED_MESH",
+        "UNQUALIFIED_AXISMIRA_CONTROL_CANDIDATE",
+    )
+    if receipt["mesh_status"] == "ABSTAIN":
+        assert receipt["axis_mira_control_event_count"] == 0
     with np.load(io.BytesIO(cas.read_object(result["outputs"][0]))) as archive:
         assert archive["scene_triplanes"].shape[1] == 3
         assert np.isfinite(archive["local_features"]).all()
@@ -224,6 +230,57 @@ def _learned_tessa_candidate_for_cas():
         graphics_logits=torch.zeros(1, 3, 5),
         static_quality_logits=torch.zeros(1, 3, 4),
     )
+
+
+def test_raw_shape_axis_mira_abstain_is_explicit_not_fabricated():
+    arrays, receipt = _raw_axis_mira_candidates_v1({
+        "mesh_candidate": None,
+        "control_status": "ABSTAIN_NO_VALID_PREDICTED_MESH",
+    })
+    assert arrays == {}
+    assert receipt["axis_mira_control_events"] == []
+    assert receipt["axis_mira_control_event_count"] == 0
+    assert receipt["axis_mira_control_authority"] == "NO_CONTROL_CANDIDATE"
+    with pytest.raises(RuntimeError, match="AXIS_CONTROL_WITHOUT_MESH"):
+        _raw_axis_mira_candidates_v1({
+            "mesh_candidate": None,
+            "control_status": "UNQUALIFIED_AXISMIRA_CONTROL_CANDIDATE",
+        })
+
+
+def test_raw_shape_preserves_addressed_axis_event_and_mira_discrete_weights():
+    from models.rss_vnext.dynamic_refinement import RSSvNextDynamicRefinementOutput
+    from models.axis.rig_program_model_v6 import RigProgramEventV6, RigTokenKindV6
+    mesh = _learned_tessa_candidate_for_cas()
+    soft = torch.ones(1, 3, 1)
+    delta = torch.zeros(1, 3, 3)
+    dynamic = RSSvNextDynamicRefinementOutput(
+        vertices=mesh.rest_vertices_iris,
+        weights=soft,
+        displacement=delta,
+        weight_delta_logits=torch.zeros(1, 3, 1),
+        readiness_logits=torch.zeros(1, 3, 4),
+        source_mesh=mesh,
+    )
+    arrays, receipt = _raw_axis_mira_candidates_v1({
+        "mesh_candidate": mesh,
+        "control_status": "UNQUALIFIED_AXISMIRA_CONTROL_CANDIDATE",
+        "control_event_proposal": [RigProgramEventV6(kind=RigTokenKindV6.BOS)],
+        "dynamic_mesh_candidate": dynamic,
+        "discrete_skin_weight_proposal": soft.clone(),
+        "skin_joint_hidden_states": torch.zeros(1, 1, 8),
+        "joint_valid_mask": torch.ones(1, 1, dtype=torch.bool),
+    })
+    assert receipt["axis_mira_control_event_count"] == 1
+    assert receipt["axis_mira_control_events"][0]["kind"] == int(RigTokenKindV6.BOS)
+    assert receipt["axis_mira_discrete_skin_candidate_present"] is True
+    assert receipt["axis_mira_control_authority"] == (
+        "LEARNED_CAUSAL_CONTROL_NOT_CANONICAL_RIG_SKIN"
+    )
+    with np.load(io.BytesIO(_tensor_archive(**arrays)), allow_pickle=False) as archive:
+        assert archive["axis_mira_discrete_skin_weights"].shape == (1, 3, 1)
+        assert archive["axis_mira_joint_valid_mask"].tolist() == [[1]]
+        assert archive["axis_mira_dynamic_vertices"].shape == (1, 3, 3)
 
 
 def test_raw_tessa_candidate_is_preserved_without_source_promotion():

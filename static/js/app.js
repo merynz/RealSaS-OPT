@@ -1,5 +1,6 @@
 import {StudioDocument} from './studio_document.js';
 import {apiFetch} from './api_gateway_v1.js';
+import {downloadQualifiedNativeRSS} from './native_export_v1.js';
 import {StudioOperationJournal} from './studio_operation_journal.js';
 import {StudioDirtyState} from './studio_dirty_state.js';
 
@@ -789,12 +790,8 @@ if ($('#undoEdit')) $('#undoEdit').onclick = undoEdit;
 if ($('#redoEdit')) $('#redoEdit').onclick = redoEdit;
 $('#exportRuntime').onclick = async () => {
   try {
-    const response = await api('/api/export', {
-      method: 'POST',
-      headers: {'content-type': 'application/json'},
-      body: JSON.stringify({bundle: S.bundle}),
-    });
-    toast(response.package_path);
+    const result = await downloadQualifiedNativeRSS(S.bundle);
+    toast('Verified base RSS downloaded · SHA-256 '+result.content_sha256.slice(0,12));
   } catch (error) {
     toast(error.message, true);
   }

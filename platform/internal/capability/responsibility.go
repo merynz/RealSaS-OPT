@@ -12,18 +12,18 @@ import (
 var productResponsibilityLedgerJSON []byte
 
 type ResponsibilityDefinition struct {
-	ID                      string              `json:"id"`
-	RoleID                  ProductRoleID       `json:"role_id"`
-	RequiredWhenRolePresent bool                `json:"required_when_role_present"`
-	AuthorityKind           string              `json:"authority_kind"`
-	Exclusive               bool                `json:"exclusive"`
-	ExecutionOwnerClass     ImplementationClass `json:"execution_owner_class"`
-	OwnerComponent          string              `json:"owner_component"`
-	ModelFamily             string              `json:"model_family,omitempty"`
-	ModelExecutionCapabilityID string            `json:"model_execution_capability_id,omitempty"`
-	CanonicalTransformID    string              `json:"canonical_transform_id"`
-	DataReduction           string              `json:"data_reduction"`
-	SourceTruthRetained     bool                `json:"source_truth_retained"`
+	ID                         string              `json:"id"`
+	RoleID                     ProductRoleID       `json:"role_id"`
+	RequiredWhenRolePresent    bool                `json:"required_when_role_present"`
+	AuthorityKind              string              `json:"authority_kind"`
+	Exclusive                  bool                `json:"exclusive"`
+	ExecutionOwnerClass        ImplementationClass `json:"execution_owner_class"`
+	OwnerComponent             string              `json:"owner_component"`
+	ModelFamily                string              `json:"model_family,omitempty"`
+	ModelExecutionCapabilityID string              `json:"model_execution_capability_id,omitempty"`
+	CanonicalTransformID       string              `json:"canonical_transform_id"`
+	DataReduction              string              `json:"data_reduction"`
+	SourceTruthRetained        bool                `json:"source_truth_retained"`
 }
 
 type responsibilityRules struct {
@@ -40,20 +40,20 @@ type ResponsibilityLedger struct {
 }
 
 type ResponsibilityTerrainNode struct {
-	ResponsibilityID         string              `json:"responsibility_id"`
-	RoleID                   ProductRoleID       `json:"role_id"`
-	CapabilityID             string              `json:"capability_id"`
-	ImplementationClass      ImplementationClass `json:"implementation_class"`
-	ResponsibilityOwnerClass ImplementationClass `json:"responsibility_owner_class"`
-	OwnerComponent           string              `json:"owner_component"`
-	ModelFamily              string              `json:"model_family,omitempty"`
-	ModelExecutionCapabilityID string            `json:"model_execution_capability_id,omitempty"`
-	OwnerModuleID            string              `json:"owner_module_id"`
-	AuthorityKind            string              `json:"authority_kind"`
-	Exclusive                bool                `json:"exclusive"`
-	CanonicalTransformID     string              `json:"canonical_transform_id"`
-	DataReduction            string              `json:"data_reduction"`
-	SourceTruthRetained      bool                `json:"source_truth_retained"`
+	ResponsibilityID           string              `json:"responsibility_id"`
+	RoleID                     ProductRoleID       `json:"role_id"`
+	CapabilityID               string              `json:"capability_id"`
+	ImplementationClass        ImplementationClass `json:"implementation_class"`
+	ResponsibilityOwnerClass   ImplementationClass `json:"responsibility_owner_class"`
+	OwnerComponent             string              `json:"owner_component"`
+	ModelFamily                string              `json:"model_family,omitempty"`
+	ModelExecutionCapabilityID string              `json:"model_execution_capability_id,omitempty"`
+	OwnerModuleID              string              `json:"owner_module_id"`
+	AuthorityKind              string              `json:"authority_kind"`
+	Exclusive                  bool                `json:"exclusive"`
+	CanonicalTransformID       string              `json:"canonical_transform_id"`
+	DataReduction              string              `json:"data_reduction"`
+	SourceTruthRetained        bool                `json:"source_truth_retained"`
 }
 
 func loadResponsibilityLedger() (ResponsibilityLedger, error) {
@@ -229,20 +229,20 @@ func ResponsibilityTerrain(registry *Registry) ([]ResponsibilityTerrainNode, err
 				return nil, fmt.Errorf("RESPONSIBILITY_PRODUCT_PASS_OWNER_NOT_AUTHORIZED:%s", descriptor.ID)
 			}
 			terrain = append(terrain, ResponsibilityTerrainNode{
-				ResponsibilityID:         id,
-				RoleID:                   role,
-				CapabilityID:             descriptor.ID,
-				ImplementationClass:      implementation,
-				ResponsibilityOwnerClass: definition.ExecutionOwnerClass,
-				OwnerComponent:           definition.OwnerComponent,
-				ModelFamily:              strings.TrimSpace(definition.ModelFamily),
+				ResponsibilityID:           id,
+				RoleID:                     role,
+				CapabilityID:               descriptor.ID,
+				ImplementationClass:        implementation,
+				ResponsibilityOwnerClass:   definition.ExecutionOwnerClass,
+				OwnerComponent:             definition.OwnerComponent,
+				ModelFamily:                strings.TrimSpace(definition.ModelFamily),
 				ModelExecutionCapabilityID: strings.TrimSpace(definition.ModelExecutionCapabilityID),
-				OwnerModuleID:            descriptor.OwnerModuleID,
-				AuthorityKind:            definition.AuthorityKind,
-				Exclusive:                definition.Exclusive,
-				CanonicalTransformID:     definition.CanonicalTransformID,
-				DataReduction:            definition.DataReduction,
-				SourceTruthRetained:      definition.SourceTruthRetained,
+				OwnerModuleID:              descriptor.OwnerModuleID,
+				AuthorityKind:              definition.AuthorityKind,
+				Exclusive:                  definition.Exclusive,
+				CanonicalTransformID:       definition.CanonicalTransformID,
+				DataReduction:              definition.DataReduction,
+				SourceTruthRetained:        definition.SourceTruthRetained,
 			})
 		}
 	}

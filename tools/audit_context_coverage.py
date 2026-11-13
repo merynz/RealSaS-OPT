@@ -140,7 +140,7 @@ def is_high_signal(path: str) -> bool:
 
     if path in {"AGENTS.md", "CURRENT_STATE.md", "SYSTEM_INDEX.md"}:
         return True
-    if path.startswith("prereg/"):
+    if path.startswith(("prereg/", "historical/prereg/")):
         return True
     if path.startswith("canonical/"):
         if path in GENERATED_SELF:

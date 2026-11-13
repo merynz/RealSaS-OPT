@@ -45,8 +45,8 @@ def render() -> str:
     lines.extend([
         "## Research and unpromoted material", "",
         "- [Experiments](../experiments/README.md): bounded apparatus and research records.",
-        "- `prospective/`: unpromoted hypotheses and plans.",
-        "- `restoration/`: restoration-era provenance and source audits.", "",
+        "- `historical/prospective/`: unpromoted hypotheses and plans.",
+        "- `historical/restoration/`: restoration-era provenance and source audits.", "",
         "The external v0.5 archive remains byte authority for its own historical",
         "source. Only explicitly promoted, regression-gated mechanisms belong in",
         "current executable homes.", "",

@@ -418,7 +418,7 @@ func (a Activities) PrepareCapabilityExecution(ctx context.Context, req orchestr
 	var shapeParentBinding map[string]any
 	if descriptor.Kind == capability.KindModule &&
 		descriptor.ID == capability.ProductMeshCapabilityID &&
-		descriptor.Metadata["executor_contract"] == capability.RSSvNextMeshContractV2 {
+		descriptor.Metadata["executor_contract"] == capability.RSSvNextMeshContractV3 {
 		shapeParentBinding, err = rssVNextMeshParentBinding(refs, selectedModels)
 		if err != nil {
 			return orchestration.EngineCapabilityRequest{}, err

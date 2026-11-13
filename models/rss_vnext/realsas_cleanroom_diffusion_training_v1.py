@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-"""Clean-room StdGEN task-training baseline, not a trained product model.
+"""Clean-room RealSaS task-training baseline, not a trained product model.
 
-StdGEN CVPR 2025 §3.1: Stable Diffusion + ReferenceNet canonicalization,
+the CVPR 2025 multi-view reference §3.1: Stable Diffusion + ReferenceNet canonicalization,
 Era3D-derived joint RGB+normal multi-view diffusion. §3.2 trains S-LRM
-with attention LoRA, starting from InstantNeRF. We do NOT copy StdGEN source
+with attention LoRA, starting from InstantNeRF. We do NOT copy RealSaS source
 or weights. This adapter can tune attention on an independently pre-trained
 local denoiser; it cannot claim Era3D row-wise multiview parity or pose
-canonicalization quality until measured against StdGEN in unseen families.
+canonicalization quality until measured against RealSaS in unseen families.
 
 Task-specific difference: paired original source tokens and morphology-
 conditional neutral poses. No fabricated human A-pose target for nonhumans.
@@ -29,7 +29,7 @@ STAGE_CANONICAL = "ARBITRARY_TWO_SCENES_TO_CANONICAL_POSE"
 STAGE_MULTIVIEW = "CANONICAL_POSE_TO_CAMERA_CONDITIONED_RGBA_NORMAL"
 SPLITS = frozenset({"train", "val", "unseen"})
 _RENDER_OWNER = "INDEPENDENT_3D_ASSET_RENDERED_TRAINING_TRUTH_NOT_PRODUCT_SOURCE"
-_TRAINING_SCHEMA = "RealSaS.RSSvNext.StdGENCleanroomTrainingRender.v1"
+_TRAINING_SCHEMA = "RealSaS.RSSvNext.RealSaSCleanroomTrainingRender.v1"
 
 
 def _sha(value: str) -> bool:
@@ -143,7 +143,7 @@ def validate_cleanroom_render_corpus_v1(
         morphologies[record.split].add(record.morphology_id)
         canonical_eligible[record.split] += int(record.source_pose_truth_available)
     return {
-        "schema": "RealSaS.RSSvNext.StdGENCleanroomCorpusValidation.v1",
+        "schema": "RealSaS.RSSvNext.RealSaSCleanroomCorpusValidation.v1",
         "counts_by_split": {s: counts[s] for s in sorted(SPLITS)},
         "canonical_pose_training_eligible_by_split": {
             s: canonical_eligible[s] for s in sorted(SPLITS)
@@ -162,7 +162,7 @@ class AttentionLoRALinearV1(nn.Module):
     """Own LoRA delta around an immutable pretrained Linear weight.
 
     Exact pretrained forward initially, learned low-rank delta after updates.
-    No dependency on StdGEN custom code or checkpoint.
+    No dependency on RealSaS custom code or checkpoint.
     """
     def __init__(self, linear: nn.Linear, *, rank: int = 8, alpha: float = 8.) -> None:
         super().__init__()
@@ -215,7 +215,7 @@ def install_attention_lora_v1(
 class RowWiseRGBNormalViewAttentionV1(nn.Module):
     """Cleanroom camera/modality-aware row-wise multi-view latent interaction.
 
-    Reference: StdGEN §3.1 adapts Era3D with memory-efficient row attention
+    Reference: the CVPR 2025 reference §3.1 adapts Era3D with memory-efficient row attention
     across camera views and jointly generated RGB/normal maps. This small
     independent latent-space attention is a trainable *baseline*, not a copy
     or a claim of multiscale Era3D feature parity.
@@ -388,7 +388,7 @@ def cleanroom_diffusion_noise_microstep_v1(
         raise ValueError("RSS_VNEXT_DIFFUSION_RENDER_SUPERVISION_DOMAIN")
     if stage == STAGE_MULTIVIEW:
         half=v//2
-        # StdGEN/Era3D couples RGB and normal for the SAME camera and
+        # RealSaS/Era3D couples RGB and normal for the SAME camera and
         # aligned orthographic scanline. Unpaired maps or dissimilar camera
         # elevations invalidate correspondence and row-wise attention.
         if (

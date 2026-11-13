@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Independently authored Era3D-style UNet feature-scale row-wise attention.
 
-Reference: Era3D NeurIPS 2024 and StdGEN CVPR 2025 §3.1. Unlike the
+Reference: Era3D NeurIPS 2024 and the CVPR 2025 multi-view reference §3.1. Unlike the
 earlier external noisy-latent row mixer, this operator executes WITHIN each
 Diffusers Transformer2DModel feature stage (down, mid and up), at that
 stage's native resolution. It expects six orthographic, same-elevation
@@ -21,7 +21,7 @@ from typing import Any
 import torch
 from torch import Tensor, nn
 
-from .stdgen_era3d_unclip_microstep_v1 import (
+from .realsas_era3d_unclip_microstep_v1 import (
     expand_pretrained_unclip_input_conv_v1,
 )
 

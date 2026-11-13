@@ -284,7 +284,14 @@ def validate_mechanics_dynamic_integrity_court_v1(
         )
     except (ValueError, TypeError) as exc:
         raise QualificationError("DYNAMIC_INTEGRITY_REPLAY_FAILED") from exc
-    if receipt != replayed.to_dict():
+    # CAS JSON roundtrips tuple fields as arrays. Compare canonical JSON
+    # identity, never Python tuple/list object equality. The recomputation
+    # below still detects tampered measurements even after a rehash.
+    if (
+        type(receipt.get("court_hash")) is not str
+        or receipt["court_hash"] != replayed.court_hash
+        or content_sha256(receipt) != content_sha256(replayed.to_dict())
+    ):
         raise QualificationError("DYNAMIC_INTEGRITY_REPLAY_BYTES_OR_METRICS_DRIFT")
     return replayed
 

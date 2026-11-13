@@ -14,7 +14,7 @@ from tests.compiler.test_rss_vnext_raw_canonical_skin_v4 import (
 )
 
 
-def _full_parent_fixture(tmp_path):
+def _full_parent_fixture(tmp_path, *, active_mechanics_courts=False):
     cas, skin_req, _, _ = skin_fixture(tmp_path)
     skin = run_skin(cas, skin_req)
     assert skin["status"] == "PASS"
@@ -26,16 +26,30 @@ def _full_parent_fixture(tmp_path):
             "RealSaS.CanonicalSkinIR",
         )
     ]
+    mechanics_meta = {
+        "executor_contract": "RealSaS.ProductMechanicsCompile.v1",
+        "required_models": [],
+        "rest_qualification": {
+            "max_position_drift": 0.00001,
+            "max_constraint_residual": 0.0001,
+        },
+    }
+    if active_mechanics_courts:
+        mechanics_meta["control_intervention_policy"] = {
+            "enabled": True, "max_probed_controls": 128,
+            "max_full_mesh_deformation_probes": 4,
+            "relative_translation": 0.02,
+            "max_constraint_residual": 0.001,
+        }
+        mechanics_meta["dynamic_integrity_policy"] = {
+            "enabled": True, "max_faces": 1024,
+            "max_controls": 128,
+            "relative_translation": 0.02,
+            "max_constraint_residual": 0.001,
+        }
     mechanics = execute_mechanics_capability_v1({
         "kind": "MODULE", "capability_id": "product.mechanics",
-        "capability_metadata": {
-            "executor_contract": "RealSaS.ProductMechanicsCompile.v1",
-            "required_models": [],
-            "rest_qualification": {
-                "max_position_drift": 0.00001,
-                "max_constraint_residual": 0.0001,
-            },
-        },
+        "capability_metadata": mechanics_meta,
         "model_releases": [], "input_artifacts": mesh_rig_skin,
     }, read_object=cas.read_object, put_bytes=cas.put_bytes)
     assert mechanics["status"] == "PASS"
@@ -44,7 +58,7 @@ def _full_parent_fixture(tmp_path):
         "capability_metadata": {
             "executor_contract": "RealSaS.ProductGraphicsCompile.v1",
             "required_models": [],
-            "mechanics_intervention_required": False,
+            "mechanics_intervention_required": active_mechanics_courts,
         },
         "model_releases": [],
         "input_artifacts": inherited + mechanics["outputs"],
@@ -81,6 +95,26 @@ def test_two_original_images_neural_shape_mesh_rig_skin_mechanics_graphics_runti
     assert receipt["source_hidden_surface_qualified"] is False
     assert receipt["pose_conditioned_visibility_qualified"] is False
     assert receipt["product_revision_minted"] is False
+
+
+def test_raw_graphics_consumes_real_mechanics_nonrest_intervention_and_dynamic_court(
+    tmp_path,
+):
+    cas, req, mechanics, skin = _full_parent_fixture(
+        tmp_path, active_mechanics_courts=True,
+    )
+    types = {row["artifact_type"] for row in mechanics["outputs"]}
+    assert "RealSaS.MechanicsInterventionCourt" in types
+    assert "RealSaS.MechanicsDynamicIntegrityCourt" in types
+    result = execute_graphics_capability_v1(
+        req, read_object=cas.read_object, put_bytes=cas.put_bytes,
+    )
+    assert result["status"] == "PASS"
+    assert result["diagnostics"]["mechanics_intervention_court_hash"]
+    assert result["diagnostics"]["mechanical_source_contact_qualified"] is False
+    graphics = json.loads(cas.read_object(result["outputs"][0]))
+    assert graphics["metadata"]["mechanics_intervention_court_hash"]
+    assert graphics["metadata"]["source_static_silhouette_passed"] is True
 
 
 def test_raw_graphics_rejects_different_scene_parent_even_if_source_cas_was_reused(

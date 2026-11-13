@@ -506,6 +506,8 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         return tokens, token_xy, self.early_semantics(tokens)
 
     def _original_source_tokens(self, rgba: Tensor, camera_features: Tensor):
+        if rgba.ndim != 5 or rgba.shape[1] != 2 or rgba.shape[2] != 4:
+            raise ValueError("RSS_VNEXT_ONLY_TWO_SOURCE_RGBA_VIEWS")
         if not isinstance(camera_features, Tensor) or camera_features.shape != (
             rgba.shape[0], 2, self.cfg.iris.camera_feature_dim,
         ):

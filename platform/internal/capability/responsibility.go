@@ -20,6 +20,7 @@ type ResponsibilityDefinition struct {
 	ExecutionOwnerClass     ImplementationClass `json:"execution_owner_class"`
 	OwnerComponent          string              `json:"owner_component"`
 	ModelFamily             string              `json:"model_family,omitempty"`
+	ModelExecutionCapabilityID string            `json:"model_execution_capability_id,omitempty"`
 	CanonicalTransformID    string              `json:"canonical_transform_id"`
 	DataReduction           string              `json:"data_reduction"`
 	SourceTruthRetained     bool                `json:"source_truth_retained"`
@@ -46,6 +47,7 @@ type ResponsibilityTerrainNode struct {
 	ResponsibilityOwnerClass ImplementationClass `json:"responsibility_owner_class"`
 	OwnerComponent           string              `json:"owner_component"`
 	ModelFamily              string              `json:"model_family,omitempty"`
+	ModelExecutionCapabilityID string            `json:"model_execution_capability_id,omitempty"`
 	OwnerModuleID            string              `json:"owner_module_id"`
 	AuthorityKind            string              `json:"authority_kind"`
 	Exclusive                bool                `json:"exclusive"`
@@ -203,6 +205,26 @@ func ResponsibilityTerrain(registry *Registry) ([]ResponsibilityTerrainNode, err
 			}
 			owned[id] = descriptor.ID
 			ownedByRole[role][id] = struct{}{}
+			// A single unified checkpoint is executed once by the declared
+			// upstream Shape capability. Rig/Skin own independent Compiler
+			// responsibilities but cannot declare or run a second learned model.
+			if origin := strings.TrimSpace(definition.ModelExecutionCapabilityID); origin != "" {
+				if definition.ModelFamily == "" || !strings.HasPrefix(origin, "product.") {
+					return nil, fmt.Errorf("RESPONSIBILITY_MODEL_ORIGIN_INVALID:%s", id)
+				}
+				if origin != descriptor.ID {
+					found := false
+					for _, dep := range descriptor.Dependencies {
+						if dep == origin {
+							found = true
+							break
+						}
+					}
+					if !found {
+						return nil, fmt.Errorf("RESPONSIBILITY_UPSTREAM_MODEL_EVIDENCE_DEPENDENCY_MISSING:%s:%s", descriptor.ID, origin)
+					}
+				}
+			}
 			if definition.AuthorityKind == "PRODUCT_PASS_AUTHORITY" && !descriptor.ProductPassAuthority {
 				return nil, fmt.Errorf("RESPONSIBILITY_PRODUCT_PASS_OWNER_NOT_AUTHORIZED:%s", descriptor.ID)
 			}
@@ -214,6 +236,7 @@ func ResponsibilityTerrain(registry *Registry) ([]ResponsibilityTerrainNode, err
 				ResponsibilityOwnerClass: definition.ExecutionOwnerClass,
 				OwnerComponent:           definition.OwnerComponent,
 				ModelFamily:              strings.TrimSpace(definition.ModelFamily),
+				ModelExecutionCapabilityID: strings.TrimSpace(definition.ModelExecutionCapabilityID),
 				OwnerModuleID:            descriptor.OwnerModuleID,
 				AuthorityKind:            definition.AuthorityKind,
 				Exclusive:                definition.Exclusive,

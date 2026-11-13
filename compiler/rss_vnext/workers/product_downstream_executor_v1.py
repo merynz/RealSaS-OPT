@@ -220,8 +220,13 @@ def _replay_raw_source_graphics_proof_v1(
         r for r in refs if type(r) is dict
         and r.get("artifact_type") == receipt_type
     ]
+    orphan_rgb = any(
+        type(r) is dict and r.get("artifact_type")
+        == "RealSaS.RSSvNextObservedRGBHypothesisSamples"
+        for r in refs
+    )
     if not raws:
-        if supplied or compiled.metadata.get("origin") == (
+        if supplied or orphan_rgb or compiled.metadata.get("origin") == (
             "RAW_TWO_IMAGE_UNIFIED_H_TYPED_GRAPHICS_CANDIDATES"
         ):
             raise RuntimeError("PRODUCT_PROOF_ORPHAN_RAW_GRAPHICS_RECEIPT")
@@ -241,10 +246,22 @@ def _replay_raw_source_graphics_proof_v1(
     # The caller already reopened all canonical parents and the persisted
     # Graphics/Runtime graph. This is a *second* compiler evaluation from
     # source CAS, never a second ModelRelease/inference invocation.
-    replayed_graph, replayed_receipt = _raw_two_image_graphics_v1(
+    replayed_graph, replayed_receipt, replayed_rgb = _raw_two_image_graphics_v1(
         request, canonical_mesh=mesh, canonical_rig=rig,
         canonical_skin=skin, read_object=read_object,
     )
+    rgb_rows = [
+        ref for ref in refs if type(ref) is dict
+        and ref.get("artifact_type") == "RealSaS.RSSvNextObservedRGBHypothesisSamples"
+        and ref.get("schema_version") == "v1"
+    ]
+    if len(rgb_rows) != 1 or (
+        _read(
+            request, read_object,
+            "RealSaS.RSSvNextObservedRGBHypothesisSamples", "v1",
+        ) != replayed_rgb
+    ):
+        raise RuntimeError("PRODUCT_PROOF_ORIGINAL_RGB_CANDIDATE_REPLAY_MISMATCH")
     if intervention is not None:
         bound = replace(replayed_graph, metadata={
             **replayed_graph.metadata,
@@ -296,6 +313,9 @@ def _replay_raw_source_graphics_proof_v1(
         "source_camera_observed": False,
         "dynamic_source_visibility_qualified": False,
         "source_attachment_contact_qualified": False,
+        "source_original_rgb_candidate_replayed": True,
+        "source_original_rgb_candidate_hash": replayed_rgb["candidate_hash"],
+        "source_original_rgb_candidate_samples": replayed_rgb["sample_count"],
         "graphics_receipt_hash": replayed_receipt["receipt_hash"],
         "compiled_graphics_graph_hash": replayed_graph.graph_hash,
     }
@@ -328,6 +348,7 @@ def execute_graphics_capability_v1(
     if len(supplied_refs) > 1:
         raise RuntimeError("PRODUCT_GRAPHICS_AMBIGUOUS_EXTERNAL_EVIDENCE")
     native_receipt = None
+    source_rgb_candidate = None
     if supplied_refs:
         # Explicit legacy/test evidence remains a separate, inspectable
         # authority scope. It does not become source-observed appearance.
@@ -363,10 +384,17 @@ def execute_graphics_capability_v1(
         from .rss_vnext_graphics_consumer_v1 import (
             compile_rss_vnext_shape_native_graphics_v1,
         )
-        compiled, native_receipt = compile_rss_vnext_shape_native_graphics_v1(
+        compilation = compile_rss_vnext_shape_native_graphics_v1(
             request, canonical_mesh=mesh, canonical_rig=rig,
             canonical_skin=skin, read_object=read_object,
         )
+        if len(compilation) == 3:
+            compiled, native_receipt, source_rgb_candidate = compilation
+        elif len(compilation) == 2:
+            compiled, native_receipt = compilation
+            source_rgb_candidate = None
+        else:
+            raise RuntimeError("PRODUCT_GRAPHICS_NEURAL_CANDIDATE_TUPLE_ABI")
         source_kind = "SINGLE_RSSVNEXT_SHAPE_INFERENCE_REGION_CANDIDATES"
 
     if intervention is not None:
@@ -408,6 +436,13 @@ def execute_graphics_capability_v1(
             native_receipt,
             role="rss_graphics_native_candidate_receipt",
             kind="RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
+            version="v1", put_bytes=put_bytes,
+        ))
+    if source_rgb_candidate is not None:
+        outputs.append(_seal(
+            source_rgb_candidate,
+            role="rss_original_source_rgb_hypothesis_samples",
+            kind="RealSaS.RSSvNextObservedRGBHypothesisSamples",
             version="v1", put_bytes=put_bytes,
         ))
     return {

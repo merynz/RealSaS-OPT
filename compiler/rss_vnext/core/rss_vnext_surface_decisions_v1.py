@@ -220,8 +220,57 @@ def compile_rss_vnext_surface_candidates_v1(
     )
 
 
+def rss_vnext_computed_surface_from_dict_v1(payload: dict) -> RSSvNextComputedCandidateSurfaceV1:
+    """Decode the exact JSON CAS representation without making new geometry.
+
+    Dataclass type annotations are not runtime converters: passing nested
+    face dictionaries through unchanged would break rig/graphics consumers.
+    This reader preserves all numeric evidence and rejects unknown fields.
+    """
+    from dataclasses import fields
+    if type(payload) is not dict:
+        _fail("RSS_VNEXT_COMPUTED_SURFACE_JSON_OBJECT_REQUIRED")
+    allowed = {f.name for f in fields(RSSvNextComputedCandidateSurfaceV1)}
+    if set(payload) != allowed or payload.get("schema") != SCHEMA:
+        _fail("RSS_VNEXT_COMPUTED_SURFACE_SCHEMA_OR_FIELDS_DRIFT")
+    face_allowed = {f.name for f in fields(RSSvNextComputedCandidateFaceV1)}
+    if type(payload["faces"]) is not list:
+        _fail("RSS_VNEXT_COMPUTED_SURFACE_FACE_ARRAY_INVALID")
+    rows = []
+    nested = (
+        "graphics_logits_by_corner", "affordance_logits_by_corner",
+        "original_rgba_by_corner", "original_projection_valid_by_corner",
+    )
+    for row in payload["faces"]:
+        if type(row) is not dict or set(row) != face_allowed:
+            _fail("RSS_VNEXT_COMPUTED_SURFACE_FACE_FIELDS_DRIFT")
+        converted = dict(row)
+        for k in (
+            "candidate_vertex_indices", "unit_normal_xyz",
+            "region_probabilities", "presentation_role_probabilities",
+        ):
+            if type(converted[k]) is not list:
+                _fail("RSS_VNEXT_COMPUTED_SURFACE_FACE_VECTOR_INVALID")
+            converted[k] = tuple(converted[k])
+        for k in nested:
+            values = converted[k]
+            if type(values) is not list:
+                _fail("RSS_VNEXT_COMPUTED_SURFACE_FACE_NESTING_INVALID")
+            if k == "original_rgba_by_corner":
+                converted[k] = tuple(
+                    tuple(tuple(v) for v in corner) for corner in values
+                )
+            else:
+                converted[k] = tuple(tuple(v) for v in values)
+        rows.append(RSSvNextComputedCandidateFaceV1(**converted))
+    return RSSvNextComputedCandidateSurfaceV1(
+        **{**payload, "faces": tuple(rows)}
+    )
+
+
 __all__ = [
     "RSSvNextComputedCandidateFaceV1",
     "RSSvNextComputedCandidateSurfaceV1",
     "compile_rss_vnext_surface_candidates_v1",
+    "rss_vnext_computed_surface_from_dict_v1",
 ]

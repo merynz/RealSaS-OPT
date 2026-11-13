@@ -48,6 +48,12 @@ from .graphics_runtime_v1 import (
 from .pose_depth_visibility_v1 import (
     PoseDepthPixelEvidenceV1, inspect_pose_depth_pixel_v1,
 )
+from .pose_depth_raster_v1 import (
+    PoseDepthRasterV1, rasterize_pose_depth_v1,
+)
+from .mechanics_attachment_socket_runtime_v1 import (
+    solve_attachment_socket_world_v1,
+)
 
 
 VIEW_IDS_V1 = tuple(f"V{i}" for i in range(8))
@@ -188,6 +194,11 @@ class PuppetRuntimeFrameV1:
     product_revision_id: str
     authority: str = "QUALIFIED_SOURCE_GEOMETRY_INTERACTION_CONSUMER"
     graphics_projection: PuppetGraphicsProjectionV1 | None = None
+    # These are exact AXIS anchor poses on the same Mechanics frame. They are
+    # editor handles, not new contacts, held-prop geometry or source truth.
+    socket_world_positions: Mapping[str, tuple[float, float, float]] = field(default_factory=dict)
+    socket_view_positions: Mapping[str, tuple[float, float, float]] = field(default_factory=dict)
+    socket_source_contact_qualified: bool = False
 
 
 @dataclass(frozen=True)
@@ -340,6 +351,20 @@ class ControllablePuppetSessionV1:
         )
         validate_frame_composition_v3(self.bundle.playback, frame)
         camera = self.cameras[self.view_id]
+        socket_world = solve_attachment_socket_world_v1(
+            self.bundle.rig, pose, tuple(self.control_states.values()),
+        )
+        socket_view: dict[str, tuple[float, float, float]] = {}
+        if socket_world:
+            ordered = tuple(sorted(socket_world))
+            projected_sockets = project_points_xyz_v3(
+                np.asarray([socket_world[key] for key in ordered], dtype=np.float64),
+                camera,
+            )
+            socket_view = {
+                key: tuple(float(v) for v in projected_sockets[index])
+                for index, key in enumerate(ordered)
+            }
         xyz = {
             vertex_id: np.asarray(pos, dtype=np.float64)
             for vertex_id, pos in zip(
@@ -423,6 +448,29 @@ class ControllablePuppetSessionV1:
             deformed=deform,
             product_revision_id=self.bundle.product_revision_id,
             graphics_projection=graphics_projection,
+            socket_world_positions=socket_world,
+            socket_view_positions=socket_view,
+        )
+
+    def inspect_graphics_depth_raster(
+        self, width: int, height: int,
+        *, max_face_pixel_tests: int = 4_000_000,
+    ) -> PoseDepthRasterV1:
+        """On-demand full-frame face ownership on the current IK/LBS pose.
+
+        This cannot produce RGB pixels, fill unobserved texture, or prove
+        source-visible regions. Coplanar fronts remain explicitly ambiguous.
+        """
+        frame = self.frame()
+        p = frame.graphics_projection
+        if p is None:
+            raise QualificationError("PUPPET_RUNTIME_GRAPHICS_DEPTH_REQUIRES_GRAPH")
+        return rasterize_pose_depth_v1(
+            view_id=p.view_id, graphics_hash=p.graphics_hash,
+            projected_faces=p.projected_faces,
+            face_fragment_ids=p.face_fragment_ids,
+            width=width, height=height,
+            max_face_pixel_tests=max_face_pixel_tests,
         )
 
     def inspect_graphics_depth_at(self, x: float, y: float) -> PoseDepthPixelEvidenceV1:

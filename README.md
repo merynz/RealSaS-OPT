@@ -2,7 +2,7 @@
 
 **We don't generate. We compile.** The product is an **editable puppet**: source artwork → unified RSS.vNext evidence → qualified geometry, articulation, skin, mechanics, 2D presentation, motion → Proof → durable Studio puppet.
 
-> **Execution status (13 November 2026):** `main` currently selects five older product roles. The nine-role RSS.vNext product DAG is under development in [PR #485](https://github.com/merynz/RealSaS-OPT/pull/485), not yet merged. Proof and the public Awaken compile gateway remain intentionally fail-closed. A successful source test is not a ProductRevision.
+> **Execution status (13 November 2026):** This source tree selects a single nine-role RSS.vNext product DAG (Input, Shape, Mesh, Rig, Skin, Mechanics, Graphics, Motion, Proof). Independent ProductProof remains fail-closed while source appearance, contact, renderer parity and persistent edit/reopen witnesses are missing. A successful source test is not a ProductRevision.
 
 ## Product architecture — start here
 

@@ -30,11 +30,11 @@ func TestResponsibilityTerrainProjectsActiveInputAndShape(t *testing.T) {
 	if shape.RoleID != ProductRoleShape || shape.AuthorityKind != "PROPOSAL" || shape.ImplementationClass != ImplementationModel {
 		t.Fatalf("shape terrain=%+v", shape)
 	}
-	if shape.ResponsibilityOwnerClass != ImplementationModel || shape.OwnerComponent != "TESSA" || shape.ModelFamily != "TESSA" {
+	if shape.ResponsibilityOwnerClass != ImplementationModel || shape.OwnerComponent != "RSS_UNIFIED_TESSA" || shape.ModelFamily != RSSvNextModelFamily || shape.ModelExecutionCapabilityID != ProductShapeCapabilityID {
 		t.Fatalf("shape model terrain=%+v", shape)
 	}
 	iris := byID["shape.shared_scene_evidence"]
-	if iris.OwnerComponent != "IRIS" || iris.ModelFamily != "IRIS" {
+	if iris.OwnerComponent != "RSS_UNIFIED_IRIS" || iris.ModelFamily != RSSvNextModelFamily || iris.ModelExecutionCapabilityID != ProductShapeCapabilityID {
 		t.Fatalf("iris terrain=%+v", iris)
 	}
 }
@@ -48,7 +48,7 @@ func TestRequiredModelFamiliesAreDerivedFromActiveTerrain(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := []string{"IRIS", "TESSA"}; !reflect.DeepEqual(families, want) {
+	if want := []string{RSSvNextModelFamily}; !reflect.DeepEqual(families, want) {
 		t.Fatalf("families=%v want=%v", families, want)
 	}
 }
@@ -59,7 +59,7 @@ func TestRequiredModelFamiliesIncludeAxisAndMiraForFullCatalog(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := []string{"AXIS", "IRIS", "MIRA", "TESSA"}; !reflect.DeepEqual(families, want) {
+	if want := []string{RSSvNextModelFamily}; !reflect.DeepEqual(families, want) {
 		t.Fatalf("families=%v want=%v", families, want)
 	}
 	terrain, err := ResponsibilityTerrain(registry)
@@ -71,11 +71,11 @@ func TestRequiredModelFamiliesIncludeAxisAndMiraForFullCatalog(t *testing.T) {
 		byID[row.ResponsibilityID] = row
 	}
 	axis := byID["rig.structure_proposal"]
-	if axis.RoleID != ProductRoleRig || axis.ModelFamily != "AXIS" || axis.AuthorityKind != "PROPOSAL" {
+	if axis.RoleID != ProductRoleRig || axis.ModelFamily != RSSvNextModelFamily || axis.ModelExecutionCapabilityID != ProductShapeCapabilityID || axis.AuthorityKind != "PROPOSAL" {
 		t.Fatalf("axis terrain=%+v", axis)
 	}
 	mira := byID["skin.influence_proposal"]
-	if mira.RoleID != ProductRoleSkin || mira.ModelFamily != "MIRA" || mira.AuthorityKind != "PROPOSAL" {
+	if mira.RoleID != ProductRoleSkin || mira.ModelFamily != RSSvNextModelFamily || mira.ModelExecutionCapabilityID != ProductShapeCapabilityID || mira.AuthorityKind != "PROPOSAL" {
 		t.Fatalf("mira terrain=%+v", mira)
 	}
 	if _, ok := byID["rig.frame_observability_qualification"]; ok {
@@ -93,7 +93,7 @@ func TestResponsibilityLedgerSeparatesAxisMiraProposalsFromCompilerAuthority(t *
 		byID[row.ID] = row
 	}
 	axis := byID["rig.structure_proposal"]
-	if axis.ExecutionOwnerClass != ImplementationModel || axis.OwnerComponent != "AXIS" || axis.ModelFamily != "AXIS" || axis.AuthorityKind != "PROPOSAL" {
+	if axis.ExecutionOwnerClass != ImplementationModel || axis.OwnerComponent != "RSS_UNIFIED_AXIS" || axis.ModelFamily != RSSvNextModelFamily || axis.ModelExecutionCapabilityID != ProductShapeCapabilityID || axis.AuthorityKind != "PROPOSAL" {
 		t.Fatalf("axis responsibility=%+v", axis)
 	}
 	rigMint := byID["rig.canonical_identity_mint"]
@@ -108,7 +108,7 @@ func TestResponsibilityLedgerSeparatesAxisMiraProposalsFromCompilerAuthority(t *
 		t.Fatalf("post-bind observability responsibility=%+v", postBind)
 	}
 	mira := byID["skin.influence_proposal"]
-	if mira.ExecutionOwnerClass != ImplementationModel || mira.OwnerComponent != "MIRA" || mira.ModelFamily != "MIRA" || mira.AuthorityKind != "PROPOSAL" {
+	if mira.ExecutionOwnerClass != ImplementationModel || mira.OwnerComponent != "RSS_UNIFIED_MIRA" || mira.ModelFamily != RSSvNextModelFamily || mira.ModelExecutionCapabilityID != ProductShapeCapabilityID || mira.AuthorityKind != "PROPOSAL" {
 		t.Fatalf("mira responsibility=%+v", mira)
 	}
 	skinMint := byID["skin.canonical_influence_mint"]

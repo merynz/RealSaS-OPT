@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.RSSvNextCompilerSourceRelocation.v1",
   "source_commit": "40aa72d10a9ddc575be9e490f77ae0a65b8b3498",
-  "content_identity": "GIT_BLOB_SHA1_UNCHANGED",
+  "content_identity": "CURRENT_INTEGRATED_PRODUCT_SOURCE_SHA1_WITH_ORIGINAL_ARCHIVE_IDENTITY_ON_MODIFIED_ROWS",
   "paths": [
     {
       "old_path": "compiler/realsas_compiler_core/rss_vnext_canonical_mesh_candidate_bridge_v1.py",
@@ -66,7 +66,8 @@
     {
       "old_path": "compiler/realsas_compiler_core/rss_vnext_surface_decisions_v1.py",
       "new_path": "compiler/rss_vnext/core/rss_vnext_surface_decisions_v1.py",
-      "git_blob_sha1": "8a56bcf8de4958113620ab30c3f317c635513edb"
+      "git_blob_sha1": "b3987c70cece8cd597b5cdcbfb8bb77706924e4b",
+      "original_git_blob_sha1": "8a56bcf8de4958113620ab30c3f317c635513edb"
     },
     {
       "old_path": "compiler/realsas_compiler_core/rss_vnext_two_view_raster_diagnostic_v1.py",
@@ -86,22 +87,26 @@
     {
       "old_path": "compiler/realsas_compiler_services/platform_worker/rss_vnext_mesh_executor_v2.py",
       "new_path": "compiler/rss_vnext/workers/rss_vnext_mesh_executor_v2.py",
-      "git_blob_sha1": "14d03913b1a86b57ee68fb5f841077a0b3770506"
+      "git_blob_sha1": "b79ccdc45e6436a98d36f6b8cd89f3719dcc7c8a",
+      "original_git_blob_sha1": "14d03913b1a86b57ee68fb5f841077a0b3770506"
     },
     {
       "old_path": "compiler/realsas_compiler_services/platform_worker/rss_vnext_product_fanout_v1.py",
       "new_path": "compiler/rss_vnext/workers/rss_vnext_product_fanout_v1.py",
-      "git_blob_sha1": "5ff02ecb59eb6496fe3da5d6770e02222497f328"
+      "git_blob_sha1": "e2aced834d39059cc9775a981b850e463f0fc04d",
+      "original_git_blob_sha1": "5ff02ecb59eb6496fe3da5d6770e02222497f328"
     },
     {
       "old_path": "compiler/realsas_compiler_services/platform_worker/rss_vnext_shape_executor_v3.py",
       "new_path": "compiler/rss_vnext/workers/rss_vnext_shape_executor_v3.py",
-      "git_blob_sha1": "1e7f7fa0823ec1ba92b193feb652ea5886ba5000"
+      "git_blob_sha1": "f32cdf176a0a41ef30bcda491a79bea83165ba4b",
+      "original_git_blob_sha1": "1e7f7fa0823ec1ba92b193feb652ea5886ba5000"
     },
     {
       "old_path": "compiler/realsas_compiler_services/platform_worker/rss_vnext_source_codec_v1.py",
       "new_path": "compiler/rss_vnext/workers/rss_vnext_source_codec_v1.py",
       "git_blob_sha1": "13cb53c21eba2c6f7544fbdfb8360062192c9e82"
     }
-  ]
+  ],
+  "integrated_product_source": "feat/rss-vnext-product-role-closure-20261113@5d1869118cd8483714bb3e6406e19ff44f20f97f"
 }

@@ -411,6 +411,15 @@ func (a Activities) PrepareCapabilityExecution(ctx context.Context, req orchestr
 	if err != nil {
 		return orchestration.EngineCapabilityRequest{}, err
 	}
+	var shapeParentBinding map[string]any
+	if descriptor.Kind == capability.KindModule &&
+		descriptor.ID == capability.ProductMeshCapabilityID &&
+		descriptor.Metadata["executor_contract"] == capability.RSSvNextMeshContractV2 {
+		shapeParentBinding, err = rssVNextMeshParentBinding(refs, selectedModels)
+		if err != nil {
+			return orchestration.EngineCapabilityRequest{}, err
+		}
+	}
 	if tag.RowsAffected() == 1 {
 		payload, _ := json.Marshal(map[string]any{
 			"execution_id":          executionID.String(),
@@ -449,6 +458,7 @@ func (a Activities) PrepareCapabilityExecution(ctx context.Context, req orchestr
 		CapabilityMetadata:        descriptor.Metadata,
 		GoalParameters:            req.GoalParameters,
 		InputArtifacts:            refs,
+		ShapeParentBinding:        shapeParentBinding,
 		ModelReleases:             modelRefs,
 	}, nil
 }

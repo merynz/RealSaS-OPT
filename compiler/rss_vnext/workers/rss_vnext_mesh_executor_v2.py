@@ -92,25 +92,26 @@ def _read_cas(ref: dict[str, Any], read_object: Callable[[dict[str, Any]], bytes
 
 
 def _parents(request: dict[str, Any]):
+    from .rss_vnext_cas_parent_v1 import select_rss_vnext_parent_v1
+
     refs = list(request.get("input_artifacts") or ())
-    if len(refs) != 9 or any(type(x) is not dict for x in refs):
+    if len(refs) not in (9, 10) or any(type(x) is not dict for x in refs):
         raise RuntimeError("RSS_VNEXT_MESH_EXPECTS_SOURCE_INDEX_AND_SEVEN_CHILDREN")
-    sources = [x for x in refs if x.get("artifact_type") == SOURCE_ARTIFACT_TYPE]
+    # The tenth transport ref is permitted ONLY when the original Goal
+    # source and the Input output are an identical immutable CAS object.
+    source = select_rss_vnext_parent_v1(request, SOURCE_ARTIFACT_TYPE, "v1")
     indexes = [x for x in refs if x.get("artifact_type") == INDEX_ARTIFACT_TYPE]
-    if len(sources) != 1 or len(indexes) != 1:
+    if len(indexes) != 1 or indexes[0].get("schema_version") != "v1":
         raise RuntimeError("RSS_VNEXT_MESH_SOURCE_OR_INDEX_CARDINALITY")
-    if (
-        sources[0].get("schema_version") != "v1"
-        or indexes[0].get("schema_version") != "v1"
-    ):
-        raise RuntimeError("RSS_VNEXT_MESH_PARENT_ABI_DRIFT")
+    if sum(x.get("artifact_type") == SOURCE_ARTIFACT_TYPE for x in refs) != len(refs) - 8:
+        raise RuntimeError("RSS_VNEXT_MESH_SOURCE_REF_COUNT_DRIFT")
     forbidden = {
         "RealSaS.ShapeInput", "RealSaS.ShapeProposal",
         "RealSaS.SourceObservation", "RealSaS.IRISSceneEvidence",
     }
     if any(x.get("artifact_type") in forbidden for x in refs):
         raise RuntimeError("RSS_VNEXT_MESH_LEGACY_PARENT_FORBIDDEN")
-    return sources[0], indexes[0], refs
+    return source, indexes[0], refs
 
 
 def _read_receipt(
@@ -158,6 +159,7 @@ def _store_json(
     payload: dict[str, Any], *,
     role: str, artifact_type: str,
     put_bytes: Callable[[bytes], dict[str, Any]],
+    authority_class: str = "CALCULATED_NEURAL_CANDIDATE_NOT_CANONICAL_PRODUCT",
 ) -> dict[str, Any]:
     data = json.dumps(
         payload, sort_keys=True, separators=(",", ":"), allow_nan=False,
@@ -177,7 +179,7 @@ def _store_json(
         "storage_key": sealed["storage_key"],
         "content_sha256": sealed["content_sha256"],
         "size_bytes": sealed["size_bytes"],
-        "authority_class": "CALCULATED_NEURAL_CANDIDATE_NOT_CANONICAL_PRODUCT",
+        "authority_class": authority_class,
     }
 
 
@@ -382,6 +384,99 @@ def execute_rss_vnext_mesh_capability_v2(
         continuity, role=CONTINUITY_ROLE,
         artifact_type=CONTINUITY_ARTIFACT_TYPE, put_bytes=put_bytes,
     ))
+
+    # Only an EngineRelease with both separately pinned source-raster and
+    # mechanical mesh policies can upgrade the neural TESSA candidate into a
+    # canonical static carrier. The seven specialist children and continuity
+    # have already been preserved; this court never rewrites H(x).
+    from .rss_vnext_mesh_static_admission_v1 import (
+        maybe_admit_rss_vnext_static_mesh_v1,
+    )
+    admission = maybe_admit_rss_vnext_static_mesh_v1(
+        metadata=metadata, source=source, evidence=evidence,
+        source_identity_court=source_evidence_court,
+        diagnostic=raster_diagnostic, computed_surface=surface,
+        canonical_bridge=bridge, model_config=cfg,
+    )
+    if admission is not None and admission.status != "PASS_OBSERVED_TWO_VIEW_STATIC_CARRIER":
+        return {
+            "capability_id": "product.mesh", "status": "FAIL",
+            "outputs": [],
+            "diagnostics": {
+                "schema": "RealSaS.RSSvNext.ProductMeshAdmissionDiagnostics.v1",
+                "source_candidate_preserved_in_shape_cas": True,
+                "source_fidelity_passed": False,
+                "blockers": list(admission.blockers),
+                "product_revision_minted": False,
+            },
+            "failure": {
+                "code": "RSS_VNEXT_TWO_VIEW_STATIC_MESH_QUALIFICATION_FAILED",
+                "class": "COMPILER_MESH",
+                "reported_owner_module_id": "product.mesh",
+                "diagnostics": {"blockers": list(admission.blockers)},
+            },
+        }
+    policy_bound = all(x in metadata for x in (
+        "two_view_static_policy", "two_view_static_policy_sha256",
+        "mesh_policy_document_sha256",
+    ))
+    if policy_bound and admission is None:
+        return {
+            "capability_id": "product.mesh", "status": "FAIL",
+            "outputs": [],
+            "diagnostics": {
+                "schema": "RealSaS.RSSvNext.ProductMeshAdmissionDiagnostics.v1",
+                "topology_abstained": True, "product_revision_minted": False,
+            },
+            "failure": {
+                "code": "RSS_VNEXT_CANONICAL_MESH_TOPOLOGY_ABSTAIN",
+                "class": "COMPILER_MESH",
+                "reported_owner_module_id": "product.mesh",
+                "diagnostics": {},
+            },
+        }
+    if (
+        metadata.get("canonical_mesh_required_for_product_execution") is True
+        and admission is None
+    ):
+        # A source candidate CAS court may pass, but a *product.mesh* release
+        # advertising CanonicalMesh as its required output cannot do so without
+        # separately admitted observed raster + geometry policy.
+        return {
+            "capability_id": "product.mesh", "status": "FAIL",
+            "outputs": [],
+            "diagnostics": {
+                "schema": "RealSaS.RSSvNext.ProductMeshAdmissionDiagnostics.v1",
+                "candidate_evidence_preserved_in_shape_cas": True,
+                "observed_static_source_policy_bound": policy_bound,
+                "canonical_mesh_qualified": False,
+                "product_revision_minted": False,
+            },
+            "failure": {
+                "code": "RSS_VNEXT_CANONICAL_MESH_REQUIRED_BUT_NOT_ADMITTED",
+                "class": "COMPILER_MESH",
+                "reported_owner_module_id": "product.mesh",
+                "diagnostics": {
+                    "observed_static_source_policy_bound": policy_bound,
+                    "topology_state": surface.state,
+                },
+            },
+        }
+    if admission is not None:
+        output.append(_store_json(
+            admission.static_qualification.to_dict(),
+            role="rss_two_view_static_qualification",
+            artifact_type="RealSaS.StaticCanonicalMeshQualificationIR",
+            put_bytes=put_bytes,
+            authority_class="SOURCE_OBSERVED_TWO_VIEW_STATIC_QUALIFICATION",
+        ))
+        output.append(_store_json(
+            admission.canonical_mesh.to_dict(),
+            role="canonical_mesh",
+            artifact_type="RealSaS.CanonicalMeshIR",
+            put_bytes=put_bytes,
+            authority_class="COMPILER_CANONICAL_MESH_TWO_OBSERVED_VIEWS",
+        ))
     return {
         "capability_id": "product.mesh",
         "status": "PASS",
@@ -410,7 +505,15 @@ def execute_rss_vnext_mesh_capability_v2(
             "original_source_ray_replay_is_not_texture_authority": True,
             "two_view_raster_diagnostic_is_not_source_fidelity": True,
             "original_source_tensor_identity_is_not_source_fidelity": True,
-            "canonical_mesh_authority": False,
+            "canonical_mesh_authority": admission is not None,
+            "canonical_mesh_source_qualification_scope": (
+                "TWO_OBSERVED_SILHOUETTES_ONLY"
+                if admission is not None else "NONE"
+            ),
+            "canonical_mesh_lineage_hash": (
+                admission.canonical_mesh.mesh_lineage_hash
+                if admission is not None else None
+            ),
             "source_visibility_authority": False,
             "executable_rig_skin_qualified": False,
             "product_revision_minted": False,

@@ -2,7 +2,7 @@
 
 This is the **current architecture entrypoint**, not a new independent manifest. Executable choices live in [`platform/internal/capability/contracts/product_capabilities_v1.json`](platform/internal/capability/contracts/product_capabilities_v1.json) at the exact commit.
 
-As of **13 November 2026**, `main@40aa72d` still selects the five-role legacy product source graph. The complete nine-role candidate is Draft [PR #485](https://github.com/merynz/RealSaS-OPT/pull/485). It has structural and intervention evidence but **does not mint ProductRevision**; trained checkpoint/source-release admission remains separate. The older FIT1/AXIS 5.4.1/MIRA 5.5 system description is preserved at [historical/repository/SYSTEM_INDEX_20261011.md](historical/repository/SYSTEM_INDEX_20261011.md).
+The integrated source tree selects the nine-role RSS.vNext product catalog. It has structural and intervention evidence but **does not mint ProductRevision**; trained checkpoint/source-release admission remains separate. The older FIT1/AXIS 5.4.1/MIRA 5.5 system description is preserved at [historical/repository/SYSTEM_INDEX_20261011.md](historical/repository/SYSTEM_INDEX_20261011.md).
 
 | Product role | Producer/consumer contract | Authority boundary |
 | --- | --- | --- |
@@ -16,7 +16,7 @@ As of **13 November 2026**, `main@40aa72d` still selects the five-role legacy pr
 | Motion | Editable control-space clips and retarget | A static rest hold is not a proven animated Idle |
 | Proof | Canonical replay, source render/contact/edit witnesses and ProductRevision | Sole product PASS decision owner, currently fail-closed |
 
-All nine roles are **candidate architecture** until selected by main catalog. The user-visible product target is **Awaken → compiled editable puppet → Studio → edit/save/reopen**, not video/sprite-only output.
+All nine roles are selected by the source product catalog; selection is **not** proof of product qualification. The user-visible product target is **Awaken → compiled editable puppet → Studio → edit/save/reopen**, not video/sprite-only output.
 
 ## Sources and evidence
 

@@ -482,6 +482,22 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
             )
         return await _with_heartbeat(run_rig_v2, request)
 
+    # RSS.vNext one-checkpoint Rig worker consumes the exact original Shape
+    # fanout and a separately qualified canonical static mesh. It must not
+    # load or infer an independent AXIS/MIRA release.
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductRigInference.v3"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.rss_vnext_rig_executor_v3 import (
+            execute_rss_vnext_rig_capability_v3,
+        )
+        return await _with_heartbeat(
+            lambda value: execute_rss_vnext_rig_capability_v3(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            ), request,
+        )
+
     if (
         str(request.get("kind") or "") == "MODULE"
         and metadata.get("executor_contract") == "RealSaS.ProductSkinInference.v2"
@@ -498,6 +514,19 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
 
     if (
         str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductSkinInference.v3"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.rss_vnext_skin_executor_v3 import (
+            execute_rss_vnext_skin_capability_v3,
+        )
+        return await _with_heartbeat(
+            lambda value: execute_rss_vnext_skin_capability_v3(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            ), request,
+        )
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
         and metadata.get("executor_contract") == "RealSaS.ProductMechanicsCompile.v1"
     ):
         from compiler.realsas_compiler_services.platform_worker.mechanics_executor_v1 import (
@@ -509,6 +538,48 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
                 value, read_object=_read_cas_object, put_bytes=_put_cas_bytes
             )
         return await _with_heartbeat(run_mechanics_rest, request)
+
+    # Canonical downstream product graph: typed Graphics and Motion compilers
+    # can pass locally, while Proof cannot claim release/product authority from
+    # only candidate inputs. ProductRevision stays Platform-owned.
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductGraphicsCompile.v1"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.product_downstream_executor_v1 import (
+            execute_graphics_capability_v1,
+        )
+        return await _with_heartbeat(
+            lambda value: execute_graphics_capability_v1(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            ), request,
+        )
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductMotionCompile.v2"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.product_downstream_executor_v1 import (
+            execute_motion_capability_v2,
+        )
+        return await _with_heartbeat(
+            lambda value: execute_motion_capability_v2(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            ), request,
+        )
+
+    if (
+        str(request.get("kind") or "") == "MODULE"
+        and metadata.get("executor_contract") == "RealSaS.ProductProofCompile.v1"
+    ):
+        from compiler.realsas_compiler_services.platform_worker.product_downstream_executor_v1 import (
+            execute_proof_capability_v1,
+        )
+        return await _with_heartbeat(
+            lambda value: execute_proof_capability_v1(
+                value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+            ), request,
+        )
 
     if str(request.get("kind") or "") != "STAGE":
         return {

@@ -68,10 +68,22 @@ func ProductModelRequirements(registry *Registry) ([]ProductModelRequirement, er
 		if row.ModelFamily == "" {
 			continue
 		}
-		if requiredByRole[row.RoleID] == nil {
-			requiredByRole[row.RoleID] = map[string]struct{}{}
+		// A learned specialist may contribute evidence to Rig/Skin while the
+		// same model was executed exactly once in Shape. Required ModelReleases
+		// therefore belong to the executing capability, not every downstream
+		// consumer of the shared inference. The responsibility terrain checks
+		// that a consumer declares the producer as an explicit dependency.
+		owner := row.RoleID
+		if row.ModelExecutionCapabilityID != "" {
+			owner = ProductRoleID(strings.TrimPrefix(row.ModelExecutionCapabilityID, "product."))
+			if owner == row.RoleID && row.ModelExecutionCapabilityID != row.CapabilityID {
+				return nil, fmt.Errorf("PRODUCT_MODEL_EXECUTION_OWNER_DRIFT:%s", row.ResponsibilityID)
+			}
 		}
-		requiredByRole[row.RoleID][row.ModelFamily] = struct{}{}
+		if requiredByRole[owner] == nil {
+			requiredByRole[owner] = map[string]struct{}{}
+		}
+		requiredByRole[owner][row.ModelFamily] = struct{}{}
 	}
 
 	globalArchitecture := map[string]string{}

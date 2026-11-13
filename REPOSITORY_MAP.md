@@ -1,6 +1,6 @@
 # Repository map · RSS.vNext
 
-This map is **human navigation**; it is not a competing architecture configuration. For executable roles, always inspect `platform/internal/capability/contracts/product_capabilities_v1.json` at the checked-out commit. The nine-role RSS.vNext candidate is in PR #485; `main` has not yet adopted it.
+This map is **human navigation**; it is not a competing architecture configuration. For executable roles, always inspect `platform/internal/capability/contracts/product_capabilities_v1.json` at the checked-out commit. The checked-out catalog is the source of truth. This integrated source tree selects nine RSS.vNext product roles; ProductRevision PASS remains fail-closed.
 
 ## Active product-facing homes
 
@@ -8,7 +8,7 @@ This map is **human navigation**; it is not a competing architecture configurati
 | --- | --- |
 | `models/rss_vnext/` | One shared model inference; specialist evidence fanout |
 | `models/iris/`, `models/tessa/`, `models/axis/`, `models/mira/` | Geometry, topology, articulation and skin expert implementations |
-| `compiler/rss_vnext/` | Unified RSS.vNext-specific courts and workers (byte-identical relocation) |
+| `compiler/rss_vnext/` | Unified RSS.vNext-specific courts and workers (single physical home; 4 modules subsequently updated from the product integration) |
 | `compiler/realsas_compiler_core/`, `compiler/realsas_compiler_services/` | Shared canonical primitives, mechanics, graphics, motion, proof and compatibility machinery |
 | `runtime/` | Interactive puppet, skin deformation, native rendering |
 | `product/` | BUSTED Awaken/Studio |

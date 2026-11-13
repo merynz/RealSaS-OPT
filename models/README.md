@@ -10,7 +10,7 @@ The current product target is **one RSSVNEXT release, one inference**, with inde
 | AXIS | `axis/` | Learned control and articulation structure |
 | MIRA | `mira/` | Influence/skin evidence tied to the same mesh and rig |
 
-The nine-role RSS.vNext candidate is in [PR #485](https://github.com/merynz/RealSaS-OPT/pull/485), not yet the `main` execution graph. Checkpoint training and unseen qualification are **not** established by source availability.
+This integrated source tree selects the nine-role RSS.vNext graph through the Go capability catalog. Checkpoint training and unseen qualification are **not** established by source availability.
 
 ## Historical code and compatibility
 

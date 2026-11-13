@@ -33,6 +33,7 @@ EDGES: dict[str, dict[str, tuple[str, str]]] = {
         "product.skin": ("input_skin_artifact_type", "input_skin_schema_version"),
     },
     "product.graphics": {
+        "product.rig": ("input_rig_artifact_type", "input_rig_schema_version"),
         "product.mesh": ("input_mesh_artifact_type", "input_mesh_schema_version"),
         "product.skin": ("input_skin_artifact_type", "input_skin_schema_version"),
         "product.mechanics": ("input_mechanics_artifact_type", "input_mechanics_schema_version"),
@@ -40,6 +41,11 @@ EDGES: dict[str, dict[str, tuple[str, str]]] = {
     "product.motion": {
         "product.rig": ("input_rig_artifact_type", "input_rig_schema_version"),
         "product.mechanics": ("input_mechanics_artifact_type", "input_mechanics_schema_version"),
+    },
+    "product.proof": {
+        "product.mechanics": ("input_mechanics_artifact_type", "input_mechanics_schema_version"),
+        "product.graphics": ("input_graphics_artifact_type", "input_graphics_schema_version"),
+        "product.motion": ("input_motion_artifact_type", "input_motion_schema_version"),
     },
 }
 

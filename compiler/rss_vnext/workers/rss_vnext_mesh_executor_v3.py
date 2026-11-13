@@ -81,9 +81,7 @@ def _archive(blob: bytes, required: set[str], allowed: set[str]) -> dict[str, np
             names = {row.filename for row in infos}
             if (
                 len(infos) != len(names)
-                or names != {key + ".npy" for key in required | (
-                    {name[:-4] for name in names if name.endswith(".npy")} - required
-                )}
+                or any(not name.endswith(".npy") for name in names)
                 or sum(row.file_size for row in infos) > MAX_UNCOMPRESSED_BYTES
                 or any(row.file_size > MAX_UNCOMPRESSED_BYTES for row in infos)
             ):
@@ -210,16 +208,16 @@ def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[st
                  triangles[:, 2] - triangles[:, 0]), axis=-1,
     )
     legal = bool((area2 > 1e-12).all())
+    component_continuity = bool(
+        np.all(vertex_components[faces] == face_components[:, None])
+    )
     return {
         "mesh_state": state,
         "topology_token_count": int(tokens.shape[1]),
         "candidate_vertices": int(n),
         "candidate_faces": int(faces.shape[0]),
         "nondegenerate_faces": int(np.count_nonzero(area2 > 1e-12)),
-        "component_id_continuity": bool(
-            set(map(int, np.unique(face_components)))
-            <= set(map(int, np.unique(vertex_components)))
-        ),
+        "component_id_continuity": component_continuity,
         "geometric_face_area_positive": legal,
     }
 

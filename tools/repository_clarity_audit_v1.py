@@ -105,6 +105,173 @@ def static_model_imports(source: str) -> set[str]:
     )}
 
 
+
+def static_return_statuses(source: str, function_name: str) -> list[str]:
+    """Find literal return statuses in an executable function, not in comments."""
+    tree = ast.parse(source)
+    matches = [
+        node for node in tree.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and node.name == function_name
+    ]
+    if len(matches) != 1:
+        return []
+    statuses = set()
+    for node in ast.walk(matches[0]):
+        if not isinstance(node, ast.Return) or not isinstance(node.value, ast.Dict):
+            continue
+        for key, value in zip(node.value.keys, node.value.values):
+            if (
+                isinstance(key, ast.Constant) and key.value == "status"
+                and isinstance(value, ast.Constant) and isinstance(value.value, str)
+            ):
+                statuses.add(value.value)
+    return sorted(statuses)
+
+
+def product_readiness(root: Path, capabilities: dict) -> dict:
+    """Read-only closure inventory from the live product code, never ProductPASS.
+
+    Static inspection can identify missing product wiring. It cannot establish
+    source truth, native equivalence, a usable checkpoint or a ProductRevision.
+    Even after the last static blocker disappears, independent executable
+    qualification is still mandatory.
+    """
+    def source(path: str) -> str:
+        return (root / path).read_text(encoding="utf-8")
+
+    proof = source(
+        "compiler/rss_vnext/workers/product_downstream_executor_v1.py"
+    )
+    server = source("product/busted_site/server.py")
+    parent = source("product/living_compile/server.py")
+    frontend = "\n".join(source(name) for name in (
+        "product/busted_site/static/js/awaken.js",
+        "product/busted_site/static/js/studio_persistence.js",
+        "product/busted_site/static/js/studio_requalification_ui.js",
+    ))
+    input_contract = source(
+        "compiler/rss_vnext/core/rss_vnext_source_observation_v1.py"
+    )
+    runtime = source(
+        "compiler/realsas_compiler_core/controllable_puppet_runtime_v1.py"
+    )
+    proof_statuses = static_return_statuses(
+        proof, "execute_proof_capability_v1"
+    )
+    proof_missing = sorted(set(re.findall(
+        r'"(SOURCE_APPEARANCE_AND_POSE_VISIBILITY|'
+        r'NATIVE_GRAPHICS_RENDERER_PARITY|'
+        r'CONTACT_AND_ATTACHMENT_BEHAVIOR|'
+        r'EDIT_CONSEQUENCE_AND_RUNTIME_RSS_REOPEN|'
+        r'SOURCE_AND_MODEL_RELEASE_ADMISSION)"', proof
+    )))
+    developer_only = sorted(
+        key for key, item in capabilities.items()
+        if item.get("policy", {}).get("allowed_modes") == ["DEVELOPER"]
+    )
+    frontend_routes = set(re.findall(
+        r"/api/(?:compile|studio)/[a-z-]+", frontend
+    ))
+    # A mentioned route is NOT a working handler: the inherited Living Compile
+    # server explicitly raises on several compile endpoints. An overriding
+    # BUSTED handler may implement one, but a rejected parent route is absent.
+    server_literals = {
+        node.value for node in ast.walk(ast.parse(server))
+        if isinstance(node, ast.Constant) and isinstance(node.value, str)
+    }
+    parent_ast = ast.parse(parent)
+    parent_literals = {
+        node.value for node in ast.walk(parent_ast)
+        if isinstance(node, ast.Constant) and isinstance(node.value, str)
+    }
+    parent_rejected = {
+        node.value
+        for conditional in ast.walk(parent_ast)
+        if isinstance(conditional, ast.If) and any(
+            isinstance(child, ast.Raise)
+            for statement in conditional.body for child in ast.walk(statement)
+        )
+        for node in ast.walk(conditional.test)
+        if isinstance(node, ast.Constant)
+        and isinstance(node.value, str)
+        and node.value.startswith("/api/")
+    }
+    handled_routes = server_literals | (parent_literals - parent_rejected)
+    missing_routes = sorted(frontend_routes - handled_routes)
+    checks = []
+
+    def block(code: str, owner: str, reason: str, details: dict) -> None:
+        checks.append({
+            "id": code, "status": "OPEN", "owner": owner,
+            "reason": reason, "source_evidence": details,
+        })
+
+    if developer_only:
+        block(
+            "PRODUCT_CAPABILITIES_DEVELOPER_ONLY", "platform",
+            "A developer capability DAG is not an admitted product workflow.",
+            {"roles": developer_only},
+        )
+    if "FAIL" in proof_statuses and "PASS" not in proof_statuses:
+        block(
+            "PROOF_HAS_NO_PASS_EXECUTION_PATH", "compiler",
+            "The active Proof executor always returns a failed qualification.",
+            {"literal_return_statuses": proof_statuses},
+        )
+    if proof_missing:
+        block(
+            "PROOF_INDEPENDENT_WITNESSES_MISSING", "compiler/runtime",
+            "The active Proof executor names independently required witnesses.",
+            {"requirements": proof_missing},
+        )
+    if '"public_compile_gateway": False' in server or '"compile_available": False' in server:
+        block(
+            "PUBLIC_COMPILE_GATEWAY_DISABLED", "product",
+            "The public API reports compile unavailable even with valid input.",
+            {"api": "/api/project"},
+        )
+    if missing_routes:
+        block(
+            "PRODUCT_HTTP_CONSUMERS_UNBOUND", "product/platform",
+            "The BUSTED frontend calls endpoints not handled by its HTTP server.",
+            {"unhandled_frontend_routes": missing_routes},
+        )
+    if (
+        "camera_features" in input_contract
+        and "(2, 13)" in input_contract
+        and "camera_features" not in source("product/busted_site/static/js/awaken.js")
+    ):
+        block(
+            "TWO_VIEW_CAMERA_POLICY_UNBOUND", "product/models",
+            "Front/back files do not supply the required canonical 13D cameras; "
+            "a versioned assumption/estimation policy must be explicit.",
+            {"observations": 2, "camera_features_per_view": 13},
+        )
+    if "PUPPET_RUNTIME_EIGHT_CAMERAS_REQUIRED" in runtime:
+        block(
+            "TWO_VIEW_TO_RUNTIME_VIEW_BRIDGE_UNVERIFIED", "runtime",
+            "The current puppet consumer requires eight output cameras; "
+            "two observed source views alone do not prove the required view set.",
+            {"source_view_count": 2, "runtime_requires_eight_views": True},
+        )
+    return {
+        "schema": "RealSaS.ProductReadinessSourceAudit.v1",
+        "scope": "SOURCE_STATIC_ONLY_NOT_PRODUCT_QUALIFICATION",
+        "readiness_claim": "BLOCKED" if checks else "UNVERIFIED_REQUIRES_EXECUTABLE_PROOF",
+        "product_capability_count": len(capabilities),
+        "proof_literal_return_statuses": proof_statuses,
+        "checks": checks,
+        "open_count": len(checks),
+        "training_and_unseen": "EXTERNAL_NOT_EVALUATED",
+        "guarantees": {
+            "no_product_revision_minted": True,
+            "no_source_or_model_authority_inferred": True,
+            "no_native_parity_claimed": True,
+            "static_absence_of_blockers_is_not_deploy_pass": True,
+        },
+    }
+
 def census(root: Path) -> dict:
     files = tracked_paths(root)
     file_set = set(files)
@@ -177,6 +344,7 @@ def census(root: Path) -> dict:
         "unclassified_directories": sorted(actual_directories - ROOT_DISPOSITIONS.keys()),
         "active_catalog_roles": roles,
         "active_product_role_count": len(roles),
+        "product_readiness": product_readiness(root, catalog["capabilities"]),
         "workflows": {
             "yaml_count": len(workflow_files),
             "named_fast_count": len(fast),
@@ -210,6 +378,7 @@ def main() -> None:
         print("Tracked files:", data["tracked_files"])
         print("Unclassified top-level directories:", data["unclassified_directories"])
         print("Active product roles:", ", ".join(data["active_catalog_roles"]))
+        print("Product deploy blockers (source audit):", data["product_readiness"]["open_count"])
         print("Workflows:", data["workflows"]["yaml_count"], data["workflows"]["actual_by_class"])
         print("Unreviewed auto-trigger workflows:", len(data["workflows"]["other_automatic"]))
         print("Unreviewed dispatch-capable workflows:", len(data["workflows"]["other_dispatch"]))

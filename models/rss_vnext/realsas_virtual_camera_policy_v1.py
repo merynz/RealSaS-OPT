@@ -24,9 +24,13 @@ def target_canonical_and_six_cameras_v1(
         or not 0.05 <= orthographic_half_extent <= 20.
     ):
         raise ValueError("RSS_VNEXT_VIRTUAL_CAMERA_POLICY_INVALID")
+    # Match the six-view S-LRM training target bank exactly. The old
+    # 60-degree uniform ring disagreed with the -90/-45/0/45/90/180
+    # training cameras, creating avoidable checkpoint inference drift.
+    azimuth_degrees = (-90., -45., 0., 45., 90., 180.)
     views = torch.zeros((batch_size, 6, 13), dtype=dtype, device=device)
     for index in range(6):
-        angle = 2. * math.pi * index / 6.
+        angle = math.radians(azimuth_degrees[index])
         radial = torch.tensor(
             (math.sin(angle), 0., math.cos(angle)),
             dtype=dtype, device=device,
@@ -51,7 +55,7 @@ def target_canonical_and_six_cameras_v1(
         raise RuntimeError("RSS_VNEXT_VIRTUAL_CAMERA_FRAME_NOT_ORTHONORMAL")
     # Canonical FRONT/BACK are virtual target poses at 0 and 180 degrees;
     # original user views may have unknown camera, pose and perspective.
-    return views[:, [0, 3]].contiguous(), views
+    return views[:, [2, 5]].contiguous(), views
 
 
 __all__ = ["target_canonical_and_six_cameras_v1"]

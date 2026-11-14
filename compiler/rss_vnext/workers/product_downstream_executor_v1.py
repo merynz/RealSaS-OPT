@@ -370,6 +370,12 @@ def _replay_raw_source_graphics_proof_v1(
     if not raws:
         if any(
             type(row) is dict and row.get("artifact_type")
+            == "RealSaS.RSSvNextNativeInteractivePuppetPreview"
+            for row in refs
+        ):
+            raise RuntimeError("PRODUCT_PROOF_ORPHAN_NATIVE_INTERACTIVE_PREVIEW")
+        if any(
+            type(row) is dict and row.get("artifact_type")
             == "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
             for row in refs
         ):
@@ -504,6 +510,33 @@ def _replay_raw_source_graphics_proof_v1(
         or uv_claim["original_rgb_candidate_sha256"] != sha256(raw_rgb).hexdigest()
     ):
         raise RuntimeError("PRODUCT_PROOF_RAW_UV_TEXTURE_ATLAS_SOURCE_REPLAY_MISMATCH")
+    from compiler.realsas_compiler_core.graphics_runtime_v1 import (
+        build_runtime_graphics_v1,
+    )
+    from compiler.rss_vnext.workers.rss_vnext_native_preview_package_v1 import (
+        _MAX_PREVIEW_BYTES,
+        compile_rss_vnext_native_preview_package_v1,
+        select_rss_vnext_native_preview_camera_v1,
+    )
+    preview_refs = [
+        row for row in request.get("input_artifacts") or ()
+        if type(row) is dict and row.get("artifact_type") ==
+        "RealSaS.RSSvNextNativeInteractivePuppetPreview"
+    ]
+    if len(preview_refs)!=1 or preview_refs[0].get("schema_version")!="v1":
+        raise RuntimeError("PRODUCT_PROOF_NATIVE_PUPPET_PREVIEW_CARDINALITY")
+    preview_blob = read_rss_vnext_parent_cas_v1(
+        preview_refs[0], read_object, limit=_MAX_PREVIEW_BYTES,
+    )
+    preview_replay,_ = compile_rss_vnext_native_preview_package_v1(
+        mesh=mesh,rig=rig,skin=skin,
+        graphics=build_runtime_graphics_v1(compiled,face_count=len(mesh.faces)),
+        uv_atlas_cas=uv_expected,
+        virtual_camera=select_rss_vnext_native_preview_camera_v1(mesh),
+        control_frames=((),),
+    )
+    if preview_blob != preview_replay:
+        raise RuntimeError("PRODUCT_PROOF_NATIVE_PUPPET_PREVIEW_REPLAY_MISMATCH")
     return {
         "original_two_image_source_binding_replayed": True,
         "original_alpha_static_mesh_qualification_recomputed": True,
@@ -513,6 +546,9 @@ def _replay_raw_source_graphics_proof_v1(
         "mesh_uv_atlas_compiled_from_real_original_rgb": True,
         "mesh_uv_texture_atlas_recomputed_independently": True,
         "mesh_uv_texture_atlas_cas_sha256": sha256(uv_bytes).hexdigest(),
+        "native_interactive_preview_recomputed_independently": True,
+        "native_interactive_preview_cas_sha256": sha256(preview_blob).hexdigest(),
+        "native_preview_product_revision_minted": False,
         "mesh_uv_texture_atlas_size": uv_claim["atlas_size"],
         "mesh_uv_texture_surface_owner_source_qualified": False,
         "mesh_uv_draw_order_is_separately_compiled": True,

@@ -112,6 +112,8 @@ func (ProductGraphicsProvider) Capabilities(context.Context) ([]Descriptor, erro
 	metadata["raw_mesh_uv_texture_atlas_schema_version"] = "v1"
 	metadata["raw_mesh_uv_texture_surface_ownership_qualified"] = false
 	metadata["raw_mesh_uv_2d_draw_order_independent"] = true
+	metadata["raw_mesh_uv_same_h_graphics_logits_used"] = true
+	metadata["raw_mesh_uv_inferred_color_not_source_observed"] = true
 	metadata["input_source_schema_version"] = "v1"
 	metadata["input_fanout_artifact_type"] = "RealSaS.RSSvNextProductEvidenceFanout"
 	metadata["input_fanout_schema_version"] = "v1"

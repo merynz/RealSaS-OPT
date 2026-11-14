@@ -56,9 +56,9 @@ def _packing(number_of_faces: int, max_face_samples: int):
     # Prefer observed texel density, but large generic morphologies must
     # gracefully downshift chart size instead of failing solely because a
     # preferred 96px face tile cannot fit the 2048px resource budget.
-    for side in reversed(_TILE_OPTIONS):
-        if side > preferred:
-            continue
+    choices = [side for side in _TILE_OPTIONS if side >= preferred]
+    choices += [side for side in reversed(_TILE_OPTIONS) if side < preferred]
+    for side in choices:
         per_row = min(math.ceil(math.sqrt(number_of_faces)), MAX_DIMENSION // side)
         if per_row <= 0:
             continue

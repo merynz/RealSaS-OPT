@@ -213,6 +213,25 @@ class MIRASkinFSQCodecV6(nn.Module):
         quantized, token_ids, hard_codes = self.quantizer(latent)
         return token_ids, quantized, hard_codes
 
+    def source_ste_tokens_with_quantization_loss_v1(
+        self, weights: Tensor, vertex_features: Tensor, joint_features: Tensor,
+        *, surface_vertex_mass: Tensor,
+    ) -> tuple[Tensor, Tensor, Tensor]:
+        """Source-teacher FSQ encoding shared by BOTH product decoder modes.
+
+        Quantizer forward uses hard FSQ values with straight-through encoder
+        gradients; the explicit commitment term must see pre-quantization
+        bounded latents. Only the qualified source codec bootstrap invokes
+        this path: never condition product inference on source skin weights.
+        """
+        latent = self._encode_latent(
+            weights, vertex_features, joint_features,
+            surface_vertex_mass=surface_vertex_mass,
+        )
+        codes_ste, token_ids, hard = self.quantizer(latent)
+        commitment = F.mse_loss(torch.tanh(latent), hard.detach())
+        return token_ids, codes_ste, commitment
+
     def _decode_code_vectors(
         self, codes: Tensor, vertex_features: Tensor, joint_features: Tensor,
     ) -> Tensor:

@@ -112,6 +112,13 @@ def _build(tmp_path):
         canonical_mesh_lineage_hash=mesh.mesh_lineage_hash,
     ))
     pose_file.write_bytes(_native_pose_bytes(mesh, _project_two_frames(mesh)))
+    preview_ref = next(
+        row for row in out["outputs"]
+        if row["artifact_type"] == "RealSaS.RSSvNextNativeInteractivePuppetPreview"
+    )
+    preview_file = tmp_path / "product_worker_native_puppet.rss"
+    preview_file.write_bytes(cas.read_object(preview_ref))
+    assert preview_file.read_bytes().startswith(b"RSASV2R1")
     player = tmp_path / "rss_uv_native_player"
     compile_result = subprocess.run(
         ["g++", "-std=c++17", "-O2", "-Wall", "-Wextra", "-pedantic",
@@ -121,7 +128,7 @@ def _build(tmp_path):
     assert compile_result.returncode == 0, (
         "Native RSS UV C++ compile failure:\n" + compile_result.stderr
     )
-    return player, graphics_file, texture_file, pose_file, arrays, manifest
+    return player, graphics_file, texture_file, pose_file, arrays, manifest, preview_file
 
 
 def _render(player, graphics, texture, pose, tmp_path,
@@ -141,7 +148,7 @@ def _render(player, graphics, texture, pose, tmp_path,
 def test_real_canonical_mesh_uv_texture_renders_two_poses_in_cpp(
     tmp_path,
 ):
-    player, gfx, uv, poses, atlas, manifest = _build(tmp_path)
+    player, gfx, uv, poses, atlas, manifest, preview_file = _build(tmp_path)
     selftest = subprocess.run(
         [str(player), "--self-test"],
         capture_output=True, text=True, check=True,
@@ -158,6 +165,17 @@ def test_real_canonical_mesh_uv_texture_renders_two_poses_in_cpp(
         player, gfx, uv, poses, tmp_path, frame=1, source_view=-1,
     )
     assert "RSS_UV_NATIVE_POSED_2D_RENDER_PASS" in summary
+    # Exact byte payload emitted by the ACTIVE product.graphics worker,
+    # not a separately assembled test package, must be natively drawable.
+    output = tmp_path / "actual_worker_rest.rgba"
+    run = subprocess.run([
+        str(player), "--rss", str(preview_file),
+        "0", "0", "-1", str(output),
+    ], capture_output=True, text=True)
+    assert run.returncode == 0, run.stderr
+    assert "rss_archive=1" in run.stdout
+    actual = np.frombuffer(output.read_bytes(), dtype=np.uint8).reshape(128,128,4)
+    assert np.count_nonzero(actual[:,:,3]) > 25
     assert np.count_nonzero(front[:, :, 3]) > 25
     assert np.count_nonzero(inferred[:, :, 3]) > 25
     assert not np.array_equal(inferred, moved)
@@ -180,7 +198,7 @@ def test_real_canonical_mesh_uv_texture_renders_two_poses_in_cpp(
 def test_native_rejects_texture_from_another_canonical_mesh_and_bad_pose(
     tmp_path,
 ):
-    player, gfx, uv, poses, _, _ = _build(tmp_path)
+    player, gfx, uv, poses, _, _, _ = _build(tmp_path)
     original = bytearray(uv.read_bytes())
     # magic[8], 5x u32[20], first digest length[4], first SHA begins at 32.
     assert original[28:32] == struct.pack("<I", 64)

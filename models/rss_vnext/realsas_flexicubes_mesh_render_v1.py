@@ -68,6 +68,17 @@ def _camera_check(cameras: Tensor) -> None:
         raise ValueError("RSS_VNEXT_REALSAS_STAGE3_CAMERA_ORTHONORMAL")
 
 
+def stage3_default_raster_backend_v1(device: torch.device):
+    """Explicit product GPU selection, testable without a CUDA CI device."""
+    if not isinstance(device, torch.device):
+        raise ValueError("RSS_VNEXT_STAGE3_DEVICE_CONTRACT")
+    return (
+        PyTorch3DRasterV1 if device.type == "cuda"
+        else BustedTorchRasterV1 if device.type == "cpu"
+        else None
+    )
+
+
 def render_realsas_layered_flexicubes_mesh_v1(
     *,
     witness: RSSvNextFlexiCubesSurfaceEvidence,
@@ -127,10 +138,9 @@ def render_realsas_layered_flexicubes_mesh_v1(
     if raster_backend is None:
         # Product A100/CUDA path: compiled PyTorch3D, mandatory. Reference
         # Python raster is retained for CPU tests and independent comparison.
-        dr = (
-            PyTorch3DRasterV1 if witness.xyz.is_cuda
-            else BustedTorchRasterV1
-        )
+        dr = stage3_default_raster_backend_v1(witness.xyz.device)
+        if dr is None:
+            raise RuntimeError("RSS_VNEXT_STAGE3_DEVICE_BACKEND_UNSUPPORTED")
     else:
         dr = raster_backend
     if raster_context is None:
@@ -217,4 +227,6 @@ def render_realsas_layered_flexicubes_mesh_v1(
     )
 
 
-__all__=["RASTER_ID","render_realsas_layered_flexicubes_mesh_v1"]
+__all__=["RASTER_ID","PYTORCH3D_RASTER_ID","INJECTED_RASTER_ID",
+         "stage3_default_raster_backend_v1",
+         "render_realsas_layered_flexicubes_mesh_v1"]

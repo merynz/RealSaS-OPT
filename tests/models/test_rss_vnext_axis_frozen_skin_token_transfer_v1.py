@@ -313,7 +313,7 @@ def test_stationary_axis_skin_code_teacher_replays_spatial_fsq_product_decoder()
     engine=_trainer(model,registry)
     before=model.axis.skin_code_head.weight.detach().clone()
     result=engine.train_step(batch)
-    assert torch.isfinite(result.loss)
+    assert torch.isfinite(result.skin_code_ce)
     assert result.independent_source_codec_weight_mae<=1.
     assert engine.step==1
     assert model.axis.skin_code_head.weight.grad is not None
@@ -328,7 +328,7 @@ def test_stationary_spatial_skin_teacher_binds_mode_and_all_decoder_weights(tmp_
     model,batch,registry=_case("POINT_QUERY_CROSS_ATTENTION")
     engine=_trainer(model,registry)
     result=engine.objective(batch)
-    assert torch.isfinite(result.loss)
+    assert torch.isfinite(result.skin_code_ce)
     checkpoint=tmp_path/"axis-spatial-skin-tokens.pt"
     engine.save_checkpoint(checkpoint)
     replay=_trainer(model,registry)

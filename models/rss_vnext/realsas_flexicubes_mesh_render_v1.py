@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-"""Live RealSaS stage3: FlexiCubes layered mesh -> BUSTED-owned raster.
+"""Live RealSaS Stage3: shared-H FlexiCubes mesh -> licensed PyTorch3D.
 
 Reference: CVPR 2025 §3.2 Stage3 Eq(10) uses semantic-equivalent SDF,
 FlexiCubes and mesh RGB/semantic/normal/depth raster supervision. This
-independently written adapter consumes the EXISTING PINNED NVIDIA
-FlexiCubes witness, queries the SAME IRIS H(x) for appearance and roles,
-then uses BUSTED's own PyTorch first-hit differentiable raster.
-It never copies or imports NVIDIA nvdiffrast code and never mints
-source-surface ownership.
+adapter consumes EXISTING pinned NVIDIA FlexiCubes extraction and queries
+the SAME IRIS H(x) for appearance/roles; GPU triangle raster is provided by
+PyTorch3D's compiled CUDA library (BSD-style). There is no nvdiffrast import.
 
-The backend works on CPU/CUDA and preserves exact source/render authority.
-Its bounding-box triangle iteration is a correctness baseline; no production
-throughput or native CUDA kernel equivalence is claimed by CPU tests.
+CPU correctness tests retain the separate bounded BUSTED PyTorch reference.
+A green CPU test is not a claim of numerical or throughput parity with the
+external native CUDA binary or of source-surface ownership.
 """
 
 from hashlib import sha256
@@ -27,8 +25,13 @@ from models.iris.vnext.flexicubes_v1 import vertex_normals_v1
 from .flexicubes_surface_evidence import RSSvNextFlexiCubesSurfaceEvidence
 from .realsas_joint_slrm_render_v1 import RealSaSFlexiCubesLayerRasterV1
 from .busted_raster_backend_v1 import BustedTorchRasterV1
+from .pytorch3d_raster_backend_v1 import (
+    RASTER_ID as PYTORCH3D_RASTER_ID,
+    PyTorch3DRasterV1,
+)
 
 RASTER_ID="BUSTED_TORCH_FIRST_HIT_DIFFERENTIABLE_STAGE3_V1"
+INJECTED_RASTER_ID="RESEARCH_INJECTED_UNQUALIFIED_STAGE3_BACKEND_V1"
 
 
 def _mesh_digest(vertices: Tensor,faces: Tensor) -> str:
@@ -63,6 +66,17 @@ def _camera_check(cameras: Tensor) -> None:
         raise ValueError("RSS_VNEXT_REALSAS_STAGE3_CAMERA_ORTHONORMAL")
 
 
+def stage3_default_raster_backend_v1(device: torch.device):
+    """Explicit product GPU selection, testable without a CUDA CI device."""
+    if not isinstance(device, torch.device):
+        raise ValueError("RSS_VNEXT_STAGE3_DEVICE_CONTRACT")
+    return (
+        PyTorch3DRasterV1 if device.type == "cuda"
+        else BustedTorchRasterV1 if device.type == "cpu"
+        else None
+    )
+
+
 def render_realsas_layered_flexicubes_mesh_v1(
     *,
     witness: RSSvNextFlexiCubesSurfaceEvidence,
@@ -79,10 +93,15 @@ def render_realsas_layered_flexicubes_mesh_v1(
 ) -> RealSaSFlexiCubesLayerRasterV1:
     """Differentiable mesh-stage producer for L3, from signed H(x) witness.
 
-    Per-view first-hit depth and barycentric attributes from owned raster; NDC camera
-    vertical axis is flipped for top-left torch image convention.
-    No average-z / whole-face single-depth shortcut is used. Full rendered
-    RGB/mask/semantics/normal/depth are bound to exactly the witness mesh.
+    CUDA defaults to PyTorch3D's compiled first-hit rasterizer. A CUDA machine
+    without a working PyTorch3D build fails closed; it NEVER silently uses the
+    slow BUSTED Python triangle walk. CPU uses the bounded first-party raster
+    for CI correctness and source diagnostics only. An injected research
+    backend is explicitly unqualified in the emitted identity.
+
+    Both implementations preserve the same camera convention and exact
+    indexed mesh; PyTorch3D maps the 4-channel raster and flips Y back into
+    the existing bottom-left Stage-3 consumer ABI.
     """
     if (
         type(witness) is not RSSvNextFlexiCubesSurfaceEvidence
@@ -114,9 +133,21 @@ def render_realsas_layered_flexicubes_mesh_v1(
         or not bool(torch.isfinite(scene_triplanes).all())
     ):
         raise ValueError("RSS_VNEXT_REALSAS_STAGE3_SHARED_SCENE_DRIFT")
-    dr=BustedTorchRasterV1 if raster_backend is None else raster_backend
+    if raster_backend is None:
+        # Product A100/CUDA path: compiled PyTorch3D, mandatory. Reference
+        # Python raster is retained for CPU tests and independent comparison.
+        dr = stage3_default_raster_backend_v1(witness.xyz.device)
+        if dr is None:
+            raise RuntimeError("RSS_VNEXT_STAGE3_DEVICE_BACKEND_UNSUPPORTED")
+    else:
+        dr = raster_backend
     if raster_context is None:
         raster_context=dr.RasterizeCudaContext()
+    rasterizer_identity = (
+        PYTORCH3D_RASTER_ID if dr is PyTorch3DRasterV1
+        else RASTER_ID if dr is BustedTorchRasterV1
+        else INJECTED_RASTER_ID
+    )
     verts=witness.xyz[0].float()
     tri=witness.faces.to(torch.int32).contiguous()
     normals=vertex_normals_v1(witness.xyz[0],witness.faces).float()
@@ -139,8 +170,8 @@ def render_realsas_layered_flexicubes_mesh_v1(
         rast,_db=dr.rasterize(
             raster_context,clip,tri,resolution=(height,width),
         )
-        # The owned raster image origin is bottom-left. Model and
-        # admitted PNG teachers are top-left: explicit y axis reversal.
+        # Both raster backends return bottom-left rows. Admitted PNG source
+        # teachers are top-left; flip ONCE after all channel interpolation.
         coverage=(rast[...,3:4]>0).to(verts.dtype)
         sampled_position,_=dr.interpolate(
             verts[None].contiguous(),rast,tri,
@@ -166,15 +197,15 @@ def render_realsas_layered_flexicubes_mesh_v1(
         rgba=torch.cat((
             rgb*coverage,coverage,
         ),dim=-1).contiguous()
-        # The owned raster uses differentiable soft edge coverage only;
-        # face selection and metric depth remain first-hit, not blurred.
+        # The raster ABI carries differentiable edge alpha; face selection
+        # and metric depth remain first-hit, not blended across geometry.
         smooth=dr.antialias(rgba,rast,clip,tri).clamp(0.,1.)
         alpha=smooth[...,3:4]
         whitened=(smooth[...,:3]+1.-alpha).clamp(0.,1.)
         normal=F.normalize(sampled_normal,dim=-1,eps=1.e-8)*coverage
         metric_depth=((sampled_position-cam[None,None,None,:3])*
                       cam[None,None,None,9:12]).sum(-1,keepdim=True)*coverage
-        # Explicitly convert from GL bottom-left raster orientation.
+        # Explicitly convert from Stage-3 bottom-left to PNG top-left.
         values=[whitened,alpha,role*coverage,normal,metric_depth]
         per_view.append(tuple(x.flip(dims=(1,)).reshape(1,height*width,-1) for x in values))
     grouped=[
@@ -190,8 +221,10 @@ def render_realsas_layered_flexicubes_mesh_v1(
         source_scene_prediction_sha256=source_scene_prediction_sha256,
         mesh_surface_prediction_sha256=_mesh_digest(witness.xyz,witness.faces),
         semantic_layer_name=witness.layer_name,
-        rasterizer_identity=RASTER_ID,
+        rasterizer_identity=rasterizer_identity,
     )
 
 
-__all__=["RASTER_ID","render_realsas_layered_flexicubes_mesh_v1"]
+__all__=["RASTER_ID","PYTORCH3D_RASTER_ID","INJECTED_RASTER_ID",
+         "stage3_default_raster_backend_v1",
+         "render_realsas_layered_flexicubes_mesh_v1"]

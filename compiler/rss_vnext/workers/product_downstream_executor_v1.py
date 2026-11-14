@@ -288,8 +288,12 @@ def _seal_binary_candidate_v1(
     from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
         MAX_ARTIFACT_BYTES as MAX_UV_CAS,
     )
+    from compiler.rss_vnext.workers.rss_vnext_native_preview_package_v1 import (
+        _MAX_PREVIEW_BYTES,
+    )
     budget = (
-        MAX_UV_CAS if kind == "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
+        _MAX_PREVIEW_BYTES if kind == "RealSaS.RSSvNextNativeInteractivePuppetPreview"
+        else MAX_UV_CAS if kind == "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
         else MAX_RGB_CAS
     )
     if not body or len(body) > budget:
@@ -638,6 +642,21 @@ def execute_graphics_capability_v1(
             graphics_scene_content_sha256=graphics_scene_digest,
         )
     rendered = build_runtime_graphics_v1(compiled,face_count=len(mesh.faces))
+    native_preview_bytes = None
+    native_preview_manifest = None
+    if raw_texture_atlas is not None:
+        from compiler.rss_vnext.workers.rss_vnext_native_preview_package_v1 import (
+            compile_rss_vnext_native_preview_package_v1,
+            select_rss_vnext_native_preview_camera_v1,
+        )
+        native_preview_bytes, native_preview_manifest = (
+            compile_rss_vnext_native_preview_package_v1(
+                mesh=mesh, rig=rig, skin=skin, graphics=rendered,
+                uv_atlas_cas=raw_texture_atlas,
+                virtual_camera=select_rss_vnext_native_preview_camera_v1(mesh),
+                control_frames=((),),
+            )
+        )
     outputs = [
         _seal(compiled,role="compiled_graphics",kind="RealSaS.CompiledGraphics",
               version="v1",put_bytes=put_bytes),
@@ -665,6 +684,13 @@ def execute_graphics_capability_v1(
             kind="RealSaS.RSSvNextMeshUVTextureAtlasCandidate",
             put_bytes=put_bytes,
         ))
+    if native_preview_bytes is not None:
+        outputs.append(_seal_binary_candidate_v1(
+            native_preview_bytes,
+            role="rss_native_interactive_puppet_preview",
+            kind="RealSaS.RSSvNextNativeInteractivePuppetPreview",
+            put_bytes=put_bytes,
+        ))
     return {
         "capability_id":"product.graphics","status":"PASS",
         "outputs":outputs,"failure":None,
@@ -682,6 +708,14 @@ def execute_graphics_capability_v1(
             ),
             "source_rgb_surface_ownership_qualified": False,
             "mesh_uv_texture_atlas_candidate_present": raw_texture_atlas is not None,
+            "native_interactive_puppet_preview_present": native_preview_bytes is not None,
+            "native_preview_product_revision_minted": False,
+            "native_preview_virtual_camera_not_source_observed": True,
+            "native_preview_root_pose_source": "DETERMINISTIC_REST_NO_ANIMATION",
+            "native_preview_mesh_hash": (
+                native_preview_manifest["canonical_mesh_lineage_hash"]
+                if native_preview_manifest is not None else None
+            ),
             "mesh_uv_texture_atlas_size": (
                 raw_texture_manifest["atlas_size"] if raw_texture_manifest is not None else None
             ),

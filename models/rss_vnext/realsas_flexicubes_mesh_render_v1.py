@@ -45,7 +45,7 @@ def _mesh_digest(vertices: Tensor,faces: Tensor) -> str:
 def _camera_check(cameras: Tensor) -> None:
     if (
         cameras.ndim!=3 or cameras.shape[0]!=1
-        or cameras.shape[1] not in (1,6)
+        or cameras.shape[1] not in (1,2,6)
         or cameras.shape[2]!=13
         or not torch.is_floating_point(cameras)
         or not bool(torch.isfinite(cameras).all())

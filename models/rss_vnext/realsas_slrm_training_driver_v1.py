@@ -37,6 +37,13 @@ from .realsas_joint_slrm_render_v1 import (
 from .realsas_flexicubes_mesh_render_v1 import render_realsas_layered_flexicubes_mesh_v1
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 from .training_optimizer_ownership_v1 import qualify_rss_vnext_optimizer_ownership_v1
+from .semantic_geometry_prior import RSSvNextSemanticLayerSpec
+from .realsas_observed_source_ray_tether_v1 import (
+    CAMERA_ABI as ORIGINAL_RAY_CAMERA_ABI,
+    RSSvNextOriginalObservedRayBatchV1,
+    construct_original_observed_ray_samples_v1,
+    original_observed_source_photometric_loss_v1,
+)
 
 
 def _sha(v: object) -> bool:
@@ -76,6 +83,10 @@ class RealSaSSLRMBatchV1:
     stage3_normal_mask: Tensor | None = None
     stage3_depth_mask: Tensor | None = None
     conditioning_normals: Tensor | None = None  # learned 6-view normal conditioning
+    # Optional original pixels: source camera geometry must be independently
+    # qualified. The six constructed views are NEVER their replacement.
+    source_observed_rays: RSSvNextOriginalObservedRayBatchV1 | None = None
+    source_observed_admission_key: str = ""
 
 
 @dataclass(frozen=True)
@@ -87,6 +98,8 @@ class RealSaSSLRMTrainingLossWeightsV1:
     mesh_normal: float=1.
     mesh_depth: float=1.
     flexicubes_deformation: float=1.
+    observed_source_rgb: float=0.
+    observed_source_alpha: float=0.
 
     def validate(self) -> None:
         import math
@@ -108,12 +121,13 @@ class RealSaSSLRMTrainerV1:
     each minibatch. It binds original source, generated input, cameras,
     camera rays, peeled role mask, RGB, alpha and semantic GT.
     """
-    schema="RealSaS.RSSvNext.RealSaSSLRMTrainer.v3"
+    schema="RealSaS.RSSvNext.RealSaSSLRMTrainer.v4"
 
     def __init__(
         self, model: RSSvNextUnifiedCharacterModel, optimizer: torch.optim.Optimizer,
         *, dataset_manifest_sha256: str,
         trusted_source_3d_render_registry: Mapping[str,Mapping[str,object]],
+        trusted_original_observed_ray_registry: Mapping[str,Mapping[str,object]] | None = None,
         lpips_loss_fn: Callable[[Tensor,Tensor],Tensor] | None = None,
         weights: RealSaSSLRMTrainingLossWeightsV1 = RealSaSSLRMTrainingLossWeightsV1(),
         clip_gradient_norm: float=1.,
@@ -146,6 +160,21 @@ class RealSaSSLRMTrainerV1:
         self.registry_sha256=sha256(json.dumps(
             snapshot,sort_keys=True,separators=(",",":"),allow_nan=False,
         ).encode()).hexdigest()
+        original_snapshot={
+            str(key):dict(value)
+            for key,value in (trusted_original_observed_ray_registry or {}).items()
+        }
+        self.trusted_original_observed_ray_registry=MappingProxyType({
+            k:MappingProxyType(v) for k,v in original_snapshot.items()
+        })
+        self.original_observed_ray_registry_sha256=sha256(json.dumps(
+            original_snapshot,sort_keys=True,separators=(",",":"),allow_nan=False,
+        ).encode()).hexdigest()
+        if (
+            (weights.observed_source_rgb>0 or weights.observed_source_alpha>0)
+            and not original_snapshot
+        ):
+            raise ValueError("RSS_VNEXT_REALSAS_SLRM_ORIGINAL_SOURCE_REGISTRY_REQUIRED")
         self.policy_sha256=sha256(json.dumps(
             {"weights":asdict(weights),"input_profile":input_profile},
             sort_keys=True,separators=(",",":"),
@@ -313,6 +342,48 @@ class RealSaSSLRMTrainerV1:
         # privileged rendering target data.
         if t.generated_completion_used_as_truth:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_GENERATED_TEACHER_FORBIDDEN")
+        source=batch.source_observed_rays
+        key=batch.source_observed_admission_key
+        source_enabled=(
+            self.weights.observed_source_rgb>0 or
+            self.weights.observed_source_alpha>0
+        )
+        if (source is not None or key) and not source_enabled:
+            raise ValueError("RSS_VNEXT_REALSAS_SLRM_ORIGINAL_SOURCE_LOSS_NOT_ENABLED")
+        if source_enabled:
+            if (
+                type(source) is not RSSvNextOriginalObservedRayBatchV1
+                or not key
+                or self.input_profile!=REALSAS_SIX_VIEW_TRAINING_PROFILE
+                or batch.original_observed_view_count != 2
+                or t.stage not in (STAGE_1,STAGE_2,STAGE_3)
+            ):
+                raise ValueError("RSS_VNEXT_REALSAS_SLRM_ORIGINAL_SOURCE_CALIBRATED_PAIR_REQUIRED")
+            r=self.trusted_original_observed_ray_registry.get(key)
+            fields={
+                "admission_status":"QUALIFIED_NATIVE_TWO_SOURCE_CAMERA_PHOTOMETRY",
+                "dataset_manifest_sha256":self.manifest_sha256,
+                "original_source_binding_sha256":batch.source_binding_sha256,
+                "original_observed_view_count":2,
+                "original_linear_rgba_sha256":_digest(source.original_linear_rgba),
+                "original_camera_13d_sha256":_digest(source.original_camera_13d),
+                "source_pixel_indices_sha256":_digest(source.source_pixel_indices),
+                "ray_depth_sha256":_digest(source.ray_depth),
+                "ray_delta_sha256":_digest(source.ray_delta),
+                "source_rgb_mask_sha256":_digest(source.qualified_rgb_mask),
+                "source_alpha_mask_sha256":_digest(source.qualified_alpha_mask),
+                "original_camera_abi":ORIGINAL_RAY_CAMERA_ABI,
+                "original_cameras_independently_calibrated":True,
+                "original_source_linear_rgb_straight_alpha":True,
+                "source_pixels_are_native_not_generated":True,
+                "source_rays_supply_3d_depth_truth":False,
+                "generated_completion_used_as_source_photometry":False,
+            }
+            if r is None or any(r.get(k)!=v for k,v in fields.items()):
+                raise ValueError("RSS_VNEXT_REALSAS_SLRM_ORIGINAL_SOURCE_RECEIPT_DRIFT")
+            # Camera consistency and two-source pixel coverage are asserted
+            # *after* cryptographic source binding, before student forward.
+            construct_original_observed_ray_samples_v1(source)
 
     def objective(self,batch:RealSaSSLRMBatchV1) -> dict[str,Tensor]:
         if not self.model.training:
@@ -385,11 +456,82 @@ class RealSaSSLRMTrainerV1:
         parts=realsas_joint_stage_loss_v1(
             pred,teacher,lpips_loss_fn=self.lpips_loss_fn,**extra,
         )
+        if batch.source_observed_rays is not None:
+            # Full source photographs are rendered with ALL roles, even
+            # while the independent 3D teacher peels outer layers in Stage2.
+            # The source target is never a guessed peeled image or 3D point.
+            observed=construct_original_observed_ray_samples_v1(
+                batch.source_observed_rays,
+            )
+            if teacher.stage==STAGE_3:
+                # Stage3 must preserve original FRONT/BACK via an ACTUAL
+                # FlexiCubes mesh raster, never an auxiliary NeRF ray proxy.
+                # It is an all-role surface extracted from the SAME H(x);
+                # the independent source photo contributes color/alpha only.
+                rgba=batch.source_observed_rays.original_linear_rgba
+                hh,ww=rgba.shape[-2:]
+                if (
+                    rgba.shape[0]!=1 or hh>1024 or ww>1024
+                    or rgba.shape[1]!=2
+                ):
+                    raise ValueError("RSS_VNEXT_REALSAS_STAGE3_ORIGINAL_SOURCE_RASTER_DOMAIN")
+                schema=self.model.cfg.semantic_role_schema()
+                source_layer=RSSvNextSemanticLayerSpec(
+                    "original_source_all_visible_roles",schema.roles,
+                )
+                full_witness=self.model.fc_surface_bridge(
+                    state.scene_triplanes,
+                    extractor=batch.stage3_flexicubes_extractor,
+                    role_head=self.model.presentation_role_head,
+                    schema=schema,layer=source_layer,
+                    field_policy="SIGNED_HYPOTHESIS_ONLY",
+                )
+                full_mesh=render_realsas_layered_flexicubes_mesh_v1(
+                    witness=full_witness,iris=self.model.iris,
+                    scene_triplanes=state.scene_triplanes,
+                    graphics_head=self.model.graphics,
+                    semantic_role_head=self.model.presentation_role_head,
+                    cameras=batch.source_observed_rays.original_camera_13d.detach(),
+                    height=hh,width=ww,
+                    source_scene_prediction_sha256=_digest(state.scene_triplanes),
+                )
+                addr=batch.source_observed_rays.source_pixel_indices
+                flat=(addr[...,0]*hh*ww+addr[...,1]*ww+addr[...,2]).long()
+                selected_rgb=torch.gather(
+                    full_mesh.rgb_white_composite,1,
+                    flat[...,None].expand(-1,-1,3),
+                )
+                selected_alpha=torch.gather(
+                    full_mesh.alpha,1,flat[...,None],
+                )
+            else:
+                visible_all_roles=torch.ones(
+                    (*observed.ray_direction.shape[:2],
+                     self.model.cfg.semantic_role_schema().count),
+                    dtype=torch.bool,device=observed.ray_direction.device,
+                )
+                source_prediction=render_realsas_joint_from_shared_scene_v1(
+                    iris=self.model.iris,scene_triplanes=state.scene_triplanes,
+                    sample_xyz=observed.sample_xyz,
+                    ray_delta=observed.ray_delta,
+                    ray_depth=observed.ray_depth,
+                    ray_direction=observed.ray_direction,
+                    keep_roles=visible_all_roles,
+                    shared_graphics_head=self.model.graphics,
+                    shared_semantic_role_head=self.model.presentation_role_head,
+                )
+                selected_rgb=source_prediction.rgb_white_composite
+                selected_alpha=source_prediction.alpha
+            parts.update(original_observed_source_photometric_loss_v1(
+                selected_rgb,selected_alpha,observed,
+            ))
         weighted={
             "rgb_mse":self.weights.rgb,"mask_mse":self.weights.alpha,
             "semantic_ce":self.weights.semantic,"lpips":self.weights.lpips,
             "normal_cosine":self.weights.mesh_normal,"depth_l1":self.weights.mesh_depth,
             "flexicubes_deformation":self.weights.flexicubes_deformation,
+            "observed_source_rgb_mse":self.weights.observed_source_rgb,
+            "observed_source_alpha_mse":self.weights.observed_source_alpha,
         }
         total=sum(weighted[k]*v for k,v in parts.items() if k in weighted)
         if not bool(torch.isfinite(total)):
@@ -426,6 +568,7 @@ class RealSaSSLRMTrainerV1:
         payload={
             "schema":self.schema,"dataset_manifest_sha256":self.manifest_sha256,
             "teacher_registry_sha256":self.registry_sha256,
+            "original_source_registry_sha256":self.original_observed_ray_registry_sha256,
             "objective_policy_sha256":self.policy_sha256,
             "optimizer_ownership_binding_sha256":self.optimizer_ownership.binding_sha256,
             "global_step":self.global_step,"sampler_cursor":sampler_cursor,
@@ -448,6 +591,8 @@ class RealSaSSLRMTrainerV1:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_CORPUS_DRIFT")
         if data.get("teacher_registry_sha256")!=self.registry_sha256:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_RENDER_TRUTH_DRIFT")
+        if data.get("original_source_registry_sha256")!=self.original_observed_ray_registry_sha256:
+            raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_ORIGINAL_SOURCE_DRIFT")
         if data.get("objective_policy_sha256")!=self.policy_sha256:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_OBJECTIVE_POLICY_DRIFT")
         self._assert_optimizer_ownership()

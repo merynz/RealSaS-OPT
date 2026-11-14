@@ -80,7 +80,7 @@ def test_teacher_free_product_calls_incremental_decoder_without_prefix_rescans(m
         raise RuntimeError("FULL_PREFIX_DECODER_INFER_PATH_FORBIDDEN")
 
     monkeypatch.setattr(net.tessa, "decode_tokens", forbidden)
-    monkeypatch.setattr(net.tessa, "decode_next_token_v1", observed)
+    monkeypatch.setattr(unified_module, "decode_next_token_v1", observed)
     rgba = torch.rand((1, 2, 4, 16, 16))
     cameras = torch.zeros((1, 2, 13))
     for idx in (3, 7, 11, 12):

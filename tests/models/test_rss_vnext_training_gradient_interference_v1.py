@@ -227,3 +227,28 @@ def test_two_source_qualified_3d_objectives_share_nonzero_IRIS_scene_gradient():
     pair=scene["pairwise"][0]
     assert pair["cosine"] is not None and -1. <= pair["cosine"] <= 1.
     assert scene["cancellation_ratio"] is not None
+
+
+
+def test_opposed_losses_can_be_harmful_or_only_cancel_under_weighted_step():
+    p=torch.nn.Parameter(torch.tensor([1.,2.]))
+    neutral=probe({
+        "rig":(p.sum(),1.),"appearance":(-p.sum(),1.),
+    },named=[("iris.scene.scene_queries",p)])
+    row=neutral["owners"]["SHARED_IRIS_SCENE"]
+    assert row["pairwise"][0]["cosine"]==pytest.approx(-1.)
+    assert row["cancellation_ratio"]==pytest.approx(0.)
+    assert row["adverse_first_order_family_count"]==0
+    assert row["first_order_plain_gradient_descent_alignment"]["rig"]["first_order_dot"] is None
+    weighted=probe({
+        "rig":(p.sum(),3.),"appearance":(-p.sum(),1.),
+    },named=[("iris.scene.scene_queries",p)])
+    row=weighted["owners"]["SHARED_IRIS_SCENE"]
+    assert row["pairwise"][0]["cosine"]==pytest.approx(-1.)
+    assert row["adverse_first_order_family_count"]==1
+    assert row["first_order_plain_gradient_descent_alignment"]["rig"][
+        "first_order_dot"]==pytest.approx(4.)
+    assert row["first_order_plain_gradient_descent_alignment"]["appearance"][
+        "first_order_dot"]==pytest.approx(-4.)
+    assert row["first_order_plain_gradient_descent_alignment"]["appearance"][
+        "adverse_plain_gradient_descent"] is True

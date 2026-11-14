@@ -1477,6 +1477,104 @@ class RSSvNextStructuralTrainer:
             # No source-native attachment labels: opt-in weight cannot
             # turn absent contact evidence into a synthetic negative.
             raise ValueError("RSS_VNEXT_SOCKET_FACE_SOURCE_LABELS_REQUIRED")
+        source_pose_loss = None
+        n_source_poses = 0
+        pose_fields = (
+            batch.source_pose_skin_matrices, batch.source_pose_rest_samples,
+            batch.source_pose_animated_samples, batch.source_pose_valid_mask,
+        )
+        pose_requested = any(value is not None for value in pose_fields) or bool(
+            batch.source_pose_admission_key
+        )
+        if pose_requested:
+            if any(value is None for value in pose_fields) or not batch.source_pose_admission_key:
+                raise ValueError("RSS_VNEXT_SOURCE_POSE_TEACHER_INCOMPLETE")
+            if self.weights.source_pose_surface <= 0:
+                raise ValueError("RSS_VNEXT_SOURCE_POSE_OBJECTIVE_NOT_ENABLED")
+            if (
+                self.axis_training_policy != "PRODUCT_MESH_MATCHED_REQUIRED"
+                or matched_axis_mesh is None or matched_axis_memory is None
+                or not axis_requested or batch.axis_teacher_sequence is None
+            ):
+                raise ValueError("RSS_VNEXT_SOURCE_POSE_REQUIRES_MESH_MATCHED_AXIS")
+            matrices, rest_samples, animated_samples, pose_mask = pose_fields
+            teacher = batch.axis_teacher_sequence
+            joint_count = int((
+                (teacher.kind_ids == int(RigTokenKindV6.JOINT))
+                & teacher.attention_mask.bool()
+            ).sum().item())
+            mesh_xyz = matched_axis_mesh.rest_vertices_iris
+            if (
+                joint_count < 2 or matrices.ndim != 5
+                or matrices.shape[0] != 1 or matrices.shape[2:] != (joint_count, 4, 4)
+                or not 2 <= matrices.shape[1] <= 16
+                or rest_samples.ndim != 2 or rest_samples.shape[1] != 3
+                or not 4 <= rest_samples.shape[0] <= 4096
+                or animated_samples.shape != (matrices.shape[1], rest_samples.shape[0], 3)
+                or pose_mask.shape != (matrices.shape[1],)
+                or pose_mask.dtype != torch.bool or not bool(pose_mask.any())
+                or any(t.device != mesh_xyz.device for t in pose_fields)
+                or any(t.dtype != mesh_xyz.dtype for t in pose_fields[:3])
+                or any(t.requires_grad for t in pose_fields)
+                or not all(bool(torch.isfinite(t).all()) for t in pose_fields[:3])
+            ):
+                raise ValueError("RSS_VNEXT_SOURCE_POSE_MESH_JOINT_SAMPLE_DOMAIN")
+            last_row = matrices[..., 3, :]
+            expected_row = torch.tensor(
+                (0., 0., 0., 1.), device=matrices.device,
+                dtype=matrices.dtype,
+            )
+            if not bool(torch.allclose(last_row, expected_row, atol=1.e-5, rtol=0)):
+                raise ValueError("RSS_VNEXT_SOURCE_POSE_MATRIX_NOT_AFFINE")
+            pose_receipt = self.trusted_source_pose_registry.get(
+                batch.source_pose_admission_key,
+            )
+            expected = {
+                "admission_status": "QUALIFIED_NATIVE_RIG_POSED_SURFACE_IN_TESSA_MESH_DOMAIN",
+                "teacher_semantics": "SOURCE_NATIVE_REST_AND_INTERVENTION_POSED_SURFACES_NOT_PREDICTED_VIEWS",
+                "source_coordinate_system": "IRIS_NORMALIZED_SOURCE_XYZ",
+                "dataset_manifest_sha256": self.dataset_manifest_sha256,
+                "source_qualification_key": batch.source_qualification_key,
+                "observed_rgba_sha256": source_surface_tensor_sha256(batch.rgba),
+                "observed_camera_sha256": source_surface_tensor_sha256(batch.camera_features),
+                "axis_teacher_sequence_sha256": axis_teacher_sequence_sha256_v6(teacher),
+                "tessa_mesh_address_digest": axis_mesh_teacher_address_digest_v1(
+                    matched_axis_mesh,
+                ),
+                "source_pose_skin_matrices_sha256": source_surface_tensor_sha256(matrices),
+                "source_pose_rest_samples_sha256": source_surface_tensor_sha256(rest_samples),
+                "source_pose_animated_samples_sha256": source_surface_tensor_sha256(animated_samples),
+                "source_pose_valid_mask_sha256": source_surface_tensor_sha256(pose_mask),
+                "independent_pose_contact_or_ik_qualified": False,
+                "generated_views_are_source_motion": False,
+            }
+            if pose_receipt is None or any(
+                pose_receipt.get(key) != value for key, value in expected.items()
+            ):
+                raise ValueError("RSS_VNEXT_SOURCE_POSE_NATIVE_RECEIPT_DRIFT")
+            # Reuse the *same* indexed mesh and causal memory as AXIS product
+            # training. Ground-truth weights never enter model inference.
+            predicted_axis = self.model.axis(matched_axis_memory, teacher)
+            predicted_skin, valid_joints, _ = self.model.mira(
+                matched_axis_mesh.local_features,
+                matched_axis_mesh.rest_vertices_iris,
+                predicted_axis["hidden"], predicted_axis["skin_code_logits"],
+                teacher, vertex_normals=matched_axis_mesh.normals,
+            )
+            if (
+                valid_joints.shape != (1, joint_count)
+                or not bool(valid_joints.all())
+                or predicted_skin.shape != (1, mesh_xyz.shape[1], joint_count)
+            ):
+                raise ValueError("RSS_VNEXT_SOURCE_POSE_SKIN_JOINT_ORDER_DRIFT")
+            outcome = source_pose_surface_consequence_loss(
+                matched_axis_mesh, predicted_skin,
+                matrices, rest_samples, animated_samples,
+                valid_pose_mask=pose_mask,
+            )
+            source_pose_loss = outcome["total"]
+            n_source_poses = int(outcome["qualified_pose_count"].item())
+
         n_topo = 0
         n_pairs = 0
         if self.weights.topology > 0 and batch.topology_teacher_tokens is not None:

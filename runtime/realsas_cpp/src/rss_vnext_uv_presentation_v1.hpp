@@ -35,6 +35,13 @@ struct Reader {
         pos+=4;
         return v;
     }
+    std::uint16_t u16() {
+        require(2);
+        const auto value=static_cast<std::uint16_t>(input[pos])
+            |static_cast<std::uint16_t>(input[pos+1]<<8);
+        pos+=2;
+        return value;
+    }
     float f32() {
         const auto bits=u32();
         float v{};
@@ -105,8 +112,24 @@ inline Texture parse_texture(const std::vector<std::uint8_t>& blob) {
     t.conflict=r.bytes(pixels);
     t.inferred_log_uncertainty_half.reserve(pixels);
     for(std::size_t i=0;i<pixels;++i) {
-        const std::uint32_t v=r.u32(); // two float16 packed? no: 2 bytes each
-        (void)v;
+        const std::uint16_t v=r.u16();
+        if((v&0x7c00u)==0x7c00u)
+            throw std::runtime_error("RSS_UV_NATIVE_UNCERTAINTY_NONFINITE");
+        t.inferred_log_uncertainty_half.push_back(v);
+    }
+    for(std::size_t i=0;i<2*pixels;++i) {
+        const auto mask=t.source_mask[i];
+        if(mask>1)throw std::runtime_error("RSS_UV_NATIVE_SOURCE_MASK_DOMAIN");
+        if(mask==0)for(int channel=0;channel<4;++channel)
+            if(t.source_rgba[i*4+channel]!=0)
+                throw std::runtime_error("RSS_UV_NATIVE_UNOBSERVED_SOURCE_COLOR_FORGED");
+    }
+    for(std::size_t i=0;i<pixels;++i) {
+        if(t.inferred_mask[i]>1||t.conflict[i]>1)
+            throw std::runtime_error("RSS_UV_NATIVE_INFERRED_MASK_DOMAIN");
+        if(t.inferred_mask[i]==0)for(int channel=0;channel<4;++channel)
+            if(t.inferred_rgba[4*i+channel]!=0)
+                throw std::runtime_error("RSS_UV_NATIVE_UNKNOWN_INFERRED_COLOR_FORGED");
     }
     if(r.pos!=blob.size())
         throw std::runtime_error("RSS_UV_NATIVE_TRAILING");

@@ -151,9 +151,20 @@ def audit_rss_vnext_gradient_interference_v1(
             or not isfinite(pair[1]) or pair[1] <= 0.
         ):
             raise ValueError("RSS_VNEXT_GRADIENT_COURT_LOSS_DOMAIN")
-    selected = _selected_owners(tuple(named_parameters), policy)
+    all_named = tuple(named_parameters)
+    selected = _selected_owners(all_named, policy)
     if not selected:
         raise ValueError("RSS_VNEXT_GRADIENT_COURT_NO_AUDITABLE_PARAMETERS")
+    trainable_named = tuple((name, param) for name, param in all_named
+                            if param.requires_grad)
+    unmapped = tuple((name, param) for name, param in trainable_named
+                     if _owner(name) is None)
+    selected_parameter_count = sum(
+        len(params) for params, _, _ in selected.values()
+    )
+    selected_elements = sum(
+        p.numel() for params, _, _ in selected.values() for _, p in params
+    )
 
     result: dict = {
         "schema": SCHEMA,
@@ -163,6 +174,19 @@ def audit_rss_vnext_gradient_interference_v1(
         "optimizer_step_performed": False,
         "loss_families": [name for name, _ in terms],
         "policy": asdict(policy),
+        "all_trainable_parameter_tensors": len(trainable_named),
+        "all_trainable_scalar_elements": sum(p.numel() for _, p in trainable_named),
+        "sampled_parameter_tensors": selected_parameter_count,
+        "sampled_scalar_elements": selected_elements,
+        "unmapped_trainable_parameter_tensors": len(unmapped),
+        "unmapped_trainable_scalar_elements": sum(p.numel() for _, p in unmapped),
+        "unmapped_trainable_parameter_name_examples": [
+            name for name, _ in unmapped[:20]
+        ],
+        "full_model_coverage": (
+            selected_parameter_count == len(trainable_named)
+            and len(unmapped) == 0
+        ),
         "owners": {},
         "global_pairwise_conflict_estimate": None,
     }

@@ -108,7 +108,7 @@ class RealSaSSLRMTrainerV1:
     each minibatch. It binds original source, generated input, cameras,
     camera rays, peeled role mask, RGB, alpha and semantic GT.
     """
-    schema="RealSaS.RSSvNext.RealSaSSLRMTrainer.v2"
+    schema="RealSaS.RSSvNext.RealSaSSLRMTrainer.v3"
 
     def __init__(
         self, model: RSSvNextUnifiedCharacterModel, optimizer: torch.optim.Optimizer,
@@ -170,6 +170,27 @@ class RealSaSSLRMTrainerV1:
             ))
         ):
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_SIX_VIEW_BASELINE_VS_ONE_VIEW_ABLATION")
+        # Six generated RGB views without their normal-map partner are not
+        # the joint RGB+normal construction prescribed for this product
+        # profile. Omitting normals silently leaves normal_condition_proj
+        # without the input it was designed to learn. The direct one-view
+        # research profile has no generated normal teacher.
+        normals=batch.conditioning_normals
+        if self.input_profile==REALSAS_SIX_VIEW_TRAINING_PROFILE:
+            if (
+                not isinstance(normals,Tensor)
+                or normals.shape!=(
+                    batch.conditioning_rgba.shape[0],6,3,
+                    *batch.conditioning_rgba.shape[-2:],
+                )
+                or normals.dtype!=batch.conditioning_rgba.dtype
+                or normals.device!=batch.conditioning_rgba.device
+                or not bool(torch.isfinite(normals).all())
+                or bool(((normals < -1.0001) | (normals > 1.0001)).any())
+            ):
+                raise ValueError("RSS_VNEXT_REALSAS_SLRM_SIX_VIEW_NORMAL_CONDITION_REQUIRED")
+        elif normals is not None:
+            raise ValueError("RSS_VNEXT_REALSAS_SLRM_ONE_VIEW_NORMAL_CONDITION_FORBIDDEN")
         if type(t) is not RealSaSJointTargetV1 or not batch.admitted_3d_render_key:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_SOURCE_TARGET_REQUIRED")
         if t.stage not in (STAGE_1,STAGE_2,STAGE_3):
@@ -183,6 +204,13 @@ class RealSaSSLRMTrainerV1:
             "conditioning_authority":batch.conditioning_authority,
             "conditioning_checkpoint_sha256":batch.generating_checkpoint_sha256,
             "conditioning_rgba_sha256":_digest(batch.conditioning_rgba),
+            # The normal map is a live component of the SAME H(x) encoder.
+            # Its bytes must be receipt-bound just like RGB and cameras,
+            # otherwise source teacher records would survive conditioning
+            # changes and wrongly claim a stationary shared scene.
+            "conditioning_normals_sha256":(
+                _digest(normals) if normals is not None else None
+            ),
             "conditioning_cameras_sha256":_digest(batch.conditioning_cameras),
             "ray_xyz_sha256":_digest(batch.ray_xyz),
             "ray_deltas_sha256":_digest(batch.ray_deltas),

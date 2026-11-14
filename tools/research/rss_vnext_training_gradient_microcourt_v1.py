@@ -48,8 +48,29 @@ def main() -> None:
                 max_elements_per_owner=65536,
             ),
         )
+        # Paired pre/post objective on the exact same synthetic training
+        # example and deterministic dropout masks. This tests the ACTUAL
+        # AdamW step rather than inferring AdamW effects from the SGD
+        # first-order gradient direction. It still does NOT measure unseen
+        # or held-out generalization.
+        dropout_seed=seed+100000
+        torch.manual_seed(dropout_seed)
+        with torch.no_grad():
+            before=trainer.objective(batch)
+            initial={
+                "topology":float(before.topology_loss),
+                "surface_roles":float(before.surface_role_loss),
+            }
+        torch.manual_seed(dropout_seed)
         measured=trainer.train_step(batch).gradient_interference_report
         assert measured is not None
+        torch.manual_seed(dropout_seed)
+        with torch.no_grad():
+            after=trainer.objective(batch)
+            actual_deltas={
+                "topology":float(after.topology_loss)-initial["topology"],
+                "surface_roles":float(after.surface_role_loss)-initial["surface_roles"],
+            }
         scene=measured["owners"]["SHARED_IRIS_SCENE"]
         pair=next(x for x in scene["pairwise"]
                   if set((x["left"],x["right"]))=={"topology","surface_roles"})
@@ -67,6 +88,10 @@ def main() -> None:
                 scene["first_order_plain_gradient_descent_alignment"],
             "iris_scene_adverse_first_order_families":
                 scene["adverse_first_order_family_count"],
+            "actual_AdamW_same_batch_one_step_loss_delta":actual_deltas,
+            "actual_AdamW_any_task_loss_increased":any(
+                value>0. for value in actual_deltas.values()
+            ),
             "iris_scene_worst_named_parameter_pairs":
                 scene["worst_sampled_parameters"][:3],
             "iris_scene_sampled_parameters":scene["sampled_parameter_count"],
@@ -86,6 +111,10 @@ def main() -> None:
         ),
         "seeds_with_adverse_first_order_plain_gradient_descent":sum(
             int(r["iris_scene_adverse_first_order_families"]>0)
+            for r in records
+        ),
+        "seeds_with_any_increased_loss_after_real_AdamW_step":sum(
+            int(r["actual_AdamW_any_task_loss_increased"])
             for r in records
         ),
         "records":records,

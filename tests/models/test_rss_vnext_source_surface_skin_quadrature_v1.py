@@ -111,3 +111,48 @@ def test_no_grad_into_rest_geometry_or_independent_source_teacher():
     out.loss.backward()
     assert rest.grad is None and teacher.grad is None
     assert student.grad is not None and student.grad.abs().sum()>0.
+
+def test_area_simplex_kl_does_not_dilute_sparse_influence_with_more_joints():
+    # Identical physical source triangle and identical wrong influence:
+    # adding bones with zero source AND student weights must not reduce
+    # the full-distribution error, unlike mean-over-VxJ SmoothL1.
+    rest=torch.tensor([[[0.,0.,0.],[1.,0.,0.],[0.,1.,0.]]])
+    faces=torch.tensor([[0,1,2]])
+    kl_values=[]
+    smooth_values=[]
+    for joints in (2,8,64):
+        native=torch.zeros((1,3,joints),dtype=torch.float32)
+        estimate=torch.zeros_like(native)
+        native[...,0]=1.
+        estimate[...,0]=.8
+        estimate[...,1]=.2
+        estimate.requires_grad_()
+        result=source_surface_area_skin_loss_v1(
+            rest,faces,estimate,native,
+        )
+        assert float(result.simplex_kl_loss)>0
+        kl_values.append(float(result.simplex_kl_loss.detach()))
+        smooth_values.append(float(result.loss.detach()))
+        result.simplex_kl_loss.backward()
+        assert estimate.grad is not None
+        assert bool(torch.isfinite(estimate.grad).all())
+        assert estimate.grad[0,:,0].abs().sum()>0
+    assert max(kl_values)-min(kl_values)<1e-6
+    assert smooth_values[0]>smooth_values[1]>smooth_values[2]
+
+
+def test_area_simplex_kl_is_zero_at_correct_skin_and_teacher_grad_is_forbidden():
+    rest,faces,student,teacher=mesh(False)
+    # Source geometry/skin are independent teacher-only witnesses.
+    target=teacher.detach().clone().requires_grad_(True)
+    same=target.detach().clone().requires_grad_(True)
+    rest=rest.detach().clone().requires_grad_(True)
+    result=source_surface_area_skin_loss_v1(rest,faces,same,target)
+    assert abs(float(result.simplex_kl_loss.detach()))<1e-6
+    # A separate erroneous student must yield gradients only into student.
+    error=student.detach().clone().requires_grad_(True)
+    result=source_surface_area_skin_loss_v1(rest,faces,error,target)
+    result.simplex_kl_loss.backward()
+    assert error.grad is not None and error.grad.abs().sum()>0
+    assert target.grad is None
+    assert rest.grad is None

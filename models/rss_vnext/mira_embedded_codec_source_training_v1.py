@@ -409,8 +409,8 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             and (
                 batch.source_area_rest_vertices.shape!=batch.source_rest_vertices.shape
                 or not torch.allclose(
-                    batch.source_area_rest_vertices,
-                    batch.source_rest_vertices,
+                    batch.source_area_rest_vertices.to(torch.float64),
+                    batch.source_rest_vertices.to(torch.float64),
                     atol=1e-6,rtol=0.,
                 )
             )

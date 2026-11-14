@@ -111,14 +111,27 @@ def _build_player(tmp_path):
     return exe
 
 
-def _render(exe,archive,tmp_path,frame):
-    output = tmp_path / f"native_frame_{frame}.rgba"
+def _render(exe,archive,tmp_path,frame,*,source_view=0,owners=False):
+    output = tmp_path / f"native_frame_{frame}_source_{source_view}.rgba"
     cmd = [
-        str(exe),"--rss",str(archive),str(frame),"0","0",str(output),
+        str(exe),"--rss",str(archive),str(frame),"0",
+        str(source_view),str(output),
     ]
+    owner_file=tmp_path / "native_owners.i32"
+    authority_file=tmp_path / "native_authority.u8"
+    if owners:
+        cmd += [str(owner_file),str(authority_file)]
     result = subprocess.run(cmd,capture_output=True,text=True,check=True)
     assert "rss_archive=1" in result.stdout
     frame_rgba = np.frombuffer(output.read_bytes(),dtype=np.uint8).reshape(96,96,4)
+    if owners:
+        assert owner_file.stat().st_size == 96*96*4
+        assert authority_file.stat().st_size == 96*96
+        owners_data=np.fromfile(owner_file,dtype="<i4")
+        authority=np.fromfile(authority_file,dtype=np.uint8)
+        assert np.all(owners_data>=-1)
+        assert set(np.unique(authority)).issubset({0,1,2})
+        assert 1 in np.unique(authority)
     return frame_rgba,result.stdout
 
 
@@ -148,6 +161,13 @@ def test_real_two_original_images_reach_editable_mechanics_rss_and_native_2d_pix
     assert np.count_nonzero(second[:,:,3])>20
     assert "source_candidate_pixels=" in receipt0
     assert "graphics_order_overrides=" in receipt1
+    inferred,_=_render(exe,archive,tmp_path,0,source_view=-1)
+    assert np.count_nonzero(inferred[:,:,3])>20
+    assert not np.array_equal(first,inferred)
+    _,_=_render(exe,archive,tmp_path,0,source_view=0,owners=True)
+    # Exactly two canonical authored ROOT states have independently replayed
+    # projected positions; texture color changes cannot masquerade as motion.
+    assert reopened["pose_bytes"][32+len(mesh.faces)*12:] != b""
 
 
 def test_rehashed_rss_package_cannot_hide_edits_that_no_longer_match_real_mechanics(

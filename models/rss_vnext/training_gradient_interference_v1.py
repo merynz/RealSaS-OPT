@@ -14,7 +14,7 @@ rather than an invented zero-conflict verdict.
 """
 
 from dataclasses import asdict, dataclass
-from math import isfinite, sqrt
+from math import isfinite
 from typing import Mapping, Sequence
 
 import torch
@@ -166,34 +166,47 @@ def audit_rss_vnext_gradient_interference_v1(
         "owners": {},
         "global_pairwise_conflict_estimate": None,
     }
+    # ONE autograd pass per task across all sampled owner groups. A pass
+    # per (task, owner) would unnecessarily replay the same large IRIS
+    # graph many times and create prohibitive R&D overhead.
+    global_parameters = [
+        p for params, _, _ in selected.values() for _, p in params
+    ]
+    global_gradients: dict[str, list[Tensor]] = {}
+    for name, (loss, _) in terms:
+        raw = torch.autograd.grad(
+            loss, tuple(global_parameters), retain_graph=True,
+            create_graph=False, allow_unused=True,
+            materialize_grads=False,
+        )
+        detached = [
+            (
+                g.detach().reshape(-1).to(dtype=torch.float64, device="cpu")
+                if g is not None
+                else torch.zeros(p.numel(), dtype=torch.float64)
+            )
+            for p, g in zip(global_parameters, raw)
+        ]
+        if any(not bool(torch.isfinite(g).all()) for g in detached):
+            raise RuntimeError("RSS_VNEXT_GRADIENT_COURT_NONFINITE_GRADIENT")
+        global_gradients[name] = detached
+
+    offset = 0
     for owner, (params, eligible_n, eligible_elements) in selected.items():
-        tensor_params = tuple(p for _, p in params)
+        length = len(params)
         by_term: dict[str, Tensor] = {}
         norms: dict[str, float] = {}
         weighted_norms: dict[str, float] = {}
         parameter_grads: dict[str, list[Tensor]] = {}
-        for name, (loss, weight) in terms:
-            raw = torch.autograd.grad(
-                loss, tensor_params, retain_graph=True,
-                create_graph=False, allow_unused=True,
-                materialize_grads=False,
-            )
-            per_param = [
-                (
-                    g.detach().reshape(-1).to(dtype=torch.float64, device="cpu")
-                    if g is not None
-                    else torch.zeros(p.numel(), dtype=torch.float64)
-                )
-                for (_, p), g in zip(params, raw)
-            ]
-            if any(not bool(torch.isfinite(g).all()) for g in per_param):
-                raise RuntimeError("RSS_VNEXT_GRADIENT_COURT_NONFINITE_GRADIENT")
+        for name, (_, weight) in terms:
+            per_param = global_gradients[name][offset:offset+length]
             vector = torch.cat(per_param)
             by_term[name] = vector
             parameter_grads[name] = per_param
             norm = float(torch.linalg.vector_norm(vector).item())
             norms[name] = norm
             weighted_norms[name] = norm * float(weight)
+        offset += length
 
         pairs = []
         worst_parameters = []

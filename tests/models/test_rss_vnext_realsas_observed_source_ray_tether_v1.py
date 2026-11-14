@@ -92,8 +92,9 @@ def test_two_actual_source_photometric_rays_train_same_six_view_scene():
     assert torch.isfinite(outcomes["total"])
     assert float(outcomes["observed_source_rgb_mse"])>0
     assert float(outcomes["observed_source_alpha_mse"])>0
-    assert net.graphics.net[-1].weight.grad is not None if hasattr(net.graphics,"net") else any(
-        p.grad is not None and bool(torch.isfinite(p.grad).all()) and float(p.grad.abs().sum())>0
+    assert any(
+        p.grad is not None and bool(torch.isfinite(p.grad).all())
+        and float(p.grad.abs().sum())>0
         for p in net.graphics.parameters()
     )
     assert any(p.grad is not None and p.grad.abs().sum()>0 for p in net.iris.parameters())
@@ -225,6 +226,7 @@ def test_original_camera_pixels_cannot_be_duplicate_or_one_sided():
         )
     one_sided=source.source_pixel_indices.clone()
     one_sided[0,2:,0]=0
+    one_sided[0,2:,1]=torch.tensor([9,10])
     with pytest.raises(ValueError,match="BOTH_SOURCE_VIEWS_REQUIRED"):
         construct_original_observed_ray_samples_v1(
             replace(source,source_pixel_indices=one_sided),

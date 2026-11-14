@@ -327,12 +327,11 @@ inline PixelImage render(const graphics_v1::State& graphics,const Texture& textu
     const std::size_t pixels=static_cast<std::size_t>(width)*height;
     std::vector<std::vector<Layer>> layers(pixels);
     for(std::uint32_t f=0;f<faces.size();++f){
-        // Explicit request for an inferred 2D semantic stratum. Default
-        // full-puppet rendering NEVER suppresses a face due to an untrained
-        // or uncertain role. This mask is a representation choice, NOT
-        // independently witnessed source drawable/occlusion authority.
-        if(presentation_role_filter>=0 &&
-           texture.face_role_candidate[f]!=presentation_role_filter)continue;
+        // IMPORTANT: Include EVERY physical occluder in the first-hit
+        // calculation even when exporting an individual Semantic stratum.
+        // Hiding unselected triangles before depth would expose an arm,
+        // weapon or rear surface that the complete puppet actually occludes.
+        // The filter limits the *visible contribution*, not visibility.
         if(!graphics_v1::face_visible(graphics,view,f))continue;
         const auto ids=faces[f];
         if(ids[0]>=posed_vertices.size()||ids[1]>=posed_vertices.size()||
@@ -401,18 +400,35 @@ inline PixelImage render(const graphics_v1::State& graphics,const Texture& textu
         });
         if(order!=physical)++output.explicit_order_overrides;
         std::array<double,4> accum{};
+        double physical_transmittance=1.;
+        // The full physical layer stack determines the transmittance seen
+        // by each candidate role, regardless of which role is exported.
+        // For semitransparent front surfaces a rear role can contribute
+        // only its *already attenuated* visible part.
         for(auto idx:order){
-            const auto& rgba=hits[idx].color.rgba;
-            const double transmit=1.-accum[3];
-            for(int ch=0;ch<3;++ch)accum[ch]+=transmit*rgba[ch]*rgba[3];
-            accum[3]+=transmit*rgba[3];
+            const auto& layer=hits[idx];
+            const auto& rgba=layer.color.rgba;
+            const double contribution=physical_transmittance*rgba[3];
+            const bool selected=(
+                presentation_role_filter<0 ||
+                texture.face_role_candidate[layer.face]==presentation_role_filter
+            );
+            if(selected && contribution>1e-12){
+                for(int ch=0;ch<3;++ch)
+                    accum[ch]+=contribution*rgba[ch];
+                accum[3]+=contribution;
+                if(output.front_face[pixel]<0){
+                    output.front_face[pixel]=static_cast<std::int32_t>(layer.face);
+                    output.color_authority[pixel]=layer.color.authority;
+                }
+            }
+            physical_transmittance*=1.-rgba[3];
+            if(physical_transmittance<=1e-12)break;
         }
         if(accum[3]>1e-12)
             for(int ch=0;ch<3;++ch)
                 output.rgba[4*pixel+ch]=q8(accum[ch]/accum[3]);
         output.rgba[4*pixel+3]=q8(accum[3]);
-        output.front_face[pixel]=static_cast<std::int32_t>(hits[order.front()].face);
-        output.color_authority[pixel]=hits[order.front()].color.authority;
     }
     return output;
 }

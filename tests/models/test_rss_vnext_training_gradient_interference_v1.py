@@ -77,6 +77,7 @@ def test_undefined_gradients_remain_undefined_and_sampling_coverage_is_explicit(
     p=torch.nn.Parameter(torch.tensor([1.,2.]))
     unused=torch.nn.Parameter(torch.tensor([0.,0.]))
     other=torch.nn.Parameter(torch.tensor([2.,2.]))
+    unmapped=torch.nn.Parameter(torch.tensor([1.]))
     out=probe({
         "only_one_owner":(p.sum(),1.),
         "disjoint_owner":(other.sum(),1.),
@@ -84,7 +85,11 @@ def test_undefined_gradients_remain_undefined_and_sampling_coverage_is_explicit(
         ("iris.scene.layer0",p),
         ("iris.scene.layer1",unused),
         ("graphics.rgb_head",other),
+        ("unknown.future_expert",unmapped),
     ],max_params=1)
+    assert out["unmapped_trainable_parameter_tensors"]==1
+    assert out["unmapped_trainable_scalar_elements"]==1
+    assert out["full_model_coverage"] is False
     scene=out["owners"]["SHARED_IRIS_SCENE"]
     graphics=out["owners"]["GRAPHICS_HEAD"]
     assert scene["coverage_is_complete"] is False

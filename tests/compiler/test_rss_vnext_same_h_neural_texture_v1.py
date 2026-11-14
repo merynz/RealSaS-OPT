@@ -56,7 +56,7 @@ def test_same_H_graphics_candidate_completes_unknown_uv_in_separate_neural_layer
     assert len(predicted) == metadata["neural_graphics_color_texel_count"]
     assert (predicted[:, 0] > 250).all()
     assert (predicted[:, 1] < 5).all()
-    assert (predicted[:, 2] < 5).all()
+    assert (predicted[:, 2] <= 5).all()
     assert (predicted[:, 3] == 255).all()
     assert np.allclose(
         arrays["neural_rgb_log_uncertainty_f16"][

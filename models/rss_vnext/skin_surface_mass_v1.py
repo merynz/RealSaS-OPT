@@ -14,14 +14,14 @@ rule; otherwise equal weight arrays would produce different FSQ target IDs.
 import torch
 from torch import Tensor
 
-POOLING_ABI = "RealSaS.RSSvNext.MIRATESSASurfaceMass.v1"
+POOLING_ABI = "RealSaS.RSSvNext.MIRATESSASurfaceMass.v2"
 
 
 def tessa_vertex_surface_mass_v1(rest_vertices: Tensor, faces: Tensor) -> Tensor:
     """Detached per-vertex lumped triangle area, shape [1,V].
 
-    Unreferenced vertices have zero mass and cannot dominate the learned
-    latent. Uses TESSA's exact canonical vertex and face ordering; masks and
+    Unreferenced vertices have zero mass and cannot dominate EITHER latent
+    aggregator (mean or masked max). Uses TESSA's canonical face ordering; masks and
     source permissions remain independent concerns.
     """
     if (

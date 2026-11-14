@@ -37,6 +37,7 @@ from .flexicubes_animation_supervision import (
     source_animation_flexicubes_loss,
 )
 from .unified_character_model import RSSvNextUnifiedCharacterModel
+from .animation_ready_mesh import source_pose_surface_consequence_loss
 from .attachment_face_correspondence_v1 import (
     source_qualified_socket_face_loss_v1, axis_sequence_digest_v1,
     mesh_topology_digest_v1,
@@ -130,6 +131,12 @@ class RSSvNextStructuralTrainingBatch:
     # admission. Control/constraint tokens additionally need intervention truth.
     axis_teacher_sequence: AXISSequenceV6 | None = None
     axis_teacher_admission_key: str = ""
+    # Source-native pose consequence teacher: never an image encoder input.
+    source_pose_skin_matrices: Tensor | None = None  # [1,P,J,4,4] IRIS coords
+    source_pose_rest_samples: Tensor | None = None  # [M,3]
+    source_pose_animated_samples: Tensor | None = None  # [P,M,3]
+    source_pose_valid_mask: Tensor | None = None  # [P] independently qualified
+    source_pose_admission_key: str = ""
     # Exact source-native HELD/HOLDER labels, independently reindexed to the
     # training TESSA teacher mesh; -1 UNKNOWN is masked, not a true negative.
     source_anchor_face_targets: Tensor | None = None
@@ -182,6 +189,7 @@ class RSSvNextTrainingWeights:
     source_inside_sign: float = 0.0   # opt-in: closed-solid signed occupancy
     axis_rig_skin_codes: float = 0.0  # opt-in: source rig and MIRA-codec-bound FSQ teacher
     anchor_face_correspondence: float = 0.0  # source-native directed face labels
+    source_pose_surface: float = 0.0  # source-native rest/posed surface consequence
     flexicubes_surface: float = 0.3
     flexicubes_animation: float = 0.0  # explicit opt-in on admitted source motion
     novel_view: float = 0.0             # opt-in: source-qualified 8-way appearance
@@ -202,7 +210,8 @@ class RSSvNextTrainingWeights:
             self.surface_roles, self.region_pairs, self.typed_relations,
             self.graphics_source_rgb,
             self.source_udf, self.source_inside_sign,
-            self.axis_rig_skin_codes, self.anchor_face_correspondence, self.flexicubes_surface, self.flexicubes_animation,
+            self.axis_rig_skin_codes, self.anchor_face_correspondence,
+            self.source_pose_surface, self.flexicubes_surface, self.flexicubes_animation,
             self.novel_view, self.realsas_joint_slrm,
         ) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_NEGATIVE_OBJECTIVE_WEIGHT")
@@ -210,7 +219,8 @@ class RSSvNextTrainingWeights:
             self.topology + self.motion_preference
             + self.source_semantics + self.semantic_risk + self.surface_roles + self.region_pairs
             + self.typed_relations + self.graphics_source_rgb + self.source_udf + self.source_inside_sign
-            + self.axis_rig_skin_codes + self.anchor_face_correspondence + self.flexicubes_surface
+            + self.axis_rig_skin_codes + self.anchor_face_correspondence
+            + self.source_pose_surface + self.flexicubes_surface
             + self.flexicubes_animation + self.novel_view
             + self.realsas_joint_slrm <= 0
             or self.clip_gradient_norm <= 0
@@ -248,6 +258,8 @@ class RSSvNextTrainingResult:
     axis_rig_skin_loss: Tensor | None = None
     eligible_axis_sequences: int = 0
     axis_training_conditioning: str = "NO_AXIS_OBJECTIVE"
+    source_pose_surface_loss: Tensor | None = None
+    eligible_source_pose_count: int = 0
     anchor_face_correspondence_loss: Tensor | None = None
     eligible_anchor_held_faces: int = 0
     eligible_anchor_holder_faces: int = 0
@@ -349,6 +361,7 @@ class RSSvNextStructuralTrainer:
         trusted_typed_relation_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_axis_teacher_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_anchor_face_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_source_pose_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_signed_source_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_graphics_rgb_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_source_field_registry: Mapping[str, Mapping[str, object]] | None = None,
@@ -530,6 +543,19 @@ class RSSvNextStructuralTrainer:
                 anchor_snapshot, sort_keys=True, separators=(",", ":"),
                 allow_nan=False,
             ).encode("utf8")).hexdigest() if anchor_snapshot else ""
+        )
+        pose_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_source_pose_registry or {}).items()
+        }
+        self.trusted_source_pose_registry = MappingProxyType({
+            key: MappingProxyType(value) for key, value in pose_snapshot.items()
+        })
+        self.source_pose_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                pose_snapshot, sort_keys=True, separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf8")).hexdigest() if pose_snapshot else ""
         )
         signed_snapshot = {
             str(key): dict(value)

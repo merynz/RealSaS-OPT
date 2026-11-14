@@ -246,6 +246,7 @@ def test_missing_source_labels_and_disabled_objective_do_not_train_negative():
             flexicubes_surface=0,axis_rig_skin_codes=1,
             anchor_face_correspondence=0,
         ),
+        axis_training_policy="PRODUCT_MESH_MATCHED_REQUIRED",
         trusted_axis_teacher_registry={"native-axis":axis},
         trusted_anchor_face_registry={"native-attachment":receipt},
     )

@@ -175,7 +175,6 @@ def validate_raw_neural_socket_faces_v1(
         raise RuntimeError("RSS_VNEXT_RAW_ANCHOR_AXIS_EVENT_BINDING_DRIFT")
     face_components=scene["tessa_candidate_face_components"]
     nfaces=int(scene["tessa_candidate_faces"].shape[0])
-    controls=[e for e in events if e.get("kind") == 5] # overwritten below by enum
     from models.axis.rig_program_model_v6 import RigTokenKindV6
     controls=[e for e in events if e.get("kind")==int(RigTokenKindV6.CONTROL)]
     expected_event_indices=set()

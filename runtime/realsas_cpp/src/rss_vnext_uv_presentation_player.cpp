@@ -472,6 +472,41 @@ int self_test(){
        crossed.front_face[20*64+20]!=1||
        crossed.overlapping_pixels==0)
         throw std::runtime_error("RSS_UV_NATIVE_ORTHO_MOVING_FIRST_HIT_DRIFT");
+    // Two overlapping candidate faces retain their original RGB textures.
+    // A requested semantic 2D stratum can independently show only one face,
+    // but the default full image never discards uncertain semantic evidence.
+    tex.role_count=4u;
+    tex.role_schema_digest=std::string(64,'a');
+    tex.face_role_probability={
+        .85f,.05f,.05f,.05f,
+        .05f,.05f,.85f,.05f,
+    };
+    tex.face_role_candidate={0u,2u};
+    const auto role0=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(1.,2.,0),64,64,0,-1,0
+    );
+    const auto role2=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(1.,2.,0),64,64,0,-1,2
+    );
+    const auto all_roles=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(1.,2.,0),64,64,0,-1
+    );
+    if(at(role0,20,20)!=std::array<int,4>{255,0,0,255}||
+       at(role2,20,20)!=std::array<int,4>{0,0,255,255}||
+       at(all_roles,20,20)!=std::array<int,4>{255,0,0,255})
+        throw std::runtime_error("RSS_UV_NATIVE_SEMANTIC_SUBLAYER_NOT_CONSUMED");
+    tex.face_role_candidate[0]=255u;
+    const auto unknown=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(1.,2.,0),64,64,0,-1,0
+    );
+    if(unknown.front_face[20*64+20]>=0)
+        throw std::runtime_error("RSS_UV_NATIVE_SEMANTIC_UNKNOWN_NOT_ABSTAINED");
+    const auto still_visible=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(1.,2.,0),64,64,0,-1
+    );
+    if(at(still_visible,20,20)!=std::array<int,4>{255,0,0,255})
+        throw std::runtime_error("RSS_UV_NATIVE_UNKNOWN_SUPPRESSED_PUPPET");
+    std::cout<<"RSS_UV_NATIVE_SEMANTIC_SUBLAYER_CONSUMER_PASS\n";
     std::cout<<"RSS_UV_NATIVE_ORTHOGRAPHIC_CHART_AND_MOVING_DEPTH_PASS\n";
     std::cout<<"RSS_UV_NATIVE_POSED_DEPTH_AND_PARTIAL_ORDER_PASS\n";
     return 0;
@@ -481,15 +516,16 @@ int main(int argc,char** argv){
     try {
         if(argc==2&&std::string(argv[1])=="--self-test")return self_test();
         const bool archive_mode=argc>1&&std::string(argv[1])=="--rss";
-        if(archive_mode ? (argc!=7&&argc!=9) : (argc!=8&&argc!=10))
+        if(archive_mode ? (argc!=7&&argc!=8&&argc!=9)
+                        : (argc!=8&&argc!=9&&argc!=10))
             throw std::runtime_error(
                 "USAGE: rss_uv_player graphics.bin uv.bin pose.bin frame view"
                 " source_view output.rgba [owner.i32 authority.u8]"
                 " OR --rss preview.rss frame view source_view output.rgba"
-                " [owner.i32 authority.u8]"
+                " [owner.i32 authority.u8] or --role=K (model-candidate)"
             );
         std::vector<std::uint8_t> graphics_blob,texture_blob,pose_blob;
-        int frame=0,view=0,source_view=-1;
+        int frame=0,view=0,source_view=-1,role_filter=-1;
         const char* output_path=nullptr;
         const char* owner_path=nullptr;
         const char* authority_path=nullptr;
@@ -517,6 +553,12 @@ int main(int argc,char** argv){
             source_view=parse_index(argv[5]);
             output_path=argv[6];
             if(argc==9){owner_path=argv[7];authority_path=argv[8];}
+            if(argc==8){
+                const std::string arg(argv[7]);
+                if(arg.rfind("--role=",0)!=0)
+                    throw std::runtime_error("RSS_UV_NATIVE_SEMANTIC_ARG_FORMAT");
+                role_filter=parse_index(arg.substr(7).c_str());
+            }
             if(manifest.at("schema")==
                 "RealSaS.RSSvNext.NativeInteractivePuppetPreview.v1"&&view!=0)
                 throw std::runtime_error("RSS_UV_PREVIEW_SINGLE_PROJECTED_VIEW_ONLY");
@@ -529,6 +571,12 @@ int main(int argc,char** argv){
             source_view=parse_index(argv[6]);
             output_path=argv[7];
             if(argc==10){owner_path=argv[8];authority_path=argv[9];}
+            if(argc==9){
+                const std::string arg(argv[8]);
+                if(arg.rfind("--role=",0)!=0)
+                    throw std::runtime_error("RSS_UV_NATIVE_SEMANTIC_ARG_FORMAT");
+                role_filter=parse_index(arg.substr(7).c_str());
+            }
         }
         const auto graphics=realsas::graphics_v1::parse(graphics_blob);
         if(archive_mode){
@@ -577,6 +625,16 @@ int main(int argc,char** argv){
             }
         }
         const auto texture=realsas::rss_uv_v1::parse_texture(texture_blob);
+        if(archive_mode){
+            const bool semantic=texture.role_count>0;
+            if(
+                manifest.at("semantic_role_sublayer_model_only") !=
+                    (semantic?"1":"0")||
+                manifest.at("semantic_role_sublayer_source_qualified")!="0"
+            )throw std::runtime_error(
+                "RSS_UV_NATIVE_SEMANTIC_SUBLAYER_FALSE_AUTHORITY"
+            );
+        }
         const auto poses=parse_poses(pose_blob);
         if(frame<0||frame>=static_cast<int>(poses.frames.size())||
            view<0||view>=8||source_view < -1||source_view>1)
@@ -594,7 +652,8 @@ int main(int argc,char** argv){
         const auto output=realsas::rss_uv_v1::render(
             graphics,texture,poses.faces,
             poses.frames[frame][poses.view_count==1?0u:static_cast<std::size_t>(view)],
-            poses.width,poses.height,static_cast<std::uint32_t>(view),source_view
+            poses.width,poses.height,static_cast<std::uint32_t>(view),
+            source_view,role_filter
         );
         write_file(output_path,output.rgba);
         if(owner_path){
@@ -609,6 +668,8 @@ int main(int argc,char** argv){
         std::cout<<"RSS_UV_NATIVE_POSED_2D_RENDER_PASS"
                  <<" frame="<<frame<<" view="<<view
                  <<" source_layer="<<source_view
+                 <<" presentation_role_filter="<<role_filter
+                 <<" semantic_role_is_source_truth=0"
                  <<" rss_archive="<<(archive_mode?1:0)
                  <<" overlap_pixels="<<output.overlapping_pixels
                  <<" graphics_order_overrides="<<output.explicit_order_overrides

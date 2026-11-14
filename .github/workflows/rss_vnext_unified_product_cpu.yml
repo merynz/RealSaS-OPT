@@ -29,6 +29,7 @@ on:
       - "tests/repository/test_product_producer_consumer_audit_v1.py"
       - "tests/repository/test_fit1_mechanical_product_role_alignment_v1.py"
       - "tools/product_producer_consumer_audit_v1.py"
+      - "tools/research/rss_vnext_training_gradient_microcourt_v1.py"
       - ".github/workflows/rss_vnext_unified_product_cpu.yml"
   pull_request:
     paths:
@@ -98,3 +99,8 @@ jobs:
             tests/repository/test_rss_vnext_unified_expert_source_home_v1.py \
             tests/repository/test_product_producer_consumer_audit_v1.py \
             tests/repository/test_fit1_mechanical_product_role_alignment_v1.py
+
+      - name: Observe synthetic shared-H gradient interference without changing training
+        env:
+          PYTHONPATH: .
+        run: python tools/research/rss_vnext_training_gradient_microcourt_v1.py

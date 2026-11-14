@@ -157,6 +157,7 @@ def test_real_canonical_mesh_uv_texture_renders_two_poses_in_cpp(
         capture_output=True, text=True, check=True,
     )
     assert "RSS_UV_NATIVE_POSED_DEPTH_AND_PARTIAL_ORDER_PASS" in selftest.stdout
+    assert "RSS_UV_NATIVE_ORTHOGRAPHIC_CHART_AND_MOVING_DEPTH_PASS" in selftest.stdout
 
     front, summary = _render(
         player, gfx, uv, poses, tmp_path, frame=0, source_view=0, owner=True,

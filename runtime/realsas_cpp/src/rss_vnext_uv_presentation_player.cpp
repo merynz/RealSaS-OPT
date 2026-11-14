@@ -418,6 +418,61 @@ int self_test(){
         posed(1.,2.,12.),64,64,0,-1);
     if(at(moved,20,20)==at(original,20,20)||at(moved,42,20)!=at(original,20,20))
         throw std::runtime_error("RSS_UV_NATIVE_POSED_TRANSLATION_TEST_FAIL");
+    // A rectangular UV bounding box is NOT proof of membership in this
+    // triangular face chart. The positive-weight tap at texel (3,2) is
+    // outside face 0 although it is inside the chart's UV AABB; the source
+    // mask there may belong to a neighboring face. Never blend/claim it.
+    const std::array<double,3> near_uv_edge{{.05,.70,.25}};
+    const auto chart_edge=realsas::rss_uv_v1::sample_texture(
+        tex,0,near_uv_edge,0
+    );
+    if(chart_edge.authority!=2||chart_edge.rgba[0]<.999||
+       chart_edge.rgba[1]>1e-8)
+        throw std::runtime_error("RSS_UV_NATIVE_TRIANGLE_SOURCE_CHART_BLEED");
+    // Inverse-depth interpolation is WRONG for an orthographic camera.
+    // Paint a position-varying inferred gradient to expose UV drift when
+    // a character's joints move vertices in depth without moving their XY.
+    for(int y=0;y<8;++y)for(int x=1;x<=3;++x){
+        const auto p=y*8+x;
+        tex.inferred_rgba[4*p]=static_cast<std::uint8_t>(20+50*x);
+        tex.inferred_rgba[4*p+1]=0;
+        tex.inferred_rgba[4*p+2]=static_cast<std::uint8_t>(20+35*y);
+        tex.inferred_rgba[4*p+3]=255;
+    }
+    const std::vector<Projected> depth_gradient={
+        {10,10,1.},{54,10,6.},{10,54,10.},
+        {10,10,30.},{54,10,30.},{10,54,30.},
+    };
+    const auto tilted=realsas::rss_uv_v1::render(
+        graphics,tex,faces,depth_gradient,64,64,0,-1
+    );
+    const double w1=(20.5-10.)/44.,w2=(20.5-10.)/44.;
+    const std::array<double,3> affine_bary{{1.-w1-w2,w1,w2}};
+    const auto expected_gradient=realsas::rss_uv_v1::sample_texture(
+        tex,0,affine_bary,-1
+    );
+    if(expected_gradient.authority!=2||
+       tilted.front_face[20*64+20]!=0)
+        throw std::runtime_error("RSS_UV_NATIVE_ORTHO_GRADIENT_DOMAIN");
+    for(int channel=0;channel<4;++channel){
+        const auto expected=static_cast<int>(std::floor(
+            expected_gradient.rgba[channel]*255.+.5
+        ));
+        if(std::abs(at(tilted,20,20)[channel]-expected)>1)
+            throw std::runtime_error("RSS_UV_NATIVE_ORTHO_UV_AFFINE_DRIFT");
+    }
+    // The same triangles can swap first-hit ownership ACROSS PIXELS due to
+    // the pose's true interpolated depth, not average face depth or order.
+    auto crossing=depth_gradient;
+    for(int vertex=3;vertex<6;++vertex)crossing[vertex].z=3.5;
+    const auto crossed=realsas::rss_uv_v1::render(
+        graphics,tex,faces,crossing,64,64,0,-1
+    );
+    if(crossed.front_face[12*64+12]!=0||
+       crossed.front_face[20*64+20]!=1||
+       crossed.overlapping_pixels==0)
+        throw std::runtime_error("RSS_UV_NATIVE_ORTHO_MOVING_FIRST_HIT_DRIFT");
+    std::cout<<"RSS_UV_NATIVE_ORTHOGRAPHIC_CHART_AND_MOVING_DEPTH_PASS\n";
     std::cout<<"RSS_UV_NATIVE_POSED_DEPTH_AND_PARTIAL_ORDER_PASS\n";
     return 0;
 }

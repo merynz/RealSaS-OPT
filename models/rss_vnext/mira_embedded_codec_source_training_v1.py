@@ -34,7 +34,7 @@ from .training_engine import (
     axis_teacher_sequence_sha256_v6, source_surface_tensor_sha256,
 )
 
-SCHEMA = "RealSaS.RSSvNext.EmbeddedMIRASourceCodecTrainer.v1"
+SCHEMA = "RealSaS.RSSvNext.EmbeddedMIRASourceCodecTrainer.v2"
 _TEACHER = "QUALIFIED_SOURCE_MIRA_DENSE_SKIN_TESSA_AXIS_JOINT_REINDEX"
 
 

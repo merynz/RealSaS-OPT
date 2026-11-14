@@ -12,6 +12,7 @@ from collections import OrderedDict
 from dataclasses import asdict, replace
 from hashlib import sha256
 import json
+import math
 from pathlib import Path
 import struct
 from typing import Any, Mapping, Sequence
@@ -48,6 +49,7 @@ from compiler.realsas_compiler_core.runtime_package_v2 import (
 from .rss_vnext_native_uv_transport_v1 import encode_native_rss_vnext_uv_v1
 
 SCHEMA = "RealSaS.RSSvNext.NativeInteractivePuppetPreview.v1"
+SCHEMA_EIGHT = "RealSaS.RSSvNext.NativeInteractivePuppetPreview.v2"
 _REQUIRED = frozenset({
     "manifest.txt", "mesh.json", "rig.json", "skin.json",
     "graphics.bin", "texture.bin", "pose.bin", "controls.json",
@@ -66,38 +68,77 @@ def _sha(value: bytes) -> str:
 
 def _make_pose_binary(
     mesh: CanonicalMeshIR, rig: CanonicalRigIRV2, skin: CanonicalSkinIRV2,
-    frames: Sequence[Sequence[ControlTransformIRV1]], camera: Mapping,
+    frames: Sequence[Sequence[ControlTransformIRV1]],
+    camera: Mapping | Sequence[Mapping],
 ) -> tuple[bytes, list[str]]:
-    camera_state = qualify_camera_v3(
-        camera, view_id="V0", view_index=0,
-    )
-    if camera_state.resolution > 2048 or len(frames) not in range(1, 513):
+    """One solved 3D pose projected to exactly 1 or 8 camera directions.
+
+    RSPOSE01 stays byte compatible for legacy preview archives. RSPOSE02
+    stores frame-major/view-minor projected positions, preserving the SAME
+    canonical mesh, rig, skin, control program, and triangle addresses.
+    """
+    eight_way = not isinstance(camera, Mapping)
+    if eight_way:
+        if not isinstance(camera, (tuple, list)) or len(camera) != 8:
+            raise RuntimeError("RSS_PREVIEW_EIGHT_WAY_CAMERA_CARDINALITY")
+        camera_states = tuple(
+            qualify_camera_v3(value, view_id=f"V{i}", view_index=i)
+            for i, value in enumerate(camera)
+        )
+        if len({c.resolution for c in camera_states}) != 1:
+            raise RuntimeError("RSS_PREVIEW_EIGHT_WAY_CAMERA_RESOLUTION_DRIFT")
+    else:
+        camera_states = (qualify_camera_v3(
+            camera, view_id="V0", view_index=0,
+        ),)
+    resolution = camera_states[0].resolution
+    if resolution > 2048 or len(frames) not in range(1, 513):
         raise RuntimeError("RSS_PREVIEW_CAMERA_OR_FRAME_RESOURCE_BUDGET")
     v_ids = tuple(v.canonical_mesh_vertex_id for v in mesh.vertices)
     v_index = {value: index for index, value in enumerate(v_ids)}
     if len(v_index) != len(v_ids) or len(mesh.faces) > 4096:
         raise RuntimeError("RSS_PREVIEW_CANONICAL_ADDRESS_BUDGET")
     faces = tuple(tuple(v_index[k] for k in face) for face in mesh.faces)
-    data = bytearray(b"RSPOSE01")
-    data.extend(struct.pack("<IIIIII", 1, len(v_ids), len(faces),
-                            len(frames), camera_state.resolution,
-                            camera_state.resolution))
+    views = len(camera_states)
+    # The binary is also loaded by the native standalone player (64 MiB
+    # direct pose budget). Fail BEFORE computing or allocating giant scenes.
+    expected = (36 if eight_way else 32) + 12 * len(faces) + (
+        len(frames) * views * len(v_ids) * 24
+    )
+    if expected > 64 * 1024 * 1024:
+        raise RuntimeError("RSS_PREVIEW_EIGHT_WAY_POSE_RESOURCE_BUDGET")
+    data = bytearray(b"RSPOSE02" if eight_way else b"RSPOSE01")
+    if eight_way:
+        data.extend(struct.pack(
+            "<IIIIIII", 2, len(v_ids), len(faces), len(frames),
+            views, resolution, resolution,
+        ))
+    else:
+        data.extend(struct.pack(
+            "<IIIIII", 1, len(v_ids), len(faces), len(frames),
+            resolution, resolution,
+        ))
     for face in faces:
         data.extend(struct.pack("<III", *face))
     program_hashes = []
     for controls in frames:
-        if len(controls) > 256 or any(type(x) is not ControlTransformIRV1 for x in controls):
+        if len(controls) > 256 or any(
+            type(x) is not ControlTransformIRV1 for x in controls
+        ):
             raise RuntimeError("RSS_PREVIEW_CONTROL_FRAME_DOMAIN")
         pose = solve_control_pose_v1(rig, controls)
         result = deform_mesh_lbs_v1(mesh, rig, skin, pose)
         if tuple(result.canonical_mesh_vertex_ids) != v_ids:
             raise RuntimeError("RSS_PREVIEW_MECHANICS_VERTEX_REORDER")
         positions = np.asarray(result.positions, dtype=np.float64)
-        projected = project_points_xyz_v3(positions, camera_state)
-        if not np.isfinite(projected).all() or np.any(projected[:, 2] <= 0):
-            raise RuntimeError("RSS_PREVIEW_VIRTUAL_CAMERA_CLIPS_MESH")
-        data.extend(projected.astype("<f8", copy=False).tobytes(order="C"))
+        for camera_state in camera_states:
+            projected = project_points_xyz_v3(positions, camera_state)
+            if not np.isfinite(projected).all() or np.any(projected[:, 2] <= 0):
+                raise RuntimeError("RSS_PREVIEW_VIRTUAL_CAMERA_CLIPS_MESH")
+            data.extend(projected.astype("<f8", copy=False).tobytes(order="C"))
         program_hashes.append(pose.control_program_hash)
+    if len(data) != expected:
+        raise RuntimeError("RSS_PREVIEW_EIGHT_WAY_POSE_BINARY_LAYOUT")
     return bytes(data), program_hashes
 
 
@@ -158,9 +199,50 @@ def select_rss_vnext_native_preview_camera_v1(
     }
 
 
+def select_rss_vnext_eight_way_virtual_cameras_v1(
+    mesh: CanonicalMeshIR, *, resolution: int = 128,
+) -> tuple[dict[str, Any], ...]:
+    """Exactly eight 45-degree yaw views of ONE canonical 3D mesh.
+
+    The world-Y-up camera convention is a product rendering POLICY, not an
+    observed uploaded camera or source visibility measurement. Each view
+    has the same center, scale and resolution; no view-specific mesh/rig.
+    """
+    validate_canonical_mesh_domain_v1(mesh)
+    if type(resolution) is not int or not 16 <= resolution <= 2048:
+        raise RuntimeError("RSS_PREVIEW_VIRTUAL_RESOLUTION_INVALID")
+    xyz = np.asarray([v.P for v in mesh.vertices], dtype=np.float64)
+    if not np.isfinite(xyz).all() or len(mesh.faces) > 4096 or len(xyz) > 65536:
+        raise RuntimeError("RSS_PREVIEW_VIRTUAL_MESH_BUDGET")
+    center = (xyz.min(axis=0) + xyz.max(axis=0)) * .5
+    radius = float(np.linalg.norm(xyz - center, axis=-1).max())
+    if not math.isfinite(radius) or radius <= 1.e-10:
+        raise RuntimeError("RSS_PREVIEW_VIRTUAL_MESH_DEGENERATE")
+    distance = max(2., radius * 4.)
+    half_extent = max(radius * 1.2, 1.e-3)
+    cameras = []
+    for index in range(8):
+        angle = index * math.pi / 4.
+        forward = np.asarray((-math.sin(angle), 0., -math.cos(angle)))
+        right = np.asarray((math.cos(angle), 0., -math.sin(angle)))
+        origin = center - distance * forward
+        cameras.append({
+            "view_index": index, "yaw_degrees": index * 45,
+            "origin": tuple(map(float, origin)),
+            "right": tuple(map(float, right)),
+            "screen_up": (0., 1., 0.),
+            "forward": tuple(map(float, forward)),
+            "half_extent": half_extent, "resolution": resolution,
+            "source_camera_observed": False,
+            "selection_policy": "CANONICAL_Y_UP_EIGHT_YAW_DIRECTIONS_V1",
+        })
+    return tuple(cameras)
+
+
 def prepare_rss_vnext_virtual_preview_graphics_v1(
     graphics: RuntimeGraphicsV1, *,
     canonical_mesh_hash: str, face_count: int,
+    all_virtual_directions: bool = False,
 ) -> RuntimeGraphicsV1:
     """Demote an unregistered *virtual* camera to conservative geometry visibility.
 
@@ -185,7 +267,7 @@ def prepare_rss_vnext_virtual_preview_graphics_v1(
             visible_fragment_indices=universal_view,
             topological_fragment_order=universal_view,
             order_edges=(),
-        ) if view.view_index == 0 else view
+        ) if all_virtual_directions or view.view_index == 0 else view
         for view in graphics.views
     )
     preview = replace(
@@ -196,6 +278,7 @@ def prepare_rss_vnext_virtual_preview_graphics_v1(
             **graphics.metadata,
             "virtual_camera_view_is_registered": False,
             "virtual_preview_source_view_visibility_reused": False,
+            "virtual_preview_all_eight_directions": all_virtual_directions,
             "virtual_preview_draw_policy": "ALL_CANONICAL_FRAGMENTS_POSED_DEPTH_ONLY",
         },
     )

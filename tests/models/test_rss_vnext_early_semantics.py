@@ -716,7 +716,11 @@ def test_source_graphics_rgb_receipt_rejects_relabelled_rays_and_missing_visibil
         admission_status="QUALIFIED_FOR_THIS_SUPERVISION_FAMILY",
     )
     trainer.objective(batch)
-    batch.source_graphics_rgb_target = target + .01
+    # Keep the tamper probe within admitted [0,1] RGB; otherwise this
+    # accidentally exercises range validation, not receipt-byte binding.
+    batch.source_graphics_rgb_target = torch.where(
+        target <= .5, target + .01, target - .01,
+    )
     with pytest.raises(ValueError, match="GRAPHICS_RGB_SOURCE_RECEIPT_DRIFT"):
         trainer.objective(batch)
     batch.source_graphics_rgb_target = target

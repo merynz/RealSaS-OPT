@@ -101,6 +101,63 @@ def _make_pose_binary(
     return bytes(data), program_hashes
 
 
+def select_rss_vnext_native_preview_camera_v1(
+    mesh: CanonicalMeshIR, *, resolution: int = 128,
+) -> dict[str, Any]:
+    """Choose an honest virtual preview angle from the *same* canonical mesh.
+
+    Maximize aggregate triangle projected area among three orthogonal axes.
+    This is a deterministic display heuristic; it is NOT the camera of either
+    uploaded image and cannot establish source visibility or back-side color.
+    """
+    validate_canonical_mesh_domain_v1(mesh)
+    if type(resolution) is not int or not 16 <= resolution <= 2048:
+        raise RuntimeError("RSS_PREVIEW_VIRTUAL_RESOLUTION_INVALID")
+    xyz = np.asarray([v.P for v in mesh.vertices], dtype=np.float64)
+    index = {v.canonical_mesh_vertex_id: i for i,v in enumerate(mesh.vertices)}
+    faces = np.asarray([[index[k] for k in f] for f in mesh.faces], dtype=np.int64)
+    if len(faces)>4096 or len(xyz)>65536:
+        raise RuntimeError("RSS_PREVIEW_VIRTUAL_MESH_BUDGET")
+    axes = (
+        ((1.,0.,0.),(0.,1.,0.),(0.,0.,1.)),
+        ((1.,0.,0.),(0.,0.,1.),(0.,1.,0.)),
+        ((0.,1.,0.),(0.,0.,1.),(1.,0.,0.)),
+    )
+    center = (xyz.min(axis=0)+xyz.max(axis=0))*.5
+    best = None
+    for right,up,forward in axes:
+        projected = np.stack(
+            (xyz @ np.asarray(right), xyz @ np.asarray(up)), axis=-1
+        )
+        triangles = projected[faces]
+        area = float(np.abs(
+            (triangles[:,1,0]-triangles[:,0,0]) *
+            (triangles[:,2,1]-triangles[:,0,1]) -
+            (triangles[:,1,1]-triangles[:,0,1]) *
+            (triangles[:,2,0]-triangles[:,0,0])
+        ).sum())
+        extents = projected.max(axis=0)-projected.min(axis=0)
+        # Prefer larger area. Ties pick XY, then XZ, then YZ consistently.
+        if best is None or area > best[0] + 1e-12:
+            best = (area,right,up,forward,extents)
+    assert best is not None
+    area,right,up,forward,extents = best
+    if area <= 1e-12:
+        raise RuntimeError("RSS_PREVIEW_NO_NONDEGENERATE_VIRTUAL_VIEW")
+    diagonal = float(np.linalg.norm(xyz.max(axis=0)-xyz.min(axis=0)))
+    distance = max(2.,diagonal*3.)
+    origin = center-np.asarray(forward)*distance
+    return {
+        "view_index":0,
+        "origin":tuple(float(x) for x in origin),
+        "right":right, "screen_up":up, "forward":forward,
+        "half_extent":max(float(extents.max())*.65,1e-3),
+        "resolution":resolution,
+        "source_camera_observed":False,
+        "selection_policy":"MAX_PROJECTED_CANONICAL_TRIANGLE_AREA_V1",
+    }
+
+
 def compile_rss_vnext_native_preview_package_v1(
     *, mesh: CanonicalMeshIR,
     rig: CanonicalRigIRV2,
@@ -305,5 +362,6 @@ def edit_rss_vnext_native_preview_controls_v1(
 __all__ = [
     "SCHEMA", "compile_rss_vnext_native_preview_package_v1",
     "reopen_rss_vnext_native_preview_package_v1",
+    "select_rss_vnext_native_preview_camera_v1",
     "edit_rss_vnext_native_preview_controls_v1",
 ]

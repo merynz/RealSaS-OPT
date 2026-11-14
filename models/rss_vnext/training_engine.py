@@ -337,7 +337,7 @@ class RSSvNextStructuralTrainer:
     verdicts never enter image tokens or scene forward.
     """
 
-    checkpoint_schema = "RealSaS.RSSvNext.StructuralTrainerCheckpoint.v1"
+    checkpoint_schema = "RealSaS.RSSvNext.StructuralTrainerCheckpoint.v2"
 
     def __init__(
         self,

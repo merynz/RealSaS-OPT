@@ -23,6 +23,7 @@ from torch import Tensor, nn
 import torch.nn.functional as F
 
 from compiler.realsas_compiler_core.hashing import content_sha256
+from .realsas_denoiser_architecture_v1 import validate_paired_denoiser_abi_v1
 
 
 STAGE_CANONICAL = "ARBITRARY_TWO_SCENES_TO_CANONICAL_POSE"
@@ -410,6 +411,10 @@ def cleanroom_diffusion_noise_microstep_v1(
             )
         ):
             raise ValueError("RSS_VNEXT_DIFFUSION_RGB_NORMAL_CAMERA_PAIRING_DRIFT")
+    validate_paired_denoiser_abi_v1(
+        denoiser, conditioning_width=conditioner.source_projection.out_features,
+        latent_row_attention=rowwise_attention, require_explicit_config=False,
+    )
     cond = conditioner(source_tokens,target_cameras,target_modalities)
     flat = rendered_target_rgb.reshape(b*v,3,h,w)
     with torch.no_grad():

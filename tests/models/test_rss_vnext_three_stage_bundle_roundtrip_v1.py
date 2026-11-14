@@ -39,7 +39,10 @@ class _MapConfig(dict):
 class UNet2DConditionModel(nn.Module):
     def __init__(self, config=None):
         super().__init__()
-        self.config = _MapConfig(config or {"in_channels": 4})
+        self.config = _MapConfig(config or {
+            "in_channels": 4, "out_channels": 4,
+            "cross_attention_dim": 32,
+        })
         self.conv = nn.Conv2d(4, 4, 1)
         self.peft_config = {}
 

@@ -231,3 +231,107 @@ def test_original_camera_pixels_cannot_be_duplicate_or_one_sided():
         construct_original_observed_ray_samples_v1(
             replace(source,source_pixel_indices=one_sided),
         )
+
+
+def _real_stage3_source_case():
+    # Contract-level raster replay with a synthetic witness only.
+    # It exercises the real first-hit differentiable mesh renderer and H(x)
+    # colors; it is NOT a production FlexiCubes extraction quality test.
+    from torch import nn
+    from models.rss_vnext.flexicubes_surface_evidence import (
+        RSSvNextFlexiCubesSurfaceEvidence,
+    )
+    from models.rss_vnext.semantic_geometry_prior import (
+        RSSvNextSemanticLayerSpec,
+    )
+    net,batch,receipt,signed=source_case(STAGE_3)
+    roles=net.cfg.semantic_role_schema().roles
+    k=len(roles)
+    count=6*8*8
+    target=replace(
+        batch.source_3d_render_target,
+        rgb_white=torch.rand((1,count,3)),
+        alpha=torch.ones((1,count,1)),
+        role_indices=torch.zeros((1,count),dtype=torch.long),
+        qualified_rgb_mask=torch.ones((1,count),dtype=torch.bool),
+        qualified_mask_mask=torch.ones((1,count),dtype=torch.bool),
+        qualified_role_mask=torch.ones((1,count),dtype=torch.bool),
+    )
+    batch=replace(
+        batch,source_3d_render_target=target,
+        stage3_flexicubes_extractor=object(),
+        stage3_semantic_layer=RSSvNextSemanticLayerSpec(
+            "without_secondary",roles[1:],
+        ),
+        stage3_camera_features=batch.conditioning_cameras.clone(),
+        stage3_hw=(8,8),
+        stage3_target_normal=torch.zeros((1,count,3)),
+        stage3_target_depth=torch.ones((1,count,1)),
+        stage3_normal_mask=torch.ones((1,count),dtype=torch.bool),
+        stage3_depth_mask=torch.ones((1,count),dtype=torch.bool),
+    )
+    receipt.update({
+        "target_rgb_sha256":_digest(target.rgb_white),
+        "target_alpha_sha256":_digest(target.alpha),
+        "target_role_sha256":_digest(target.role_indices),
+        "target_rgb_mask_sha256":_digest(target.qualified_rgb_mask),
+        "target_alpha_mask_sha256":_digest(target.qualified_mask_mask),
+        "target_role_mask_sha256":_digest(target.qualified_role_mask),
+        "independently_qualified_closed_signed_source":True,
+        "stage3_source_camera_sha256":_digest(batch.stage3_camera_features),
+        "stage3_normal_target_sha256":_digest(batch.stage3_target_normal),
+        "stage3_depth_target_sha256":_digest(batch.stage3_target_depth),
+        "stage3_normal_mask_sha256":_digest(batch.stage3_normal_mask),
+        "stage3_depth_mask_sha256":_digest(batch.stage3_depth_mask),
+        "stage3_render_height":8,"stage3_render_width":8,
+        "stage3_world_normal_convention":"SOURCE_GEOMETRIC_NORMAL_WORLD_XYZ",
+        "stage3_metric_depth_convention":"SOURCE_CAMERA_FORWARD_FIRST_HIT_WORLD_UNITS",
+        "stage3_visibility_convention":"SOURCE_3D_ZBUFFER_VISIBLE_ONLY",
+        "stage3_semantic_role_schema_id":net.cfg.semantic_role_schema_id,
+        "stage3_layer_keep_roles":list(roles[1:]),
+    })
+    class SyntheticWitnessBridge(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.call_layers=[]
+        def forward(self,scene_triplanes,*,extractor,role_head,schema,layer,field_policy):
+            assert field_policy=="SIGNED_HYPOTHESIS_ONLY"
+            assert schema.roles==roles
+            self.call_layers.append(layer.name)
+            xyz=torch.tensor(
+                [[[-.35,-.35,0.],[.35,-.35,0.],[0.,.35,0.]]],
+                requires_grad=True,device=scene_triplanes.device,
+            )
+            return RSSvNextFlexiCubesSurfaceEvidence(
+                xyz=xyz,faces=torch.tensor([[0,1,2]],dtype=torch.long),
+                local_features=torch.zeros((1,3,4)),
+                presentation_role_logits=torch.zeros((1,3,k)),
+                regularizer=xyz.square().mean(),
+                sample_grid_xyz=torch.zeros((1,8,3)),
+                signed_field_grid=torch.tensor([[-1.,1.,-1.,1.,-1.,1.,-1.,1.]]),
+                cube_parameters=torch.zeros((1,21)),
+                source_policy=field_policy,
+                layer_name=layer.name,
+            )
+    bridge=SyntheticWitnessBridge()
+    net.fc_surface_bridge=bridge
+    return net,batch,receipt,signed,bridge
+
+
+def test_stage3_preserves_two_real_views_using_full_role_mesh_raster_not_nerf():
+    from unittest.mock import patch
+    net,batch,receipt,signed,bridge=_real_stage3_source_case()
+    engine=make_trainer(net,receipt,signed)
+    with patch(
+        "models.rss_vnext.realsas_slrm_training_driver_v1.render_realsas_joint_from_shared_scene_v1",
+        side_effect=AssertionError("Stage3 source must not use NeRF"),
+    ):
+        outputs=engine.objective(batch)
+    assert bridge.call_layers==[
+        "without_secondary","original_source_all_visible_roles",
+    ]
+    assert torch.isfinite(outputs["total"])
+    assert float(outputs["observed_source_rgb_mse"])>0
+    assert float(outputs["observed_source_alpha_mse"])>0
+    outputs["total"].backward()
+    assert any(p.grad is not None and p.grad.abs().sum()>0 for p in net.graphics.parameters())

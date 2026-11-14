@@ -228,3 +228,28 @@ def test_token_handoff_checkpoint_pins_architecture_codec_registry_and_source(tm
     )
     with pytest.raises(ValueError,match="RESUME_POLICY_DRIFT"):
         shifted.load_checkpoint(target)
+
+
+
+def test_axis_null_skin_embedding_actually_changes_pre_joint_conditioning():
+    model,batch,_=_case()
+    with torch.no_grad():
+        mesh=model.build_mesh_candidate(
+            batch.scene,batch.topology_teacher_tokens[0],
+            source_authority="TEACHER_FORCED_TRAINING_ONLY",
+        )
+        memory=model._control_memory(
+            batch.scene,batch.structural_memory,mesh,
+        )
+        joints=torch.where(
+            batch.axis_teacher_sequence.kind_ids[0]==int(RigTokenKindV6.JOINT)
+        )[0]
+        original=model.axis(memory,batch.axis_teacher_sequence)[
+            "hidden"][:,joints-1].clone()
+        # skin_code_ids=-1 for all BOS/JOINT prefixes; _shift(-1)=0.
+        # Changing row 0 changes hidden states *before* the first SKIN_CODE.
+        row=model.axis.skin_embedding.weight[0]
+        row.add_(torch.linspace(-2.,2.,row.numel(),device=row.device))
+        changed=model.axis(memory,batch.axis_teacher_sequence)[
+            "hidden"][:,joints-1]
+    assert not torch.allclose(original,changed,atol=1e-5)

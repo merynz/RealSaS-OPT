@@ -446,3 +446,65 @@ def test_eight_way_preview_forged_camera_is_rejected_even_when_entry_rehashed(
     tampered.write_bytes(_entry_bytes(entries))
     with pytest.raises(RuntimeError,match="EIGHT_WAY_CAMERA_POLICY_DRIFT"):
         reopen_rss_vnext_native_preview_package_v1(tampered)
+
+
+def test_native_semantic_candidate_pass_filters_2d_faces_without_recoloring_source(tmp_path):
+    """The real active Graphics->UV->.rss path must carry the Semantic head
+    into native pixel selection; default image preserves full appearance."""
+    from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
+        reopen_rss_vnext_uv_texture_atlas_v1,
+    )
+    archive,manifest,mesh,rig,skin,frames=_compiled_preview_fixture(tmp_path)
+    assert manifest["semantic_role_sublayer_model_only"]=="1"
+    assert manifest["semantic_role_sublayer_source_qualified"]=="0"
+    raw=read_rss_v2(archive)
+    assert raw["texture.bin"][:8]==b"RSUVT002"
+    exe=_build_player(tmp_path)
+    original,_=_render(exe,archive,tmp_path,0,source_view=-1)
+    assert (original[...,3]>0).any()
+    # No source truth assertion depends on model role; it only selects an
+    # optional candidate sublayer. On a single-face example, at least three
+    # of the four roles are absent, so the corresponding native pass is empty.
+    visible=[]
+    for role in range(4):
+        output=tmp_path/f"semantic_role_{role}.rgba"
+        cmd=[
+            str(exe),"--rss",str(archive),"0","0","-1",
+            str(output),f"--role={role}",
+        ]
+        got=subprocess.run(cmd,capture_output=True,text=True)
+        assert got.returncode==0,got.stderr
+        assert "semantic_role_is_source_truth=0" in got.stdout
+        assert f"presentation_role_filter={role}" in got.stdout
+        rgba=np.frombuffer(output.read_bytes(),dtype=np.uint8).reshape(96,96,4)
+        visible.append(bool((rgba[...,3]>0).any()))
+    assert not all(visible)
+    assert sum(visible)<=len(mesh.faces)
+    assert manifest["product_revision_minted"]=="0"
+    reopened=reopen_rss_vnext_native_preview_package_v1(archive)
+    assert reopened["mesh"].mesh_lineage_hash==mesh.mesh_lineage_hash
+    assert reopened["product_revision_minted"] is False
+
+
+def test_native_preview_role_only_does_not_promote_false_source_ownership(tmp_path):
+    archive,manifest,_,_,_,_=_compiled_preview_fixture(tmp_path)
+    raw=read_rss_v2(archive)
+    forged=OrderedDict(raw)
+    lines=forged["manifest.txt"].decode().splitlines()
+    forged["manifest.txt"]=(
+        "\n".join(
+            "semantic_role_sublayer_source_qualified=1"
+            if line.startswith("semantic_role_sublayer_source_qualified=")
+            else line
+            for line in lines
+        )+"\n"
+    ).encode()
+    tampered=tmp_path/"forged_role_authority.rss"
+    tampered.write_bytes(_entry_bytes(forged))
+    exe=_build_player(tmp_path)
+    output=tmp_path/"must_not_be_drawn.rgba"
+    got=subprocess.run([
+        str(exe),"--rss",str(tampered),"0","0","-1",str(output),
+    ],capture_output=True,text=True)
+    assert got.returncode!=0
+    assert "SEMANTIC_SUBLAYER_FALSE_AUTHORITY" in got.stderr

@@ -24,6 +24,8 @@ from .realsas_cleanroom_diffusion_training_v1 import (
     RowWiseRGBNormalViewAttentionV1,
 )
 
+from .realsas_denoiser_architecture_v1 import validate_paired_denoiser_abi_v1
+
 SCHEMA = "RealSaS.RSSvNext.PairedDiffusionStageCheckpoint.v1"
 _MAX_CHECKPOINT_BYTES = 10 * 1024 * 1024 * 1024
 _MAX_IMAGE_PIXELS = 1024 * 1024
@@ -80,6 +82,10 @@ class RSSvNextPinnedDiffusionStageV1:
             raise ValueError("RSS_VNEXT_GENERATOR_VAE_SCALE_INVALID")
         if getattr(scheduler.config, "prediction_type", None) != "epsilon":
             raise ValueError("RSS_VNEXT_GENERATOR_EPSILON_SCHEDULER_REQUIRED")
+        validate_paired_denoiser_abi_v1(
+            denoiser, conditioning_width=conditioner.source_projection.out_features,
+            latent_row_attention=rowwise_attention, require_explicit_config=False,
+        )
         self.stage = stage
         self.denoiser = denoiser
         self.vae = vae

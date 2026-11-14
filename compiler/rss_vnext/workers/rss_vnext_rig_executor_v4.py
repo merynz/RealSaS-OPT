@@ -154,6 +154,22 @@ def execute_rss_vnext_rig_capability_v4(
         required=SCENE_REQUIRED, allowed=SCENE_REQUIRED | MESH_KEYS | AXIS_MIRA_KEYS | RAW_GRAPHICS_KEYS,
     )
     measured = _validate_candidate(scene, receipt)
+    raw_anchor = receipt.get("raw_model_socket_face_candidate")
+    if raw_anchor is not None:
+        from .rss_vnext_raw_anchor_face_evidence_v1 import (
+            validate_raw_neural_socket_faces_v1,
+        )
+        socket_face_replay = validate_raw_neural_socket_faces_v1(
+            raw_anchor, scene=scene, construction_receipt=receipt,
+        )
+    else:
+        # Older test/research receipts remain readable, but MUST NOT claim
+        # any learned socket-face evidence or product attachment authority.
+        socket_face_replay = {
+            "state": "NO_MODEL_SOCKET_FACE_EVIDENCE",
+            "candidate_count": 0, "abstain_count": 0,
+            "attachment_qualified": False,
+        }
     controls = _validate_raw_axis_mira(scene, receipt, measured)
     if (
         measured["mesh_state"] != "UNQUALIFIED_MESH_CANDIDATE"
@@ -242,6 +258,7 @@ def execute_rss_vnext_rig_capability_v4(
         "canonical_rig_lineage_hash": rig.rig_lineage_hash,
         "skin_code_proposal_hash": codes.proposal_lineage_hash,
         "axis_event_count": controls["control_event_count"],
+        "model_socket_face_replay": socket_face_replay,
         "source_camera_observed": False,
         "source_3d_joint_teacher_claimed": False,
         "product_revision_minted": False,
@@ -270,6 +287,9 @@ def execute_rss_vnext_rig_capability_v4(
             "control_count": len(rig.controls),
             "constraint_count": len(rig.constraints),
             "attachment_anchor_count": len(rig.attachment_anchors),
+            "neural_socket_face_candidate_count": socket_face_replay["candidate_count"],
+            "neural_socket_face_abstain_count": socket_face_replay["abstain_count"],
+            "neural_socket_face_attachment_qualified": False,
             "same_unified_checkpoint": True,
             "original_camera_observed": False,
             "source_3d_joint_teacher_claimed": False,

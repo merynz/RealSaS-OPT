@@ -28,6 +28,7 @@ from models.mira.skin_fsq_codec_v6 import MIRASkinFSQCodecV6, MIRASkinFSQCodecCo
 from models.tessa.v2.generation_v2 import TESSAGrammarStateV2
 from .animation_ready_mesh import RSSvNextAnimationReadyMesh, RSSvNextStructuralMeshCandidate
 from .tessa_incremental_decode_v1 import decode_next_token_v1
+from .attachment_face_correspondence_v1 import RSSvNextSocketFaceCorrespondenceHeadV1
 from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefinementConfig
 from .semantic_structure import RSSvNextGenericRegionStructure
 from .early_semantic_field import RSSvNextEarlySemanticField
@@ -459,6 +460,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         )
         self.control_norm = nn.LayerNorm(cfg.tessa.d_model)
         self.axis = AXISRigProgramModelV6(cfg.axis_config())
+        self.anchor_face_correspondence = RSSvNextSocketFaceCorrespondenceHeadV1(
+            field_width=h, axis_width=cfg.control_hidden_dim,
+            region_slots=cfg.region_slots, hidden_width=cfg.relation_width,
+        )
         self.mira = RSSvNextSkinCoupler(cfg)
         self.mesh_bridge = RSSvNextAnimationReadyMesh(self.iris, cfg.tessa)
         # FlexiCubes is a DIFFERENTIABLE SURFACE WITNESS for the structural
@@ -822,10 +827,16 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 source_authority="TEACHER_FORCED_TRAINING_ONLY",
             )
 
-        control_logits = skin_weights = joint_mask = None
+        control_logits = skin_weights = joint_mask = anchor_face_candidate = None
         if rig_sequence is not None:
             controls = self.axis(self._control_memory(state, structural_memory, mesh), rig_sequence)
             control_logits = controls
+            if mesh is not None:
+                anchor_face_candidate = self.anchor_face_correspondence(
+                    mesh=mesh, axis_hidden=controls["hidden"],
+                    axis_sequence=rig_sequence,
+                    region_relation_logits=state.region_relation_logits,
+                )
             kinds = rig_sequence.kind_ids
             if bool((kinds == int(RigTokenKindV6.SKIN_CODE)).any()):
                 feat = state.local_features if mesh is None else mesh.local_features
@@ -856,6 +867,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             skin_joint_valid_mask=joint_mask,
             mesh_candidate=mesh,
             dynamic_mesh_candidate=dynamic,
+            anchor_face_candidate=anchor_face_candidate,
             flexicubes_surface_evidence=surface_witness,
         )
 
@@ -1083,6 +1095,13 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 events, device=memory.device,
             )
             control_out = self.axis(memory, seq)
+            # Addresses are selected by the same trained network, never a
+            # Compiler nearest-face heuristic. NO_FACE remains a valid result.
+            result["anchor_face_candidate"] = self.anchor_face_correspondence(
+                mesh=mesh, axis_hidden=control_out["hidden"],
+                axis_sequence=seq,
+                region_relation_logits=out.state.region_relation_logits,
+            )
             if bool((seq.kind_ids == int(RigTokenKindV6.SKIN_CODE)).any()):
                 weights, joint_valid, joints = self.mira(
                     mesh.local_features, mesh.rest_vertices_iris,

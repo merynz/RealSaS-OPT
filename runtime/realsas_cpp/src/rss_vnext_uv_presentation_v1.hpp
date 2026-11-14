@@ -82,15 +82,26 @@ struct Texture {
     std::vector<std::uint8_t> inferred_mask; // [H,W]
     std::vector<std::uint8_t> conflict; // [H,W] (never merged silently)
     std::vector<std::uint16_t> inferred_log_uncertainty_half;
+    // Version-2 optional *predicted* 2D presentation strata, one K-way
+    // distribution per canonical indexed triangle. These are not original
+    // source roles, contact, alpha or draw-order authority.
+    std::uint32_t role_count{};
+    std::string role_schema_digest;
+    std::vector<float> face_role_probability;
+    std::vector<std::uint8_t> face_role_candidate; // 255 = abstain
 };
 
 inline Texture parse_texture(const std::vector<std::uint8_t>& blob) {
-    static const char magic[8]={'R','S','U','V','T','0','0','1'};
+    static const char legacy[8]={'R','S','U','V','T','0','0','1'};
+    static const char semantic[8]={'R','S','U','V','T','0','0','2'};
+    const bool semantic_roles=blob.size()>=28 &&
+        std::memcmp(blob.data(),semantic,8)==0;
     if(blob.size()<28||blob.size()>128u*1024u*1024u||
-       std::memcmp(blob.data(),magic,8)!=0)
+       (!semantic_roles && std::memcmp(blob.data(),legacy,8)!=0))
         throw std::runtime_error("RSS_UV_NATIVE_MAGIC_OR_SIZE");
     Reader r{blob,8};
-    if(r.u32()!=1)throw std::runtime_error("RSS_UV_NATIVE_VERSION");
+    if(r.u32()!=(semantic_roles?2u:1u))
+        throw std::runtime_error("RSS_UV_NATIVE_VERSION");
     Texture t;
     t.width=r.u32();t.height=r.u32();t.faces=r.u32();
     if(r.u32()!=3 || !t.width || !t.height ||
@@ -143,6 +154,38 @@ inline Texture parse_texture(const std::vector<std::uint8_t>& blob) {
         if(t.inferred_mask[i]==0)for(int channel=0;channel<4;++channel)
             if(t.inferred_rgba[4*i+channel]!=0)
                 throw std::runtime_error("RSS_UV_NATIVE_UNKNOWN_INFERRED_COLOR_FORGED");
+    }
+    if(semantic_roles) {
+        t.role_count=r.u32();
+        if(t.role_count<2||t.role_count>16)
+            throw std::runtime_error("RSS_UV_NATIVE_SEMANTIC_ROLE_COUNT");
+        t.role_schema_digest=r.digest();
+        t.face_role_probability.resize(
+            static_cast<std::size_t>(t.faces)*t.role_count
+        );
+        for(auto& probability:t.face_role_probability){
+            probability=r.f32();
+            if(!std::isfinite(probability)||probability<0.f||probability>1.f)
+                throw std::runtime_error("RSS_UV_NATIVE_SEMANTIC_PROBABILITY");
+        }
+        t.face_role_candidate=r.bytes(t.faces);
+        for(std::size_t f=0;f<t.faces;++f){
+            double sum=0.,best=-1.,second=-1.;
+            std::uint8_t winner=255u;
+            for(std::uint32_t k=0;k<t.role_count;++k){
+                const double prob=t.face_role_probability[f*t.role_count+k];
+                sum+=prob;
+                if(prob>best){second=best;best=prob;
+                              winner=static_cast<std::uint8_t>(k);}
+                else if(prob>second)second=prob;
+            }
+            const auto expected=(
+                best>=.5 && best-second>=.1
+            )?winner:255u;
+            if(std::abs(sum-1.)>1e-6||
+               t.face_role_candidate[f]!=expected)
+                throw std::runtime_error("RSS_UV_NATIVE_SEMANTIC_CHOICE_DRIFT");
+        }
     }
     if(r.pos!=blob.size())
         throw std::runtime_error("RSS_UV_NATIVE_TRAILING");
@@ -264,7 +307,8 @@ inline PixelImage render(const graphics_v1::State& graphics,const Texture& textu
                          const std::vector<std::array<std::uint32_t,3>>& faces,
                          const std::vector<Projected>& posed_vertices,
                          std::uint32_t width,std::uint32_t height,
-                         std::uint32_t view,int original_view_hint){
+                         std::uint32_t view,int original_view_hint,
+                         int presentation_role_filter=-1){
     if(
         texture.mesh_hash!=graphics.canonical_mesh_binding_hash
         ||texture.faces!=faces.size()
@@ -273,10 +317,22 @@ inline PixelImage render(const graphics_v1::State& graphics,const Texture& textu
         ||width<1||height<1||width>2048||height>2048
         ||posed_vertices.empty()||posed_vertices.size()>65536
     )throw std::runtime_error("RSS_UV_NATIVE_GRAPHICS_MESH_POSE_DOMAIN");
+    if(presentation_role_filter < -1
+       || (presentation_role_filter >= 0
+           && (texture.role_count==0 ||
+               presentation_role_filter>=static_cast<int>(texture.role_count) ||
+               texture.face_role_candidate.size()!=faces.size())))
+        throw std::runtime_error("RSS_UV_NATIVE_SEMANTIC_ROLE_FILTER_DOMAIN");
     struct Layer {std::uint32_t face{};double z{};Color color;};
     const std::size_t pixels=static_cast<std::size_t>(width)*height;
     std::vector<std::vector<Layer>> layers(pixels);
     for(std::uint32_t f=0;f<faces.size();++f){
+        // Explicit request for an inferred 2D semantic stratum. Default
+        // full-puppet rendering NEVER suppresses a face due to an untrained
+        // or uncertain role. This mask is a representation choice, NOT
+        // independently witnessed source drawable/occlusion authority.
+        if(presentation_role_filter>=0 &&
+           texture.face_role_candidate[f]!=presentation_role_filter)continue;
         if(!graphics_v1::face_visible(graphics,view,f))continue;
         const auto ids=faces[f];
         if(ids[0]>=posed_vertices.size()||ids[1]>=posed_vertices.size()||

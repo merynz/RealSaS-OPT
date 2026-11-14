@@ -47,8 +47,17 @@ def encode_native_rss_vnext_uv_v1(
 
     width, height = receipt["atlas_size"]
     faces = receipt["face_count"]
-    output = bytearray(MAGIC)
-    output.extend(struct.pack("<IIIII", VERSION, width, height, faces, 3))
+    has_roles = (
+        receipt.get("semantic_role_sublayer_is_model_candidate_not_source_truth")
+        is True
+    )
+    # Preserve byte compatibility for older CAA-free candidate atlases.
+    # A V2 appendix is carried ONLY when actual same-H semantic evidence was
+    # present, replayed and explicitly retained in the atlas CAS.
+    output = bytearray(b"RSUVT002" if has_roles else MAGIC)
+    output.extend(struct.pack(
+        "<IIIII", 2 if has_roles else VERSION, width, height, faces, 3,
+    ))
     output.extend(_text(canonical_mesh_lineage_hash))
     output.extend(_text(sha256(uv_atlas_cas).hexdigest()))
     output.extend(_text(
@@ -69,6 +78,24 @@ def encode_native_rss_vnext_uv_v1(
     for key, dtype in raw_fields:
         field = np.ascontiguousarray(arrays[key], dtype=np.dtype(dtype))
         output.extend(field.tobytes(order="C"))
+    if has_roles:
+        role_probs = np.ascontiguousarray(
+            arrays["face_presentation_role_probabilities_f32"], dtype="<f4",
+        )
+        chosen = np.ascontiguousarray(
+            arrays["face_presentation_role_primary_u8"], dtype=np.uint8,
+        )
+        if (
+            role_probs.shape != (faces, receipt["semantic_role_count"])
+            or chosen.shape != (faces,)
+        ):
+            raise RuntimeError("RSS_NATIVE_UV_SEMANTIC_FACE_ADDRESS_DRIFT")
+        output.extend(struct.pack("<I", receipt["semantic_role_count"]))
+        output.extend(_text(sha256(
+            receipt["semantic_role_schema_id"].encode("ascii"),
+        ).hexdigest()))
+        output.extend(role_probs.tobytes(order="C"))
+        output.extend(chosen.tobytes(order="C"))
     if not len(output) <= MAX_NATIVE_BYTES:
         raise RuntimeError("RSS_NATIVE_UV_TRANSPORT_RESOURCE_BUDGET")
     return bytes(output)

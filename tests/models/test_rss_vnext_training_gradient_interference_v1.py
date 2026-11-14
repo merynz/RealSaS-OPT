@@ -191,3 +191,39 @@ def test_sampler_policy_changes_cannot_fake_complete_layer_coverage():
             named=[("iris.scene.large",p),("iris.scene.second",q)],
             max_params=5,max_elements=128,
         )
+
+
+
+def test_two_source_qualified_3d_objectives_share_nonzero_IRIS_scene_gradient():
+    # Unlike a source-patch classifier, source 3D role/mesh objectives must
+    # both backpropagate through H(x). These are synthetic/diagnostic source
+    # teachers only; they make no learned geometry quality claim.
+    from tests.models.test_rss_vnext_early_semantics import _qualified_3d_role_case
+    net, registry, batch = _qualified_3d_role_case()
+    topology_batch = make_sample(net)
+    batch.topology_teacher_tokens = topology_batch.topology_teacher_tokens
+    batch.topology_valid_mask = topology_batch.topology_valid_mask
+    trainer = RSSvNextStructuralTrainer(
+        net, torch.optim.AdamW(net.parameters(), lr=1.e-3),
+        dataset_manifest_sha256="3"*64,
+        trusted_surface_role_registry=registry,
+        weights=RSSvNextTrainingWeights(
+            topology=1., surface_roles=1.,
+            motion_preference=0., source_semantics=0.,
+            flexicubes_surface=0.,
+        ),
+        gradient_court_policy=RSSvNextGradientCourtPolicyV1(
+            every_n_steps=1, max_parameters_per_owner=12,
+            max_elements_per_owner=65536,
+        ),
+    )
+    report=trainer.train_step(batch).gradient_interference_report
+    assert report is not None
+    scene=report["owners"]["SHARED_IRIS_SCENE"]
+    assert set(report["loss_families"])=={"topology","surface_roles"}
+    assert scene["per_family_gradient_norms"]["topology"]>0.
+    assert scene["per_family_gradient_norms"]["surface_roles"]>0.
+    assert scene["pairwise_defined_count"]==1
+    pair=scene["pairwise"][0]
+    assert pair["cosine"] is not None and -1. <= pair["cosine"] <= 1.
+    assert scene["cancellation_ratio"] is not None

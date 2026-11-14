@@ -319,7 +319,12 @@ def source_surface_tensor_sha256(value: Tensor) -> str:
     header = json.dumps({
         "dtype": str(cpu.dtype), "shape": list(cpu.shape),
     }, sort_keys=True, separators=(",", ":")).encode("utf8")
-    return hashlib.sha256(header + bytes([0]) + cpu.numpy().tobytes()).hexdigest()
+    # NumPy does not expose torch.bfloat16, but source receipts need
+    # bitwise-stable BF16 hashes on A100 without a float32 cast (which
+    # changes teacher authority). A flattened byte view preserves the
+    # original dtype/shape in header and exact storage bits in payload.
+    raw = cpu.reshape(-1).view(torch.uint8).numpy().tobytes()
+    return hashlib.sha256(header + bytes([0]) + raw).hexdigest()
 
 
 from .training_optimizer_ownership_v1 import qualify_rss_vnext_optimizer_ownership_v1

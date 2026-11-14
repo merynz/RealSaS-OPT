@@ -71,6 +71,16 @@ from compiler.realsas_compiler_core.rig_constraint_schema_v1 import RIG_CONSTRAI
 class RSSvNextStructuralTrainingBatch:
     rgba: Tensor
     camera_features: Tensor
+    # Product reconstruction sees only original pixels + six generated
+    # RGB/normal/camera hypotheses. Training source camera is teacher-only.
+    product_generated_rgba: Tensor | None = None
+    product_generated_normals: Tensor | None = None
+    product_generated_cameras: Tensor | None = None
+    product_source_binding_sha256: str = ""
+    product_canonical_checkpoint_sha256: str = ""
+    product_multiview_checkpoint_sha256: str = ""
+    product_generation_checkpoint_sha256: str = ""
+    product_conditioning_admission_key: str = ""
     topology_teacher_tokens: Tensor | None = None
     topology_valid_mask: Tensor | None = None
     motion_candidate_tokens: Tensor | None = None
@@ -291,6 +301,8 @@ class RSSvNextStructuralTrainer:
         dataset_manifest_sha256: str,
         weights: RSSvNextTrainingWeights = RSSvNextTrainingWeights(),
         preference: RSSvNextTopologyPreferenceConfig = RSSvNextTopologyPreferenceConfig(),
+        scene_conditioning_policy: str = "RESEARCH_CALIBRATED_TWO_VIEW",
+        trusted_generated_conditioning_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_render_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_surface_role_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_semantic_patch_registry: Mapping[str, Mapping[str, object]] | None = None,
@@ -310,6 +322,21 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_NOT_HEX") from exc
         weights.validate()
         preference.validate()
+        if scene_conditioning_policy not in (
+            "RESEARCH_CALIBRATED_TWO_VIEW", "PRODUCT_GENERATED_SIX_VIEW",
+        ):
+            raise ValueError("RSS_VNEXT_TRAIN_SCENE_CONDITIONING_POLICY_INVALID")
+        if (
+            scene_conditioning_policy != "PRODUCT_GENERATED_SIX_VIEW"
+            and getattr(model, "construction_requires_generated_multiview", False)
+        ):
+            raise ValueError("RSS_VNEXT_TRAIN_PRODUCT_CHECKPOINT_REQUIRES_GENERATED_SCENE")
+        if (
+            scene_conditioning_policy == "PRODUCT_GENERATED_SIX_VIEW"
+            and model.cfg.constructed_total_views != 0
+        ):
+            raise ValueError("RSS_VNEXT_TRAIN_COMPETING_MULTIVIEW_CONSTRUCTORS")
+        self.scene_conditioning_policy = scene_conditioning_policy
         self.model = model
         self.optimizer = optimizer
         self.weights = weights
@@ -320,8 +347,27 @@ class RSSvNextStructuralTrainer:
         self.objective_policy_sha256 = hashlib.sha256(json.dumps({
             "weights": asdict(weights),
             "preference": asdict(preference),
+            "scene_conditioning_policy": self.scene_conditioning_policy,
         }, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf8")).hexdigest()
         self.dataset_manifest_sha256 = dataset_manifest_sha256.lower()
+        # This launcher-owned registry binds the *actual generated* scene
+        # conditioning, not independent source-rendered teacher imagery.
+        # A bare checkpoint SHA in an untrusted batch is never sufficient.
+        generated_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_generated_conditioning_registry or {}).items()
+        }
+        self.trusted_generated_conditioning_registry = MappingProxyType({
+            key: MappingProxyType(value)
+            for key, value in generated_snapshot.items()
+        })
+        self.generated_conditioning_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                generated_snapshot, sort_keys=True, separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf8")).hexdigest()
+            if generated_snapshot else ""
+        )
         # The trusted training launcher supplies this, not the data batch.
         registry_snapshot = {
             str(key): dict(value)
@@ -480,9 +526,91 @@ class RSSvNextStructuralTrainer:
         if not self.model.training:
             raise RuntimeError("RSS_VNEXT_TRAIN_REQUIRES_TRAIN_MODE")
 
-        state, aux, _ = self.model.encode_observations(
-            batch.rgba, batch.camera_features,
+        product_fields = (
+            batch.product_generated_rgba, batch.product_generated_normals,
+            batch.product_generated_cameras, batch.product_source_binding_sha256,
+            batch.product_canonical_checkpoint_sha256,
+            batch.product_multiview_checkpoint_sha256,
+            batch.product_generation_checkpoint_sha256,
+            batch.product_conditioning_admission_key,
         )
+        if self.scene_conditioning_policy == "PRODUCT_GENERATED_SIX_VIEW":
+            if (
+                any(x is None or x == "" for x in product_fields[3:])
+                or any(x is None for x in product_fields[:3])
+            ):
+                raise ValueError("RSS_VNEXT_TRAIN_PRODUCT_GENERATED_SCENE_REQUIRED")
+            generated, normals, cameras = product_fields[:3]
+            if (
+                not isinstance(generated, Tensor)
+                or not isinstance(normals, Tensor)
+                or not isinstance(cameras, Tensor)
+                or batch.rgba.ndim != 5 or batch.rgba.shape[:3] != (1, 2, 4)
+                or generated.ndim != 5 or generated.shape[:3] != (1, 6, 4)
+                or normals.shape != (1, 6, 3, *generated.shape[-2:])
+                or cameras.shape != (1, 6, 13)
+                or any(t.device != batch.rgba.device for t in (generated, normals, cameras))
+            ):
+                raise ValueError("RSS_VNEXT_TRAIN_PRODUCT_GENERATED_SCENE_SHAPE")
+            from .realsas_two_source_construction_v1 import (
+                target_canonical_and_six_cameras_v1,
+            )
+            # The generation stage uses precisely these six virtual cameras.
+            # Model inputs must never receive measured source-camera labels.
+            _, fixed = target_canonical_and_six_cameras_v1(
+                1, device=str(cameras.device), dtype=cameras.dtype,
+            )
+            if not torch.allclose(cameras, fixed, atol=1.e-6, rtol=0):
+                raise ValueError("RSS_VNEXT_TRAIN_GENERATOR_CAMERA_CONTRACT_DRIFT")
+            expected = {
+                "admission_status": "PINNED_GENERATOR_OUTPUT_NOT_SOURCE_TEACHER",
+                "dataset_manifest_sha256": self.dataset_manifest_sha256,
+                "source_qualification_key": batch.source_qualification_key,
+                "source_observed_rgba_sha256": source_surface_tensor_sha256(batch.rgba),
+                "original_camera_is_model_input": False,
+                "generated_rgba_sha256": source_surface_tensor_sha256(generated),
+                "generated_normals_sha256": source_surface_tensor_sha256(normals),
+                "generated_cameras_sha256": source_surface_tensor_sha256(cameras),
+                "source_binding_sha256": batch.product_source_binding_sha256,
+                "canonical_stage_checkpoint_sha256": batch.product_canonical_checkpoint_sha256,
+                "multiview_stage_checkpoint_sha256": batch.product_multiview_checkpoint_sha256,
+                "combined_generation_checkpoint_sha256": batch.product_generation_checkpoint_sha256,
+                "generated_views_are_observed_source": False,
+            }
+            if any(type(v) is not str or len(v) != 64 or any(
+                c not in "0123456789abcdef" for c in v
+            ) for v in (
+                batch.product_source_binding_sha256,
+                batch.product_canonical_checkpoint_sha256,
+                batch.product_multiview_checkpoint_sha256,
+                batch.product_generation_checkpoint_sha256,
+            )):
+                raise ValueError("RSS_VNEXT_TRAIN_GENERATOR_CHECKPOINT_SHA_DOMAIN")
+            receipt = self.trusted_generated_conditioning_registry.get(
+                batch.product_conditioning_admission_key
+            )
+            if receipt is None or any(receipt.get(k) != v for k,v in expected.items()):
+                raise ValueError("RSS_VNEXT_TRAIN_GENERATED_SCENE_RECEIPT_DRIFT")
+            state = self.model.encode_generated_multiview(
+                batch.rgba, None,
+                generated_rgba=generated, generated_cameras=cameras,
+                generated_normals=normals,
+                generation_checkpoint_sha256=batch.product_generation_checkpoint_sha256,
+                source_binding_sha256=batch.product_source_binding_sha256,
+            )
+            if (
+                state.camera_features is not None
+                or state.scene_conditioning_authority != "GENERATED_SIX_VIEW_SHARED_SCENE"
+                or state.source_camera_authority != "UNKNOWN_NO_ORIGINAL_CAMERA_PROJECTION"
+            ):
+                raise RuntimeError("RSS_VNEXT_TRAIN_GENERATED_SCENE_PRODUCT_AUTHORITY_DRIFT")
+            aux = None
+        else:
+            if any(x is not None for x in product_fields[:3]) or any(product_fields[3:]):
+                raise ValueError("RSS_VNEXT_TRAIN_GENERATED_SCENE_UNEXPECTED")
+            state, aux, _ = self.model.encode_observations(
+                batch.rgba, batch.camera_features,
+            )
         joint_loss = None
         joint_rays = 0
         joint_fields = (
@@ -1254,6 +1382,7 @@ class RSSvNextStructuralTrainer:
             "dataset_manifest_sha256": self.dataset_manifest_sha256,
             "objective_policy_sha256": self.objective_policy_sha256,
             "render_registry_sha256": self.render_registry_sha256,
+            "generated_conditioning_registry_sha256": self.generated_conditioning_registry_sha256,
             "surface_role_registry_sha256": self.surface_role_registry_sha256,
             "semantic_patch_registry_sha256": self.semantic_patch_registry_sha256,
             "region_pair_registry_sha256": self.region_pair_registry_sha256,
@@ -1295,6 +1424,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_OBJECTIVE_POLICY_DRIFT")
         if data.get("render_registry_sha256", "") != self.render_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_RENDER_REGISTRY_DRIFT")
+        if data.get("generated_conditioning_registry_sha256", "") != self.generated_conditioning_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_GENERATOR_REGISTRY_DRIFT")
         if data.get("surface_role_registry_sha256", "") != self.surface_role_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SURFACE_ROLE_REGISTRY_DRIFT")
         if data.get("semantic_patch_registry_sha256", "") != self.semantic_patch_registry_sha256:

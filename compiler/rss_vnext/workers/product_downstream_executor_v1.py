@@ -210,9 +210,16 @@ def _seal_binary_candidate_v1(
     body: bytes, *, role: str, kind: str, put_bytes: Callable,
 ) -> dict[str, Any]:
     from compiler.rss_vnext.workers.rss_vnext_source_rgb_projection_candidate_v1 import (
-        MAX_ARTIFACT_BYTES,
+        MAX_ARTIFACT_BYTES as MAX_RGB_CAS,
     )
-    if not body or len(body) > MAX_ARTIFACT_BYTES:
+    from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
+        MAX_ARTIFACT_BYTES as MAX_UV_CAS,
+    )
+    budget = (
+        MAX_UV_CAS if kind == "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
+        else MAX_RGB_CAS
+    )
+    if not body or len(body) > budget:
         raise RuntimeError("PRODUCT_GRAPHICS_SOURCE_RGB_CAS_BUDGET")
     ref = put_bytes(body)
     if (
@@ -284,6 +291,12 @@ def _replay_raw_source_graphics_proof_v1(
         and r.get("artifact_type") == receipt_type
     ]
     if not raws:
+        if any(
+            type(row) is dict and row.get("artifact_type")
+            == "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
+            for row in refs
+        ):
+            raise RuntimeError("PRODUCT_PROOF_ORPHAN_RAW_UV_TEXTURE_ATLAS")
         if any(
             type(row) is dict and row.get("artifact_type")
             == "RealSaS.RSSvNextSourceRGBImagePlaneCandidates"
@@ -383,12 +396,44 @@ def _replay_raw_source_graphics_proof_v1(
         or claimed_rgb_manifest.get("mesh_lineage_hash") != mesh.mesh_lineage_hash
     ):
         raise RuntimeError("PRODUCT_PROOF_RAW_SOURCE_RGB_PIXEL_FACE_REPLAY_MISMATCH")
+    from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
+        ARTIFACT_TYPE as UV_ATLAS_TYPE,
+        MAX_ARTIFACT_BYTES as MAX_UV_BYTES,
+        compile_rss_vnext_uv_texture_atlas_v1,
+        reopen_rss_vnext_uv_texture_atlas_v1,
+    )
+    uv_refs = [
+        row for row in request.get("input_artifacts") or ()
+        if type(row) is dict and row.get("artifact_type") == UV_ATLAS_TYPE
+    ]
+    if len(uv_refs) != 1 or uv_refs[0].get("schema_version") != "v1":
+        raise RuntimeError("PRODUCT_PROOF_RAW_UV_TEXTURE_ATLAS_CARDINALITY")
+    uv_bytes = read_rss_vnext_parent_cas_v1(
+        uv_refs[0], read_object, limit=MAX_UV_BYTES,
+    )
+    _, uv_claim = reopen_rss_vnext_uv_texture_atlas_v1(uv_bytes)
+    uv_expected, uv_receipt = compile_rss_vnext_uv_texture_atlas_v1(
+        source_rgb_candidates=expected_rgb, mesh=mesh,
+    )
+    if (
+        uv_bytes != uv_expected
+        or uv_claim != uv_receipt
+        or uv_claim["canonical_mesh_lineage_hash"] != mesh.mesh_lineage_hash
+        or uv_claim["original_rgb_candidate_sha256"] != sha256(raw_rgb).hexdigest()
+    ):
+        raise RuntimeError("PRODUCT_PROOF_RAW_UV_TEXTURE_ATLAS_SOURCE_REPLAY_MISMATCH")
     return {
         "original_two_image_source_binding_replayed": True,
         "original_alpha_static_mesh_qualification_recomputed": True,
         "original_rgb_source_pixel_face_candidates_recomputed": True,
         "original_rgb_image_plane_sample_count": expected_rgb_manifest["sample_count"],
         "original_rgb_image_plane_cas_sha256": sha256(raw_rgb).hexdigest(),
+        "mesh_uv_atlas_compiled_from_real_original_rgb": True,
+        "mesh_uv_texture_atlas_recomputed_independently": True,
+        "mesh_uv_texture_atlas_cas_sha256": sha256(uv_bytes).hexdigest(),
+        "mesh_uv_texture_atlas_size": uv_claim["atlas_size"],
+        "mesh_uv_texture_surface_owner_source_qualified": False,
+        "mesh_uv_draw_order_is_separately_compiled": True,
         "original_rgb_surface_owner_source_qualified": False,
         "same_checkpoint_typed_graphics_recomputed": True,
         "original_source_rgb_appearance_qualified": False,
@@ -497,9 +542,17 @@ def execute_graphics_capability_v1(
             native_receipt["receipt_hash"] = content_sha256(native_receipt)
     raw_source_rgb = None
     raw_source_rgb_summary = None
+    raw_texture_atlas = None
+    raw_texture_manifest = None
     if compiled.metadata.get("origin") == "RAW_TWO_IMAGE_UNIFIED_H_TYPED_GRAPHICS_CANDIDATES":
         raw_source_rgb, raw_source_rgb_summary = _raw_source_rgb_candidate_from_cas_v1(
             request, read_object, mesh,
+        )
+        from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
+            compile_rss_vnext_uv_texture_atlas_v1,
+        )
+        raw_texture_atlas, raw_texture_manifest = compile_rss_vnext_uv_texture_atlas_v1(
+            source_rgb_candidates=raw_source_rgb, mesh=mesh,
         )
     rendered = build_runtime_graphics_v1(compiled,face_count=len(mesh.faces))
     outputs = [
@@ -522,6 +575,13 @@ def execute_graphics_capability_v1(
             kind="RealSaS.RSSvNextSourceRGBImagePlaneCandidates",
             put_bytes=put_bytes,
         ))
+    if raw_texture_atlas is not None:
+        outputs.append(_seal_binary_candidate_v1(
+            raw_texture_atlas,
+            role="rss_canonical_mesh_uv_texture_atlas_candidate",
+            kind="RealSaS.RSSvNextMeshUVTextureAtlasCandidate",
+            put_bytes=put_bytes,
+        ))
     return {
         "capability_id":"product.graphics","status":"PASS",
         "outputs":outputs,"failure":None,
@@ -538,6 +598,20 @@ def execute_graphics_capability_v1(
                 if raw_source_rgb_summary is not None else 0
             ),
             "source_rgb_surface_ownership_qualified": False,
+            "mesh_uv_texture_atlas_candidate_present": raw_texture_atlas is not None,
+            "mesh_uv_texture_atlas_size": (
+                raw_texture_manifest["atlas_size"] if raw_texture_manifest is not None else None
+            ),
+            "mesh_uv_texels_per_original_view": (
+                raw_texture_manifest["source_view_color_texel_counts"]
+                if raw_texture_manifest is not None else [0, 0]
+            ),
+            "mesh_uv_source_conflict_texels": (
+                raw_texture_manifest["source_view_conflict_texel_count"]
+                if raw_texture_manifest is not None else 0
+            ),
+            "mesh_uv_texture_surface_ownership_qualified": False,
+            "graphics_draw_order_independent_of_uv_atlas": True,
             "graphics_source_kind":source_kind,
             "mechanics_intervention_court_hash": (
                 intervention["court_hash"] if intervention is not None else None

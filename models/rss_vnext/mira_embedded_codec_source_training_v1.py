@@ -98,6 +98,18 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or not trusted_source_skin_registry
         ):
             raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_CODEC_TRAINER_POLICY")
+        # A codec bootstrap optimizer must cover every trainable embedded
+        # codec parameter, and MUST NOT update IRIS/TESSA/AXIS or the
+        # untrained point-query decoder under an unrelated phase.
+        codec_ids={id(p) for p in model.mira.codec.parameters() if p.requires_grad}
+        optimizer_ids=[
+            id(p) for group in optimizer.param_groups for p in group["params"]
+        ]
+        if (
+            not codec_ids or len(optimizer_ids)!=len(set(optimizer_ids))
+            or set(optimizer_ids)!=codec_ids
+        ):
+            raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_CODEC_OPTIMIZER_SCOPE_DRIFT")
         self.model = model
         self.optimizer = optimizer
         self.dataset_manifest_sha256 = dataset_manifest_sha256

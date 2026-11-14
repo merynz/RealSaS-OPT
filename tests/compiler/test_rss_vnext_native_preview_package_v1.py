@@ -8,6 +8,7 @@ IK/FK/LBS solver and verified again on reopening, not handwritten animation.
 """
 
 from collections import OrderedDict
+from dataclasses import replace
 import json
 from pathlib import Path
 import subprocess
@@ -26,6 +27,9 @@ from compiler.realsas_compiler_core.canonical_skin_ir_v2 import (
 from compiler.realsas_compiler_core.graphics_reopen_v1 import (
     reopen_compiled_graphics_v1,
 )
+from compiler.realsas_compiler_core.graphics_runtime_v1 import (
+    RuntimeGraphicsV1, RuntimeGraphicsViewV1, runtime_graphics_hash_v1,
+)
 from compiler.realsas_compiler_core.runtime_package_v2 import (
     _entry_bytes, read_rss_v2,
 )
@@ -39,6 +43,7 @@ from compiler.rss_vnext.workers.rss_vnext_native_preview_package_v1 import (
     compile_rss_vnext_native_preview_package_v1,
     reopen_rss_vnext_native_preview_package_v1,
     edit_rss_vnext_native_preview_controls_v1,
+    prepare_rss_vnext_virtual_preview_graphics_v1,
 )
 from tests.compiler.test_rss_vnext_raw_graphics_consumer_v1 import (
     _full_parent_fixture,
@@ -144,6 +149,13 @@ def test_real_two_original_images_reach_editable_mechanics_rss_and_native_2d_pix
     assert manifest["admission"]=="DEVELOPER_PREVIEW_NOT_PRODUCT_REVISION"
     assert manifest["product_revision_minted"]=="0"
     assert manifest["source_rgb_surface_ownership_qualified"]=="0"
+    assert manifest["virtual_preview_draw_policy"] == (
+        "ALL_CANONICAL_FRAGMENTS_POSED_DEPTH_ONLY"
+    )
+    assert manifest["virtual_preview_camera_registered_to_graphics_view"] == "0"
+    assert manifest["texture_layer_draw_order_authority"] == (
+        "POSED_DEPTH_ONLY_FOR_UNREGISTERED_VIRTUAL_CAMERA"
+    )
     reopened = reopen_rss_vnext_native_preview_package_v1(archive)
     assert reopened["mesh"].mesh_lineage_hash==mesh.mesh_lineage_hash
     assert reopened["rig"].rig_lineage_hash==rig.rig_lineage_hash
@@ -162,6 +174,8 @@ def test_real_two_original_images_reach_editable_mechanics_rss_and_native_2d_pix
     assert np.count_nonzero(second[:,:,3])>20
     assert "source_candidate_pixels=" in receipt0
     assert "graphics_order_overrides=" in receipt1
+    assert "graphics_order_overrides=0" in receipt0
+    assert "graphics_order_overrides=0" in receipt1
     inferred,_=_render(exe,archive,tmp_path,0,source_view=-1)
     assert np.count_nonzero(inferred[:,:,3])>20
     assert not np.array_equal(first,inferred)
@@ -272,3 +286,46 @@ def test_actual_native_puppet_control_edit_preserves_mesh_texture_and_reopens(
                 ),),
             ),
         )
+
+
+
+def test_unregistered_virtual_camera_does_not_reuse_source_view_zero_visibility():
+    """A virtual axis must not hide predicted triangles behind view-0 masks."""
+    views = tuple(
+        RuntimeGraphicsViewV1(
+            view_index=i,
+            visible_fragment_indices=(0,) if i == 0 else (0, 1),
+            topological_fragment_order=(1, 0) if i == 0 else (0, 1),
+            order_edges=((1, 0),) if i == 0 else (),
+        ) for i in range(8)
+    )
+    metadata = {
+        "source_visibility_coverage_complete": False,
+        "pose_conditioned_order_execution": False,
+        "source_visibility_requires_independent_ray_receipt": True,
+    }
+    original = RuntimeGraphicsV1(
+        canonical_mesh_binding_hash="a" * 64,
+        compiled_graphics_binding_hash="b" * 64,
+        face_fragment_index=(0, 1),
+        fragment_ids=("front", "rear"),
+        fragment_support_band_pixels=(0, 0),
+        views=views, attachments=(),
+        runtime_graphics_hash="", metadata=metadata,
+    )
+    original = replace(
+        original, runtime_graphics_hash=runtime_graphics_hash_v1(original),
+    )
+    converted = prepare_rss_vnext_virtual_preview_graphics_v1(
+        original, canonical_mesh_hash="a" * 64, face_count=2,
+    )
+    assert converted.views[0].visible_fragment_indices == (0, 1)
+    assert converted.views[0].order_edges == ()
+    assert converted.views[0].topological_fragment_order == (0, 1)
+    assert converted.views[1:] == original.views[1:]
+    assert converted.compiled_graphics_binding_hash == original.compiled_graphics_binding_hash
+    assert converted.runtime_graphics_hash != original.runtime_graphics_hash
+    assert converted.metadata["virtual_camera_view_is_registered"] is False
+    assert converted.metadata["virtual_preview_source_view_visibility_reused"] is False
+    # Never promote an unregistered virtual angle into source visibility truth.
+    assert converted.metadata["source_visibility_coverage_complete"] is False

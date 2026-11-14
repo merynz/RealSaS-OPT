@@ -20,10 +20,16 @@ from tests.compiler.test_rss_vnext_raw_graphics_consumer_v1 import (
 )
 
 
-def _complete_product_preflight(tmp_path, *, interventions=True):
+def _complete_product_preflight(
+    tmp_path, *, interventions=True, preview_presentation_profile="SINGLE_CAMERA_2D",
+):
     cas, graphics_req, mechanics, skin = _full_parent_fixture(
         tmp_path, active_mechanics_courts=interventions,
     )
+    graphics_req["capability_metadata"] = {
+        **graphics_req.get("capability_metadata", {}),
+        "preview_presentation_profile": preview_presentation_profile,
+    }
     graphics = execute_graphics_capability_v1(
         graphics_req, read_object=cas.read_object, put_bytes=cas.put_bytes,
     )
@@ -299,3 +305,45 @@ def test_raw_proof_refuses_rehashed_fake_native_puppet_preview(
     ]
     with pytest.raises(RuntimeError,match="NATIVE_PUPPET_PREVIEW_REPLAY_MISMATCH"):
         _proof(cas, request)
+
+
+def test_optional_eight_yaw_product_graphics_and_independent_proof_replay(tmp_path):
+    cas, request, motion, graphics = _complete_product_preflight(
+        tmp_path, preview_presentation_profile="EIGHT_YAW_45",
+    )
+    assert graphics["diagnostics"]["native_preview_presentation_profile"] == "EIGHT_YAW_45"
+    preview = next(
+        row for row in request["input_artifacts"]
+        if row["artifact_type"] == "RealSaS.RSSvNextNativeInteractivePuppetPreview"
+    )
+    from compiler.realsas_compiler_core.runtime_package_v2 import read_rss_v2_bytes_v1
+    from compiler.rss_vnext.workers.rss_vnext_native_preview_package_v1 import (
+        SCHEMA_EIGHT,
+    )
+    entries=read_rss_v2_bytes_v1(cas.read_object(preview))
+    assert entries["pose.bin"][:8] == b"RSPOSE02"
+    assert f"schema={SCHEMA_EIGHT}".encode() in entries["manifest.txt"]
+    assert b"presentation_profile=EIGHT_YAW_45" in entries["manifest.txt"]
+    # Profile selection is not counterfeit source truth: the independent
+    # Proof CAS replay still fails closed on missing external witnesses.
+    result=_proof(cas,request)
+    assert result["status"]=="FAIL"
+    assert result["failure"]["code"]=="PRODUCT_PROOF_INDEPENDENT_WITNESSES_MISSING"
+    assert result["diagnostics"]["raw_original_source_graphics_replay"][
+        "native_interactive_preview_recomputed_independently"
+    ] is True
+    assert result["diagnostics"]["product_revision_minted"] is False
+
+
+def test_unknown_presentation_profile_is_rejected_before_compilation(tmp_path):
+    cas, request, mechanics, skin = _full_parent_fixture(
+        tmp_path, active_mechanics_courts=True,
+    )
+    request["capability_metadata"] = {
+        **request.get("capability_metadata", {}),
+        "preview_presentation_profile": "UNSUPPORTED_3D_OUTPUT",
+    }
+    with pytest.raises(RuntimeError,match="PREVIEW_PRESENTATION_PROFILE_INVALID"):
+        execute_graphics_capability_v1(
+            request,read_object=cas.read_object,put_bytes=cas.put_bytes,
+        )

@@ -465,7 +465,11 @@
         "raw_mesh_uv_texture_surface_ownership_qualified": false,
         "raw_mesh_uv_2d_draw_order_independent": true,
         "raw_mesh_uv_same_h_graphics_logits_used": true,
-        "raw_mesh_uv_inferred_color_not_source_observed": true
+        "raw_mesh_uv_inferred_color_not_source_observed": true,
+        "raw_native_interactive_preview_artifact_type": "RealSaS.RSSvNextNativeInteractivePuppetPreview",
+        "raw_native_interactive_preview_schema_version": "v1",
+        "raw_native_interactive_preview_release_authorized": false,
+        "raw_native_interactive_preview_virtual_camera": true
       }
     },
     "product.motion": {
@@ -550,7 +554,10 @@
         "raw_source_rgb_independent_pixel_replay_required": true,
         "input_raw_mesh_uv_texture_atlas_artifact_type": "RealSaS.RSSvNextMeshUVTextureAtlasCandidate",
         "input_raw_mesh_uv_texture_atlas_schema_version": "v1",
-        "raw_mesh_uv_texture_atlas_replay_required": true
+        "raw_mesh_uv_texture_atlas_replay_required": true,
+        "input_raw_native_preview_artifact_type": "RealSaS.RSSvNextNativeInteractivePuppetPreview",
+        "input_raw_native_preview_schema_version": "v1",
+        "raw_native_preview_independent_replay_required": true
       }
     }
   }

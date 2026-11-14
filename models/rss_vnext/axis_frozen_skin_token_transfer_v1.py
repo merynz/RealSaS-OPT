@@ -51,6 +51,25 @@ _ADMISSION = "QUALIFIED_NATIVE_SOURCE_FROZEN_AXIS_MIRA_SKIN_CODE_HANDOFF"
 _STAGE_TRAINABLE = ("axis.skin_code_head.",)
 
 
+def frozen_rss_vnext_axis_token_upstream_state_sha256_v1(
+    model: RSSvNextUnifiedCharacterModel,
+) -> str:
+    """One-time exact upstream weight+buffer identity, excludes trained head.
+
+    Check at stage admission, checkpoint save and resume. Expensive for large
+    A100 models by design, but never rehashes the full model every batch.
+    """
+    state=model.state_dict()
+    fields = {
+        name: source_surface_tensor_sha256(tensor)
+        for name,tensor in state.items()
+        if not name.startswith(_STAGE_TRAINABLE)
+    }
+    if not fields:
+        raise RuntimeError("RSS_VNEXT_STATIONARY_TOKEN_NO_FROZEN_SOURCE_STATE")
+    return _json_sha(fields)
+
+
 def _sha(v: object) -> bool:
     return type(v) is str and len(v) == 64 and all(
         c in "0123456789abcdef" for c in v
@@ -123,6 +142,14 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
         self.registry_sha256 = _json_sha(registry)
         self.config_sha256 = architecture_digest(model.cfg)
         self.codec_sha256 = frozen_mira_codec_state_sha256_v6(model)
+        self.frozen_state_sha256 = (
+            frozen_rss_vnext_axis_token_upstream_state_sha256_v1(model)
+        )
+        self._frozen_parameter_versions = tuple(
+            (name,param._version)
+            for name,param in model.named_parameters()
+            if not name.startswith(_STAGE_TRAINABLE)
+        )
         self.optimizer_ownership = self._assert_scope()
         self.step = 0
 
@@ -141,6 +168,16 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
             or self.model.mira.codec.training
         ):
             raise ValueError("RSS_VNEXT_STATIONARY_TOKEN_UPSTREAM_MUST_BE_FROZEN")
+        # PyTorch parameter version counters catch in-place mutations
+        # of frozen upstream modules during this stage without rehashing
+        # multi-GB tensors on EVERY optimizer step.
+        versions = tuple(
+            (name,param._version)
+            for name,param in self.model.named_parameters()
+            if not name.startswith(_STAGE_TRAINABLE)
+        )
+        if versions != self._frozen_parameter_versions:
+            raise RuntimeError("RSS_VNEXT_STATIONARY_TOKEN_UPSTREAM_PARAMETER_MUTATED")
         owner = qualify_rss_vnext_optimizer_ownership_v1(
             self.model, self.optimizer,
         )
@@ -231,6 +268,7 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
             or pre.get("source_qualification_key") != batch.source_qualification_key
             or pre.get("source_binding_sha256") != batch.source_binding_sha256
             or pre.get("upstream_frozen_checkpoint_sha256") != self.upstream_frozen_checkpoint_sha256
+            or pre.get("upstream_frozen_model_state_sha256") != self.frozen_state_sha256
             or pre.get("mira_codec_state_sha256") != self.codec_sha256
             or pre.get("scene_generator_binding_sha256") != state.generating_checkpoint_sha256
             or pre.get("mesh_teacher_tokens_sha256") != source_surface_tensor_sha256(batch.topology_teacher_tokens)
@@ -340,8 +378,16 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
         self.step+=1
         return result
 
+    def _assert_frozen_state_identity(self) -> None:
+        if (
+            frozen_rss_vnext_axis_token_upstream_state_sha256_v1(self.model)
+            != self.frozen_state_sha256
+        ):
+            raise RuntimeError("RSS_VNEXT_STATIONARY_TOKEN_UPSTREAM_STATE_DRIFT")
+
     def save_checkpoint(self, path: str | Path) -> None:
         self._assert_scope()
+        self._assert_frozen_state_identity()
         target=Path(path)
         target.parent.mkdir(parents=True,exist_ok=True)
         payload={
@@ -350,6 +396,7 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
             "registry_sha256":self.registry_sha256,
             "architecture_sha256":self.config_sha256,
             "frozen_upstream_checkpoint_sha256":self.upstream_frozen_checkpoint_sha256,
+            "frozen_upstream_actual_model_state_sha256":self.frozen_state_sha256,
             "frozen_codec_state_sha256":self.codec_sha256,
             "optimizer_ownership_sha256":self.optimizer_ownership.binding_sha256,
             "step":self.step,
@@ -369,6 +416,7 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
 
     def load_checkpoint(self, path: str | Path) -> None:
         self._assert_scope()
+        self._assert_frozen_state_identity()
         p=torch.load(Path(path),map_location="cpu",weights_only=True)
         if (
             p.get("schema")!=SCHEMA
@@ -376,6 +424,7 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
             or p.get("registry_sha256")!=self.registry_sha256
             or p.get("architecture_sha256")!=self.config_sha256
             or p.get("frozen_upstream_checkpoint_sha256")!=self.upstream_frozen_checkpoint_sha256
+            or p.get("frozen_upstream_actual_model_state_sha256")!=self.frozen_state_sha256
             or p.get("frozen_codec_state_sha256")!=self.codec_sha256
             or p.get("optimizer_ownership_sha256")!=self.optimizer_ownership.binding_sha256
             or type(p.get("step")) is not int or p["step"]<0
@@ -391,4 +440,5 @@ __all__=[
     "SCHEMA","RSSvNextStationarySkinTokenBatchV1",
     "RSSvNextStationarySkinTokenResultV1",
     "RSSvNextStationaryAXISSkinTokenTrainerV1",
+    "frozen_rss_vnext_axis_token_upstream_state_sha256_v1",
 ]

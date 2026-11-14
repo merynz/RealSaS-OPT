@@ -1017,11 +1017,18 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         ids = torch.tensor([[self.cfg.tessa.BOS]], device=rgba.device, dtype=torch.long)
         grammar = TESSAGrammarStateV2()
         failure = None
+        incremental = None
         try:
             for _ in range(limit - 1):
-                logits = self.tessa.decode_tokens(
-                    memory=out.structural_memory, input_ids=ids,
-                ).logits[0, -1]
+                # V3.1 exact rolling causal KV state shares the teacher-forced
+                # weights and semantics, avoiding O(prefix) full recomputation
+                # at every token. No token enters the cache twice.
+                logits_batch, incremental = self.tessa.decode_next_token_v1(
+                    memory=out.structural_memory,
+                    token=ids[:, -1:],
+                    cache=incremental,
+                )
+                logits = logits_batch[0]
                 allowed = grammar.allowed_token_mask(config=self.cfg.tessa, device=ids.device)
                 # Existing V2 grammar allows adjacent-coordinate start before
                 # the seed triangle; reject that path in this strict runner.

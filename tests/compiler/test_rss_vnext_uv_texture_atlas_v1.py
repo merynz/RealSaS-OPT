@@ -229,3 +229,112 @@ def test_semantic_cannot_be_unbound_from_graphics_scene_or_role_schema():
             presentation_role_vertex_logits=np.full((n,4),np.nan),
             presentation_role_schema_id="roles.v1",
         )
+
+
+def test_same_h_semantic_roles_change_face_sublayer_without_changing_rgb():
+    _, mesh, samples = _source_mesh_and_samples()
+    n = len(mesh.vertices)
+    graphics = np.zeros((n, 5), dtype=np.float32)
+    graphics[:, :3] = [2., -1., 0.25]
+    role0 = np.tile(
+        np.asarray([[9., -9., -9., -9.]], dtype=np.float32), (n, 1)
+    )
+    role2 = np.tile(
+        np.asarray([[-9., -9., 9., -9.]], dtype=np.float32), (n, 1)
+    )
+    kwargs = {
+        "source_rgb_candidates":samples,
+        "mesh":mesh,
+        "graphics_vertex_logits":graphics,
+        "graphics_scene_content_sha256":"a" * 64,
+        "presentation_role_schema_id":
+            "RSS.vNext.SemanticPresentationRoles.FourWayResearch.v1",
+    }
+    atlas0, meta0 = compile_rss_vnext_uv_texture_atlas_v1(
+        **kwargs, presentation_role_vertex_logits=role0,
+    )
+    atlas2, meta2 = compile_rss_vnext_uv_texture_atlas_v1(
+        **kwargs, presentation_role_vertex_logits=role2,
+    )
+    a, _ = reopen_rss_vnext_uv_texture_atlas_v1(atlas0)
+    b, _ = reopen_rss_vnext_uv_texture_atlas_v1(atlas2)
+    assert not np.array_equal(
+        a["face_presentation_role_primary_u8"],
+        b["face_presentation_role_primary_u8"],
+    )
+    assert a["face_presentation_role_primary_u8"].tolist() == [0]
+    assert b["face_presentation_role_primary_u8"].tolist() == [2]
+    assert not np.array_equal(
+        a["face_presentation_role_probabilities_f32"],
+        b["face_presentation_role_probabilities_f32"],
+    )
+    # Semantic controls candidate strata, NEVER source pixels, inferred RGB,
+    # atlas chart topology, alpha, appearance or source 3D ownership.
+    for field in (
+        "texture_rgba_u8", "texture_source_sample_mask_u8",
+        "source_view_conflict_u8", "neural_rgb_candidate_rgba_u8",
+        "neural_rgb_candidate_mask_u8", "face_vertex_uv_f32",
+    ):
+        assert np.array_equal(a[field], b[field]), field
+    assert meta0["semantic_role_sublayer_is_model_candidate_not_source_truth"]
+    assert meta2["source_3d_surface_ownership_verified"] is False
+    assert meta2["pose_conditioned_occlusion_qualified"] is False
+    assert meta2["product_revision_minted"] is False
+    assert atlas0 != atlas2
+    assert atlas0 == compile_rss_vnext_uv_texture_atlas_v1(
+        **kwargs, presentation_role_vertex_logits=role0,
+    )[0]
+
+
+def test_same_h_semantic_role_abstention_cannot_be_promoted_by_rehashed_cas():
+    _, mesh, samples = _source_mesh_and_samples()
+    n=len(mesh.vertices)
+    graphics=np.zeros((n, 5),dtype=np.float32)
+    uniform=np.zeros((n, 4),dtype=np.float32)
+    atlas, meta=compile_rss_vnext_uv_texture_atlas_v1(
+        source_rgb_candidates=samples, mesh=mesh,
+        graphics_vertex_logits=graphics,
+        graphics_scene_content_sha256="b"*64,
+        presentation_role_vertex_logits=uniform,
+        presentation_role_schema_id=
+            "RSS.vNext.SemanticPresentationRoles.FourWayResearch.v1",
+    )
+    arrays, reopened=reopen_rss_vnext_uv_texture_atlas_v1(atlas)
+    assert arrays["face_presentation_role_primary_u8"].tolist()==[255]
+    assert reopened["semantic_face_abstention_count"]==1
+    # Tamper with the role assignment while preserving all binary/receipt
+    # framing: the decoder must independently recompute the candidate.
+    arrays["face_presentation_role_primary_u8"][0]=1
+    with pytest.raises(RuntimeError,match="SEMANTIC_ROLE_SELECTION_DRIFT"):
+        reopen_rss_vnext_uv_texture_atlas_v1(_archive(arrays))
+    # Even a rehashed manifest cannot manufacture source ownership.
+    arrays["face_presentation_role_primary_u8"][0]=255
+    fake=json.loads(arrays["manifest_utf8"].tobytes())
+    fake["source_3d_surface_ownership_verified"]=True
+    arrays["manifest_utf8"]=np.frombuffer(
+        json.dumps(fake,sort_keys=True,separators=(",",":")).encode(),
+        dtype=np.uint8,
+    ).copy()
+    with pytest.raises(RuntimeError,match="FALSE_AUTHORITY"):
+        reopen_rss_vnext_uv_texture_atlas_v1(_archive(arrays))
+
+
+def test_semantic_role_field_requires_same_h_graphics_and_source_lineage():
+    _, mesh, samples=_source_mesh_and_samples()
+    roles=np.ones((len(mesh.vertices),4),dtype=np.float32)
+    with pytest.raises(RuntimeError,match="SEMANTIC_GRAPHICS_SHARED_H_REQUIRED"):
+        compile_rss_vnext_uv_texture_atlas_v1(
+            source_rgb_candidates=samples,mesh=mesh,
+            presentation_role_vertex_logits=roles,
+            presentation_role_schema_id="role-v1",
+        )
+    with pytest.raises(RuntimeError,match="SEMANTIC_VERTEX_ABI"):
+        compile_rss_vnext_uv_texture_atlas_v1(
+            source_rgb_candidates=samples,mesh=mesh,
+            graphics_vertex_logits=np.ones((len(mesh.vertices),5)),
+            graphics_scene_content_sha256="a"*64,
+            presentation_role_vertex_logits=np.ones(
+                (len(mesh.vertices)-1,4),dtype=np.float32,
+            ),
+            presentation_role_schema_id="role-v1",
+        )

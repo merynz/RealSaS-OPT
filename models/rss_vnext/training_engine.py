@@ -37,6 +37,10 @@ from .flexicubes_animation_supervision import (
     source_animation_flexicubes_loss,
 )
 from .unified_character_model import RSSvNextUnifiedCharacterModel
+from .attachment_face_correspondence_v1 import (
+    source_qualified_socket_face_loss_v1, axis_sequence_digest_v1,
+    mesh_topology_digest_v1,
+)
 from .early_semantic_field import (
     masked_source_semantic_evidence_loss,
     masked_semantic_expected_brier_risk_loss,
@@ -126,6 +130,11 @@ class RSSvNextStructuralTrainingBatch:
     # admission. Control/constraint tokens additionally need intervention truth.
     axis_teacher_sequence: AXISSequenceV6 | None = None
     axis_teacher_admission_key: str = ""
+    # Exact source-native HELD/HOLDER labels, independently reindexed to the
+    # training TESSA teacher mesh; -1 UNKNOWN is masked, not a true negative.
+    source_anchor_face_targets: Tensor | None = None
+    source_anchor_face_mask: Tensor | None = None
+    source_anchor_face_admission_key: str = ""
     # Only source-native, independently reindexed TESSA mesh labels may
     # condition product AXIS teacher forcing. Teacher remains training-only.
     # Independently source-rendered 6 novel views; FRONT/BACK remain the only
@@ -172,6 +181,7 @@ class RSSvNextTrainingWeights:
     source_udf: float = 0.0           # opt-in: source native unsigned distances
     source_inside_sign: float = 0.0   # opt-in: closed-solid signed occupancy
     axis_rig_skin_codes: float = 0.0  # opt-in: source rig and MIRA-codec-bound FSQ teacher
+    anchor_face_correspondence: float = 0.0  # source-native directed face labels
     flexicubes_surface: float = 0.3
     flexicubes_animation: float = 0.0  # explicit opt-in on admitted source motion
     novel_view: float = 0.0             # opt-in: source-qualified 8-way appearance
@@ -192,7 +202,7 @@ class RSSvNextTrainingWeights:
             self.surface_roles, self.region_pairs, self.typed_relations,
             self.graphics_source_rgb,
             self.source_udf, self.source_inside_sign,
-            self.axis_rig_skin_codes, self.flexicubes_surface, self.flexicubes_animation,
+            self.axis_rig_skin_codes, self.anchor_face_correspondence, self.flexicubes_surface, self.flexicubes_animation,
             self.novel_view, self.realsas_joint_slrm,
         ) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_NEGATIVE_OBJECTIVE_WEIGHT")
@@ -200,7 +210,7 @@ class RSSvNextTrainingWeights:
             self.topology + self.motion_preference
             + self.source_semantics + self.semantic_risk + self.surface_roles + self.region_pairs
             + self.typed_relations + self.graphics_source_rgb + self.source_udf + self.source_inside_sign
-            + self.axis_rig_skin_codes + self.flexicubes_surface
+            + self.axis_rig_skin_codes + self.anchor_face_correspondence + self.flexicubes_surface
             + self.flexicubes_animation + self.novel_view
             + self.realsas_joint_slrm <= 0
             or self.clip_gradient_norm <= 0
@@ -238,6 +248,10 @@ class RSSvNextTrainingResult:
     axis_rig_skin_loss: Tensor | None = None
     eligible_axis_sequences: int = 0
     axis_training_conditioning: str = "NO_AXIS_OBJECTIVE"
+    anchor_face_correspondence_loss: Tensor | None = None
+    eligible_anchor_held_faces: int = 0
+    eligible_anchor_holder_faces: int = 0
+    eligible_anchor_negative_faces: int = 0
     realsas_joint_slrm_loss: Tensor | None = None
     eligible_realsas_joint_rays: int = 0
     gradient_norm: Tensor | None = None
@@ -334,6 +348,7 @@ class RSSvNextStructuralTrainer:
         trusted_region_pair_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_typed_relation_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_axis_teacher_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_anchor_face_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_signed_source_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_graphics_rgb_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_source_field_registry: Mapping[str, Mapping[str, object]] | None = None,
@@ -500,6 +515,21 @@ class RSSvNextStructuralTrainer:
             hashlib.sha256(json.dumps(
                 axis_snapshot, sort_keys=True, separators=(",", ":"), allow_nan=False,
             ).encode("utf8")).hexdigest() if axis_snapshot else ""
+        )
+        # Separate source-native face-reindex truth: a joint token/region
+        # segmentation cannot self-certify contact or true NO_FACE labels.
+        anchor_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_anchor_face_registry or {}).items()
+        }
+        self.trusted_anchor_face_registry = MappingProxyType({
+            key: MappingProxyType(value) for key, value in anchor_snapshot.items()
+        })
+        self.anchor_face_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                anchor_snapshot, sort_keys=True, separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf8")).hexdigest() if anchor_snapshot else ""
         )
         signed_snapshot = {
             str(key): dict(value)
@@ -1260,6 +1290,8 @@ class RSSvNextStructuralTrainer:
         axis_loss = None
         n_axis = 0
         axis_conditioning = "NO_AXIS_OBJECTIVE"
+        matched_axis_mesh = None
+        matched_axis_memory = None
         axis_requested = batch.axis_teacher_sequence is not None or bool(batch.axis_teacher_admission_key)
         if axis_requested:
             if batch.axis_teacher_sequence is None or not batch.axis_teacher_admission_key:
@@ -1315,17 +1347,17 @@ class RSSvNextStructuralTrainer:
                     != source_surface_tensor_sha256(batch.camera_features)
                 ):
                     raise ValueError("RSS_VNEXT_AXIS_PRODUCT_TESSA_SOURCE_BINDING_DRIFT")
-                matched_mesh = self.model.build_mesh_candidate(
+                matched_axis_mesh = self.model.build_mesh_candidate(
                     state, tokens[0],
                     source_authority="TEACHER_FORCED_TRAINING_ONLY",
                 )
                 if (
                     receipt.get("mesh_teacher_topology_digest")
-                    != axis_mesh_teacher_address_digest_v1(matched_mesh)
+                    != axis_mesh_teacher_address_digest_v1(matched_axis_mesh)
                 ):
                     raise ValueError("RSS_VNEXT_AXIS_PRODUCT_TESSA_FACE_REINDEX_DRIFT")
-                matched_memory = self.model._control_memory(
-                    state, memory, matched_mesh,
+                matched_axis_memory = self.model._control_memory(
+                    state, memory, matched_axis_mesh,
                 )
                 axis_conditioning = "PRODUCT_MESH_MATCHED_TESSA_H"
             else:
@@ -1334,17 +1366,91 @@ class RSSvNextStructuralTrainer:
                 # whose held/holder mesh is unavailable.
                 if bool((teacher.kind_ids == int(RigTokenKindV6.ANCHOR)).any()):
                     raise ValueError("RSS_VNEXT_AXIS_RIG_ONLY_ANCHOR_REQUIRES_MESH")
-                matched_memory = self.model._control_memory(state, memory)
+                matched_axis_memory = self.model._control_memory(state, memory)
                 axis_conditioning = "RIG_ONLY_PRETRAIN_NOT_PRODUCT_PARITY"
             axis_loss, _axis_components = qualified_axis_rig_skin_sequence_loss_v6(
                 self.model.axis,
-                matched_memory,
+                matched_axis_memory,
                 teacher,
                 tokens_per_joint=self.model.cfg.skin_tokens_per_joint,
                 executable_constraint_operators=RIG_CONSTRAINT_OPERATOR_IDS_V1,
                 control_intervention_qualified=control_qualified,
             )
             n_axis = int(teacher.kind_ids.shape[0])
+        anchor_face_loss = None
+        eligible_anchor_held = eligible_anchor_holder = eligible_anchor_negative = 0
+        anchor_requested = (
+            batch.source_anchor_face_targets is not None
+            or batch.source_anchor_face_mask is not None
+            or bool(batch.source_anchor_face_admission_key)
+        )
+        if anchor_requested:
+            if (
+                batch.source_anchor_face_targets is None
+                or batch.source_anchor_face_mask is None
+                or not batch.source_anchor_face_admission_key
+                or batch.axis_teacher_sequence is None
+                or not batch.axis_teacher_admission_key
+                or batch.topology_teacher_tokens is None
+                or batch.topology_valid_mask is None
+            ):
+                raise ValueError("RSS_VNEXT_SOCKET_FACE_TRAIN_TEACHER_INCOMPLETE")
+            if self.weights.anchor_face_correspondence <= 0:
+                raise ValueError("RSS_VNEXT_SOCKET_FACE_TRAIN_WEIGHT_REQUIRED")
+            if self.axis_training_policy != "PRODUCT_MESH_MATCHED_REQUIRED":
+                raise ValueError("RSS_VNEXT_SOCKET_FACE_MESH_MATCHED_PRODUCT_POLICY_REQUIRED")
+            if matched_axis_mesh is None or matched_axis_memory is None:
+                raise ValueError("RSS_VNEXT_SOCKET_FACE_MATCHED_AXIS_MEMORY_MISSING")
+            source_registry = self.trusted_anchor_face_registry
+            row = source_registry.get(batch.source_anchor_face_admission_key)
+            axis_row = self.trusted_axis_teacher_registry.get(
+                batch.axis_teacher_admission_key,
+            )
+            teacher = batch.axis_teacher_sequence
+            if (
+                row is None
+                or row.get("admission_status")
+                != "QUALIFIED_SOURCE_NATIVE_ATTACHMENT_FACE_REINDEX"
+                or row.get("source_qualification_key") != batch.source_qualification_key
+                or row.get("dataset_manifest_sha256") != self.dataset_manifest_sha256
+                or row.get("observed_rgba_sha256") != source_surface_tensor_sha256(batch.rgba)
+                or row.get("observed_camera_sha256") != source_surface_tensor_sha256(batch.camera_features)
+                or axis_row is None
+                or axis_row.get("admission_status") != "QUALIFIED_SOURCE_RIG_SKIN_TOKEN_TEACHER"
+                or axis_row.get("dataset_manifest_sha256") != self.dataset_manifest_sha256
+                or axis_row.get("source_qualification_key") != batch.source_qualification_key
+                or axis_row.get("architecture_id") != AXIS_V6_PRODUCT_ARCHITECTURE_ID
+                or axis_row.get("teacher_sequence_sha256") != axis_teacher_sequence_sha256_v6(teacher)
+                or row.get("axis_teacher_sequence_sha256") != axis_sequence_digest_v1(teacher)
+            ):
+                raise ValueError("RSS_VNEXT_SOCKET_FACE_SOURCE_OR_AXIS_TEACHER_RECEIPT_DRIFT")
+            # Reuse THE SAME mesh object and causal memory as the AXIS
+            # teacher-forced objective; do not build a second source scene.
+            control_hidden = self.model.axis(
+                matched_axis_memory, teacher,
+            )["hidden"]
+            predicted = self.model.anchor_face_correspondence(
+                mesh=matched_axis_mesh, axis_hidden=control_hidden,
+                axis_sequence=teacher,
+                region_relation_logits=state.region_relation_logits,
+            )
+            face_objective = source_qualified_socket_face_loss_v1(
+                predicted,
+                source_face_targets=batch.source_anchor_face_targets,
+                source_face_mask=batch.source_anchor_face_mask,
+                source_asset_sha256=row["source_asset_sha256"],
+                dataset_manifest_sha256=self.dataset_manifest_sha256,
+                source_admission_key=batch.source_anchor_face_admission_key,
+                trusted_registry=source_registry,
+            )
+            anchor_face_loss = face_objective.loss
+            eligible_anchor_held = face_objective.eligible_held
+            eligible_anchor_holder = face_objective.eligible_holder
+            eligible_anchor_negative = face_objective.eligible_negative
+        elif self.weights.anchor_face_correspondence > 0 and axis_requested:
+            # No source-native attachment labels: opt-in weight cannot
+            # turn absent contact evidence into a synthetic negative.
+            raise ValueError("RSS_VNEXT_SOCKET_FACE_SOURCE_LABELS_REQUIRED")
         n_topo = 0
         n_pairs = 0
         if self.weights.topology > 0 and batch.topology_teacher_tokens is not None:
@@ -1396,6 +1502,7 @@ class RSSvNextStructuralTrainer:
             and region_pair_loss is None
             and typed_relation_loss is None
             and graphics_rgb_loss is None and axis_loss is None
+            and anchor_face_loss is None
             and source_udf_loss is None and source_inside_sign_loss is None
             and joint_loss is None
         ):
@@ -1414,6 +1521,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.source_udf, source_udf_loss),
                 (self.weights.source_inside_sign, source_inside_sign_loss),
                 (self.weights.axis_rig_skin_codes, axis_loss),
+                (self.weights.anchor_face_correspondence, anchor_face_loss),
                 (self.weights.flexicubes_surface, fc_loss),
                 (self.weights.flexicubes_animation, fc_anim_loss),
                 (self.weights.novel_view, novel_loss),
@@ -1452,6 +1560,10 @@ class RSSvNextStructuralTrainer:
             axis_rig_skin_loss=axis_loss,
             eligible_axis_sequences=n_axis,
             axis_training_conditioning=axis_conditioning,
+            anchor_face_correspondence_loss=anchor_face_loss,
+            eligible_anchor_held_faces=eligible_anchor_held,
+            eligible_anchor_holder_faces=eligible_anchor_holder,
+            eligible_anchor_negative_faces=eligible_anchor_negative,
             realsas_joint_slrm_loss=joint_loss,
             eligible_realsas_joint_rays=joint_rays,
         )
@@ -1487,6 +1599,7 @@ class RSSvNextStructuralTrainer:
             "region_pair_registry_sha256": self.region_pair_registry_sha256,
             "typed_relation_registry_sha256": self.typed_relation_registry_sha256,
             "axis_teacher_registry_sha256": self.axis_teacher_registry_sha256,
+            "anchor_face_registry_sha256": self.anchor_face_registry_sha256,
             "signed_source_registry_sha256": self.signed_source_registry_sha256,
             "graphics_rgb_registry_sha256": self.graphics_rgb_registry_sha256,
             "source_field_registry_sha256": self.source_field_registry_sha256,
@@ -1535,6 +1648,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_TYPED_RELATION_REGISTRY_DRIFT")
         if data.get("axis_teacher_registry_sha256", "") != self.axis_teacher_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_AXIS_TEACHER_REGISTRY_DRIFT")
+        if data.get("anchor_face_registry_sha256", "") != self.anchor_face_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_ANCHOR_FACE_REGISTRY_DRIFT")
         if data.get("signed_source_registry_sha256", "") != self.signed_source_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SIGNED_SOURCE_REGISTRY_DRIFT")
         if data.get("graphics_rgb_registry_sha256", "") != self.graphics_rgb_registry_sha256:

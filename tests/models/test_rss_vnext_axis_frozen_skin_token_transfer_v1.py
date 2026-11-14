@@ -9,6 +9,7 @@ from models.axis.rig_program_model_v6 import RigTokenKindV6
 from models.rss_vnext.axis_frozen_skin_token_transfer_v1 import (
     RSSvNextStationarySkinTokenBatchV1,
     RSSvNextStationaryAXISSkinTokenTrainerV1,
+    frozen_rss_vnext_axis_token_upstream_state_sha256_v1,
 )
 from models.rss_vnext.training_engine import (
     axis_mesh_teacher_address_digest_v1,
@@ -71,6 +72,8 @@ def _case():
         "source_qualification_key":batch.source_qualification_key,
         "source_binding_sha256":batch.source_binding_sha256,
         "upstream_frozen_checkpoint_sha256":UPSTREAM,
+        "upstream_frozen_model_state_sha256":
+            frozen_rss_vnext_axis_token_upstream_state_sha256_v1(model),
         "mira_codec_state_sha256":frozen_mira_codec_state_sha256_v6(model),
         "scene_generator_binding_sha256":scene.generating_checkpoint_sha256,
         "mesh_teacher_tokens_sha256":source_surface_tensor_sha256(topo),
@@ -273,3 +276,26 @@ def test_bf16_training_source_tensor_identity_is_raw_bitwise_not_float32_recast(
     assert actual==source_surface_tensor_sha256(bf.clone())
     assert actual!=source_surface_tensor_sha256(bf.float())
     assert actual!=source_surface_tensor_sha256(bf.reshape(1,3))
+
+
+
+def test_stationary_handoff_pins_actual_upstream_model_state_not_only_claimed_tag():
+    model,batch,registry=_case()
+    trainer=_trainer(model,registry)
+    old=trainer.frozen_state_sha256
+    assert len(old)==64
+    # torch in-place updates of frozen parameters increment version and are
+    # detected without multi-GB SHA work at each batch.
+    with torch.no_grad():
+        model.iris.scene.scene_queries.add_(.02)
+    with pytest.raises(RuntimeError,match="UPSTREAM_PARAMETER_MUTATED"):
+        trainer.objective(batch)
+    # A resigned receipt with the OLD caller-provided tag does not turn
+    # the modified real weights back into the original checkpoint.
+    new_registry={"source-skin-bridge":{
+        **registry["source-skin-bridge"],
+        "mira_codec_state_sha256":frozen_mira_codec_state_sha256_v6(model),
+    }}
+    fresh=_trainer(model,new_registry)
+    with pytest.raises(ValueError,match="SOURCE_RECEIPT_DRIFT"):
+        fresh.objective(batch)

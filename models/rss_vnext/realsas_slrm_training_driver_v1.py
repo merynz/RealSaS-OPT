@@ -11,6 +11,10 @@ Camera/teacher
 render authority stays with independently admitted source-3D data. An
 optional second observed image never becomes six 'source' observations.
 
+Stage3 raster backend identity and device policy are checkpoint-pinned.
+PyTorch3D's actual CUDA build, gradients and speed require a separate
+qualification on the intended training GPU.
+
 IMPORTANT: not a proof of pretrained InstantNeRF initialization, LoRA
 stage policy, full multiview refinement or published-reference-level image quality.
 """

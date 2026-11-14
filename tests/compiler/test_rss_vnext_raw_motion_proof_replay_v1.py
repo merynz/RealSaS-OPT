@@ -355,9 +355,10 @@ def test_graphics_is_only_active_two_image_appearance_owner_and_semantic_is_cons
     cas, request, _, graphics=_complete_product_preflight(tmp_path)
     diagnostics=graphics["diagnostics"]
     assert diagnostics["mesh_uv_semantic_role_evidence_consumed"] is True
-    assert diagnostics["mesh_uv_semantic_role_schema_id"] == (
-        "RSS.vNext.SemanticPresentationRoles.FourWayResearch.v1"
-    )
+    # The fixture deliberately binds a *different* but valid source
+    # semantic schema. Carry the actual checkpoint/schema ID, never
+    # overwrite it with a hard-coded default semantic label ontology.
+    assert diagnostics["mesh_uv_semantic_role_schema_id"] == "Test.Presentation"
     assert diagnostics["mesh_uv_semantic_role_is_source_truth"] is False
     assert diagnostics["source_rgb_surface_ownership_qualified"] is False
     assert diagnostics["source_appearance_qualified"] is False

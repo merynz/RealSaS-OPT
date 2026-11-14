@@ -6,7 +6,7 @@ A trained MIRA FSQ vocabulary cannot be taught to AXIS as fixed labels while
 its own encoding features (IRIS/TESSA vertex features and AXIS causal JOINT
 hidden) keep changing. This stage freezes the entire representation producer
 and the product MIRA codec, then learns ONLY the AXIS causal SkinTokens head
-and its autoregressive skin-code embedding.
+while freezing the entire token embedding table.
 
 The stage has no authority for source rig/control reconstruction, editing,
 attachment or release. It requires independently trusted source-native weights
@@ -43,7 +43,12 @@ from .unified_character_model import RSSvNextUnifiedCharacterModel
 
 SCHEMA = "RealSaS.RSSvNext.StationaryAXISSkinTokenStage.v1"
 _ADMISSION = "QUALIFIED_NATIVE_SOURCE_FROZEN_AXIS_MIRA_SKIN_CODE_HANDOFF"
-_STAGE_TRAINABLE = ("axis.skin_code_head.", "axis.skin_embedding.")
+# Important: axis.skin_embedding[0] is present in *all* BOS/JOINT
+# prefixes because the model embeds -1 (non-skin) as index 0. Updating
+# even the null embedding row changes AXIS pre-JOINT hidden, then changes
+# the FSQ labels we are trying to hold stationary. Therefore do NOT train
+# any skin_embedding row here. Train only the classifier head.
+_STAGE_TRAINABLE = ("axis.skin_code_head.",)
 
 
 def _sha(v: object) -> bool:
@@ -349,7 +354,6 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
             "optimizer_ownership_sha256":self.optimizer_ownership.binding_sha256,
             "step":self.step,
             "skin_code_head":self.model.axis.skin_code_head.state_dict(),
-            "skin_embedding":self.model.axis.skin_embedding.state_dict(),
             "optimizer":self.optimizer.state_dict(),
             "torch_cpu_rng":torch.get_rng_state(),
         }
@@ -378,7 +382,6 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
         ):
             raise ValueError("RSS_VNEXT_STATIONARY_TOKEN_RESUME_POLICY_DRIFT")
         self.model.axis.skin_code_head.load_state_dict(p["skin_code_head"],strict=True)
-        self.model.axis.skin_embedding.load_state_dict(p["skin_embedding"],strict=True)
         self.optimizer.load_state_dict(p["optimizer"])
         self.step=p["step"]
         torch.set_rng_state(p["torch_cpu_rng"])

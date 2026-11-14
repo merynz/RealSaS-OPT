@@ -48,7 +48,7 @@ from .training_engine import (
     axis_teacher_sequence_sha256_v6, source_surface_tensor_sha256,
 )
 
-SCHEMA = "RealSaS.RSSvNext.EmbeddedMIRASourceCodecTrainer.v6"
+SCHEMA = "RealSaS.RSSvNext.EmbeddedMIRASourceCodecTrainer.v7"
 _TEACHER = "QUALIFIED_SOURCE_MIRA_DENSE_SKIN_TESSA_AXIS_JOINT_REINDEX"
 
 
@@ -91,6 +91,7 @@ class RSSvNextEmbeddedMIRACodecResultV1:
     sparse_zero_influence_error: float | None = None
     sparse_nonzero_influence_error: float | None = None
     source_area_skin_loss: Tensor | None = None
+    source_area_skin_simplex_kl_loss: Tensor | None = None
     qualified_source_area_faces: int = 0
     qualified_source_surface_area: float = 0.
     gradient_interference_report: dict | None = None
@@ -130,6 +131,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         pose_consequence_weight: float = 0.,
         trusted_source_area_registry: Mapping[str, Mapping[str, Any]] | None = None,
         source_area_skin_weight: float = 0.,
+        source_area_skin_simplex_kl_weight: float = 0.,
         gradient_court_policy: RSSvNextGradientCourtPolicyV1 = RSSvNextGradientCourtPolicyV1(),
     ):
         if (
@@ -159,6 +161,12 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or source_area_skin_weight<0
         ):
             raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_AREA_POLICY")
+        if (
+            type(source_area_skin_simplex_kl_weight) not in (int,float)
+            or not __import__("math").isfinite(source_area_skin_simplex_kl_weight)
+            or source_area_skin_simplex_kl_weight<0
+        ):
+            raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_AREA_KL_POLICY")
         # A codec bootstrap optimizer must cover every trainable embedded
         # codec parameter, and MUST NOT update IRIS/TESSA/AXIS or the
         # untrained point-query decoder under an unrelated phase.
@@ -197,6 +205,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         })
         self.area_registry_sha256=_digest_json(area_snapshot)
         self.source_area_skin_weight=float(source_area_skin_weight)
+        self.source_area_skin_simplex_kl_weight=float(source_area_skin_simplex_kl_weight)
         self.gradient_court_policy=gradient_court_policy
         self.config_sha256 = architecture_digest(model.cfg)
         # Codec-first uses a stationary upstream scene/mesh/causal-JOINT
@@ -402,6 +411,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         if discrepancy>1.e-5:
             raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_HARD_RUNTIME_REPLAY_DRIFT")
         source_area_loss=None
+        source_area_simplex_kl_loss=None
         area_faces=0
         area_measure=0.
         source_area_fields=(
@@ -413,10 +423,18 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             any(value is not None for value in source_area_fields)
             or bool(batch.source_area_admission_key)
         )
-        if area_requested or self.source_area_skin_weight>0:
+        if (
+            area_requested or self.source_area_skin_weight>0
+            or self.source_area_skin_simplex_kl_weight>0
+        ):
             if (
                 self.source_area_skin_weight<=0
-                or any(value is None for value in source_area_fields)
+                and self.source_area_skin_simplex_kl_weight<=0
+            ) or (
+                # An admitted independent native SOURCE mesh is mandatory
+                # for BOTH surface objectives. A predicted TESSA rest mesh
+                # is conditioning, never a source quadrature teacher.
+                any(value is None for value in source_area_fields)
                 or not batch.source_area_admission_key
             ):
                 raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_AREA_INCOMPLETE")
@@ -462,6 +480,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
                 source_face_mask=area_mask,
             )
             source_area_loss=area_measurement.loss
+            source_area_simplex_kl_loss=area_measurement.simplex_kl_loss
             area_faces=area_measurement.qualified_source_face_count
             area_measure=area_measurement.qualified_source_surface_area
 
@@ -615,6 +634,9 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             ) + (
                 self.source_area_skin_weight*source_area_loss
                 if source_area_loss is not None else 0.
+            ) + (
+                self.source_area_skin_simplex_kl_weight*source_area_simplex_kl_loss
+                if source_area_simplex_kl_loss is not None else 0.
             ),reconstruction_loss=fit["reconstruction_loss"],
             quantization_loss=fit["quantization_loss"],token_ids=fit["token_ids"],
             mesh_address_digest=digest,
@@ -625,6 +647,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             sparse_zero_influence_error=zero_error,
             sparse_nonzero_influence_error=nonzero_error,
             source_area_skin_loss=source_area_loss,
+            source_area_skin_simplex_kl_loss=source_area_simplex_kl_loss,
             qualified_source_area_faces=area_faces,
             qualified_source_surface_area=area_measure,
         )
@@ -640,9 +663,20 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             families["source_native_posed_LBS"]=(
                 result.source_pose_deformation_loss,self.pose_consequence_weight,
             )
-        if result.source_area_skin_loss is not None:
+        if (
+            result.source_area_skin_loss is not None
+            and self.source_area_skin_weight>0
+        ):
             families["source_area_skin"]=(
                 result.source_area_skin_loss,self.source_area_skin_weight,
+            )
+        if (
+            result.source_area_skin_simplex_kl_loss is not None
+            and self.source_area_skin_simplex_kl_weight>0
+        ):
+            families["source_area_skin_simplex_kl"]=(
+                result.source_area_skin_simplex_kl_loss,
+                self.source_area_skin_simplex_kl_weight,
             )
         report=audit_rss_vnext_gradient_interference_v1(
             named_parameters=tuple(
@@ -699,6 +733,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             "pose_consequence_weight":self.pose_consequence_weight,
             "area_registry_sha256":self.area_registry_sha256,
             "source_area_skin_weight":self.source_area_skin_weight,
+            "source_area_skin_simplex_kl_weight":self.source_area_skin_simplex_kl_weight,
             "gradient_court_policy":asdict(self.gradient_court_policy),
             "model_config_sha256":self.config_sha256,
             "codec_source_encoder_pooling_abi":MIRA_SOURCE_SURFACE_POOLING_ABI,
@@ -733,6 +768,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or payload.get("pose_consequence_weight")!=self.pose_consequence_weight
             or payload.get("area_registry_sha256")!=self.area_registry_sha256
             or payload.get("source_area_skin_weight")!=self.source_area_skin_weight
+            or payload.get("source_area_skin_simplex_kl_weight")!=self.source_area_skin_simplex_kl_weight
             or payload.get("gradient_court_policy")!=asdict(self.gradient_court_policy)
             or payload.get("model_config_sha256")!=self.config_sha256
             or payload.get("codec_source_encoder_pooling_abi")!=MIRA_SOURCE_SURFACE_POOLING_ABI

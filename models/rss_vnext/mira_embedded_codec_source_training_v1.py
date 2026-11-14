@@ -11,7 +11,7 @@ Only DOT_PRODUCT_BASELINE is eligible here: POINT_QUERY_CROSS_ATTENTION uses
 an additional spatial decoder which must have its own source-supervised loss.
 This module teaches no unknown source pixels, contact, or 2D draw order.
 """
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, replace
 from hashlib import sha256
 from pathlib import Path
 from types import MappingProxyType
@@ -28,6 +28,10 @@ from .animation_ready_mesh import posed_lbs_from_joint_matrices
 from .training_source_surface_skin_quadrature_v1 import (
     source_surface_area_skin_loss_v1,
 )
+from .training_gradient_interference_v1 import (
+    RSSvNextGradientCourtPolicyV1,
+    audit_rss_vnext_gradient_interference_v1,
+)
 
 from models.axis.rig_program_model_v6 import AXISSequenceV6, RigTokenKindV6
 from .contracts import RSSvNextSceneState
@@ -37,7 +41,7 @@ from .training_engine import (
     axis_teacher_sequence_sha256_v6, source_surface_tensor_sha256,
 )
 
-SCHEMA = "RealSaS.RSSvNext.EmbeddedMIRASourceCodecTrainer.v3"
+SCHEMA = "RealSaS.RSSvNext.EmbeddedMIRASourceCodecTrainer.v4"
 _TEACHER = "QUALIFIED_SOURCE_MIRA_DENSE_SKIN_TESSA_AXIS_JOINT_REINDEX"
 
 
@@ -82,6 +86,7 @@ class RSSvNextEmbeddedMIRACodecResultV1:
     source_area_skin_loss: Tensor | None = None
     qualified_source_area_faces: int = 0
     qualified_source_surface_area: float = 0.
+    gradient_interference_report: dict | None = None
     source_qualified: bool = False
     product_skin_qualified: bool = False
     generated_skin_program_qualified: bool = False
@@ -118,6 +123,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         pose_consequence_weight: float = 0.,
         trusted_source_area_registry: Mapping[str, Mapping[str, Any]] | None = None,
         source_area_skin_weight: float = 0.,
+        gradient_court_policy: RSSvNextGradientCourtPolicyV1 = RSSvNextGradientCourtPolicyV1(),
     ):
         if (
             type(model) is not RSSvNextUnifiedCharacterModel
@@ -129,6 +135,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or not trusted_source_skin_registry
         ):
             raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_CODEC_TRAINER_POLICY")
+        gradient_court_policy.validate()
         # Motion supervision is a distinct source-native family. Its weight
         # is bound to the training checkpoint and NEVER silently enabled by
         # merely receiving motion-shaped arrays from a generated scene.
@@ -182,6 +189,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         })
         self.area_registry_sha256=_digest_json(area_snapshot)
         self.source_area_skin_weight=float(source_area_skin_weight)
+        self.gradient_court_policy=gradient_court_policy
         self.config_sha256 = architecture_digest(model.cfg)
         self.step = 0
 
@@ -526,9 +534,48 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             qualified_source_surface_area=area_measure,
         )
 
+    def _audit_codec_task_gradients(self, result: RSSvNextEmbeddedMIRACodecResultV1) -> dict:
+        # Exact admitted objective decomposition, never the already summed
+        # fit.loss plus its component losses (would double-count gradients).
+        families={
+            "source_dense_weights":(result.reconstruction_loss,1.),
+            "fsq_quantization":(result.quantization_loss,.05),
+        }
+        if result.source_pose_deformation_loss is not None:
+            families["source_native_posed_LBS"]=(
+                result.source_pose_deformation_loss,self.pose_consequence_weight,
+            )
+        if result.source_area_skin_loss is not None:
+            families["source_area_skin"]=(
+                result.source_area_skin_loss,self.source_area_skin_weight,
+            )
+        report=audit_rss_vnext_gradient_interference_v1(
+            named_parameters=tuple(
+                (name,param)
+                for name,param in self.model.named_parameters()
+                if name.startswith("mira.codec.")
+            ),
+            loss_terms=families,policy=self.gradient_court_policy,
+        )
+        report["codec_stage_step_before_update"]=self.step
+        report["dataset_manifest_sha256"]=self.dataset_manifest_sha256
+        report["source_registries_sha256"]={
+            "skin":self.registry_sha256,
+            "pose":self.pose_registry_sha256,
+            "area":self.area_registry_sha256,
+        }
+        return report
+
     def train_step(self, batch: RSSvNextEmbeddedMIRACodecBatchV1):
         self.optimizer.zero_grad(set_to_none=True)
         result=self.objective(batch)
+        if (
+            self.gradient_court_policy.every_n_steps>0
+            and self.step%self.gradient_court_policy.every_n_steps==0
+        ):
+            result=replace(result,gradient_interference_report=(
+                self._audit_codec_task_gradients(result)
+            ))
         result.loss.backward()
         torch.nn.utils.clip_grad_norm_(
             self.model.mira.codec.parameters(),1.,error_if_nonfinite=True,
@@ -549,6 +596,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             "pose_consequence_weight":self.pose_consequence_weight,
             "area_registry_sha256":self.area_registry_sha256,
             "source_area_skin_weight":self.source_area_skin_weight,
+            "gradient_court_policy":asdict(self.gradient_court_policy),
             "model_config_sha256":self.config_sha256,
             "step":self.step,
             "codec_state_dict":self.model.mira.codec.state_dict(),
@@ -575,6 +623,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or payload.get("pose_consequence_weight")!=self.pose_consequence_weight
             or payload.get("area_registry_sha256")!=self.area_registry_sha256
             or payload.get("source_area_skin_weight")!=self.source_area_skin_weight
+            or payload.get("gradient_court_policy")!=asdict(self.gradient_court_policy)
             or payload.get("model_config_sha256")!=self.config_sha256
             or type(payload.get("step")) is not int or payload["step"]<0
         ):

@@ -37,6 +37,7 @@ from .realsas_joint_slrm_render_v1 import (
 from .realsas_flexicubes_mesh_render_v1 import render_realsas_layered_flexicubes_mesh_v1
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 from .training_optimizer_ownership_v1 import qualify_rss_vnext_optimizer_ownership_v1
+from .semantic_geometry_prior import RSSvNextSemanticLayerSpec
 from .realsas_observed_source_ray_tether_v1 import (
     CAMERA_ABI as ORIGINAL_RAY_CAMERA_ABI,
     RSSvNextOriginalObservedRayBatchV1,
@@ -355,7 +356,7 @@ class RealSaSSLRMTrainerV1:
                 or not key
                 or self.input_profile!=REALSAS_SIX_VIEW_TRAINING_PROFILE
                 or batch.original_observed_view_count != 2
-                or t.stage not in (STAGE_1,STAGE_2)
+                or t.stage not in (STAGE_1,STAGE_2,STAGE_3)
             ):
                 raise ValueError("RSS_VNEXT_REALSAS_SLRM_ORIGINAL_SOURCE_CALIBRATED_PAIR_REQUIRED")
             r=self.trusted_original_observed_ray_registry.get(key)
@@ -462,24 +463,67 @@ class RealSaSSLRMTrainerV1:
             observed=construct_original_observed_ray_samples_v1(
                 batch.source_observed_rays,
             )
-            visible_all_roles=torch.ones(
-                (*observed.ray_direction.shape[:2],
-                 self.model.cfg.semantic_role_schema().count),
-                dtype=torch.bool,device=observed.ray_direction.device,
-            )
-            source_prediction=render_realsas_joint_from_shared_scene_v1(
-                iris=self.model.iris,scene_triplanes=state.scene_triplanes,
-                sample_xyz=observed.sample_xyz,
-                ray_delta=observed.ray_delta,
-                ray_depth=observed.ray_depth,
-                ray_direction=observed.ray_direction,
-                keep_roles=visible_all_roles,
-                shared_graphics_head=self.model.graphics,
-                shared_semantic_role_head=self.model.presentation_role_head,
-            )
+            if teacher.stage==STAGE_3:
+                # Stage3 must preserve original FRONT/BACK via an ACTUAL
+                # FlexiCubes mesh raster, never an auxiliary NeRF ray proxy.
+                # It is an all-role surface extracted from the SAME H(x);
+                # the independent source photo contributes color/alpha only.
+                rgba=batch.source_observed_rays.original_linear_rgba
+                hh,ww=rgba.shape[-2:]
+                if (
+                    rgba.shape[0]!=1 or hh>1024 or ww>1024
+                    or rgba.shape[1]!=2
+                ):
+                    raise ValueError("RSS_VNEXT_REALSAS_STAGE3_ORIGINAL_SOURCE_RASTER_DOMAIN")
+                schema=self.model.cfg.semantic_role_schema()
+                source_layer=RSSvNextSemanticLayerSpec(
+                    "original_source_all_visible_roles",schema.roles,
+                )
+                full_witness=self.model.fc_surface_bridge(
+                    state.scene_triplanes,
+                    extractor=batch.stage3_flexicubes_extractor,
+                    role_head=self.model.presentation_role_head,
+                    schema=schema,layer=source_layer,
+                    field_policy="SIGNED_HYPOTHESIS_ONLY",
+                )
+                full_mesh=render_realsas_layered_flexicubes_mesh_v1(
+                    witness=full_witness,iris=self.model.iris,
+                    scene_triplanes=state.scene_triplanes,
+                    graphics_head=self.model.graphics,
+                    semantic_role_head=self.model.presentation_role_head,
+                    cameras=batch.source_observed_rays.original_camera_13d.detach(),
+                    height=hh,width=ww,
+                    source_scene_prediction_sha256=_digest(state.scene_triplanes),
+                )
+                addr=batch.source_observed_rays.source_pixel_indices
+                flat=(addr[...,0]*hh*ww+addr[...,1]*ww+addr[...,2]).long()
+                selected_rgb=torch.gather(
+                    full_mesh.rgb_white_composite,1,
+                    flat[...,None].expand(-1,-1,3),
+                )
+                selected_alpha=torch.gather(
+                    full_mesh.alpha,1,flat[...,None],
+                )
+            else:
+                visible_all_roles=torch.ones(
+                    (*observed.ray_direction.shape[:2],
+                     self.model.cfg.semantic_role_schema().count),
+                    dtype=torch.bool,device=observed.ray_direction.device,
+                )
+                source_prediction=render_realsas_joint_from_shared_scene_v1(
+                    iris=self.model.iris,scene_triplanes=state.scene_triplanes,
+                    sample_xyz=observed.sample_xyz,
+                    ray_delta=observed.ray_delta,
+                    ray_depth=observed.ray_depth,
+                    ray_direction=observed.ray_direction,
+                    keep_roles=visible_all_roles,
+                    shared_graphics_head=self.model.graphics,
+                    shared_semantic_role_head=self.model.presentation_role_head,
+                )
+                selected_rgb=source_prediction.rgb_white_composite
+                selected_alpha=source_prediction.alpha
             parts.update(original_observed_source_photometric_loss_v1(
-                source_prediction.rgb_white_composite,
-                source_prediction.alpha,observed,
+                selected_rgb,selected_alpha,observed,
             ))
         weighted={
             "rgb_mse":self.weights.rgb,"mask_mse":self.weights.alpha,

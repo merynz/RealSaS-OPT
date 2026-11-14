@@ -202,6 +202,15 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             (name, p._version) for name, p in model.named_parameters()
             if not name.startswith("mira.codec.")
         )
+        # Fail with the *stage* violation first, before the generic optimizer
+        # receipt can disguise an accidentally unfrozen upstream parameter.
+        live = {name for name, p in model.named_parameters() if p.requires_grad}
+        codec_names = {
+            name for name, _ in model.named_parameters()
+            if name.startswith("mira.codec.")
+        }
+        if not codec_names or live != codec_names:
+            raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_UPSTREAM_FREEZE_DRIFT")
         self.optimizer_ownership = qualify_rss_vnext_optimizer_ownership_v1(
             model, optimizer,
         )

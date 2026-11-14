@@ -414,6 +414,14 @@ def execute_rss_vnext_shape_capability_v4(
         role="rss_uncalibrated_embedded_mira_decoder",
         put_bytes=put_bytes,
     )
+    from .rss_vnext_raw_anchor_face_evidence_v1 import (
+        encode_raw_neural_socket_faces_v1,
+    )
+    anchor_face_candidate = encode_raw_neural_socket_faces_v1(
+        proposal,
+        scene_content_sha256=scene_ref["content_sha256"],
+        checkpoint_sha256=checkpoint["content_sha256"],
+    )
     config_ref["authority_class"] = "PINNED_UNIFIED_MODEL_CONFIG_NO_PRODUCT_AUTHORITY"
     mira_ref["authority_class"] = "PINNED_EMBEDDED_MIRA_SUBMODULE_NO_SKIN_AUTHORITY"
     receipt = {
@@ -443,6 +451,7 @@ def execute_rss_vnext_shape_capability_v4(
         **tessa_receipt,
         "tessa_decoder_config": tessa_decoder_config,
         **axis_receipt,
+        "raw_model_socket_face_candidate": anchor_face_candidate,
     }
     receipt_ref = _cas_ref(
         (json.dumps(receipt, sort_keys=True, separators=(",", ":"), allow_nan=False)

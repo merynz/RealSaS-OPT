@@ -168,6 +168,7 @@ class MIRASkinFSQCodecV6(nn.Module):
             # Backward-compatible generic codec API. Production source
             # trainers explicitly pass the canonical TESSA surface mass.
             mean_pool = encoded.mean(dim=2)
+            max_pool = encoded.amax(dim=2)
         else:
             if (
                 not isinstance(surface_vertex_mass, Tensor)
@@ -186,7 +187,17 @@ class MIRASkinFSQCodecV6(nn.Module):
                 (encoded.float() * area[:, None, :, None]).sum(dim=2)
                 / area.sum(dim=1)[:, None, None]
             ).to(dtype=encoded.dtype)
-        max_pool = encoded.amax(dim=2)
+            # The codec has TWO surface aggregators. A non-referenced or
+            # degenerate-area vertex may have arbitrary features and weights.
+            # Area-weighting only the mean while max-pooling every vertex
+            # changes the FSQ labels when such an unobserved vertex is added.
+            # A positive surface-mass mask excludes those vertices from BOTH
+            # latent aggregators. Do not threshold tiny but positive mass:
+            # it is still source-surface conditioning, not a confidence score.
+            max_pool = encoded.masked_fill(
+                ~(area[:, None, :, None] > 0),
+                float("-inf"),
+            ).amax(dim=2)
         joint_state = self.joint_encode(joint_features)
         latent = self.latent_head(torch.cat([mean_pool, max_pool, joint_state], dim=-1))
         return latent.view(b, j, self.config.tokens_per_joint, self.config.latent_dim)

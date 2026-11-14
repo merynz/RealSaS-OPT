@@ -1626,7 +1626,7 @@ class RSSvNextStructuralTrainer:
             and region_pair_loss is None
             and typed_relation_loss is None
             and graphics_rgb_loss is None and axis_loss is None
-            and anchor_face_loss is None
+            and anchor_face_loss is None and source_pose_loss is None
             and source_udf_loss is None and source_inside_sign_loss is None
             and joint_loss is None
         ):
@@ -1646,6 +1646,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.source_inside_sign, source_inside_sign_loss),
                 (self.weights.axis_rig_skin_codes, axis_loss),
                 (self.weights.anchor_face_correspondence, anchor_face_loss),
+                (self.weights.source_pose_surface, source_pose_loss),
                 (self.weights.flexicubes_surface, fc_loss),
                 (self.weights.flexicubes_animation, fc_anim_loss),
                 (self.weights.novel_view, novel_loss),
@@ -1688,6 +1689,8 @@ class RSSvNextStructuralTrainer:
             eligible_anchor_held_faces=eligible_anchor_held,
             eligible_anchor_holder_faces=eligible_anchor_holder,
             eligible_anchor_negative_faces=eligible_anchor_negative,
+            source_pose_surface_loss=source_pose_loss,
+            eligible_source_pose_count=n_source_poses,
             realsas_joint_slrm_loss=joint_loss,
             eligible_realsas_joint_rays=joint_rays,
         )
@@ -1724,6 +1727,7 @@ class RSSvNextStructuralTrainer:
             "typed_relation_registry_sha256": self.typed_relation_registry_sha256,
             "axis_teacher_registry_sha256": self.axis_teacher_registry_sha256,
             "anchor_face_registry_sha256": self.anchor_face_registry_sha256,
+            "source_pose_registry_sha256": self.source_pose_registry_sha256,
             "signed_source_registry_sha256": self.signed_source_registry_sha256,
             "graphics_rgb_registry_sha256": self.graphics_rgb_registry_sha256,
             "source_field_registry_sha256": self.source_field_registry_sha256,
@@ -1774,6 +1778,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_AXIS_TEACHER_REGISTRY_DRIFT")
         if data.get("anchor_face_registry_sha256", "") != self.anchor_face_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_ANCHOR_FACE_REGISTRY_DRIFT")
+        if data.get("source_pose_registry_sha256", "") != self.source_pose_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SOURCE_POSE_REGISTRY_DRIFT")
         if data.get("signed_source_registry_sha256", "") != self.signed_source_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_SIGNED_SOURCE_REGISTRY_DRIFT")
         if data.get("graphics_rgb_registry_sha256", "") != self.graphics_rgb_registry_sha256:

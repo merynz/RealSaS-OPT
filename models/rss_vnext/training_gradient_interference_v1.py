@@ -249,6 +249,28 @@ def audit_rss_vnext_gradient_interference_v1(
         ):
             raise RuntimeError("RSS_VNEXT_GRADIENT_COURT_CANCELLATION_NUMERICS")
         nonzero = [v for v in weighted_norms.values() if v > 0.]
+        # In plain SGD, a proposed update -eta * weighted_sum locally
+        # reduces task i iff dot(g_i, weighted_sum) > 0. Negative values
+        # are first-order harm signals; do not call them actual AdamW
+        # deterioration (adaptive preconditioning/curvature may differ).
+        descent_by_family = {}
+        for name, _ in terms:
+            if norms[name] == 0. or weighted_result == 0.:
+                descent_by_family[name] = {
+                    "first_order_dot": None,
+                    "cosine_with_weighted_sum": None,
+                    "adverse_plain_gradient_descent": None,
+                }
+                continue
+            derivative = float(torch.dot(by_term[name], weighted).item())
+            cosine_update = _cosine(
+                by_term[name], weighted, norms[name], weighted_result,
+            )
+            descent_by_family[name] = {
+                "first_order_dot": derivative,
+                "cosine_with_weighted_sum": cosine_update,
+                "adverse_plain_gradient_descent": derivative < -1.e-10,
+            }
         result["owners"][owner] = {
             "sampled_parameter_names": [name for name, _ in params],
             "sampled_parameter_count": len(params),
@@ -272,6 +294,12 @@ def audit_rss_vnext_gradient_interference_v1(
             ),
             "weighted_dominance_ratio": (
                 max(nonzero) / min(nonzero) if len(nonzero) >= 2 else None
+            ),
+            "first_order_plain_gradient_descent_alignment": descent_by_family,
+            "adverse_first_order_family_count": sum(
+                int(value["adverse_plain_gradient_descent"])
+                for value in descent_by_family.values()
+                if value["adverse_plain_gradient_descent"] is not None
             ),
             "worst_sampled_parameters": sorted(
                 worst_parameters,

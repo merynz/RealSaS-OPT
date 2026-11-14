@@ -230,9 +230,9 @@ def test_codec_first_catches_upstream_mutation_and_resume_identity(tmp_path):
         model.axis.kind_head.weight.add_(0.01)
     with pytest.raises(RuntimeError,match="UPSTREAM_PARAMETER_MUTATED"):
         engine.train_step(batch)
-    with pytest.raises(RuntimeError,match="UPSTREAM_STATE_DRIFT"):
+    with pytest.raises(RuntimeError,match="UPSTREAM_PARAMETER_MUTATED"):
         engine.save_checkpoint(checkpoint)
-    with pytest.raises(RuntimeError,match="UPSTREAM_STATE_DRIFT"):
+    with pytest.raises(RuntimeError,match="UPSTREAM_PARAMETER_MUTATED"):
         reference.load_checkpoint(checkpoint)
 
 

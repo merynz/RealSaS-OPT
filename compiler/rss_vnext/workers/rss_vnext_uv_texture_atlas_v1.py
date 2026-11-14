@@ -32,7 +32,7 @@ SCHEMA = "RealSaS.RSSvNext.MeshUVTextureAtlasCandidate.v1"
 ARTIFACT_TYPE = "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
 MAX_DIMENSION = 2048
 MAX_FACES = 4096
-MAX_ARTIFACT_BYTES = 36 * 1024 * 1024
+MAX_ARTIFACT_BYTES = 96 * 1024 * 1024
 _TILE_OPTIONS = (16, 24, 32, 48, 64, 96)
 _GUTTER = 2
 _KEYS = frozenset({
@@ -43,6 +43,9 @@ _KEYS = frozenset({
     "face_chart_xywh_i32",
     "face_vertex_uv_f32",
     "face_source_sample_counts_i32",
+    "neural_rgb_candidate_rgba_u8",
+    "neural_rgb_candidate_mask_u8",
+    "neural_rgb_log_uncertainty_f16",
 })
 
 
@@ -84,6 +87,8 @@ def _archive(arrays: dict[str, np.ndarray]) -> bytes:
 
 def compile_rss_vnext_uv_texture_atlas_v1(
     *, source_rgb_candidates: bytes, mesh: CanonicalMeshIR,
+    graphics_vertex_logits: np.ndarray | None = None,
+    graphics_scene_content_sha256: str | None = None,
 ) -> tuple[bytes, dict[str, Any]]:
     validate_canonical_mesh_domain_v1(mesh)
     if mesh.mesh_lineage_hash != canonical_mesh_lineage_hash_v1(mesh):
@@ -97,6 +102,28 @@ def compile_rss_vnext_uv_texture_atlas_v1(
         or original["mesh_face_count"] != face_count
     ):
         raise RuntimeError("TEXTURE_ATLAS_SOURCE_SAMPLE_MESH_DRIFT")
+    has_neural_field = graphics_vertex_logits is not None
+    if has_neural_field:
+        graphics_vertex_logits = np.asarray(graphics_vertex_logits)
+        if (
+            graphics_vertex_logits.ndim != 2
+            or graphics_vertex_logits.shape[0] != len(mesh.vertices)
+            or graphics_vertex_logits.shape[1] < 5
+            or not np.isfinite(graphics_vertex_logits).all()
+            or type(graphics_scene_content_sha256) is not str
+            or len(graphics_scene_content_sha256) != 64
+            or any(x not in "0123456789abcdef"
+                   for x in graphics_scene_content_sha256)
+        ):
+            raise RuntimeError("TEXTURE_ATLAS_NEURAL_GRAPHICS_FIELD_ABI")
+        vertex_logits = graphics_vertex_logits.astype(np.float64)
+    elif graphics_scene_content_sha256 is not None:
+        raise RuntimeError("TEXTURE_ATLAS_NEURAL_GRAPHICS_UNBOUND_SCENE")
+    index = {vertex.canonical_mesh_vertex_id: i
+             for i, vertex in enumerate(mesh.vertices)}
+    face_indices = np.array([
+        [index[k] for k in face] for face in mesh.faces
+    ], dtype=np.int64)
     sample_faces = samples["face_index_i32"]
     sample_views = samples["view_index_u8"]
     sample_rgba = samples["source_rgba_u8"]
@@ -107,6 +134,13 @@ def compile_rss_vnext_uv_texture_atlas_v1(
     uv = np.zeros((face_count, 3, 2), dtype=np.float32)
     counts = np.zeros((face_count, 2), dtype=np.int32)
     inner = side - 2 * _GUTTER - 1
+    neural_texture = np.zeros((height, width, 4), dtype=np.uint8)
+    neural_mask = np.zeros((height, width), dtype=np.uint8)
+    neural_log_uncertainty = np.zeros((height, width), dtype=np.float16)
+    local_uv_axis = np.arange(inner + 1, dtype=np.float64) / inner
+    uu, vv = np.meshgrid(local_uv_axis, local_uv_axis, indexing="xy")
+    in_triangle = (uu + vv <= 1. + 1.e-12)
+    texel_bary = np.stack((1. - uu - vv, uu, vv), axis=-1)
     for face in range(face_count):
         ox = (face % columns) * side
         oy = (face // columns) * side
@@ -115,6 +149,28 @@ def compile_rss_vnext_uv_texture_atlas_v1(
         uv[face, 0] = ((x0 + .5) / width, (y0 + .5) / height)
         uv[face, 1] = ((x0 + inner + .5) / width, (y0 + .5) / height)
         uv[face, 2] = ((x0 + .5) / width, (y0 + inner + .5) / height)
+        if has_neural_field:
+            # RGB logits 0:3, density logit 3, log uncertainty 4;
+            # same unified H(x) that proposed TESSA/AXIS/MIRA topology.
+            # These are inferred color candidates for UV completion,
+            # never original observed pixels or source visibility.
+            interpolated = np.einsum(
+                "abc,cd->abd", texel_bary,
+                vertex_logits[face_indices[face], :],
+            )
+            rgb = 1. / (1. + np.exp(-np.clip(interpolated[:, :, :3], -30., 30.)))
+            rgba = np.concatenate(
+                (np.rint(rgb * 255.).astype(np.uint8),
+                 np.full((inner + 1, inner + 1, 1), 255, dtype=np.uint8)),
+                axis=-1,
+            )
+            destination = neural_texture[y0:y0 + inner + 1, x0:x0 + inner + 1]
+            destination[in_triangle] = rgba[in_triangle]
+            neural_mask[y0:y0 + inner + 1, x0:x0 + inner + 1][in_triangle] = 1
+            uncertainty = np.clip(interpolated[:, :, 4], -20., 20.).astype(np.float16)
+            neural_log_uncertainty[
+                y0:y0 + inner + 1, x0:x0 + inner + 1
+            ][in_triangle] = uncertainty[in_triangle]
 
     texture = np.zeros((2, height, width, 4), dtype=np.uint8)
     has_color = np.zeros((2, height, width), dtype=np.uint8)
@@ -171,7 +227,20 @@ def compile_rss_vnext_uv_texture_atlas_v1(
         "source_view_conflict_texel_count": n_conflicts,
         "source_rgb_values_from_original_files": True,
         "source_to_face_correspondence_camera_hypothesis": True,
-        "inferred_surface_texture_completion_performed": False,
+        "inferred_surface_texture_completion_performed": bool(has_neural_field),
+        "neural_graphics_field_source": (
+            "SAME_UNIFIED_H_TESSA_VERTEX_GRAPHICS_LOGITS"
+            if has_neural_field else "UNAVAILABLE_NO_NEURAL_COMPLETION"
+        ),
+        "neural_graphics_scene_content_sha256": graphics_scene_content_sha256,
+        "neural_graphics_logits_sha256": (
+            sha256(np.asarray(graphics_vertex_logits).tobytes(order="C")).hexdigest()
+            if has_neural_field else None
+        ),
+        "neural_graphics_color_texel_count": int(neural_mask.sum()),
+        "neural_graphics_rgb_is_inferred_not_observed": True,
+        "neural_graphics_untrained_checkpoint_may_be_invalid": True,
+        "neural_completion_never_overwrites_original_rgb_layers": True,
         "source_3d_surface_ownership_verified": False,
         "draw_order_is_not_texture_atlas_authority": True,
         "pose_conditioned_occlusion_qualified": False,
@@ -191,6 +260,9 @@ def compile_rss_vnext_uv_texture_atlas_v1(
         "face_chart_xywh_i32": charts,
         "face_vertex_uv_f32": uv,
         "face_source_sample_counts_i32": counts,
+        "neural_rgb_candidate_rgba_u8": neural_texture,
+        "neural_rgb_candidate_mask_u8": neural_mask,
+        "neural_rgb_log_uncertainty_f16": neural_log_uncertainty,
     }
     return _archive(arrays), manifest
 
@@ -206,9 +278,9 @@ def reopen_rss_vnext_uv_texture_atlas_v1(
             if (
                 len(records) != len(_KEYS)
                 or {r.filename for r in records} != {key + ".npy" for key in _KEYS}
-                or any(r.file_size > 36 * 1024 * 1024 or r.compress_type != ZIP_DEFLATED
+                or any(r.file_size > 96 * 1024 * 1024 or r.compress_type != ZIP_DEFLATED
                        for r in records)
-                or sum(r.file_size for r in records) > 36 * 1024 * 1024
+                or sum(r.file_size for r in records) > 96 * 1024 * 1024
             ):
                 raise RuntimeError("TEXTURE_ATLAS_REOPEN_ARCHIVE_DOMAIN")
         with np.load(io.BytesIO(blob), allow_pickle=False) as archive:
@@ -235,6 +307,9 @@ def reopen_rss_vnext_uv_texture_atlas_v1(
     uv = arrays["face_vertex_uv_f32"]
     charts = arrays["face_chart_xywh_i32"]
     counts = arrays["face_source_sample_counts_i32"]
+    neural_texture = arrays["neural_rgb_candidate_rgba_u8"]
+    neural_mask = arrays["neural_rgb_candidate_mask_u8"]
+    neural_uncertainty = arrays["neural_rgb_log_uncertainty_f16"]
     if (
         t.shape != (2, h, w, 4) or t.dtype != np.uint8
         or m.shape != (2, h, w) or m.dtype != np.uint8
@@ -242,6 +317,16 @@ def reopen_rss_vnext_uv_texture_atlas_v1(
         or charts.shape != (n, 4) or charts.dtype != np.int32
         or uv.shape != (n, 3, 2) or uv.dtype != np.float32
         or counts.shape != (n, 2) or counts.dtype != np.int32
+        or neural_texture.shape != (h, w, 4) or neural_texture.dtype != np.uint8
+        or neural_mask.shape != (h, w) or neural_mask.dtype != np.uint8
+        or neural_uncertainty.shape != (h, w) or neural_uncertainty.dtype != np.float16
+        or np.any((neural_mask != 0) & (neural_mask != 1))
+        or not np.isfinite(neural_uncertainty).all()
+        or np.any(neural_texture[neural_mask == 0] != 0)
+        or type(meta.get("neural_graphics_color_texel_count")) is not int
+        or meta["neural_graphics_color_texel_count"] != int(neural_mask.sum())
+        or meta.get("neural_graphics_rgb_is_inferred_not_observed") is not True
+        or meta.get("neural_completion_never_overwrites_original_rgb_layers") is not True
         or np.any((m != 0) & (m != 1))
         or np.any((c != 0) & (c != 1))
         or np.any(t[m == 0] != 0)

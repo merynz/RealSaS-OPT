@@ -114,6 +114,10 @@ func (ProductGraphicsProvider) Capabilities(context.Context) ([]Descriptor, erro
 	metadata["raw_mesh_uv_2d_draw_order_independent"] = true
 	metadata["raw_mesh_uv_same_h_graphics_logits_used"] = true
 	metadata["raw_mesh_uv_inferred_color_not_source_observed"] = true
+	metadata["raw_native_interactive_preview_artifact_type"] = "RealSaS.RSSvNextNativeInteractivePuppetPreview"
+	metadata["raw_native_interactive_preview_schema_version"] = "v1"
+	metadata["raw_native_interactive_preview_release_authorized"] = false
+	metadata["raw_native_interactive_preview_virtual_camera"] = true
 	metadata["input_source_schema_version"] = "v1"
 	metadata["input_fanout_artifact_type"] = "RealSaS.RSSvNextProductEvidenceFanout"
 	metadata["input_fanout_schema_version"] = "v1"
@@ -168,6 +172,9 @@ func (ProductProofProvider) Capabilities(context.Context) ([]Descriptor, error) 
 	metadata["input_raw_mesh_uv_texture_atlas_artifact_type"] = "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
 	metadata["input_raw_mesh_uv_texture_atlas_schema_version"] = "v1"
 	metadata["raw_mesh_uv_texture_atlas_replay_required"] = true
+	metadata["input_raw_native_preview_artifact_type"] = "RealSaS.RSSvNextNativeInteractivePuppetPreview"
+	metadata["input_raw_native_preview_schema_version"] = "v1"
+	metadata["raw_native_preview_independent_replay_required"] = true
 	metadata["input_mechanics_intervention_artifact_type"] = "RealSaS.MechanicsInterventionCourt"
 	metadata["input_mechanics_intervention_schema_version"] = "v1"
 	metadata["mechanics_intervention_required"] = true

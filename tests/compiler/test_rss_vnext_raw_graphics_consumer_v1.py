@@ -74,12 +74,13 @@ def test_two_original_images_neural_shape_mesh_rig_skin_mechanics_graphics_runti
         req, read_object=cas.read_object, put_bytes=cas.put_bytes,
     )
     assert out["status"] == "PASS"
-    assert len(out["outputs"]) == 5
+    assert len(out["outputs"]) == 6
     assert set(x["artifact_type"] for x in out["outputs"]) == {
         "RealSaS.CompiledGraphics", "RealSaS.RuntimeGraphics",
         "RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
         "RealSaS.RSSvNextSourceRGBImagePlaneCandidates",
         "RealSaS.RSSvNextMeshUVTextureAtlasCandidate",
+        "RealSaS.RSSvNextNativeInteractivePuppetPreview",
     }
     diagnostics = out["diagnostics"]
     assert diagnostics["source_appearance_qualified"] is False
@@ -87,8 +88,25 @@ def test_two_original_images_neural_shape_mesh_rig_skin_mechanics_graphics_runti
     assert diagnostics["source_original_rgb_image_plane_sample_count"] > 0
     assert diagnostics["source_rgb_surface_ownership_qualified"] is False
     assert diagnostics["mesh_uv_texture_atlas_candidate_present"] is True
+    assert diagnostics["native_interactive_puppet_preview_present"] is True
+    assert diagnostics["native_preview_product_revision_minted"] is False
+    assert diagnostics["native_preview_virtual_camera_not_source_observed"] is True
     assert diagnostics["graphics_draw_order_independent_of_uv_atlas"] is True
     assert diagnostics["mesh_uv_texels_per_original_view"][0] > 0
+    from compiler.rss_vnext.workers.rss_vnext_native_preview_package_v1 import (
+        reopen_rss_vnext_native_preview_package_v1,
+    )
+    native_preview = out["outputs"][5]
+    assert native_preview["artifact_type"] == (
+        "RealSaS.RSSvNextNativeInteractivePuppetPreview"
+    )
+    assert cas.read_object(native_preview).startswith(b"RSASV2R1")
+    path = tmp_path / "product_graphics_native_preview.rss"
+    path.write_bytes(cas.read_object(native_preview))
+    reopened = reopen_rss_vnext_native_preview_package_v1(path)
+    assert reopened["product_revision_minted"] is False
+    assert reopened["control_frames"] == ((),)
+    assert reopened["manifest"]["admission"] == "DEVELOPER_PREVIEW_NOT_PRODUCT_REVISION"
     from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
         reopen_rss_vnext_uv_texture_atlas_v1,
     )

@@ -9,7 +9,7 @@ rather than trusting pose.bin to be an animation source.
 """
 
 from collections import OrderedDict
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -31,7 +31,7 @@ from compiler.realsas_compiler_core.canonical_skin_ir_v2 import (
     validate_canonical_skin_domain_v2,
 )
 from compiler.realsas_compiler_core.graphics_runtime_v1 import (
-    RuntimeGraphicsV1, validate_runtime_graphics_v1,
+    RuntimeGraphicsV1, runtime_graphics_hash_v1, validate_runtime_graphics_v1,
 )
 from compiler.realsas_compiler_core.mechanics_control_solver_v1 import (
     ControlTransformIRV1, solve_control_pose_v1, deform_mesh_lbs_v1,
@@ -101,6 +101,114 @@ def _make_pose_binary(
     return bytes(data), program_hashes
 
 
+def select_rss_vnext_native_preview_camera_v1(
+    mesh: CanonicalMeshIR, *, resolution: int = 128,
+) -> dict[str, Any]:
+    """Choose an honest virtual preview angle from the *same* canonical mesh.
+
+    Maximize aggregate triangle projected area among three orthogonal axes.
+    This is a deterministic display heuristic; it is NOT the camera of either
+    uploaded image and cannot establish source visibility or back-side color.
+    """
+    validate_canonical_mesh_domain_v1(mesh)
+    if type(resolution) is not int or not 16 <= resolution <= 2048:
+        raise RuntimeError("RSS_PREVIEW_VIRTUAL_RESOLUTION_INVALID")
+    xyz = np.asarray([v.P for v in mesh.vertices], dtype=np.float64)
+    index = {v.canonical_mesh_vertex_id: i for i,v in enumerate(mesh.vertices)}
+    faces = np.asarray([[index[k] for k in f] for f in mesh.faces], dtype=np.int64)
+    if len(faces)>4096 or len(xyz)>65536:
+        raise RuntimeError("RSS_PREVIEW_VIRTUAL_MESH_BUDGET")
+    axes = (
+        ((1.,0.,0.),(0.,1.,0.),(0.,0.,1.)),
+        ((1.,0.,0.),(0.,0.,1.),(0.,1.,0.)),
+        ((0.,1.,0.),(0.,0.,1.),(1.,0.,0.)),
+    )
+    center = (xyz.min(axis=0)+xyz.max(axis=0))*.5
+    best = None
+    for right,up,forward in axes:
+        projected = np.stack(
+            (xyz @ np.asarray(right), xyz @ np.asarray(up)), axis=-1
+        )
+        triangles = projected[faces]
+        area = float(np.abs(
+            (triangles[:,1,0]-triangles[:,0,0]) *
+            (triangles[:,2,1]-triangles[:,0,1]) -
+            (triangles[:,1,1]-triangles[:,0,1]) *
+            (triangles[:,2,0]-triangles[:,0,0])
+        ).sum())
+        extents = projected.max(axis=0)-projected.min(axis=0)
+        # Prefer larger area. Ties pick XY, then XZ, then YZ consistently.
+        if best is None or area > best[0] + 1e-12:
+            best = (area,right,up,forward,extents)
+    assert best is not None
+    area,right,up,forward,extents = best
+    if area <= 1e-12:
+        raise RuntimeError("RSS_PREVIEW_NO_NONDEGENERATE_VIRTUAL_VIEW")
+    diagonal = float(np.linalg.norm(xyz.max(axis=0)-xyz.min(axis=0)))
+    distance = max(2.,diagonal*3.)
+    origin = center-np.asarray(forward)*distance
+    return {
+        "view_index":0,
+        "origin":tuple(float(x) for x in origin),
+        "right":right, "screen_up":up, "forward":forward,
+        "half_extent":max(float(extents.max())*.65,1e-3),
+        "resolution":resolution,
+        "source_camera_observed":False,
+        "selection_policy":"MAX_PROJECTED_CANONICAL_TRIANGLE_AREA_V1",
+    }
+
+
+def prepare_rss_vnext_virtual_preview_graphics_v1(
+    graphics: RuntimeGraphicsV1, *,
+    canonical_mesh_hash: str, face_count: int,
+) -> RuntimeGraphicsV1:
+    """Demote an unregistered *virtual* camera to conservative geometry visibility.
+
+    View 0's learned visibility mask and partial order describe one indexed
+    candidate view. A virtual axis selected from a mesh is NOT that view.
+    Reusing those rules would suppress real posed triangles or invert depth.
+    Only the preview-only view 0 is widened to all canonical fragments and
+    depth sorting; the other seven candidate schedules are preserved, but
+    cannot be selected by this single-camera archive.
+    """
+    validate_runtime_graphics_v1(
+        graphics, canonical_mesh_hash=canonical_mesh_hash,
+        face_count=face_count,
+    )
+    if len(graphics.views) != 8:
+        raise RuntimeError("RSS_PREVIEW_GRAPHICS_VIEW_COVERAGE_REQUIRED")
+    n = len(graphics.fragment_ids)
+    universal_view = tuple(range(n))
+    views = tuple(
+        replace(
+            view,
+            visible_fragment_indices=universal_view,
+            topological_fragment_order=universal_view,
+            order_edges=(),
+        ) if view.view_index == 0 else view
+        for view in graphics.views
+    )
+    preview = replace(
+        graphics,
+        views=views,
+        runtime_graphics_hash="",
+        metadata={
+            **graphics.metadata,
+            "virtual_camera_view_is_registered": False,
+            "virtual_preview_source_view_visibility_reused": False,
+            "virtual_preview_draw_policy": "ALL_CANONICAL_FRAGMENTS_POSED_DEPTH_ONLY",
+        },
+    )
+    preview = replace(
+        preview, runtime_graphics_hash=runtime_graphics_hash_v1(preview),
+    )
+    validate_runtime_graphics_v1(
+        preview, canonical_mesh_hash=canonical_mesh_hash,
+        face_count=face_count,
+    )
+    return preview
+
+
 def compile_rss_vnext_native_preview_package_v1(
     *, mesh: CanonicalMeshIR,
     rig: CanonicalRigIRV2,
@@ -129,7 +237,11 @@ def compile_rss_vnext_native_preview_package_v1(
         uv_atlas_cas=uv_atlas_cas,
         canonical_mesh_lineage_hash=mesh.mesh_lineage_hash,
     )
-    graphics_bytes = encode_runtime_graphics_v1(graphics)
+    preview_graphics = prepare_rss_vnext_virtual_preview_graphics_v1(
+        graphics, canonical_mesh_hash=mesh.mesh_lineage_hash,
+        face_count=len(mesh.faces),
+    )
+    graphics_bytes = encode_runtime_graphics_v1(preview_graphics)
     camera = dict(virtual_camera)
     camera["view_index"] = 0
     pose_bytes, pose_hashes = _make_pose_binary(
@@ -166,11 +278,14 @@ def compile_rss_vnext_native_preview_package_v1(
         "canonical_mesh_lineage_hash": mesh.mesh_lineage_hash,
         "canonical_rig_lineage_hash": rig.rig_lineage_hash,
         "canonical_skin_lineage_hash": skin.skin_lineage_hash,
-        "graphics_runtime_hash": graphics.runtime_graphics_hash,
+        "graphics_runtime_hash": preview_graphics.runtime_graphics_hash,
+        "source_compiled_graphics_runtime_hash": graphics.runtime_graphics_hash,
+        "virtual_preview_camera_registered_to_graphics_view": "0",
+        "virtual_preview_draw_policy": "ALL_CANONICAL_FRAGMENTS_POSED_DEPTH_ONLY",
         "frame_count": str(len(control_frames)),
         "view_index": "0",
         "color_source_layer_policy": "EXPLICIT_HINT_ONLY",
-        "texture_layer_draw_order_authority": "GRAPHICS_PARTIAL_ORDER_PLUS_POSED_DEPTH",
+        "texture_layer_draw_order_authority": "POSED_DEPTH_ONLY_FOR_UNREGISTERED_VIRTUAL_CAMERA",
     }
     for name, blob in entries.items():
         manifest["sha256:" + name] = _sha(blob)
@@ -305,5 +420,7 @@ def edit_rss_vnext_native_preview_controls_v1(
 __all__ = [
     "SCHEMA", "compile_rss_vnext_native_preview_package_v1",
     "reopen_rss_vnext_native_preview_package_v1",
+    "select_rss_vnext_native_preview_camera_v1",
+    "prepare_rss_vnext_virtual_preview_graphics_v1",
     "edit_rss_vnext_native_preview_controls_v1",
 ]

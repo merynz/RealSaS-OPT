@@ -115,6 +115,83 @@ int parse_index(const char* text){
     return v;
 }
 
+// Native archive consumers must verify the same SHA-256 entry receipts as
+// Python reopen. This implementation is freestanding (the preview player is
+// compiled with g++ alone) and hashes the input without a padded byte copy.
+std::string rss_preview_sha256_hex(const std::vector<std::uint8_t>& bytes){
+    static constexpr std::uint32_t k[64]={
+        0x428a2f98u,0x71374491u,0xb5c0fbcfu,0xe9b5dba5u,
+        0x3956c25bu,0x59f111f1u,0x923f82a4u,0xab1c5ed5u,
+        0xd807aa98u,0x12835b01u,0x243185beu,0x550c7dc3u,
+        0x72be5d74u,0x80deb1feu,0x9bdc06a7u,0xc19bf174u,
+        0xe49b69c1u,0xefbe4786u,0x0fc19dc6u,0x240ca1ccu,
+        0x2de92c6fu,0x4a7484aau,0x5cb0a9dcu,0x76f988dau,
+        0x983e5152u,0xa831c66du,0xb00327c8u,0xbf597fc7u,
+        0xc6e00bf3u,0xd5a79147u,0x06ca6351u,0x14292967u,
+        0x27b70a85u,0x2e1b2138u,0x4d2c6dfcu,0x53380d13u,
+        0x650a7354u,0x766a0abbu,0x81c2c92eu,0x92722c85u,
+        0xa2bfe8a1u,0xa81a664bu,0xc24b8b70u,0xc76c51a3u,
+        0xd192e819u,0xd6990624u,0xf40e3585u,0x106aa070u,
+        0x19a4c116u,0x1e376c08u,0x2748774cu,0x34b0bcb5u,
+        0x391c0cb3u,0x4ed8aa4au,0x5b9cca4fu,0x682e6ff3u,
+        0x748f82eeu,0x78a5636fu,0x84c87814u,0x8cc70208u,
+        0x90befffau,0xa4506cebu,0xbef9a3f7u,0xc67178f2u
+    };
+    std::array<std::uint32_t,8> h={{
+        0x6a09e667u,0xbb67ae85u,0x3c6ef372u,0xa54ff53au,
+        0x510e527fu,0x9b05688cu,0x1f83d9abu,0x5be0cd19u
+    }};
+    const auto rotate=[](std::uint32_t x,unsigned s){
+        return (x>>s)|(x<<(32u-s));
+    };
+    if(bytes.size()>160u*1024u*1024u)
+        throw std::runtime_error("RSS_UV_PREVIEW_DIGEST_RESOURCE_BUDGET");
+    const std::uint64_t bit_length=static_cast<std::uint64_t>(bytes.size())*8u;
+    const std::size_t padded=((bytes.size()+9u+63u)/64u)*64u;
+    for(std::size_t base=0;base<padded;base+=64u){
+        std::uint32_t words[64]={};
+        for(std::size_t i=0;i<64u;++i){
+            const std::size_t index=base+i;
+            std::uint8_t byte=0;
+            if(index<bytes.size())byte=bytes[index];
+            else if(index==bytes.size())byte=0x80u;
+            else if(index>=padded-8u){
+                const auto shift=static_cast<unsigned>(
+                    8u*(padded-1u-index)
+                );
+                byte=static_cast<std::uint8_t>((bit_length>>shift)&0xffu);
+            }
+            words[i/4u]|=static_cast<std::uint32_t>(byte)
+                <<static_cast<unsigned>(24u-8u*(i%4u));
+        }
+        for(std::size_t i=16;i<64u;++i){
+            const auto a=words[i-15u],b=words[i-2u];
+            const auto s0=rotate(a,7u)^rotate(a,18u)^(a>>3u);
+            const auto s1=rotate(b,17u)^rotate(b,19u)^(b>>10u);
+            words[i]=words[i-16u]+s0+words[i-7u]+s1;
+        }
+        auto a=h[0],b=h[1],c=h[2],d=h[3],
+             e=h[4],f=h[5],g=h[6],z=h[7];
+        for(std::size_t i=0;i<64u;++i){
+            const auto s1=rotate(e,6u)^rotate(e,11u)^rotate(e,25u);
+            const auto choice=(e&f)^(~e&g);
+            const auto t1=z+s1+choice+k[i]+words[i];
+            const auto s0=rotate(a,2u)^rotate(a,13u)^rotate(a,22u);
+            const auto majority=(a&b)^(a&c)^(b&c);
+            const auto t2=s0+majority;
+            z=g;g=f;f=e;e=d+t1;d=c;c=b;b=a;a=t1+t2;
+        }
+        h[0]+=a;h[1]+=b;h[2]+=c;h[3]+=d;
+        h[4]+=e;h[5]+=f;h[6]+=g;h[7]+=z;
+    }
+    static constexpr char digits[]="0123456789abcdef";
+    std::string result;
+    result.reserve(64);
+    for(auto word:h)for(int shift=28;shift>=0;shift-=4)
+        result.push_back(digits[(word>>shift)&0x0fu]);
+    return result;
+}
+
 using RSSPreviewEntries=std::map<std::string,std::vector<std::uint8_t>>;
 RSSPreviewEntries parse_existing_rss_archive_v1(
     const std::vector<std::uint8_t>& archive
@@ -213,6 +290,11 @@ std::map<std::string,std::string> preview_manifest(
 }
 
 int self_test(){
+    if(rss_preview_sha256_hex({})!=
+           "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+       ||rss_preview_sha256_hex({'a','b','c'})!=
+           "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")
+        throw std::runtime_error("RSS_UV_PREVIEW_SHA256_SELFTEST");
     Texture tex;
     tex.width=8;tex.height=8;tex.faces=2;
     tex.mesh_hash=std::string(64,'a');
@@ -320,6 +402,16 @@ int main(int argc,char** argv){
                 read_file(argv[2],160u*1024u*1024u)
             );
             manifest=preview_manifest(entries.at("manifest.txt"));
+            for(const auto& row:entries){
+                if(row.first=="manifest.txt")continue;
+                const auto key=std::string("sha256:")+row.first;
+                const auto expected=manifest.find(key);
+                if(expected==manifest.end()||
+                   expected->second!=rss_preview_sha256_hex(row.second))
+                    throw std::runtime_error(
+                        "RSS_UV_PREVIEW_ENTRY_SHA256_MISMATCH:"+row.first
+                    );
+            }
             graphics_blob=entries.at("graphics.bin");
             texture_blob=entries.at("texture.bin");
             pose_blob=entries.at("pose.bin");
@@ -341,6 +433,36 @@ int main(int argc,char** argv){
             if(argc==10){owner_path=argv[8];authority_path=argv[9];}
         }
         const auto graphics=realsas::graphics_v1::parse(graphics_blob);
+        if(archive_mode){
+            // This archive's virtual axis was selected from the mesh, not
+            // registered to any of the eight learned/observed view schedules.
+            // Never accept source-view hiding or precedence under that axis,
+            // even if someone rewrites and rehashes the entire manifest.
+            if(manifest.at("virtual_preview_camera_registered_to_graphics_view")!="0"||
+               manifest.at("virtual_preview_draw_policy")!=
+                   "ALL_CANONICAL_FRAGMENTS_POSED_DEPTH_ONLY"||
+               manifest.at("texture_layer_draw_order_authority")!=
+                   "POSED_DEPTH_ONLY_FOR_UNREGISTERED_VIRTUAL_CAMERA"||
+               graphics.views.empty())
+                throw std::runtime_error(
+                    "RSS_UV_PREVIEW_UNREGISTERED_VIEW_POLICY_DRIFT"
+                );
+            const auto& view0=graphics.views[0];
+            const auto n=graphics.fragment_ids.size();
+            bool valid=view0.visible_fragment.size()==n&&
+                       view0.topological_order.size()==n&&
+                       view0.precedes.size()==n*n;
+            if(valid)for(std::size_t i=0;i<n;++i){
+                valid=valid&&view0.visible_fragment[i]==1u&&
+                      view0.topological_order[i]==i;
+            }
+            if(valid)for(const auto edge:view0.precedes)
+                valid=valid&&edge==0u;
+            if(!valid)
+                throw std::runtime_error(
+                    "RSS_UV_PREVIEW_UNREGISTERED_VIEW_POLICY_DRIFT"
+                );
+        }
         const auto texture=realsas::rss_uv_v1::parse_texture(texture_blob);
         const auto poses=parse_poses(pose_blob);
         if(frame<0||frame>=static_cast<int>(poses.frames.size())||

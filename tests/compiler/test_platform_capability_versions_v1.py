@@ -118,6 +118,15 @@ def test_product_capability_implementations_are_complete_and_semantic():
         "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
     )
     assert proof["parameters"]["raw_mesh_uv_texture_atlas_replay_required"] is True
+    assert graphics["parameters"]["raw_native_interactive_preview_artifact_type"] == (
+        "RealSaS.RSSvNextNativeInteractivePuppetPreview"
+    )
+    assert graphics["parameters"]["raw_native_interactive_preview_release_authorized"] is False
+    assert graphics["parameters"]["raw_native_interactive_preview_virtual_camera"] is True
+    assert proof["parameters"]["input_raw_native_preview_artifact_type"] == (
+        "RealSaS.RSSvNextNativeInteractivePuppetPreview"
+    )
+    assert proof["parameters"]["raw_native_preview_independent_replay_required"] is True
 
     skin = specs["product.skin"]
     assert skin["policy"]["dependencies"] == [

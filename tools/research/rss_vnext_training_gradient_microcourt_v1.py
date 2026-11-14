@@ -63,6 +63,12 @@ def main() -> None:
             "iris_scene_cancellation_ratio":scene["cancellation_ratio"],
             "iris_scene_weighted_dominance_ratio":
                 scene["weighted_dominance_ratio"],
+            "iris_scene_first_order_descent_alignment":
+                scene["first_order_plain_gradient_descent_alignment"],
+            "iris_scene_adverse_first_order_families":
+                scene["adverse_first_order_family_count"],
+            "iris_scene_worst_named_parameter_pairs":
+                scene["worst_sampled_parameters"][:3],
             "iris_scene_sampled_parameters":scene["sampled_parameter_count"],
             "iris_scene_eligible_parameters":scene["eligible_parameter_count"],
             "iris_scene_sampled_elements":scene["sampled_scalar_elements"],
@@ -77,6 +83,10 @@ def main() -> None:
         "seeds":list(SEEDS),
         "conflicting_iris_scene_seeds":sum(
             int(r["iris_scene_negative_interference"]) for r in records
+        ),
+        "seeds_with_adverse_first_order_plain_gradient_descent":sum(
+            int(r["iris_scene_adverse_first_order_families"]>0)
+            for r in records
         ),
         "records":records,
     }

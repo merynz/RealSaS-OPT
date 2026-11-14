@@ -27,6 +27,7 @@ from models.axis.rig_program_model_v6 import (
 from models.mira.skin_fsq_codec_v6 import MIRASkinFSQCodecV6, MIRASkinFSQCodecConfig
 from models.tessa.v2.generation_v2 import TESSAGrammarStateV2
 from .animation_ready_mesh import RSSvNextAnimationReadyMesh, RSSvNextStructuralMeshCandidate
+from .tessa_incremental_decode_v1 import decode_next_token_v1
 from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefinementConfig
 from .semantic_structure import RSSvNextGenericRegionStructure
 from .early_semantic_field import RSSvNextEarlySemanticField
@@ -1023,8 +1024,8 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 # V3.1 exact rolling causal KV state shares the teacher-forced
                 # weights and semantics, avoiding O(prefix) full recomputation
                 # at every token. No token enters the cache twice.
-                logits_batch, incremental = self.tessa.decode_next_token_v1(
-                    memory=out.structural_memory,
+                logits_batch, incremental = decode_next_token_v1(
+                    self.tessa, memory=out.structural_memory,
                     token=ids[:, -1:],
                     cache=incremental,
                 )

@@ -71,37 +71,54 @@ struct PoseReader {
     }
 };
 struct Poses {
-    std::uint32_t width{},height{};
+    std::uint32_t width{},height{},view_count{1};
     std::vector<std::array<std::uint32_t,3>> faces;
-    std::vector<std::vector<Projected>> frames;
+    // All frames are computed from ONE canonical 3D mechanical pose.
+    // The inner views differ only by projection, never mesh/rig/skin identity.
+    std::vector<std::vector<std::vector<Projected>>> frames;
 };
 Poses parse_poses(const std::vector<std::uint8_t>& input){
-    static const char magic[8]={'R','S','P','O','S','E','0','1'};
-    if(input.size()<32||std::memcmp(input.data(),magic,8)!=0)
+    static const char legacy[8]={'R','S','P','O','S','E','0','1'};
+    static const char multi[8]={'R','S','P','O','S','E','0','2'};
+    const bool eight = input.size()>=36 &&
+        std::memcmp(input.data(),multi,8)==0;
+    if(input.size()<32 ||
+       (!eight&&std::memcmp(input.data(),legacy,8)!=0))
         throw std::runtime_error("RSS_UV_NATIVE_POSE_MAGIC");
     PoseReader r{input,8};
-    if(r.u32()!=1)throw std::runtime_error("RSS_UV_NATIVE_POSE_VERSION");
+    const auto version=r.u32();
+    if(version!=(eight?2u:1u))
+        throw std::runtime_error("RSS_UV_NATIVE_POSE_VERSION");
     const auto vertices=r.u32(),faces=r.u32(),frames=r.u32();
     Poses result;
+    result.view_count = eight ? r.u32() : 1u;
     result.width=r.u32();result.height=r.u32();
     if(
         vertices<3||vertices>65536||faces<1||faces>4096||
-        frames<1||frames>512||result.width<1||result.height<1||
+        frames<1||frames>512||
+        result.view_count!=(eight?8u:1u)||
+        result.width<1||result.height<1||
         result.width>2048||result.height>2048
     )throw std::runtime_error("RSS_UV_NATIVE_POSE_DOMAIN");
-    const std::size_t expected=32u+static_cast<std::size_t>(faces)*12u+
-        static_cast<std::size_t>(frames)*vertices*24u;
+    const std::size_t expected=(eight?36u:32u)+
+        static_cast<std::size_t>(faces)*12u+
+        static_cast<std::size_t>(frames)*result.view_count*vertices*24u;
     if(expected!=input.size())
         throw std::runtime_error("RSS_UV_NATIVE_POSE_BYTE_COUNT");
     result.faces.resize(faces);
     for(auto& face:result.faces)for(auto& vertex:face){
         vertex=r.u32();
-        if(vertex>=vertices)throw std::runtime_error("RSS_UV_NATIVE_POSE_FACE_INDEX");
+        if(vertex>=vertices)
+            throw std::runtime_error("RSS_UV_NATIVE_POSE_FACE_INDEX");
     }
-    result.frames.resize(frames,std::vector<Projected>(vertices));
-    for(auto& frame:result.frames)for(auto& vertex:frame){
-        vertex={r.f64(),r.f64(),r.f64()};
-        if(!(vertex.z>0.))throw std::runtime_error("RSS_UV_NATIVE_POSE_Z");
+    result.frames.resize(frames);
+    for(auto& frame:result.frames){
+        frame.resize(result.view_count,std::vector<Projected>(vertices));
+        for(auto& projected:frame)for(auto& vertex:projected){
+            vertex={r.f64(),r.f64(),r.f64()};
+            if(!(vertex.z>0.))
+                throw std::runtime_error("RSS_UV_NATIVE_POSE_Z");
+        }
     }
     return result;
 }
@@ -278,7 +295,8 @@ std::map<std::string,std::string> preview_manifest(
         start=end+1;
     }
     if(
-        result.at("schema")!="RealSaS.RSSvNext.NativeInteractivePuppetPreview.v1"
+        (result.at("schema")!="RealSaS.RSSvNext.NativeInteractivePuppetPreview.v1"
+          &&result.at("schema")!="RealSaS.RSSvNext.NativeInteractivePuppetPreview.v2")
         ||result.at("admission")!="DEVELOPER_PREVIEW_NOT_PRODUCT_REVISION"
         ||result.at("product_revision_minted")!="0"
         ||result.at("original_source_camera_observed")!="0"
@@ -444,7 +462,8 @@ int main(int argc,char** argv){
             source_view=parse_index(argv[5]);
             output_path=argv[6];
             if(argc==9){owner_path=argv[7];authority_path=argv[8];}
-            if(view!=0)
+            if(manifest.at("schema")==
+                "RealSaS.RSSvNext.NativeInteractivePuppetPreview.v1"&&view!=0)
                 throw std::runtime_error("RSS_UV_PREVIEW_SINGLE_PROJECTED_VIEW_ONLY");
         }else{
             graphics_blob=read_file(argv[1],16u*1024u*1024u);
@@ -471,21 +490,36 @@ int main(int argc,char** argv){
                 throw std::runtime_error(
                     "RSS_UV_PREVIEW_UNREGISTERED_VIEW_POLICY_DRIFT"
                 );
-            const auto& view0=graphics.views[0];
+            const bool eight=manifest.at("schema")==
+                "RealSaS.RSSvNext.NativeInteractivePuppetPreview.v2";
+            if(
+                manifest.count("presentation_profile")!=1||
+                manifest.at("presentation_profile")!=
+                  (eight?"EIGHT_YAW_45":"SINGLE_CAMERA_2D")||
+                manifest.count("native_view_count")!=1||
+                manifest.at("native_view_count")!=(eight?"8":"1")
+            )throw std::runtime_error(
+                "RSS_UV_PREVIEW_PRESENTATION_PROFILE_DRIFT"
+            );
+            if(eight&&graphics.views.size()!=8)
+                throw std::runtime_error("RSS_UV_PREVIEW_EIGHT_WAY_VIEW_COUNT");
             const auto n=graphics.fragment_ids.size();
-            bool valid=view0.visible_fragment.size()==n&&
-                       view0.topological_order.size()==n&&
-                       view0.precedes.size()==n*n;
-            if(valid)for(std::size_t i=0;i<n;++i){
-                valid=valid&&view0.visible_fragment[i]==1u&&
-                      view0.topological_order[i]==i;
+            for(std::size_t vi=0;vi<(eight?8u:1u);++vi){
+                const auto& selected=graphics.views[vi];
+                bool valid=selected.visible_fragment.size()==n&&
+                           selected.topological_order.size()==n&&
+                           selected.precedes.size()==n*n;
+                if(valid)for(std::size_t i=0;i<n;++i){
+                    valid=valid&&selected.visible_fragment[i]==1u&&
+                          selected.topological_order[i]==i;
+                }
+                if(valid)for(const auto edge:selected.precedes)
+                    valid=valid&&edge==0u;
+                if(!valid)
+                    throw std::runtime_error(
+                        "RSS_UV_PREVIEW_UNREGISTERED_VIEW_POLICY_DRIFT"
+                    );
             }
-            if(valid)for(const auto edge:view0.precedes)
-                valid=valid&&edge==0u;
-            if(!valid)
-                throw std::runtime_error(
-                    "RSS_UV_PREVIEW_UNREGISTERED_VIEW_POLICY_DRIFT"
-                );
         }
         const auto texture=realsas::rss_uv_v1::parse_texture(texture_blob);
         const auto poses=parse_poses(pose_blob);
@@ -494,14 +528,17 @@ int main(int argc,char** argv){
             throw std::runtime_error("RSS_UV_NATIVE_ARGUMENT_RANGE");
         if(archive_mode){
             if(
-                manifest.at("graphics_runtime_hash")!=graphics.runtime_graphics_hash
+                manifest.at("native_view_count") !=
+                    (poses.view_count==8?"8":"1")
+                || manifest.at("graphics_runtime_hash")!=graphics.runtime_graphics_hash
                 ||manifest.at("canonical_mesh_lineage_hash")!=texture.mesh_hash
                 ||parse_index(manifest.at("frame_count").c_str())
                     !=static_cast<int>(poses.frames.size())
             )throw std::runtime_error("RSS_UV_PREVIEW_MANIFEST_RUNTIME_BINDING_DRIFT");
         }
         const auto output=realsas::rss_uv_v1::render(
-            graphics,texture,poses.faces,poses.frames[frame],
+            graphics,texture,poses.faces,
+            poses.frames[frame][poses.view_count==1?0u:static_cast<std::size_t>(view)],
             poses.width,poses.height,static_cast<std::uint32_t>(view),source_view
         );
         write_file(output_path,output.rgba);

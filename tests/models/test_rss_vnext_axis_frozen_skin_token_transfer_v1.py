@@ -253,3 +253,23 @@ def test_axis_null_skin_embedding_actually_changes_pre_joint_conditioning():
         changed=model.axis(memory,batch.axis_teacher_sequence)[
             "hidden"][:,joints-1]
     assert not torch.allclose(original,changed,atol=1e-5)
+
+
+
+def test_bf16_training_source_tensor_identity_is_raw_bitwise_not_float32_recast():
+    from hashlib import sha256
+    import json
+    original=torch.tensor([0.0,1.25,-2.0],dtype=torch.float32)
+    header=json.dumps(
+        {"dtype":str(original.dtype),"shape":list(original.shape)},
+        sort_keys=True,separators=(",",":"),
+    ).encode()
+    expected=sha256(header+b"\0"+original.numpy().tobytes()).hexdigest()
+    assert source_surface_tensor_sha256(original)==expected
+    bf=original.to(torch.bfloat16)
+    actual=source_surface_tensor_sha256(bf)
+    assert len(actual)==64
+    assert actual!=expected
+    assert actual==source_surface_tensor_sha256(bf.clone())
+    assert actual!=source_surface_tensor_sha256(bf.float())
+    assert actual!=source_surface_tensor_sha256(bf.reshape(1,3))

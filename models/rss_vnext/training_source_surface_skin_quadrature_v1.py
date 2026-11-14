@@ -20,7 +20,7 @@ import torch.nn.functional as F
 from torch import Tensor
 
 
-SCHEMA="RealSaS.RSSvNext.SourceSurfaceSkinQuadrature.v1"
+SCHEMA="RealSaS.RSSvNext.SourceSurfaceSkinQuadrature.v2"
 # Three symmetric points, each with 1/3 quadrature weight; degree-two exact.
 _BARY=((2./3.,1./6.,1./6.),
        (1./6.,2./3.,1./6.),
@@ -30,6 +30,10 @@ _BARY=((2./3.,1./6.,1./6.),
 @dataclass(frozen=True)
 class RSSvNextSourceSurfaceSkinQuadratureV1:
     loss: Tensor
+    # Proper scoring rule over the whole joint simplex at each source
+    # quadrature point. Unlike per-influence SmoothL1, this metric does not
+    # dilute a fixed sparse joint error by appending zero-weight bones.
+    simplex_kl_loss: Tensor
     qualified_source_face_count: int
     qualified_source_surface_area: float
     source_faces_used: Tensor
@@ -123,6 +127,7 @@ def source_surface_area_skin_loss_v1(
     rest=source_rest_vertices.detach().to(dtype=torch.float32)
     bary=torch.tensor(_BARY,device=rest.device,dtype=torch.float32)
     a_loss=torch.zeros((),device=rest.device,dtype=torch.float32)
+    kl_loss=torch.zeros((),device=rest.device,dtype=torch.float32)
     area_total=torch.zeros((),device=rest.device,dtype=torch.float64)
     pred=predicted_vertex_skin.to(dtype=torch.float32)
     target=source_vertex_skin.detach().to(dtype=torch.float32)
@@ -146,13 +151,26 @@ def source_surface_area_skin_loss_v1(
         per_face=F.smooth_l1_loss(
             pquad,tquad,reduction="none",
         ).mean(dim=(-1,-2))
+        # Source-native skin is a FULL simplex for each quadrature sample,
+        # not J unrelated binary labels. KL(target || hard-code student)
+        # is zero only when all source influences match, and does not vanish
+        # merely because the character has more joints. Both distributions
+        # are interpolated on independently admitted SOURCE faces; no
+        # predicted geometry may select where this loss is evaluated.
+        # FP32 protects the tiny positive influences needed by attachments
+        # and extremities. Clamp is numerical only; never amend teacher.
+        per_face_kl=F.kl_div(
+            pquad.clamp_min(1e-12).log(),tquad,reduction="none",
+        ).sum(dim=-1).mean(dim=-1)
         a_loss=a_loss+(per_face*areas).sum()
+        kl_loss=kl_loss+(per_face_kl*areas).sum()
         area_total=area_total+areas.double().sum()
     area_float=float(area_total.item())
     if not 0.<area_float<float("inf"):
         raise ValueError("RSS_VNEXT_SOURCE_SURFACE_SKIN_TOTAL_AREA_INVALID")
     return RSSvNextSourceSurfaceSkinQuadratureV1(
         loss=a_loss/area_total.to(dtype=a_loss.dtype),
+        simplex_kl_loss=kl_loss/area_total.to(dtype=kl_loss.dtype),
         qualified_source_face_count=int(selected.shape[0]),
         qualified_source_surface_area=area_float,
         source_faces_used=selected.detach().clone(),

@@ -64,7 +64,12 @@ def _fixture():
     model=RSSvNextUnifiedCharacterModel(
         cfg,vision_encoder=RSSvNextPatchEncoderForTests(cfg.iris.image_token_dim),
     )
-    model.train()
+    # Like a staged VQ/token codec, do not allow the latent feature producer
+    # to learn or to change dropout statistics during codec bootstrap.
+    model.eval()
+    for name, parameter in model.named_parameters():
+        parameter.requires_grad_(name.startswith("mira.codec."))
+    model.mira.codec.train()
     original=torch.rand((1,2,4,16,16))
     generated=torch.rand((1,6,4,16,16))
     normals=torch.rand((1,6,3,16,16))*2.-1.
@@ -194,3 +199,51 @@ def test_codec_bootstrap_optimizer_cannot_silently_update_or_skip_other_experts(
             model,only_bias,dataset_manifest_sha256=DATASET,
             trusted_source_skin_registry=registry,
         )
+
+
+def test_codec_first_rejects_unfrozen_or_stochastic_upstream():
+    model,batch,registry=_fixture()
+    upstream=model.axis.kind_head.weight
+    upstream.requires_grad_(True)
+    with pytest.raises(RuntimeError,match="UPSTREAM_FREEZE_DRIFT"):
+        _trainer(model,registry)
+    upstream.requires_grad_(False)
+    model.iris.train()
+    with pytest.raises(RuntimeError,match="UPSTREAM_TRAIN_MODE_DRIFT"):
+        _trainer(model,registry)
+    model.iris.eval()
+    engine=_trainer(model,registry)
+    model.axis.train()
+    with pytest.raises(RuntimeError,match="UPSTREAM_TRAIN_MODE_DRIFT"):
+        engine.train_step(batch)
+
+
+def test_codec_first_catches_upstream_mutation_and_resume_identity(tmp_path):
+    model,batch,registry=_fixture()
+    engine=_trainer(model,registry)
+    engine.train_step(batch)
+    checkpoint=tmp_path/"stationary-mira.pt"
+    engine.save_checkpoint(checkpoint)
+    reference=_trainer(model,registry)
+    reference.load_checkpoint(checkpoint)
+    with torch.no_grad():
+        model.axis.kind_head.weight.add_(0.01)
+    with pytest.raises(RuntimeError,match="UPSTREAM_PARAMETER_MUTATED"):
+        engine.train_step(batch)
+    with pytest.raises(RuntimeError,match="UPSTREAM_PARAMETER_MUTATED"):
+        engine.save_checkpoint(checkpoint)
+    with pytest.raises(RuntimeError,match="UPSTREAM_PARAMETER_MUTATED"):
+        reference.load_checkpoint(checkpoint)
+
+
+def test_codec_first_rejects_optimizer_membership_drift_and_clears_stale_grad():
+    model,batch,registry=_fixture()
+    engine=_trainer(model,registry)
+    frozen=model.axis.kind_head.weight
+    frozen.grad=torch.ones_like(frozen)
+    engine.train_step(batch)
+    assert frozen.grad is None
+    # Parameter group changes after trainer construction must not be accepted.
+    engine.optimizer.param_groups[0]["params"].pop()
+    with pytest.raises((RuntimeError,ValueError),match="OPTIMIZER"):
+        engine.train_step(batch)

@@ -32,6 +32,9 @@ from .training_gradient_interference_v1 import (
     RSSvNextGradientCourtPolicyV1,
     audit_rss_vnext_gradient_interference_v1,
 )
+from .training_optimizer_ownership_v1 import (
+    qualify_rss_vnext_optimizer_ownership_v1,
+)
 
 from models.axis.rig_program_model_v6 import AXISSequenceV6, RigTokenKindV6
 from .contracts import RSSvNextSceneState
@@ -41,7 +44,7 @@ from .training_engine import (
     axis_teacher_sequence_sha256_v6, source_surface_tensor_sha256,
 )
 
-SCHEMA = "RealSaS.RSSvNext.EmbeddedMIRASourceCodecTrainer.v4"
+SCHEMA = "RealSaS.RSSvNext.EmbeddedMIRASourceCodecTrainer.v5"
 _TEACHER = "QUALIFIED_SOURCE_MIRA_DENSE_SKIN_TESSA_AXIS_JOINT_REINDEX"
 
 
@@ -130,7 +133,8 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or not isinstance(optimizer, torch.optim.Optimizer)
             or not _hex(dataset_manifest_sha256)
             or model.cfg.skin_decoder_mode != "DOT_PRODUCT_BASELINE"
-            or not model.training
+            or model.training
+            or not model.mira.codec.training
             or not any(p.requires_grad for p in model.mira.codec.parameters())
             or not trusted_source_skin_registry
         ):
@@ -191,12 +195,73 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         self.source_area_skin_weight=float(source_area_skin_weight)
         self.gradient_court_policy=gradient_court_policy
         self.config_sha256 = architecture_digest(model.cfg)
+        # Codec-first uses a stationary upstream scene/mesh/causal-JOINT
+        # conditioning distribution. no_grad() alone would NOT prevent
+        # dropout or future upstream optimizer updates from moving labels.
+        self._frozen_parameter_versions = tuple(
+            (name, p._version) for name, p in model.named_parameters()
+            if not name.startswith("mira.codec.")
+        )
+        # Fail with the *stage* violation first, before the generic optimizer
+        # receipt can disguise an accidentally unfrozen upstream parameter.
+        live = {name for name, p in model.named_parameters() if p.requires_grad}
+        codec_names = {
+            name for name, _ in model.named_parameters()
+            if name.startswith("mira.codec.")
+        }
+        if not codec_names or live != codec_names:
+            raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_UPSTREAM_FREEZE_DRIFT")
+        self.optimizer_ownership = qualify_rss_vnext_optimizer_ownership_v1(
+            model, optimizer,
+        )
+        self.frozen_upstream_state_sha256 = self._frozen_upstream_sha256()
+        self._assert_scope()
         self.step = 0
+
+    def _frozen_upstream_sha256(self) -> str:
+        # Full state includes buffers, not only trainable parameters. Hash at
+        # stage entry/checkpoint boundaries and periodically during training.
+        return _digest_json({
+            name: source_surface_tensor_sha256(tensor)
+            for name, tensor in self.model.state_dict().items()
+            if not name.startswith("mira.codec.")
+        })
+
+    def _assert_scope(self) -> None:
+        model = self.model
+        if (
+            model.training or not model.mira.codec.training
+            or any(
+                module.training
+                for name, module in model.named_modules()
+                if not name.startswith("mira.codec")
+            )
+        ):
+            raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_UPSTREAM_TRAIN_MODE_DRIFT")
+        named = tuple(model.named_parameters())
+        trainable = {name for name, p in named if p.requires_grad}
+        codec = {name for name, _ in named if name.startswith("mira.codec.")}
+        if not codec or trainable != codec:
+            raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_UPSTREAM_FREEZE_DRIFT")
+        versions = tuple(
+            (name, p._version) for name, p in named
+            if not name.startswith("mira.codec.")
+        )
+        if versions != self._frozen_parameter_versions:
+            raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_UPSTREAM_PARAMETER_MUTATED")
+        current = qualify_rss_vnext_optimizer_ownership_v1(
+            model, self.optimizer,
+        )
+        if current.binding_sha256 != self.optimizer_ownership.binding_sha256:
+            raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_OPTIMIZER_PHASE_DRIFT")
+
+    def _assert_frozen_state_identity(self) -> None:
+        if self._frozen_upstream_sha256() != self.frozen_upstream_state_sha256:
+            raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_UPSTREAM_STATE_DRIFT")
 
     def objective(self, batch: RSSvNextEmbeddedMIRACodecBatchV1):
         model=self.model
-        if not model.training or not model.mira.codec.training:
-            raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_CODEC_REQUIRES_TRAIN")
+        self._assert_scope()
         if (
             type(batch) is not RSSvNextEmbeddedMIRACodecBatchV1
             or not _hex(batch.source_binding_sha256)
@@ -585,6 +650,12 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         return report
 
     def train_step(self, batch: RSSvNextEmbeddedMIRACodecBatchV1):
+        self._assert_scope()
+        if self.step % 128 == 0:
+            self._assert_frozen_state_identity()
+        for name, parameter in self.model.named_parameters():
+            if not name.startswith("mira.codec."):
+                parameter.grad = None
         self.optimizer.zero_grad(set_to_none=True)
         result=self.objective(batch)
         if (
@@ -604,6 +675,8 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
 
     def save_checkpoint(self, path: str | Path) -> None:
         """Resume codec-first source training, not export a ProductRelease."""
+        self._assert_scope()
+        self._assert_frozen_state_identity()
         target=Path(path)
         target.parent.mkdir(parents=True,exist_ok=True)
         payload={
@@ -616,10 +689,14 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             "source_area_skin_weight":self.source_area_skin_weight,
             "gradient_court_policy":asdict(self.gradient_court_policy),
             "model_config_sha256":self.config_sha256,
+            "frozen_upstream_state_sha256":self.frozen_upstream_state_sha256,
+            "optimizer_ownership_sha256":self.optimizer_ownership.binding_sha256,
             "step":self.step,
             "codec_state_dict":self.model.mira.codec.state_dict(),
             "optimizer":self.optimizer.state_dict(),
             "torch_cpu_rng":torch.get_rng_state(),
+            "torch_cuda_rng":torch.cuda.get_rng_state_all() if torch.cuda.is_available() else [],
+            "cuda_device_count":torch.cuda.device_count() if torch.cuda.is_available() else 0,
         }
         with tempfile.NamedTemporaryFile(
             dir=target.parent,prefix="miracodec-",suffix=".pt",delete=False,
@@ -632,6 +709,8 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             tmp.unlink(missing_ok=True)
 
     def load_checkpoint(self, path: str | Path) -> None:
+        self._assert_scope()
+        self._assert_frozen_state_identity()
         payload=torch.load(Path(path),map_location="cpu",weights_only=True)
         if (
             payload.get("schema")!=SCHEMA
@@ -643,13 +722,19 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or payload.get("source_area_skin_weight")!=self.source_area_skin_weight
             or payload.get("gradient_court_policy")!=asdict(self.gradient_court_policy)
             or payload.get("model_config_sha256")!=self.config_sha256
+            or payload.get("frozen_upstream_state_sha256")!=self.frozen_upstream_state_sha256
+            or payload.get("optimizer_ownership_sha256")!=self.optimizer_ownership.binding_sha256
             or type(payload.get("step")) is not int or payload["step"]<0
+            or payload.get("cuda_device_count")!=(torch.cuda.device_count() if torch.cuda.is_available() else 0)
+            or not isinstance(payload.get("torch_cuda_rng"),list)
         ):
             raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_CODEC_RESUME_DRIFT")
         self.model.mira.codec.load_state_dict(payload["codec_state_dict"],strict=True)
         self.optimizer.load_state_dict(payload["optimizer"])
         self.step=payload["step"]
         torch.set_rng_state(payload["torch_cpu_rng"])
+        if torch.cuda.is_available() and payload["torch_cuda_rng"]:
+            torch.cuda.set_rng_state_all(payload["torch_cuda_rng"])
 
 
 __all__ = [

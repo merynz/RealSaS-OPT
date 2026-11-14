@@ -47,7 +47,13 @@ def write_rss_v2(path: Path, entries: OrderedDict[str, bytes]) -> dict:
 
 
 def read_rss_v2(path: Path) -> OrderedDict[str, bytes]:
-    raw = path.read_bytes()
+    return read_rss_v2_bytes_v1(path.read_bytes())
+
+
+def read_rss_v2_bytes_v1(raw: bytes) -> OrderedDict[str, bytes]:
+    """Decode an in-memory CAS archive with the same strict file reader."""
+    if not isinstance(raw, bytes):
+        raise QualificationError("RSS_V2_BYTE_INPUT_REQUIRED")
     offset = 0
     if raw[: len(MAGIC)] != MAGIC:
         raise QualificationError("RSS_V2_MAGIC_INVALID")

@@ -47,6 +47,13 @@ from .neural_scene_archive_v1 import (
 from .inference_evidence_export_v1 import (
     export_inference_evidence_v1, _source_tensor_digest,
 )
+from .inference_anchor_face_export_v1 import (
+    export_rss_vnext_neural_socket_face_archive_v1,
+)
+from compiler.realsas_compiler_core.rss_vnext_socket_face_archive_v1 import (
+    SCHEMA as NEURAL_ANCHOR_FACE_SCHEMA,
+    read_rss_vnext_neural_socket_face_archive_v1,
+)
 
 _RECEIPT_SCHEMA = "RealSaS.RSSvNext.SourceToCompilerProposalReceipt.v2"
 _RECEIPT_FILES = ("observed_source_tensors.npz", "neural_evidence.json", "inference_receipt.json")
@@ -54,6 +61,7 @@ _ORIGINAL_SOURCE_FILE = "original_two_view_source.npz"
 _NEURAL_SCENE_FILE = "rss_vnext_neural_scene.npz"
 _UNIFIED_CONFIG_FILE = "rss_vnext_unified_model_config.json"
 _EMBEDDED_MIRA_FILE = "rss_vnext_embedded_mira_decoder.pt"
+_ANCHOR_FACE_FILE = "rss_vnext_neural_anchor_face.json"
 _MAX_SOURCE_BYTES = 128 * 1024 * 1024
 
 
@@ -137,7 +145,7 @@ def run_two_view_to_compiler_proposal_v1(
     target = Path(output_directory).resolve()
     target.mkdir(parents=True, exist_ok=True)
     # Refuse accidental reuse of an existing receipt: revision lineage is immutable.
-    if any((target / name).exists() for name in (*_RECEIPT_FILES, _ORIGINAL_SOURCE_FILE, _NEURAL_SCENE_FILE, _UNIFIED_CONFIG_FILE, _EMBEDDED_MIRA_FILE)):
+    if any((target / name).exists() for name in (*_RECEIPT_FILES, _ORIGINAL_SOURCE_FILE, _NEURAL_SCENE_FILE, _UNIFIED_CONFIG_FILE, _EMBEDDED_MIRA_FILE, _ANCHOR_FACE_FILE)):
         raise RuntimeError("RSS_VNEXT_RUN_OUTPUT_REVISION_ALREADY_EXISTS")
     model = load_inference_checkpoint_v1(
         checkpoint_path,
@@ -203,6 +211,11 @@ def run_two_view_to_compiler_proposal_v1(
     validate_inference_evidence_v1(
         evidence, expected_checkpoint_sha256=expected_checkpoint_sha256,
     )
+    anchor_archive = export_rss_vnext_neural_socket_face_archive_v1(
+        prediction, evidence=evidence,
+    )
+    if anchor_archive is not None:
+        _atomic_bytes(target / _ANCHOR_FACE_FILE, anchor_archive)
     # Export the actual embedded MIRA FSQ + spatial decoder weights from this
     # SAME unified checkpoint. No fake independent MIRA model release or
     # launcher-supplied codec digest is allowed to establish skin-code meaning.
@@ -267,6 +280,13 @@ def run_two_view_to_compiler_proposal_v1(
         "product_revision_minted": False,
         "qualification_status": "COMPILER_EVIDENCE_SEALED_NOT_PRODUCT_QUALIFIED",
     }
+    if anchor_archive is not None:
+        receipt.update({
+            "anchor_face_archive_schema": NEURAL_ANCHOR_FACE_SCHEMA,
+            "anchor_face_archive_file_sha256": _digest_file(target / _ANCHOR_FACE_FILE),
+            "anchor_face_archive_authority": "MODEL_SELECTED_UNQUALIFIED_ONLY",
+            "anchor_face_executable_attachment_qualified": False,
+        })
     if generation is not None:
         receipt["scene_construction_policy"] = "TWO_ORIGINAL_TO_CANONICAL_TO_SIX_GENERATED_RGB_NORMAL"
         receipt["generation_checkpoint_binding_sha256"] = generation.construction_checkpoint_binding_sha256
@@ -401,6 +421,24 @@ def read_compiler_proposal_receipt_v1(
     )
     if evidence.evidence_hash != receipt["evidence_hash"] or evidence.mesh_status != receipt["status"]:
         raise RuntimeError("RSS_VNEXT_RECEIPT_EVIDENCE_DRIFT")
+    anchor_path = root / _ANCHOR_FACE_FILE
+    expected_anchor_digest = receipt.get("anchor_face_archive_file_sha256")
+    if expected_anchor_digest is None:
+        if anchor_path.exists():
+            raise RuntimeError("RSS_VNEXT_RECEIPT_UNDECLARED_ANCHOR_FACE_ARCHIVE")
+    else:
+        if (
+            receipt.get("anchor_face_archive_schema") != NEURAL_ANCHOR_FACE_SCHEMA
+            or receipt.get("anchor_face_archive_authority") != "MODEL_SELECTED_UNQUALIFIED_ONLY"
+            or receipt.get("anchor_face_executable_attachment_qualified") is not False
+            or not anchor_path.is_file()
+            or anchor_path.stat().st_size > 2 * 1024 * 1024
+            or _digest_file(anchor_path) != expected_anchor_digest
+        ):
+            raise RuntimeError("RSS_VNEXT_RECEIPT_ANCHOR_FACE_ARCHIVE_BYTES_DRIFT")
+        read_rss_vnext_neural_socket_face_archive_v1(
+            anchor_path.read_bytes(), evidence=evidence,
+        )
     if not _carrier_decoder_follows:
         read_neural_scene_carrier_v1(
             carrier_path.read_bytes(), evidence=evidence,
@@ -558,7 +596,40 @@ def read_compiler_expert_fanout_v1(
     )
 
 
+def read_compiler_model_selected_socket_face_join_v1(
+    directory: str | Path, *,
+    expected_checkpoint_sha256: str,
+    model_config,
+):
+    """Replay original model carrier and neural HELD/HOLDER as typed candidates.
+
+    No source contact, held-object transform, canonical edit authority or
+    executable PuppetRevision is granted by this reader.
+    """
+    from compiler.realsas_compiler_core.rss_vnext_surface_decisions_v1 import (
+        compile_rss_vnext_surface_candidates_v1,
+    )
+    from compiler.realsas_compiler_core.rss_vnext_socket_face_archive_v1 import (
+        compile_model_selected_rss_vnext_socket_face_join_v1,
+    )
+    fanout = read_compiler_expert_fanout_v1(
+        directory, expected_checkpoint_sha256=expected_checkpoint_sha256,
+        model_config=model_config,
+    )
+    sidecar = Path(directory).resolve() / _ANCHOR_FACE_FILE
+    if not sidecar.is_file():
+        return None
+    archive = read_rss_vnext_neural_socket_face_archive_v1(
+        sidecar.read_bytes(), evidence=fanout.evidence,
+    )
+    surface = compile_rss_vnext_surface_candidates_v1(fanout)
+    return compile_model_selected_rss_vnext_socket_face_join_v1(
+        fanout=fanout, surface=surface, archive=archive,
+    )
+
+
 __all__ = [
+    "read_compiler_model_selected_socket_face_join_v1",
     "read_compiler_expert_fanout_v1",
     "read_compiler_neural_scene_v1",
     "run_two_view_to_compiler_proposal_v1",

@@ -87,6 +87,12 @@ def test_two_original_images_through_motion_and_independent_proof_source_replay(
         "mesh_uv_texture_atlas_recomputed_independently"
     ] is True
     assert d["raw_original_source_graphics_replay"][
+        "native_interactive_preview_recomputed_independently"
+    ] is True
+    assert d["raw_original_source_graphics_replay"][
+        "native_preview_product_revision_minted"
+    ] is False
+    assert d["raw_original_source_graphics_replay"][
         "mesh_uv_atlas_compiled_from_real_original_rgb"
     ] is True
     assert d["raw_original_source_graphics_replay"][
@@ -266,5 +272,30 @@ def test_raw_proof_refuses_source_and_receipt_downgrade_to_legacy(
             "RealSaS.RSSvNextGraphicsNativeCandidateReceipt",
         }
     ]
-    with pytest.raises(RuntimeError, match="ORPHAN_RAW_UV_TEXTURE_ATLAS"):
+    with pytest.raises(RuntimeError, match="ORPHAN_NATIVE_INTERACTIVE_PREVIEW"):
+        _proof(cas, request)
+
+
+
+def test_raw_proof_refuses_rehashed_fake_native_puppet_preview(
+    tmp_path,
+):
+    cas, request, _, _ = _complete_product_preflight(tmp_path)
+    old = next(
+        ref for ref in request["input_artifacts"]
+        if ref["artifact_type"] == "RealSaS.RSSvNextNativeInteractivePuppetPreview"
+    )
+    blob = bytearray(cas.read_object(old))
+    assert blob.startswith(b"RSASV2R1")
+    # Modify bytes while preserving a valid CAS digest and producer reference.
+    blob[-5] ^= 1
+    forged = {
+        **cas.put_bytes(bytes(blob)),
+        "artifact_type": old["artifact_type"],
+        "schema_version": "v1",
+    }
+    request["input_artifacts"] = [
+        forged if row is old else row for row in request["input_artifacts"]
+    ]
+    with pytest.raises(RuntimeError,match="NATIVE_PUPPET_PREVIEW_REPLAY_MISMATCH"):
         _proof(cas, request)

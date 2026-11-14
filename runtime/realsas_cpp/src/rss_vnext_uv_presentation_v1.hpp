@@ -175,7 +175,8 @@ inline bool accept_edge(double v,bool inclusive){
 // tap contributing nonzero weight has an original-source sample in this chart.
 // Renormalizing a single observed tap into unknown neighbors would fabricate
 // "observed" colors. Unknown coverage falls back to clearly INFERRED H(x).
-// Bilinear taps stay inside this face's UV triangle, not a neighbor's chart.
+// Bilinear taps must stay inside the CURRENT FACE'S UV TRIANGLE, not merely
+// the axis-aligned UV bounding rectangle (which includes adjacent face charts).
 // A disagreement between the TWO original layers remains preserved in
 // tex.conflict; selecting one view never establishes 3D surface ownership.
 inline Color sample_texture(const Texture& tex,std::uint32_t face,
@@ -189,10 +190,22 @@ inline Color sample_texture(const Texture& tex,std::uint32_t face,
     const double gx=u*tex.width-.5,gy=v*tex.height-.5;
     const auto x0=static_cast<int>(std::floor(gx)),y0=static_cast<int>(std::floor(gy));
     const double fx=gx-x0,fy=gy-y0;
-    const double umin=std::min({static_cast<double>(uv[0][0]),double(uv[1][0]),double(uv[2][0])});
-    const double umax=std::max({static_cast<double>(uv[0][0]),double(uv[1][0]),double(uv[2][0])});
-    const double vmin=std::min({static_cast<double>(uv[0][1]),double(uv[1][1]),double(uv[2][1])});
-    const double vmax=std::max({static_cast<double>(uv[0][1]),double(uv[1][1]),double(uv[2][1])});
+    const auto uv_orient=[](const auto& a,const auto& b,double x,double y){
+        return (static_cast<double>(b[0])-a[0])*(y-a[1])-
+               (static_cast<double>(b[1])-a[1])*(x-a[0]);
+    };
+    const double uv_area=uv_orient(uv[0],uv[1],uv[2][0],uv[2][1]);
+    if(!std::isfinite(uv_area)||std::abs(uv_area)<=1e-15)
+        return Color{}; // Degenerate UV chart cannot claim sampled appearance.
+    const auto inside_current_chart=[&](double x,double y){
+        const double u0=uv_orient(uv[1],uv[2],x,y)/uv_area;
+        const double u1=uv_orient(uv[2],uv[0],x,y)/uv_area;
+        const double u2=uv_orient(uv[0],uv[1],x,y)/uv_area;
+        // Texel center lies on (or within) THIS triangle. The tolerance is
+        // relative to barycentric coordinates, not atlas-size pixels.
+        return u0>=-1e-7 && u1>=-1e-7 && u2>=-1e-7 &&
+               u0<=1.+1e-7 && u1<=1.+1e-7 && u2<=1.+1e-7;
+    };
     const std::array<std::array<int,2>,4> taps{{
         {x0,y0},{x0+1,y0},{x0,y0+1},{x0+1,y0+1}
     }};
@@ -210,8 +223,12 @@ inline Color sample_texture(const Texture& tex,std::uint32_t face,
                 continue;
             }
             const double tu=(x+.5)/tex.width,tv=(y+.5)/tex.height;
-            if(tu<umin-1e-7||tu>umax+1e-7||tv<vmin-1e-7||tv>vmax+1e-7){
-                if(view>=0)return Color{}; // never paint across chart support
+            if(!inside_current_chart(tu,tv)){
+                // Any nonzero-weight source tap from OUTSIDE the current
+                // chart forbids "observed-source" color authority. Inferred
+                // texture can discard unsupported taps, never read a
+                // neighbor's inferred color and silently normalize it in.
+                if(view>=0)return Color{};
                 continue;
             }
             const auto p=static_cast<std::size_t>(y)*tex.width+x;
@@ -238,8 +255,11 @@ inline Color sample_texture(const Texture& tex,std::uint32_t face,
     return try_layer(-1);
 }
 
-// Presentation owns draw order, not UV texture; "z" comes from the projected,
-// deformed *canonical* mesh at this frame. Different frames can change overlap.
+// Presentation owns draw order, not UV texture. Its active cameras are
+// ORTHOGRAPHIC (project_points_xyz_v3): screen-space barycentrics and depth
+// MUST be affine, never perspective-correct 1/z. The latter moves UV colors
+// across the mesh when joints change camera depth and breaks source pixel
+// correspondence. Different poses can change physical first-hit ordering.
 inline PixelImage render(const graphics_v1::State& graphics,const Texture& texture,
                          const std::vector<std::array<std::uint32_t,3>>& faces,
                          const std::vector<Projected>& posed_vertices,
@@ -286,20 +306,19 @@ inline PixelImage render(const graphics_v1::State& graphics,const Texture& textu
             if(!accept_edge(sign*e0,inclusive[0])||
                !accept_edge(sign*e1,inclusive[1])||
                !accept_edge(sign*e2,inclusive[2]))continue;
-            // Perspective-correct interpolation in the camera z domain.
+            // Orthographic screen barycentric coordinates are already
+            // linear in canonical geometry; no inverse-depth correction.
             const double w0=e0/area,w1=e1/area,w2=e2/area;
-            const double denom=w0/a.z+w1/b.z+w2/c.z;
-            if(denom<=0||!std::isfinite(denom))
-                throw std::runtime_error("RSS_UV_NATIVE_PERSPECTIVE_DOMAIN");
-            const std::array<double,3> bary={
-                (w0/a.z)/denom,(w1/b.z)/denom,(w2/c.z)/denom
-            };
+            const std::array<double,3> bary={w0,w1,w2};
+            const double depth=w0*a.z+w1*b.z+w2*c.z;
+            if(!(depth>0.)||!std::isfinite(depth))
+                throw std::runtime_error("RSS_UV_NATIVE_ORTHOGRAPHIC_DEPTH_DOMAIN");
             const auto color=sample_texture(texture,f,bary,original_view_hint);
             if(color.authority==0||color.rgba[3]<=1e-12)continue;
             const auto p=static_cast<std::size_t>(y)*width+x;
             if(layers[p].size()>=32)
                 throw std::runtime_error("RSS_UV_NATIVE_LAYER_OVERFLOW");
-            layers[p].push_back({f,1./denom,color});
+            layers[p].push_back({f,depth,color});
         }
     }
     PixelImage output;

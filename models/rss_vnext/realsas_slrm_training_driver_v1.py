@@ -108,7 +108,7 @@ class RealSaSSLRMTrainerV1:
     each minibatch. It binds original source, generated input, cameras,
     camera rays, peeled role mask, RGB, alpha and semantic GT.
     """
-    schema="RealSaS.RSSvNext.RealSaSSLRMTrainer.v1"
+    schema="RealSaS.RSSvNext.RealSaSSLRMTrainer.v2"
 
     def __init__(
         self, model: RSSvNextUnifiedCharacterModel, optimizer: torch.optim.Optimizer,

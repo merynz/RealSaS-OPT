@@ -552,7 +552,7 @@ class RSSvNextStructuralTrainer:
                 or any(t.device != batch.rgba.device for t in (generated, normals, cameras))
             ):
                 raise ValueError("RSS_VNEXT_TRAIN_PRODUCT_GENERATED_SCENE_SHAPE")
-            from .realsas_two_source_construction_v1 import (
+            from .realsas_virtual_camera_policy_v1 import (
                 target_canonical_and_six_cameras_v1,
             )
             # The generation stage uses precisely these six virtual cameras.

@@ -391,6 +391,13 @@ def compile_rss_vnext_native_preview_package_v1(
         "native_view_count": "8" if eight_way else "1",
         "presentation_profile": "EIGHT_YAW_45" if eight_way else "SINGLE_CAMERA_2D",
         "color_source_layer_policy": "EXPLICIT_HINT_ONLY",
+        # An inferred semantic role only selects an optional presentation
+        # pass; it never qualifies source drawable/visibility or modifies
+        # original RGB. Role IDs are native texture-bound per canonical face.
+        "semantic_role_sublayer_model_only": (
+            "1" if texture_bytes.startswith(b"RSUVT002") else "0"
+        ),
+        "semantic_role_sublayer_source_qualified": "0",
         "texture_layer_draw_order_authority": "POSED_DEPTH_ONLY_FOR_UNREGISTERED_VIRTUAL_CAMERA",
     }
     for name, blob in entries.items():

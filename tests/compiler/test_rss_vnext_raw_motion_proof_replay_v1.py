@@ -347,3 +347,52 @@ def test_unknown_presentation_profile_is_rejected_before_compilation(tmp_path):
         execute_graphics_capability_v1(
             request,read_object=cas.read_object,put_bytes=cas.put_bytes,
         )
+
+
+def test_graphics_is_only_active_two_image_appearance_owner_and_semantic_is_consumed(
+    tmp_path,
+):
+    cas, request, _, graphics=_complete_product_preflight(tmp_path)
+    diagnostics=graphics["diagnostics"]
+    assert diagnostics["mesh_uv_semantic_role_evidence_consumed"] is True
+    # The fixture deliberately binds a *different* but valid source
+    # semantic schema. Carry the actual checkpoint/schema ID, never
+    # overwrite it with a hard-coded default semantic label ontology.
+    assert diagnostics["mesh_uv_semantic_role_schema_id"] == "Test.Presentation"
+    assert diagnostics["mesh_uv_semantic_role_is_source_truth"] is False
+    assert diagnostics["source_rgb_surface_ownership_qualified"] is False
+    assert diagnostics["source_appearance_qualified"] is False
+    uv=cas.read_object(next(
+        ref for ref in graphics["outputs"]
+        if ref["artifact_type"]=="RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
+    ))
+    from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
+        reopen_rss_vnext_uv_texture_atlas_v1,
+    )
+    arrays, manifest=reopen_rss_vnext_uv_texture_atlas_v1(uv)
+    assert "face_presentation_role_probabilities_f32" in arrays
+    assert "face_presentation_role_primary_u8" in arrays
+    assert manifest["neural_graphics_field_source"] == (
+        "SAME_UNIFIED_H_TESSA_VERTEX_GRAPHICS_LOGITS"
+    )
+    assert manifest["semantic_role_sublayer_never_overrides_original_rgba"]
+    assert manifest["semantic_role_sublayer_does_not_assert_visibility_or_draw_order"]
+    preview=cas.read_object(next(
+        ref for ref in graphics["outputs"]
+        if ref["artifact_type"]=="RealSaS.RSSvNextNativeInteractivePuppetPreview"
+    ))
+    from compiler.realsas_compiler_core.runtime_package_v2 import read_rss_v2_bytes_v1
+    native=read_rss_v2_bytes_v1(preview)
+    assert native["texture.bin"].startswith(b"RSUVT002")
+    assert b"semantic_role_sublayer_model_only=1" in native["manifest.txt"]
+    assert b"semantic_role_sublayer_source_qualified=0" in native["manifest.txt"]
+    result=_proof(cas,request)
+    assert result["status"]=="FAIL"
+    assert result["failure"]["code"]=="PRODUCT_PROOF_INDEPENDENT_WITNESSES_MISSING"
+    assert result["diagnostics"]["raw_original_source_graphics_replay"][
+        "mesh_uv_texture_atlas_recomputed_independently"
+    ] is True
+    assert result["diagnostics"]["raw_original_source_graphics_replay"][
+        "native_interactive_preview_recomputed_independently"
+    ] is True
+    assert result["diagnostics"]["product_revision_minted"] is False

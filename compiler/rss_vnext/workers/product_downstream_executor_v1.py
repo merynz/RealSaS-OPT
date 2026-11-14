@@ -256,6 +256,8 @@ def _raw_same_h_graphics_vertex_logits_v1(
         allowed=SCENE_REQUIRED | MESH_KEYS | AXIS_MIRA_KEYS | RAW_GRAPHICS_KEYS,
     )
     field = scene["tessa_candidate_graphics_logits"]
+    roles = scene["tessa_candidate_presentation_role_logits"]
+    role_schema = receipt.get("tessa_mesh_candidate_role_schema_id")
     id_index = {
         row.canonical_mesh_vertex_id: i
         for i, row in enumerate(mesh.vertices)
@@ -267,8 +269,13 @@ def _raw_same_h_graphics_vertex_logits_v1(
     if (
         field.ndim != 3 or field.shape[0] != 1
         or field.shape[1] != len(mesh.vertices)
-        or field.shape[2] < 5
+        or field.shape[2] != 5
         or not np.isfinite(field).all()
+        or roles.ndim != 3
+        or roles.shape[:2] != (1, len(mesh.vertices))
+        or not 2 <= roles.shape[2] <= 16
+        or not np.isfinite(roles).all()
+        or type(role_schema) is not str or not role_schema
         or any(
             row.source_candidate_vertex_id != f"RSSV:{i:08d}"
             for i, row in enumerate(mesh.vertices)
@@ -276,7 +283,10 @@ def _raw_same_h_graphics_vertex_logits_v1(
         or not np.array_equal(scene["tessa_candidate_faces"], canonical_faces)
     ):
         raise RuntimeError("SOURCE_RGB_NEURAL_GRAPHICS_VERTEX_ADDRESS_DRIFT")
-    return field[0].copy(), scene_ref["content_sha256"]
+    return (
+        field[0].copy(), roles[0].copy(), role_schema,
+        scene_ref["content_sha256"],
+    )
 
 
 def _seal_binary_candidate_v1(
@@ -495,13 +505,17 @@ def _replay_raw_source_graphics_proof_v1(
         uv_refs[0], read_object, limit=MAX_UV_BYTES,
     )
     _, uv_claim = reopen_rss_vnext_uv_texture_atlas_v1(uv_bytes)
-    graphics_logits, graphics_scene_digest = _raw_same_h_graphics_vertex_logits_v1(
-        request, read_object, mesh,
+    graphics_logits, role_logits, role_schema, graphics_scene_digest = (
+        _raw_same_h_graphics_vertex_logits_v1(
+            request, read_object, mesh,
+        )
     )
     uv_expected, uv_receipt = compile_rss_vnext_uv_texture_atlas_v1(
         source_rgb_candidates=expected_rgb, mesh=mesh,
         graphics_vertex_logits=graphics_logits,
         graphics_scene_content_sha256=graphics_scene_digest,
+        presentation_role_vertex_logits=role_logits,
+        presentation_role_schema_id=role_schema,
     )
     if (
         uv_bytes != uv_expected
@@ -708,13 +722,17 @@ def execute_graphics_capability_v1(
         from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
             compile_rss_vnext_uv_texture_atlas_v1,
         )
-        graphics_logits, graphics_scene_digest = _raw_same_h_graphics_vertex_logits_v1(
-            request, read_object, mesh,
+        graphics_logits, role_logits, role_schema, graphics_scene_digest = (
+            _raw_same_h_graphics_vertex_logits_v1(
+                request, read_object, mesh,
+            )
         )
         raw_texture_atlas, raw_texture_manifest = compile_rss_vnext_uv_texture_atlas_v1(
             source_rgb_candidates=raw_source_rgb, mesh=mesh,
             graphics_vertex_logits=graphics_logits,
             graphics_scene_content_sha256=graphics_scene_digest,
+            presentation_role_vertex_logits=role_logits,
+            presentation_role_schema_id=role_schema,
         )
     rendered = build_runtime_graphics_v1(compiled,face_count=len(mesh.faces))
     native_preview_bytes = None
@@ -812,6 +830,20 @@ def execute_graphics_capability_v1(
                 if raw_texture_manifest is not None else 0
             ),
             "mesh_uv_texture_surface_ownership_qualified": False,
+            "mesh_uv_semantic_role_evidence_consumed": (
+                bool(raw_texture_manifest.get(
+                    "semantic_role_sublayer_is_model_candidate_not_source_truth",
+                )) if raw_texture_manifest is not None else False
+            ),
+            "mesh_uv_semantic_role_schema_id": (
+                raw_texture_manifest.get("semantic_role_schema_id")
+                if raw_texture_manifest is not None else None
+            ),
+            "mesh_uv_semantic_role_abstentions": (
+                raw_texture_manifest.get("semantic_face_abstention_count")
+                if raw_texture_manifest is not None else None
+            ),
+            "mesh_uv_semantic_role_is_source_truth": False,
             "mesh_uv_neural_graphics_candidate_texels": (
                 raw_texture_manifest["neural_graphics_color_texel_count"]
                 if raw_texture_manifest is not None else 0

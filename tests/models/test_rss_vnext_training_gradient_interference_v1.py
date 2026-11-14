@@ -151,7 +151,11 @@ def test_real_unified_IRIS_court_is_observational_and_optimizer_step_identical(t
         dataset_manifest_sha256=manifest_hash(),weights=weights,
         trusted_semantic_patch_registry=registry,
     )
+    torch.manual_seed(8171)
     result=audited.train_step(batch)
+    # A training diagnostic may not consume dropout RNG either: equal seeds
+    # must yield byte-equal optimizer updates with and without the court.
+    torch.manual_seed(8171)
     baseline=plain.train_step(batch)
     audit=result.gradient_interference_report
     assert audit is not None

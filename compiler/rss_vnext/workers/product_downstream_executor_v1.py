@@ -517,6 +517,10 @@ def _replay_raw_source_graphics_proof_v1(
         _MAX_PREVIEW_BYTES,
         compile_rss_vnext_native_preview_package_v1,
         select_rss_vnext_native_preview_camera_v1,
+        select_rss_vnext_eight_way_virtual_cameras_v1,
+    )
+    from compiler.realsas_compiler_core.runtime_package_v2 import (
+        read_rss_v2_bytes_v1,
     )
     preview_refs = [
         row for row in request.get("input_artifacts") or ()
@@ -528,11 +532,36 @@ def _replay_raw_source_graphics_proof_v1(
     preview_blob = read_rss_vnext_parent_cas_v1(
         preview_refs[0], read_object, limit=_MAX_PREVIEW_BYTES,
     )
+    # This is an untrusted CAS preview. Decode only its requested profile;
+    # independently RECOMPILE the complete mesh, controls, cameras, renderer
+    # program and archive from source parents. An arbitrary forged profile,
+    # camera or modified package still fails byte-for-byte comparison.
+    preview_entries = read_rss_v2_bytes_v1(preview_blob)
+    if "manifest.txt" not in preview_entries:
+        raise RuntimeError("PRODUCT_PROOF_NATIVE_PREVIEW_MANIFEST_REQUIRED")
+    preview_manifest = {}
+    for line in preview_entries["manifest.txt"].decode("utf-8").splitlines():
+        if "=" not in line:
+            raise RuntimeError("PRODUCT_PROOF_NATIVE_PREVIEW_MANIFEST_INVALID")
+        k, v = line.split("=", 1)
+        if k in preview_manifest:
+            raise RuntimeError("PRODUCT_PROOF_NATIVE_PREVIEW_MANIFEST_DUPLICATE")
+        preview_manifest[k] = v
+    selected_profile = preview_manifest.get(
+        "presentation_profile", "SINGLE_CAMERA_2D",
+    )
+    if selected_profile not in ("SINGLE_CAMERA_2D", "EIGHT_YAW_45"):
+        raise RuntimeError("PRODUCT_PROOF_NATIVE_PREVIEW_PROFILE_UNSUPPORTED")
+    virtual_camera = (
+        select_rss_vnext_eight_way_virtual_cameras_v1(mesh)
+        if selected_profile == "EIGHT_YAW_45" else
+        select_rss_vnext_native_preview_camera_v1(mesh)
+    )
     preview_replay,_ = compile_rss_vnext_native_preview_package_v1(
         mesh=mesh,rig=rig,skin=skin,
         graphics=build_runtime_graphics_v1(compiled,face_count=len(mesh.faces)),
         uv_atlas_cas=uv_expected,
-        virtual_camera=select_rss_vnext_native_preview_camera_v1(mesh),
+        virtual_camera=virtual_camera,
         control_frames=((),),
     )
     if preview_blob != preview_replay:
@@ -567,6 +596,16 @@ def execute_graphics_capability_v1(
     request: dict[str, Any], *, read_object: Callable, put_bytes: Callable,
 ) -> dict[str, Any]:
     _require(request, "product.graphics", GRAPHICS_CONTRACT)
+    # A presentation profile is an OUTPUT decision, not a new expert,
+    # semantic ontology or fixed requirement to render eight directions.
+    policy = request.get("capability_metadata") or {}
+    preview_presentation_profile = policy.get(
+        "preview_presentation_profile", "SINGLE_CAMERA_2D",
+    )
+    if type(preview_presentation_profile) is not str or (
+        preview_presentation_profile not in ("SINGLE_CAMERA_2D", "EIGHT_YAW_45")
+    ):
+        raise RuntimeError("PRODUCT_GRAPHICS_PREVIEW_PRESENTATION_PROFILE_INVALID")
     mesh,rig,skin,mechanics = _canonical_parents(request,read_object)
     intervention = _read_graphics_mechanics_intervention_v1(
         request, read_object, mesh, rig, skin, mechanics,
@@ -684,12 +723,17 @@ def execute_graphics_capability_v1(
         from compiler.rss_vnext.workers.rss_vnext_native_preview_package_v1 import (
             compile_rss_vnext_native_preview_package_v1,
             select_rss_vnext_native_preview_camera_v1,
+            select_rss_vnext_eight_way_virtual_cameras_v1,
         )
         native_preview_bytes, native_preview_manifest = (
             compile_rss_vnext_native_preview_package_v1(
                 mesh=mesh, rig=rig, skin=skin, graphics=rendered,
                 uv_atlas_cas=raw_texture_atlas,
-                virtual_camera=select_rss_vnext_native_preview_camera_v1(mesh),
+                virtual_camera=(
+                    select_rss_vnext_eight_way_virtual_cameras_v1(mesh)
+                    if preview_presentation_profile == "EIGHT_YAW_45"
+                    else select_rss_vnext_native_preview_camera_v1(mesh)
+                ),
                 control_frames=((),),
             )
         )
@@ -745,6 +789,10 @@ def execute_graphics_capability_v1(
             "source_rgb_surface_ownership_qualified": False,
             "mesh_uv_texture_atlas_candidate_present": raw_texture_atlas is not None,
             "native_interactive_puppet_preview_present": native_preview_bytes is not None,
+            "native_preview_presentation_profile": (
+                preview_presentation_profile if native_preview_bytes is not None
+                else None
+            ),
             "native_preview_product_revision_minted": False,
             "native_preview_virtual_camera_not_source_observed": True,
             "native_preview_root_pose_source": "DETERMINISTIC_REST_NO_ANIMATION",

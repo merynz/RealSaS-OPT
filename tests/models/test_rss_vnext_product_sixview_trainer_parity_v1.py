@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import replace
 from hashlib import sha256
 
 import numpy as np
@@ -37,9 +36,8 @@ def _fixture():
     )
     source = torch.rand(1, 2, 4, 16, 16)
     calibrated_teacher_camera = torch.zeros((1, 2, 13))
-    calibrated_teacher_camera[:, :, 3] = calibrated_teacher_camera[:, :, 7] = (
-        calibrated_teacher_camera[:, :, 11]
-    ) = calibrated_teacher_camera[:, :, 12] = 1.
+    for index in (3, 7, 11, 12):
+        calibrated_teacher_camera[:, :, index] = 1.
     _, virtual = target_canonical_and_six_cameras_v1(batch_size=1)
     generated = torch.rand((1, 6, 4, 16, 16))
     normals = torch.rand((1, 6, 3, 16, 16))*2.-1.

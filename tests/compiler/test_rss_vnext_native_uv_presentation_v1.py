@@ -113,10 +113,13 @@ def _build(tmp_path):
     ))
     pose_file.write_bytes(_native_pose_bytes(mesh, _project_two_frames(mesh)))
     player = tmp_path / "rss_uv_native_player"
-    subprocess.run(
+    compile_result = subprocess.run(
         ["g++", "-std=c++17", "-O2", "-Wall", "-Wextra", "-pedantic",
          str(NATIVE), "-o", str(player)],
-        capture_output=True, text=True, check=True,
+        capture_output=True, text=True,
+    )
+    assert compile_result.returncode == 0, (
+        "Native RSS UV C++ compile failure:\n" + compile_result.stderr
     )
     return player, graphics_file, texture_file, pose_file, arrays, manifest
 

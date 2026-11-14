@@ -468,6 +468,18 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             cfg.tessa.d_model, cfg.control_heads, kdim=h, vdim=h, batch_first=True,
         )
         self.control_norm = nn.LayerNorm(cfg.tessa.d_model)
+        # AXIS must see TESSA's actual decoded *face incidence*, not just
+        # H(x) sampled at mesh vertices. Keep one token for EVERY face; no
+        # top-k, pooling across components, or teacher-only topology shortcut.
+        # The 13 geometric channels are: centroid (3), oriented normal (3),
+        # cyclic-invariant edge lengths (3), component-local offset (3),
+        # relative component area (1). All continuous values remain live.
+        self.mesh_face_to_control = nn.Sequential(
+            nn.LayerNorm(2 * h + 13),
+            nn.Linear(2 * h + 13, h),
+            nn.GELU(),
+            nn.Linear(h, h),
+        )
         self.axis = AXISRigProgramModelV6(cfg.axis_config())
         self.anchor_face_correspondence = RSSvNextSocketFaceCorrespondenceHeadV1(
             field_width=h, axis_width=cfg.control_hidden_dim,
@@ -756,19 +768,96 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         pb = torch.gather(state.query_xyz, 1, pair_indices[:, :, 1:2].expand(-1, -1, 3))
         return self.relation(torch.cat((a, z, a - z, a * z, pa - pb), dim=-1))
 
+    def _mesh_face_context(
+        self, mesh: RSSvNextStructuralMeshCandidate,
+    ) -> Tensor:
+        """Face-addressed TESSA topology evidence for AXIS, not source authority.
+
+        Coordinates/H(x) alone cannot distinguish separate components with
+        identical vertex samples but different indexed face incidence. Preserve
+        every decoded face, respect component boundaries, and keep geometry/H
+        gradients live. Face tokens are cyclic-invariant but winding-aware.
+        This is a candidate conditioning path, not a canonical rig proof.
+        """
+        mesh.validate()
+        faces = mesh.faces
+        vertices = mesh.rest_vertices_iris
+        features = mesh.local_features
+        if (
+            faces.dtype != torch.long
+            or mesh.vertex_component_ids.dtype != torch.long
+            or mesh.face_component_ids.dtype != torch.long
+            or min(int(mesh.vertex_component_ids.min()), int(mesh.face_component_ids.min())) < 0
+            or not torch.equal(
+                mesh.vertex_component_ids[faces],
+                mesh.face_component_ids[:, None].expand(-1, 3),
+            )
+        ):
+            raise ValueError("RSS_VNEXT_CONTROL_MESH_COMPONENT_FACE_IDENTITY")
+        if (
+            vertices.device != faces.device
+            or features.device != faces.device
+            or mesh.face_component_ids.device != faces.device
+            or mesh.vertex_component_ids.device != faces.device
+            or not bool(torch.isfinite(features).all())
+        ):
+            raise ValueError("RSS_VNEXT_CONTROL_MESH_FEATURE_DOMAIN")
+        tri = vertices[0, faces]  # [F,3,3], exact TESSA face order
+        edge01 = tri[:, 1] - tri[:, 0]
+        edge12 = tri[:, 2] - tri[:, 1]
+        edge20 = tri[:, 0] - tri[:, 2]
+        cross = torch.cross(edge01, -edge20, dim=-1)
+        cross_norm = torch.linalg.vector_norm(cross, dim=-1, keepdim=True)
+        if not bool(torch.isfinite(cross_norm).all()) or not bool((cross_norm > 1.e-10).all()):
+            raise ValueError("RSS_VNEXT_CONTROL_MESH_DEGENERATE_FACE")
+        area = 0.5 * cross_norm
+        face_centroid = tri.mean(dim=1)
+        face_normal = cross / cross_norm
+        edge_lengths = torch.stack((
+            torch.linalg.vector_norm(edge01, dim=-1),
+            torch.linalg.vector_norm(edge12, dim=-1),
+            torch.linalg.vector_norm(edge20, dim=-1),
+        ), dim=-1).sort(dim=-1).values
+        # Component IDs are non-semantic labels; aggregate using their
+        # equivalence classes, not an ID embedding that memorizes slot order.
+        _, component_index = torch.unique(
+            mesh.face_component_ids, sorted=True, return_inverse=True,
+        )
+        component_count = int(component_index.max()) + 1
+        component_area = area.new_zeros((component_count, 1)).index_add(
+            0, component_index, area,
+        )
+        component_centroid = tri.new_zeros((component_count, 3)).index_add(
+            0, component_index, face_centroid * area,
+        ) / component_area.clamp_min(1.e-12)
+        component_offset = face_centroid - component_centroid[component_index]
+        component_fraction = component_area[component_index] / area.sum().clamp_min(1.e-12)
+        corner_h = features[0, faces]  # [F,3,H], no detachment
+        mean_h = corner_h.mean(dim=1)
+        variance_h = (corner_h - mean_h[:, None]).square().mean(dim=1)
+        face_input = torch.cat((
+            mean_h, variance_h, face_centroid, face_normal,
+            edge_lengths, component_offset, component_fraction,
+        ), dim=-1)
+        return self.mesh_face_to_control(face_input)[None]
+
     def _control_memory(
         self, state: RSSvNextSceneState, structural: Tensor,
         mesh: RSSvNextStructuralMeshCandidate | None = None,
     ) -> Tensor:
-        # Mesh features remain addressed to the same live scene H(x).
-        context = (
-            torch.cat((state.local_features, state.region_relation_tokens), dim=1)
-            if mesh is None
-            else torch.cat((
+        # Same teacher-forced and free-running AXIS pathway: original H(x),
+        # region relation identities, exact indexed mesh vertex H(x), and
+        # complete component-aware face tokens from TESSA's actual output.
+        if mesh is None:
+            context = torch.cat((
                 state.local_features, state.region_relation_tokens,
-                mesh.local_features,
             ), dim=1)
-        )
+        else:
+            face_tokens = self._mesh_face_context(mesh)
+            context = torch.cat((
+                state.local_features, state.region_relation_tokens,
+                mesh.local_features, face_tokens,
+            ), dim=1)
         fused, _ = self.control_cross(
             structural, context, context, need_weights=False,
         )

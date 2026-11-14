@@ -38,6 +38,7 @@ from compiler.rss_vnext.workers.product_downstream_executor_v1 import (
 from compiler.rss_vnext.workers.rss_vnext_native_preview_package_v1 import (
     compile_rss_vnext_native_preview_package_v1,
     reopen_rss_vnext_native_preview_package_v1,
+    edit_rss_vnext_native_preview_controls_v1,
 )
 from tests.compiler.test_rss_vnext_raw_graphics_consumer_v1 import (
     _full_parent_fixture,
@@ -214,3 +215,60 @@ def test_false_product_revision_flag_does_not_pass_rss_reopen_or_native_player(
     ],capture_output=True,text=True)
     assert bad.returncode!=0
     assert "FALSE_SOURCE_OR_PRODUCT_AUTHORITY" in bad.stderr
+
+
+
+def test_actual_native_puppet_control_edit_preserves_mesh_texture_and_reopens(
+    tmp_path,
+):
+    original,_,mesh,rig,_,_= _compiled_preview_fixture(tmp_path)
+    root=next(control for control in rig.controls
+              if control.control_kind=="ROOT")
+    edited_frames=(
+        (),
+        (ControlTransformIRV1(
+            canonical_control_id=root.canonical_control_id,
+            translation=(0.42,0.08,0.),
+        ),),
+    )
+    edit_bytes,edit_manifest=edit_rss_vnext_native_preview_controls_v1(
+        source_package_path=original,control_frames=edited_frames,
+    )
+    saved=tmp_path/"puppet_after_user_control_edit.rss"
+    saved.write_bytes(edit_bytes)
+    reopened=reopen_rss_vnext_native_preview_package_v1(saved)
+    assert reopened["control_frames"]==edited_frames
+    assert reopened["product_revision_minted"] is False
+    assert edit_manifest["admission"]=="DEVELOPER_PREVIEW_NOT_PRODUCT_REVISION"
+    assert reopened["mesh"].mesh_lineage_hash==mesh.mesh_lineage_hash
+
+    a,b=read_rss_v2(original),read_rss_v2(saved)
+    for immutable in (
+        "mesh.json","rig.json","skin.json","graphics.bin","texture.bin",
+    ):
+        assert a[immutable]==b[immutable]
+    assert a["controls.json"]!=b["controls.json"]
+    assert a["pose.bin"]!=b["pose.bin"]
+    assert a["manifest.txt"]!=b["manifest.txt"]
+    assert (
+        json.loads(b["controls.json"])["edit_operation"]
+        =="CANONICAL_CONTROLS_RECOMPUTED_MECHANICS_LBS"
+    )
+    exe=_build_player(tmp_path)
+    old_rgb,_=_render(exe,original,tmp_path,1,source_view=-1)
+    edited_rgb,_=_render(exe,saved,tmp_path,1,source_view=-1)
+    assert not np.array_equal(old_rgb,edited_rgb)
+    assert np.count_nonzero(edited_rgb[:,:,3])>20
+
+    # An unknown animator target must not create a new phantom joint/control.
+    with pytest.raises(Exception,match="UNKNOWN"):
+        edit_rss_vnext_native_preview_controls_v1(
+            source_package_path=saved,
+            control_frames=(
+                (),
+                (ControlTransformIRV1(
+                    canonical_control_id="FORGED_CONTROL_DOES_NOT_EXIST",
+                    translation=(1.,0.,0.),
+                ),),
+            ),
+        )

@@ -36,12 +36,16 @@ from .training_engine import (
     axis_teacher_sequence_sha256_v6, frozen_mira_codec_state_sha256_v6,
     source_surface_tensor_sha256,
 )
+from .skin_surface_mass_v1 import (
+    POOLING_ABI as MIRA_SOURCE_SURFACE_POOLING_ABI,
+    tessa_vertex_surface_mass_v1,
+)
 from .training_optimizer_ownership_v1 import (
     qualify_rss_vnext_optimizer_ownership_v1,
 )
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 
-SCHEMA = "RealSaS.RSSvNext.StationaryAXISFSQTransfer.v1"
+SCHEMA = "RealSaS.RSSvNext.StationaryAXISFSQTransfer.v2"
 _ADMISSION = "QUALIFIED_NATIVE_SOURCE_FROZEN_AXIS_MIRA_SKIN_CODE_HANDOFF"
 # Important: axis.skin_embedding[0] is present in *all* BOS/JOINT
 # prefixes because the model embeds -1 (non-skin) as index 0. Updating
@@ -280,6 +284,7 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
             or pre.get("source_codec_hard_reconstruction_qualified") is not True
             or pre.get("generated_view_is_skin_teacher") is not False
             or pre.get("teacher_semantics") != "EXACT_FROZEN_FSQ_SOURCE_SKIN_TOKENS"
+            or pre.get("codec_source_encoder_pooling_abi") != MIRA_SOURCE_SURFACE_POOLING_ABI
         ):
             raise ValueError("RSS_VNEXT_STATIONARY_TOKEN_SOURCE_RECEIPT_DRIFT")
 
@@ -320,6 +325,9 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
                 raise ValueError("RSS_VNEXT_STATIONARY_TOKEN_SOURCE_WEIGHTS_DOMAIN")
             ids, _, _ = self.model.mira.codec.encode_tokens(
                 source, vertex_features, joint_hidden,
+                surface_vertex_mass=tessa_vertex_surface_mass_v1(
+                    mesh.rest_vertices_iris.detach(),mesh.faces,
+                ),
             )
             expected = teacher.skin_code_ids[0,skins].reshape(
                 1,len(joints),self.model.cfg.skin_tokens_per_joint,
@@ -395,6 +403,7 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
             "dataset_manifest_sha256":self.dataset_manifest_sha256,
             "registry_sha256":self.registry_sha256,
             "architecture_sha256":self.config_sha256,
+            "codec_source_encoder_pooling_abi":MIRA_SOURCE_SURFACE_POOLING_ABI,
             "frozen_upstream_checkpoint_sha256":self.upstream_frozen_checkpoint_sha256,
             "frozen_upstream_actual_model_state_sha256":self.frozen_state_sha256,
             "frozen_codec_state_sha256":self.codec_sha256,
@@ -423,6 +432,7 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
             or p.get("dataset_manifest_sha256")!=self.dataset_manifest_sha256
             or p.get("registry_sha256")!=self.registry_sha256
             or p.get("architecture_sha256")!=self.config_sha256
+            or p.get("codec_source_encoder_pooling_abi")!=MIRA_SOURCE_SURFACE_POOLING_ABI
             or p.get("frozen_upstream_checkpoint_sha256")!=self.upstream_frozen_checkpoint_sha256
             or p.get("frozen_upstream_actual_model_state_sha256")!=self.frozen_state_sha256
             or p.get("frozen_codec_state_sha256")!=self.codec_sha256

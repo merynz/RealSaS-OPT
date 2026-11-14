@@ -12,6 +12,9 @@ from models.rss_vnext import (
 from models.rss_vnext.realsas_virtual_camera_policy_v1 import (
     target_canonical_and_six_cameras_v1,
 )
+from models.rss_vnext.realsas_two_source_construction_v1 import (
+    paired_generation_binding_sha256_v1,
+)
 from models.rss_vnext.training_engine import (
     RSSvNextStructuralTrainingBatch, RSSvNextStructuralTrainer,
     RSSvNextTrainingWeights, source_surface_tensor_sha256,
@@ -59,7 +62,11 @@ def _fixture():
         product_source_binding_sha256="a"*64,
         product_canonical_checkpoint_sha256="b"*64,
         product_multiview_checkpoint_sha256="c"*64,
-        product_generation_checkpoint_sha256="d"*64,
+        product_generation_checkpoint_sha256=paired_generation_binding_sha256_v1(
+            source_binding_sha256="a"*64,
+            canonical_checkpoint_sha256="b"*64,
+            multiview_checkpoint_sha256="c"*64,
+        ),
         product_conditioning_admission_key="synthetic-pinned-generator-receipt",
     )
     record = {
@@ -158,3 +165,16 @@ def test_product_generator_registry_and_policy_are_checkpoint_identity(tmp_path)
     research = _trainer(clone, {}, policy="RESEARCH_CALIBRATED_TWO_VIEW")
     with pytest.raises(ValueError, match="OBJECTIVE_POLICY_DRIFT"):
         research.load_checkpoint(checkpoint)
+
+
+
+def test_product_trainer_recomputes_generator_binding_not_just_trusts_receipt():
+    net, batch, record = _fixture()
+    # A malicious batch and even a compromised registry agreeing on a fake
+    # binding must be rejected by the same immutable composition as inference.
+    batch.product_generation_checkpoint_sha256 = "d"*64
+    trainer = _trainer(net, {batch.product_conditioning_admission_key: {
+        **record, "combined_generation_checkpoint_sha256": "d"*64,
+    }})
+    with pytest.raises(ValueError, match="GENERATOR_BINDING_RECOMPUTE_DRIFT"):
+        trainer.objective(batch)

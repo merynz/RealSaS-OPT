@@ -53,8 +53,11 @@ def _packing(number_of_faces: int, max_face_samples: int):
     if not 1 <= number_of_faces <= MAX_FACES:
         raise RuntimeError("TEXTURE_ATLAS_FACE_RESOURCE_LIMIT")
     preferred = min(_TILE_OPTIONS[-1], max(_TILE_OPTIONS[0], math.ceil(math.sqrt(max_face_samples))))
-    for side in _TILE_OPTIONS:
-        if side < preferred:
+    # Prefer observed texel density, but large generic morphologies must
+    # gracefully downshift chart size instead of failing solely because a
+    # preferred 96px face tile cannot fit the 2048px resource budget.
+    for side in reversed(_TILE_OPTIONS):
+        if side > preferred:
             continue
         per_row = min(math.ceil(math.sqrt(number_of_faces)), MAX_DIMENSION // side)
         if per_row <= 0:
@@ -220,6 +223,15 @@ def compile_rss_vnext_uv_texture_atlas_v1(
         "chart_policy": "FACE_LOCAL_BARYCENTRIC_DISCONTINUOUS_UV_CHART_V1",
         "atlas_size": [width, height],
         "face_tile_size": side,
+        "requested_face_tile_size": min(
+            _TILE_OPTIONS[-1],
+            max(_TILE_OPTIONS[0], math.ceil(math.sqrt(int(per_face.max(initial=0))))),
+        ),
+        "texel_density_limited_by_atlas_budget": (
+            side < min(_TILE_OPTIONS[-1],
+                       max(_TILE_OPTIONS[0],
+                           math.ceil(math.sqrt(int(per_face.max(initial=0))))))
+        ),
         "per_face_chart_gutter_px": _GUTTER,
         "source_view_count": 2,
         "view_color_layer_provenance": "OBSERVED_RGBA_WITH_FITTED_CAMERA_FACE_ASSOCIATION",

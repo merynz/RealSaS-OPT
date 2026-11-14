@@ -155,6 +155,21 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or (len(skins) and int(skins.min())<=int(joints.max()))
         ):
             raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_CAUSAL_JOINT_SKIN_DOMAIN")
+        # Reject altered topology/AXIS bytes BEFORE student mesh decoding.
+        # A forged batch must not invoke a variable-cost grammar from a
+        # launcher-unadmitted source tensor.
+        pre_receipt=self.trusted_registry.get(batch.admission_key)
+        if (
+            pre_receipt is None
+            or pre_receipt.get("admission_status")!=_TEACHER
+            or pre_receipt.get("dataset_manifest_sha256")!=self.dataset_manifest_sha256
+            or pre_receipt.get("source_binding_sha256")!=batch.source_binding_sha256
+            or pre_receipt.get("source_qualification_key")!=batch.source_qualification_key
+            or pre_receipt.get("scene_generator_binding_sha256")!=state.generating_checkpoint_sha256
+            or pre_receipt.get("mesh_teacher_tokens_sha256")!=source_surface_tensor_sha256(batch.topology_teacher_tokens)
+            or pre_receipt.get("axis_teacher_sequence_sha256")!=axis_teacher_sequence_sha256_v6(sequence)
+        ):
+            raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_ADMISSION_DRIFT")
         # Source rig/skin must be reindexed to the SAME discrete TESSA mesh.
         # Student rest refinement is a hypothesis; no source-native topology
         # is smuggled into inference. Detach shared state in codec-first phase.

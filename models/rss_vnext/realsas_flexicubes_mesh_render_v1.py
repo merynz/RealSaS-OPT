@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-"""Live RealSaS stage3: FlexiCubes layered mesh -> BUSTED-owned raster.
+"""Live RealSaS Stage3: shared-H FlexiCubes mesh -> licensed PyTorch3D.
 
 Reference: CVPR 2025 §3.2 Stage3 Eq(10) uses semantic-equivalent SDF,
 FlexiCubes and mesh RGB/semantic/normal/depth raster supervision. This
-independently written adapter consumes the EXISTING PINNED NVIDIA
-FlexiCubes witness, queries the SAME IRIS H(x) for appearance and roles,
-then uses BUSTED's own PyTorch first-hit differentiable raster.
-It never copies or imports NVIDIA nvdiffrast code and never mints
-source-surface ownership.
+adapter consumes EXISTING pinned NVIDIA FlexiCubes extraction and queries
+the SAME IRIS H(x) for appearance/roles; GPU triangle raster is provided by
+PyTorch3D's compiled CUDA library (BSD-style). There is no nvdiffrast import.
 
-The backend works on CPU/CUDA and preserves exact source/render authority.
-Its bounding-box triangle iteration is a correctness baseline; no production
-throughput or native CUDA kernel equivalence is claimed by CPU tests.
+CPU correctness tests retain the separate bounded BUSTED PyTorch reference.
+A green CPU test is not a claim of numerical or throughput parity with the
+external native CUDA binary or of source-surface ownership.
 """
 
 from hashlib import sha256

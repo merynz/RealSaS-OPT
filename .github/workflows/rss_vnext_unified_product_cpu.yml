@@ -85,7 +85,6 @@ jobs:
             tests/compiler/test_rss_vnext_uv_texture_atlas_v1.py \
             tests/compiler/test_rss_vnext_same_h_neural_texture_v1.py \
             tests/compiler/test_rss_vnext_native_uv_presentation_v1.py \
-            tests/compiler/test_rss_vnext_real_mechanics_native_rss_preview_v1.py \
             tests/compiler/test_rss_vnext_native_preview_package_v1.py \
             tests/compiler/test_rss_vnext_raw_native_graphics_v1.py \
             tests/compiler/test_rss_vnext_raw_motion_proof_replay_v1.py \

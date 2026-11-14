@@ -45,7 +45,7 @@ from .training_optimizer_ownership_v1 import (
 )
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 
-SCHEMA = "RealSaS.RSSvNext.StationaryAXISFSQTransfer.v2"
+SCHEMA = "RealSaS.RSSvNext.StationaryAXISFSQTransfer.v3"
 _ADMISSION = "QUALIFIED_NATIVE_SOURCE_FROZEN_AXIS_MIRA_SKIN_CODE_HANDOFF"
 # Important: axis.skin_embedding[0] is present in *all* BOS/JOINT
 # prefixes because the model embeds -1 (non-skin) as index 0. Updating
@@ -125,14 +125,19 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
             or not isinstance(optimizer, torch.optim.Optimizer)
             or not _sha(dataset_manifest_sha256)
             or not _sha(upstream_frozen_checkpoint_sha256)
-            or model.cfg.skin_decoder_mode != "DOT_PRODUCT_BASELINE"
+            or model.cfg.skin_decoder_mode not in (
+                "DOT_PRODUCT_BASELINE", "POINT_QUERY_CROSS_ATTENTION",
+            )
+            or model.cfg.skin_decoder_mode != model.mira.cfg.skin_decoder_mode
             or not trusted_source_bridge_registry
             or model.training
             or model.axis.training
             or model.mira.codec.training
+            or model.mira.spatial_decoder.training
         ):
             raise ValueError("RSS_VNEXT_STATIONARY_TOKEN_STAGE_POLICY_INVALID")
         self.model = model
+        self.skin_decoder_mode = model.cfg.skin_decoder_mode
         self.optimizer = optimizer
         self.dataset_manifest_sha256 = dataset_manifest_sha256
         self.upstream_frozen_checkpoint_sha256 = upstream_frozen_checkpoint_sha256
@@ -170,6 +175,10 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
             not permitted or set(trainable) != set(permitted)
             or self.model.training or self.model.axis.training
             or self.model.mira.codec.training
+            or self.model.mira.spatial_decoder.training
+            or self.model.cfg.skin_decoder_mode != self.skin_decoder_mode
+            or self.model.mira.cfg.skin_decoder_mode != self.skin_decoder_mode
+            or architecture_digest(self.model.cfg) != self.config_sha256
         ):
             raise ValueError("RSS_VNEXT_STATIONARY_TOKEN_UPSTREAM_MUST_BE_FROZEN")
         # PyTorch parameter version counters catch in-place mutations
@@ -274,6 +283,7 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
             or pre.get("upstream_frozen_checkpoint_sha256") != self.upstream_frozen_checkpoint_sha256
             or pre.get("upstream_frozen_model_state_sha256") != self.frozen_state_sha256
             or pre.get("mira_codec_state_sha256") != self.codec_sha256
+            or pre.get("skin_decoder_mode") != self.skin_decoder_mode
             or pre.get("scene_generator_binding_sha256") != state.generating_checkpoint_sha256
             or pre.get("mesh_teacher_tokens_sha256") != source_surface_tensor_sha256(batch.topology_teacher_tokens)
             or pre.get("axis_teacher_sequence_sha256") != seq_digest
@@ -340,9 +350,27 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
                 joint_hidden, ids,
                 vertex_normals=mesh.normals.detach(),
             )
-            hard_direct=self.model.mira.codec.decode_tokens(
-                ids,vertex_features,joint_hidden,
-            )
+            if self.skin_decoder_mode == "POINT_QUERY_CROSS_ATTENTION":
+                # Recreate the *hard* FSQ vector and independently invoke
+                # the product point-query decoder on the exact indexed
+                # TESSA normals/positions and AXIS causal joint states.
+                # Comparing to the dot-product codec here would enforce
+                # parity with a decoder the product NEVER uses.
+                codes=self.model.mira.codec.quantizer.token_ids_to_codes(
+                    ids,
+                ).to(dtype=joint_hidden.dtype)
+                hard_direct=self.model.mira.spatial_decoder(
+                    mesh.local_features.detach(),
+                    mesh.rest_vertices_iris.detach(),
+                    joint_hidden,codes,
+                    torch.ones((1,len(joints)),device=joint_hidden.device,
+                               dtype=torch.bool),
+                    vertex_normals=mesh.normals.detach(),
+                ).weights
+            else:
+                hard_direct=self.model.mira.codec.decode_tokens(
+                    ids,vertex_features,joint_hidden,
+                )
             max_error=float((hard-hard_direct).abs().max().item())
             if max_error>1e-5:
                 raise RuntimeError("RSS_VNEXT_STATIONARY_TOKEN_PRODUCT_DECODER_DRIFT")
@@ -400,6 +428,7 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
         target.parent.mkdir(parents=True,exist_ok=True)
         payload={
             "schema":SCHEMA,
+            "skin_decoder_mode":self.skin_decoder_mode,
             "dataset_manifest_sha256":self.dataset_manifest_sha256,
             "registry_sha256":self.registry_sha256,
             "architecture_sha256":self.config_sha256,
@@ -429,6 +458,7 @@ class RSSvNextStationaryAXISSkinTokenTrainerV1:
         p=torch.load(Path(path),map_location="cpu",weights_only=True)
         if (
             p.get("schema")!=SCHEMA
+            or p.get("skin_decoder_mode")!=self.skin_decoder_mode
             or p.get("dataset_manifest_sha256")!=self.dataset_manifest_sha256
             or p.get("registry_sha256")!=self.registry_sha256
             or p.get("architecture_sha256")!=self.config_sha256

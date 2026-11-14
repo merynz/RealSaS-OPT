@@ -60,8 +60,8 @@ def two_joints(cfg):
     return AXISSequenceV6.from_events(events,device=torch.device("cpu"))
 
 
-def _fixture():
-    cfg=RSSvNextConfig.tiny_for_test()
+def _fixture(mode="DOT_PRODUCT_BASELINE"):
+    cfg=replace(RSSvNextConfig.tiny_for_test(),skin_decoder_mode=mode)
     model=RSSvNextUnifiedCharacterModel(
         cfg,vision_encoder=RSSvNextPatchEncoderForTests(cfg.iris.image_token_dim),
     )
@@ -69,8 +69,19 @@ def _fixture():
     # to learn or to change dropout statistics during codec bootstrap.
     model.eval()
     for name, parameter in model.named_parameters():
-        parameter.requires_grad_(name.startswith("mira.codec."))
+        if mode == "POINT_QUERY_CROSS_ATTENTION":
+            selected=(
+                name.startswith(("mira.codec.vertex_encode.",
+                                 "mira.codec.joint_encode.",
+                                 "mira.codec.latent_head."))
+                or name.startswith("mira.spatial_decoder.")
+            )
+        else:
+            selected=name.startswith("mira.codec.")
+        parameter.requires_grad_(selected)
     model.mira.codec.train()
+    if mode == "POINT_QUERY_CROSS_ATTENTION":
+        model.mira.spatial_decoder.train()
     original=torch.rand((1,2,4,16,16))
     generated=torch.rand((1,6,4,16,16))
     normals=torch.rand((1,6,3,16,16))*2.-1.
@@ -116,7 +127,7 @@ def _fixture():
         "full_source_weight_coverage":True,
         "teacher_semantics":"SOURCE_NATIVE_DENSE_SKIN_NOT_INFERRED_WEIGHTS",
         "codec_feature_abi":"IRIS_LOCAL_H_PLUS_REST_XYZ__AXIS_CAUSAL_PRE_JOINT_H",
-        "skin_decoder_mode":"DOT_PRODUCT_BASELINE",
+        "skin_decoder_mode":mode,
         "codec_source_encoder_pooling_abi":POOLING_ABI,
     }}
     return model,batch,registry
@@ -124,7 +135,9 @@ def _fixture():
 
 def _trainer(model,registry):
     return RSSvNextEmbeddedMIRASourceCodecTrainerV1(
-        model,torch.optim.AdamW(model.mira.codec.parameters(),lr=1.e-3),
+        model,torch.optim.AdamW(
+            (p for p in model.parameters() if p.requires_grad),lr=1.e-3,
+        ),
         dataset_manifest_sha256=DATASET,trusted_source_skin_registry=registry,
     )
 
@@ -248,4 +261,71 @@ def test_codec_first_rejects_optimizer_membership_drift_and_clears_stale_grad():
     # Parameter group changes after trainer construction must not be accepted.
     engine.optimizer.param_groups[0]["params"].pop()
     with pytest.raises((RuntimeError,ValueError),match="OPTIMIZER"):
+        engine.train_step(batch)
+
+
+def test_spatial_fsq_source_training_updates_actual_point_decoder_and_token_encoder():
+    model,batch,registry=_fixture("POINT_QUERY_CROSS_ATTENTION")
+    engine=_trainer(model,registry)
+    old=model.mira.spatial_decoder.pair_score[-1].weight.detach().clone()
+    result=engine.train_step(batch)
+    assert engine.step==1
+    assert torch.isfinite(result.loss)
+    assert result.hard_decoder_replay_max_abs_error<=1.e-5
+    assert result.token_ids.shape==(1,2,model.cfg.skin_tokens_per_joint)
+    assert result.source_qualified is False
+    assert result.product_skin_qualified is False
+    assert model.mira.spatial_decoder.pair_score[-1].weight.grad is not None
+    assert model.mira.spatial_decoder.pair_score[-1].weight.grad.abs().sum()>0
+    assert not torch.equal(model.mira.spatial_decoder.pair_score[-1].weight,old)
+    assert model.mira.codec.latent_head.weight.grad is not None
+    assert model.mira.codec.latent_head.weight.grad.abs().sum()>0
+    assert model.mira.codec.bias_head.weight.grad is None  # unused dot decoder
+    assert model.axis.kind_head.weight.grad is None
+    assert model.iris.scene.scene_queries.grad is None
+
+
+def test_spatial_source_checkpoint_replays_exact_decoder_and_cannot_cross_mode(tmp_path):
+    model,batch,registry=_fixture("POINT_QUERY_CROSS_ATTENTION")
+    trainer=_trainer(model,registry)
+    trainer.train_step(batch)
+    path=tmp_path/"source-spatial-fsq.pt"
+    trainer.save_checkpoint(path)
+    expected={
+        k:v.detach().clone()
+        for k,v in model.mira.spatial_decoder.state_dict().items()
+    }
+    resumed=_trainer(model,registry)
+    resumed.load_checkpoint(path)
+    assert resumed.step==1
+    assert all(torch.equal(model.mira.spatial_decoder.state_dict()[k],v)
+               for k,v in expected.items())
+    # The source registry is mode-bound even when every observed weight is
+    # the same. Dot-product source-teacher receipts are not interchangeable.
+    wrong={"qualified-codec":{
+        **registry["qualified-codec"],
+        "skin_decoder_mode":"DOT_PRODUCT_BASELINE",
+    }}
+    with pytest.raises(ValueError,match="SOURCE_ADMISSION_DRIFT"):
+        _trainer(model,wrong).objective(batch)
+    tampered=replace(batch,source_dense_weights=batch.source_dense_weights.flip(-1))
+    with pytest.raises(ValueError,match="SOURCE_ADMISSION_DRIFT"):
+        resumed.objective(tampered)
+    with torch.no_grad():
+        model.mira.codec.bias_head.weight.add_(0.01)
+    with pytest.raises(RuntimeError,match="UPSTREAM_PARAMETER_MUTATED"):
+        resumed.train_step(batch)
+
+
+def test_spatial_source_fsq_requires_complete_phase_optimizer_scope():
+    model,batch,registry=_fixture("POINT_QUERY_CROSS_ATTENTION")
+    only_codec=torch.optim.AdamW(model.mira.codec.parameters(),lr=1.e-3)
+    with pytest.raises(ValueError,match="CODEC_OPTIMIZER_SCOPE_DRIFT"):
+        RSSvNextEmbeddedMIRASourceCodecTrainerV1(
+            model,only_codec,dataset_manifest_sha256=DATASET,
+            trusted_source_skin_registry=registry,
+        )
+    engine=_trainer(model,registry)
+    model.mira.spatial_decoder.eval()
+    with pytest.raises(RuntimeError,match="UPSTREAM_TRAIN_MODE_DRIFT"):
         engine.train_step(batch)

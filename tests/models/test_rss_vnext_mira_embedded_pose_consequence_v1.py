@@ -24,8 +24,8 @@ def seeded():
     torch.set_num_threads(1)
 
 
-def pose_fixture():
-    model,batch,skin_registry=_fixture()
+def pose_fixture(mode="DOT_PRODUCT_BASELINE"):
+    model,batch,skin_registry=_fixture(mode)
     with torch.no_grad():
         mesh=model.build_mesh_candidate(
             batch.scene,batch.topology_teacher_tokens[0],
@@ -75,7 +75,9 @@ def pose_fixture():
 
 def trainer(model,skin_registry,pose_registry,weight=2.):
     return RSSvNextEmbeddedMIRASourceCodecTrainerV1(
-        model,torch.optim.AdamW(model.mira.codec.parameters(),lr=1e-3),
+        model,torch.optim.AdamW(
+            (p for p in model.parameters() if p.requires_grad),lr=1e-3,
+        ),
         dataset_manifest_sha256=DATASET,
         trusted_source_skin_registry=skin_registry,
         trusted_source_pose_registry=pose_registry,
@@ -217,3 +219,24 @@ def test_idle_only_native_pose_does_not_fake_skin_supervision():
             batch,source_joint_skin_matrices=idle,
             source_posed_vertices=rest_poses,
         ))
+
+
+def test_spatial_fsq_source_pose_consequence_reaches_product_decoder():
+    net,batch,skin,pose=pose_fixture("POINT_QUERY_CROSS_ATTENTION")
+    engine=trainer(net,skin,pose,weight=2.)
+    previous=net.mira.spatial_decoder.pair_score[-1].weight.detach().clone()
+    result=engine.train_step(batch)
+    assert result.source_pose_deformation_loss is not None
+    assert torch.isfinite(result.source_pose_deformation_loss)
+    assert float(result.source_pose_deformation_loss)>0
+    assert result.qualified_pose_vertex_count==int(
+        batch.source_pose_vertex_mask[:,1:].sum()
+    )
+    assert result.hard_token_pose_replay_max_abs_error<=1.e-5
+    assert result.hard_decoder_replay_max_abs_error<=1.e-5
+    assert net.mira.spatial_decoder.pair_score[-1].weight.grad is not None
+    assert net.mira.spatial_decoder.pair_score[-1].weight.grad.abs().sum()>0
+    assert not torch.equal(net.mira.spatial_decoder.pair_score[-1].weight,previous)
+    assert net.mira.codec.bias_head.weight.grad is None
+    assert net.axis.kind_head.weight.grad is None
+    assert not result.product_skin_qualified

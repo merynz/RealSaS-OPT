@@ -7,8 +7,10 @@ features is NOT the RSS shared-H checkpoint decoder. This source-teacher
 bootstrap uses TESSA's *exact* reindexed mesh and preceding causal AXIS joint
 states to train model.mira.codec itself, without running another MIRA model.
 
-Only DOT_PRODUCT_BASELINE is eligible here: POINT_QUERY_CROSS_ATTENTION uses
-an additional spatial decoder which must have its own source-supervised loss.
+The DOT_PRODUCT_BASELINE and POINT_QUERY_CROSS_ATTENTION decoders are
+separate source-supervised stages over the SAME FSQ teacher encoder, TESSA
+mesh and AXIS causal joint memory. The latter explicitly optimizes the
+point-query decoder actually exported and replayed at inference.
 This module teaches no unknown source pixels, contact, or 2D draw order.
 """
 from dataclasses import asdict, dataclass, replace
@@ -48,7 +50,7 @@ from .training_engine import (
     axis_teacher_sequence_sha256_v6, source_surface_tensor_sha256,
 )
 
-SCHEMA = "RealSaS.RSSvNext.EmbeddedMIRASourceCodecTrainer.v7"
+SCHEMA = "RealSaS.RSSvNext.EmbeddedMIRASourceCodecTrainer.v8"
 _TEACHER = "QUALIFIED_SOURCE_MIRA_DENSE_SKIN_TESSA_AXIS_JOINT_REINDEX"
 
 
@@ -138,10 +140,12 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             type(model) is not RSSvNextUnifiedCharacterModel
             or not isinstance(optimizer, torch.optim.Optimizer)
             or not _hex(dataset_manifest_sha256)
-            or model.cfg.skin_decoder_mode != "DOT_PRODUCT_BASELINE"
+            or model.cfg.skin_decoder_mode not in (
+                "DOT_PRODUCT_BASELINE", "POINT_QUERY_CROSS_ATTENTION",
+            )
+            or model.cfg.skin_decoder_mode != model.mira.cfg.skin_decoder_mode
             or model.training
             or not model.mira.codec.training
-            or not any(p.requires_grad for p in model.mira.codec.parameters())
             or not trusted_source_skin_registry
         ):
             raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_CODEC_TRAINER_POLICY")
@@ -167,18 +171,41 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or source_area_skin_simplex_kl_weight<0
         ):
             raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_AREA_KL_POLICY")
-        # A codec bootstrap optimizer must cover every trainable embedded
-        # codec parameter, and MUST NOT update IRIS/TESSA/AXIS or the
-        # untrained point-query decoder under an unrelated phase.
-        codec_ids={id(p) for p in model.mira.codec.parameters() if p.requires_grad}
-        optimizer_ids=[
+        # Only the deployed decoder and its FSQ encoder are trainable.
+        # Point-query mode does NOT optimize a disconnected dot-product
+        # decoder; dot mode does NOT train the unused spatial decoder.
+        mode = model.cfg.skin_decoder_mode
+        encoder_prefixes = (
+            "mira.codec.vertex_encode.", "mira.codec.joint_encode.",
+            "mira.codec.latent_head.",
+        )
+        named = tuple(model.named_parameters())
+        selected = {
+            name for name, _ in named
+            if (
+                name.startswith("mira.codec.")
+                if mode == "DOT_PRODUCT_BASELINE" else
+                name.startswith(encoder_prefixes)
+                or name.startswith("mira.spatial_decoder.")
+            )
+        }
+        if not selected or {
+            name for name, p in named if p.requires_grad
+        } != selected:
+            raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_UPSTREAM_FREEZE_DRIFT")
+        optimizer_ids = [
             id(p) for group in optimizer.param_groups for p in group["params"]
         ]
+        selected_ids = {
+            id(p) for name, p in named if name in selected
+        }
         if (
-            not codec_ids or len(optimizer_ids)!=len(set(optimizer_ids))
-            or set(optimizer_ids)!=codec_ids
+            not selected_ids or len(optimizer_ids)!=len(set(optimizer_ids))
+            or set(optimizer_ids)!=selected_ids
         ):
             raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_CODEC_OPTIMIZER_SCOPE_DRIFT")
+        self.skin_decoder_mode = mode
+        self._trainable_mira_names = frozenset(selected)
         self.model = model
         self.optimizer = optimizer
         self.dataset_manifest_sha256 = dataset_manifest_sha256
@@ -213,16 +240,12 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         # dropout or future upstream optimizer updates from moving labels.
         self._frozen_parameter_versions = tuple(
             (name, p._version) for name, p in model.named_parameters()
-            if not name.startswith("mira.codec.")
+            if name not in self._trainable_mira_names
         )
-        # Fail with the *stage* violation first, before the generic optimizer
-        # receipt can disguise an accidentally unfrozen upstream parameter.
+        # Any change to an excluded parameter (including the unused decoder)
+        # is forbidden during this stationary teacher encoding phase.
         live = {name for name, p in model.named_parameters() if p.requires_grad}
-        codec_names = {
-            name for name, _ in model.named_parameters()
-            if name.startswith("mira.codec.")
-        }
-        if not codec_names or live != codec_names:
+        if live != self._trainable_mira_names:
             raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_UPSTREAM_FREEZE_DRIFT")
         self.optimizer_ownership = qualify_rss_vnext_optimizer_ownership_v1(
             model, optimizer,
@@ -237,28 +260,42 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         return _digest_json({
             name: source_surface_tensor_sha256(tensor)
             for name, tensor in self.model.state_dict().items()
-            if not name.startswith("mira.codec.")
+            if name not in self._trainable_mira_names
         })
 
     def _assert_scope(self) -> None:
         model = self.model
+        active_module = (
+            "mira.codec." if self.skin_decoder_mode == "DOT_PRODUCT_BASELINE"
+            else "mira.spatial_decoder."
+        )
         if (
             model.training or not model.mira.codec.training
+            or (
+                model.mira.spatial_decoder.training
+                != (self.skin_decoder_mode == "POINT_QUERY_CROSS_ATTENTION")
+            )
             or any(
                 module.training
                 for name, module in model.named_modules()
-                if not name.startswith("mira.codec")
+                if not (
+                    name == "mira.codec" or name.startswith("mira.codec.")
+                    or (
+                        self.skin_decoder_mode == "POINT_QUERY_CROSS_ATTENTION"
+                        and (name == "mira.spatial_decoder"
+                             or name.startswith(active_module))
+                    )
+                )
             )
         ):
             raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_UPSTREAM_TRAIN_MODE_DRIFT")
         named = tuple(model.named_parameters())
         trainable = {name for name, p in named if p.requires_grad}
-        codec = {name for name, _ in named if name.startswith("mira.codec.")}
-        if not codec or trainable != codec:
+        if trainable != self._trainable_mira_names:
             raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_UPSTREAM_FREEZE_DRIFT")
         versions = tuple(
             (name, p._version) for name, p in named
-            if not name.startswith("mira.codec.")
+            if name not in self._trainable_mira_names
         )
         if versions != self._frozen_parameter_versions:
             raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_UPSTREAM_PARAMETER_MUTATED")
@@ -379,7 +416,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             "full_source_weight_coverage":True,
             "teacher_semantics":"SOURCE_NATIVE_DENSE_SKIN_NOT_INFERRED_WEIGHTS",
             "codec_feature_abi":"IRIS_LOCAL_H_PLUS_REST_XYZ__AXIS_CAUSAL_PRE_JOINT_H",
-            "skin_decoder_mode":"DOT_PRODUCT_BASELINE",
+            "skin_decoder_mode":self.skin_decoder_mode,
             "codec_source_encoder_pooling_abi":MIRA_SOURCE_SURFACE_POOLING_ABI,
         }
         receipt=self.trusted_registry.get(batch.admission_key)
@@ -396,9 +433,35 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         # AXIS regenerates source FSQ labels. Generated geometry affects
         # conditioning only; it does not become independent source truth.
         mass=tessa_vertex_surface_mass_v1(rest,mesh.faces)
-        fit=codec(
-            weights,features,joints_hidden,surface_vertex_mass=mass,
-        )
+        if self.skin_decoder_mode == "POINT_QUERY_CROSS_ATTENTION":
+            # Source weights are consumed only by the FSQ teacher encoder.
+            # The EXACT product point-query decoder sees hard-valued STE
+            # codes, every TESSA vertex H/XYZ/normal and causal AXIS joint
+            # states. No privileged source weights enter its input.
+            ids, codes_ste, quantization_loss = (
+                codec.source_ste_tokens_with_quantization_loss_v1(
+                    weights, features, joints_hidden, surface_vertex_mass=mass,
+                )
+            )
+            joint_mask = torch.ones(
+                (1, n_joints), device=joints_hidden.device, dtype=torch.bool,
+            )
+            prediction = model.mira.spatial_decoder(
+                local, rest, joints_hidden, codes_ste, joint_mask,
+                vertex_normals=normals,
+            ).weights
+            reconstruction_loss = F.smooth_l1_loss(prediction, weights)
+            fit = {
+                "token_ids": ids,
+                "reconstructed_weights": prediction,
+                "reconstruction_loss": reconstruction_loss,
+                "quantization_loss": quantization_loss,
+                "loss": reconstruction_loss + 0.05 * quantization_loss,
+            }
+        else:
+            fit = codec(
+                weights,features,joints_hidden,surface_vertex_mass=mass,
+            )
         # ABI parity must hold for the deployed hard-token decoder. Neither
         # expected-code soft approximation nor a second independently trained
         # MIRA decoder can substitute for exact product hard IDs.
@@ -682,7 +745,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             named_parameters=tuple(
                 (name,param)
                 for name,param in self.model.named_parameters()
-                if name.startswith("mira.codec.")
+                if name in self._trainable_mira_names
             ),
             loss_terms=families,policy=self.gradient_court_policy,
         )
@@ -700,7 +763,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         if self.step % 128 == 0:
             self._assert_frozen_state_identity()
         for name, parameter in self.model.named_parameters():
-            if not name.startswith("mira.codec."):
+            if name not in self._trainable_mira_names:
                 parameter.grad = None
         self.optimizer.zero_grad(set_to_none=True)
         result=self.objective(batch)
@@ -713,7 +776,9 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             ))
         result.loss.backward()
         torch.nn.utils.clip_grad_norm_(
-            self.model.mira.codec.parameters(),1.,error_if_nonfinite=True,
+            (p for name, p in self.model.named_parameters()
+             if name in self._trainable_mira_names),
+            1.,error_if_nonfinite=True,
         )
         self.optimizer.step()
         self.step+=1
@@ -727,6 +792,8 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         target.parent.mkdir(parents=True,exist_ok=True)
         payload={
             "schema":SCHEMA,
+            "skin_decoder_mode":self.skin_decoder_mode,
+            "trainable_parameter_names":sorted(self._trainable_mira_names),
             "dataset_manifest_sha256":self.dataset_manifest_sha256,
             "registry_sha256":self.registry_sha256,
             "pose_registry_sha256":self.pose_registry_sha256,
@@ -741,6 +808,11 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             "optimizer_ownership_sha256":self.optimizer_ownership.binding_sha256,
             "step":self.step,
             "codec_state_dict":self.model.mira.codec.state_dict(),
+            "spatial_decoder_state_dict":(
+                self.model.mira.spatial_decoder.state_dict()
+                if self.skin_decoder_mode == "POINT_QUERY_CROSS_ATTENTION"
+                else {}
+            ),
             "optimizer":self.optimizer.state_dict(),
             "torch_cpu_rng":torch.get_rng_state(),
             "torch_cuda_rng":torch.cuda.get_rng_state_all() if torch.cuda.is_available() else [],
@@ -762,6 +834,8 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         payload=torch.load(Path(path),map_location="cpu",weights_only=True)
         if (
             payload.get("schema")!=SCHEMA
+            or payload.get("skin_decoder_mode")!=self.skin_decoder_mode
+            or payload.get("trainable_parameter_names")!=sorted(self._trainable_mira_names)
             or payload.get("dataset_manifest_sha256")!=self.dataset_manifest_sha256
             or payload.get("registry_sha256")!=self.registry_sha256
             or payload.get("pose_registry_sha256")!=self.pose_registry_sha256
@@ -779,7 +853,25 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or not isinstance(payload.get("torch_cuda_rng"),list)
         ):
             raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_CODEC_RESUME_DRIFT")
+        if self.skin_decoder_mode == "POINT_QUERY_CROSS_ATTENTION":
+            if not isinstance(payload.get("spatial_decoder_state_dict"), dict):
+                raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_CODEC_RESUME_DRIFT")
+        elif payload.get("spatial_decoder_state_dict") != {}:
+            raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_CODEC_RESUME_DRIFT")
         self.model.mira.codec.load_state_dict(payload["codec_state_dict"],strict=True)
+        if self.skin_decoder_mode == "POINT_QUERY_CROSS_ATTENTION":
+            self.model.mira.spatial_decoder.load_state_dict(
+                payload["spatial_decoder_state_dict"], strict=True,
+            )
+        # load_state_dict increments PyTorch Parameter._version even for the
+        # byte-identical frozen DOT decoder that shares the FSQ codec. Verify
+        # ALL non-trainable state bytes against the original frozen snapshot
+        # before rebinding version counters after this controlled restore.
+        self._assert_frozen_state_identity()
+        self._frozen_parameter_versions = tuple(
+            (name, p._version) for name, p in self.model.named_parameters()
+            if name not in self._trainable_mira_names
+        )
         self.optimizer.load_state_dict(payload["optimizer"])
         self.step=payload["step"]
         torch.set_rng_state(payload["torch_cpu_rng"])

@@ -34,8 +34,8 @@ def deterministic():
     torch.set_num_threads(1)
 
 
-def _case():
-    model, source_batch, _ = _fixture()
+def _case(mode="DOT_PRODUCT_BASELINE"):
+    model, source_batch, _ = _fixture(mode)
     model.eval()
     model.requires_grad_(False)
     model.axis.skin_code_head.requires_grad_(True)
@@ -81,6 +81,7 @@ def _case():
         "upstream_frozen_model_state_sha256":
             frozen_rss_vnext_axis_token_upstream_state_sha256_v1(model),
         "mira_codec_state_sha256":frozen_mira_codec_state_sha256_v6(model),
+        "skin_decoder_mode":mode,
         "scene_generator_binding_sha256":scene.generating_checkpoint_sha256,
         "mesh_teacher_tokens_sha256":source_surface_tensor_sha256(topo),
         "axis_teacher_sequence_sha256":axis_teacher_sequence_sha256_v6(teacher),
@@ -306,3 +307,41 @@ def test_stationary_handoff_pins_actual_upstream_model_state_not_only_claimed_ta
     fresh=_trainer(model,new_registry)
     with pytest.raises(ValueError,match="SOURCE_RECEIPT_DRIFT"):
         fresh.objective(batch)
+
+def test_stationary_axis_skin_code_teacher_replays_spatial_fsq_product_decoder():
+    model,batch,registry=_case("POINT_QUERY_CROSS_ATTENTION")
+    engine=_trainer(model,registry)
+    before=model.axis.skin_code_head.weight.detach().clone()
+    result=engine.train_step(batch)
+    assert torch.isfinite(result.skin_code_ce)
+    assert result.independent_source_codec_weight_mae<=1.
+    assert engine.step==1
+    assert model.axis.skin_code_head.weight.grad is not None
+    assert model.axis.skin_code_head.weight.grad.abs().sum()>0
+    assert not torch.equal(model.axis.skin_code_head.weight,before)
+    assert model.mira.spatial_decoder.pair_score[-1].weight.grad is None
+    assert model.mira.codec.latent_head.weight.grad is None
+    assert not result.trained_skin_program_release_qualified
+
+
+def test_stationary_spatial_skin_teacher_binds_mode_and_all_decoder_weights(tmp_path):
+    model,batch,registry=_case("POINT_QUERY_CROSS_ATTENTION")
+    engine=_trainer(model,registry)
+    result=engine.objective(batch)
+    assert torch.isfinite(result.skin_code_ce)
+    checkpoint=tmp_path/"axis-spatial-skin-tokens.pt"
+    engine.save_checkpoint(checkpoint)
+    replay=_trainer(model,registry)
+    replay.load_checkpoint(checkpoint)
+    changed={"source-skin-bridge":{
+        **registry["source-skin-bridge"],
+        "skin_decoder_mode":"DOT_PRODUCT_BASELINE",
+    }}
+    with pytest.raises(ValueError,match="SOURCE_RECEIPT_DRIFT"):
+        _trainer(model,changed).objective(batch)
+    # Frozen spatial decoder identity is part of full upstream model state,
+    # even though a separate codec codebook digest remains identical.
+    with torch.no_grad():
+        model.mira.spatial_decoder.pair_score[-1].weight.add_(0.1)
+    with pytest.raises(RuntimeError,match="UPSTREAM_PARAMETER_MUTATED"):
+        replay.train_step(batch)

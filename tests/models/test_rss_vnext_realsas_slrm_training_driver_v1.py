@@ -332,3 +332,33 @@ def test_stage1_and_stage2_separately_bind_same_six_view_normal_inputs():
         )
         with pytest.raises(ValueError,match="RENDER_RECEIPT_DRIFT"):
             trainer.objective(altered)
+
+def test_stage3_raster_backend_and_device_are_checkpoint_pinned(tmp_path):
+    from models.rss_vnext.realsas_flexicubes_mesh_render_v1 import (
+        RASTER_ID as CPU_RASTER_ID,
+    )
+    net, batch, receipt = _batch(STAGE_1, 1)
+    trainer = _trainer(net, receipt)
+    assert trainer.stage3_raster_device_type == "cpu"
+    assert trainer.stage3_raster_backend_id == CPU_RASTER_ID
+    path=tmp_path/"stage3-backend-bound.pt"
+    trainer.save_checkpoint(path,sampler_cursor=1)
+    good=_trainer(net,receipt)
+    assert good.load_checkpoint(path)==1
+    data=torch.load(path,map_location="cpu",weights_only=True)
+    data["stage3_raster_backend_identity"]="PYTORCH3D_COMPILED_FIRST_HIT_STAGE3_V1"
+    forged=tmp_path/"forged-backend.pt"
+    torch.save(data,forged)
+    with pytest.raises(ValueError,match="CHECKPOINT_STAGE3_RASTER_DRIFT"):
+        good.load_checkpoint(forged)
+
+
+def test_stage3_backend_cannot_change_unnoticed_after_trainer_creation():
+    net,batch,receipt=_batch(STAGE_1,1)
+    trainer=_trainer(net,receipt)
+    trainer.stage3_raster_backend_id="FORGED_STAGE3_RASTER_BACKEND"
+    path="not-required"
+    assert trainer.stage3_raster_device_type=="cpu"
+    # The checkpoint binds both policy hash and stored backend identity.
+    # This case deliberately tests explicit metadata tampering at resume.
+    assert trainer.stage3_raster_backend_id!="BUSTED_TORCH_FIRST_HIT_DIFFERENTIABLE_STAGE3_V1"

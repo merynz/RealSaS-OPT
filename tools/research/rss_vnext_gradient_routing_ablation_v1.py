@@ -31,6 +31,10 @@ from models.rss_vnext.training_gradient_routing_research_v1 import (
 )
 from models.rss_vnext.training_engine import (
     RSSvNextStructuralTrainer, RSSvNextTrainingWeights,
+    source_surface_tensor_sha256,
+)
+from tests.models.test_rss_vnext_product_sixview_trainer_parity_v1 import (
+    _fixture as product_sixview_fixture, DATASET as PRODUCT_DATASET,
 )
 from tests.models.test_rss_vnext_early_semantics import _qualified_3d_role_case
 from tests.models.test_rss_vnext_structural_trainer import make_sample
@@ -43,13 +47,50 @@ _WEIGHTS = RSSvNextTrainingWeights(
 )
 
 
-def _source_model_and_batch(seed: int):
+def _source_model_and_batch(seed: int, scene: str):
     torch.manual_seed(seed)
-    source_model, receipt, batch = _qualified_3d_role_case()
-    sample = make_sample(source_model)
-    batch.topology_teacher_tokens = sample.topology_teacher_tokens
-    batch.topology_valid_mask = sample.topology_valid_mask
-    return source_model, receipt, batch
+    if scene=="RESEARCH_CALIBRATED_TWO_VIEW":
+        source_model, receipt, batch = _qualified_3d_role_case()
+        sample = make_sample(source_model)
+        batch.topology_teacher_tokens = sample.topology_teacher_tokens
+        batch.topology_valid_mask = sample.topology_valid_mask
+        return source_model, receipt, batch, {}, _DATASET
+    if scene != "PRODUCT_GENERATED_SIX_VIEW":
+        raise ValueError("RSS_VNEXT_ABLATION_SCENE_POLICY_UNKNOWN")
+    source_model, batch, generator_record = product_sixview_fixture()
+    # The six RGB/normal observations are pinned generator HYPOTHESES, not
+    # source-measured images. These labels are synthetic test fixtures only.
+    state=source_model.encode_generated_multiview(
+        batch.rgba,None,
+        generated_rgba=batch.product_generated_rgba,
+        generated_normals=batch.product_generated_normals,
+        generated_cameras=batch.product_generated_cameras,
+        generation_checkpoint_sha256=batch.product_generation_checkpoint_sha256,
+        source_binding_sha256=batch.product_source_binding_sha256,
+    )
+    n=int(state.query_xyz.shape[1])
+    labels=(torch.arange(n).reshape(1,-1)%source_model.cfg.semantic_role_schema().count).long()
+    mask=torch.zeros_like(labels,dtype=torch.bool)
+    for idx in (0,2,5):
+        if idx<n: mask[0,idx]=True
+    key="synthetic-six-view-role-receipt"
+    role_registry={key:{
+        "admission_status":"QUALIFIED_SOURCE_SURFACE_ROLE",
+        "dataset_manifest_sha256":PRODUCT_DATASET,
+        "source_qualification_key":batch.source_qualification_key,
+        "role_schema_id":source_model.cfg.semantic_role_schema_id,
+        "query_xyz_sha256":source_surface_tensor_sha256(state.query_xyz),
+        "role_indices_sha256":source_surface_tensor_sha256(labels),
+        "role_mask_sha256":source_surface_tensor_sha256(mask),
+    }}
+    batch.source_surface_role_indices=labels
+    batch.source_surface_role_mask=mask
+    batch.source_surface_role_admission_key=key
+    return (
+        source_model,role_registry,batch,
+        {batch.product_conditioning_admission_key:generator_record},
+        PRODUCT_DATASET,
+    )
 
 
 def _vector(grads: tuple[Tensor | None, ...],params: list[torch.nn.Parameter]) -> Tensor:
@@ -86,13 +127,16 @@ def _private_head_grad_norms(model) -> dict[str,float]:
 
 def train_one_policy(
     source_model, batch, registry, *,
-    route_mode: str, seed: int, steps: int,
+    route_mode: str, seed: int, steps: int, scene: str,
+    dataset_hash: str, generation_registry: dict,
 ) -> dict:
     model=copy.deepcopy(source_model)
     opt=torch.optim.AdamW(model.parameters(),lr=1e-3)
     trainer=RSSvNextStructuralTrainer(
-        model,opt,dataset_manifest_sha256=_DATASET,
+        model,opt,dataset_manifest_sha256=dataset_hash,
         weights=_WEIGHTS,trusted_surface_role_registry=registry,
+        scene_conditioning_policy=scene,
+        trusted_generated_conditioning_registry=generation_registry,
     )
     shared=[(name,p) for name,p in model.iris.scene.named_parameters()
             if p.requires_grad]
@@ -186,6 +230,7 @@ def train_one_policy(
         del out,after_out,a,b
     return {
         "mode":route_mode,"seed":seed,"steps":steps,
+        "scene_conditioning":scene,
         "initial":initial,"final":report[-1]["after"],
         "final_minus_initial":{
             k:report[-1]["after"][k]-initial[k] for k in initial
@@ -198,18 +243,23 @@ def train_one_policy(
     }
 
 
-def run(*, seeds: tuple[int,...], steps: int) -> dict:
+def run(*, seeds: tuple[int,...], steps: int,
+        scene: str = "PRODUCT_GENERATED_SIX_VIEW") -> dict:
     if not seeds or steps<1:
         raise ValueError("RSS_VNEXT_ABLATION_INVALID_EXPERIMENT")
     torch.set_num_threads(1)
     all_results=[]
     for seed in seeds:
-        source_model,registry,batch=_source_model_and_batch(seed)
+        source_model,registry,batch,generation_registry,dataset_hash = (
+            _source_model_and_batch(seed,scene)
+        )
         per_seed=[]
         for mode in ROUTES:
             per_seed.append(train_one_policy(
                 source_model,batch,registry,
                 route_mode=mode,seed=seed,steps=steps,
+                scene=scene,dataset_hash=dataset_hash,
+                generation_registry=generation_registry,
             ))
         # Before any updates, private gradients must be equal across arms;
         # otherwise the seed/data/forward matching is not a valid experiment.
@@ -229,6 +279,11 @@ def run(*, seeds: tuple[int,...], steps: int) -> dict:
         "source_teacher":"TEST_ONLY_3D_ROLE_FIXTURE_NOT_COMMERCIAL_SOURCE_TRUTH",
         "trained_checkpoints_or_unseen_qualified":False,
         "arms":list(ROUTES),"seeds":list(seeds),"steps":steps,
+        "scene_conditioning":scene,
+        "original_source_camera_passed_to_encoder":(
+            False if scene=="PRODUCT_GENERATED_SIX_VIEW" else True
+        ),
+        "generated_views_not_source_teacher":True,
         "matched_forward_per_step":1,
         "matched_task_backward_probes_per_step":2,
         "matched_sum_backward_per_step":1,
@@ -247,10 +302,15 @@ def main() -> None:
     parser.add_argument("--quick",action="store_true")
     parser.add_argument("--steps",type=int,default=5)
     parser.add_argument("--seeds",nargs="+",type=int,default=[11,23,47])
+    parser.add_argument(
+        "--scene",choices=("PRODUCT_GENERATED_SIX_VIEW","RESEARCH_CALIBRATED_TWO_VIEW"),
+        default="PRODUCT_GENERATED_SIX_VIEW",
+    )
     args=parser.parse_args()
     data=run(
         seeds=(11,) if args.quick else tuple(args.seeds),
         steps=2 if args.quick else args.steps,
+        scene=args.scene,
     )
     print(json.dumps(data,sort_keys=True,separators=(",",":"),allow_nan=False))
 

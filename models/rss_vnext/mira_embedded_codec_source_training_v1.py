@@ -25,6 +25,10 @@ from torch import Tensor
 import torch.nn.functional as F
 
 from .animation_ready_mesh import posed_lbs_from_joint_matrices
+from .skin_surface_mass_v1 import (
+    POOLING_ABI as MIRA_SOURCE_SURFACE_POOLING_ABI,
+    tessa_vertex_surface_mass_v1,
+)
 from .training_source_surface_skin_quadrature_v1 import (
     source_surface_area_skin_loss_v1,
 )
@@ -44,7 +48,7 @@ from .training_engine import (
     axis_teacher_sequence_sha256_v6, source_surface_tensor_sha256,
 )
 
-SCHEMA = "RealSaS.RSSvNext.EmbeddedMIRASourceCodecTrainer.v5"
+SCHEMA = "RealSaS.RSSvNext.EmbeddedMIRASourceCodecTrainer.v6"
 _TEACHER = "QUALIFIED_SOURCE_MIRA_DENSE_SKIN_TESSA_AXIS_JOINT_REINDEX"
 
 
@@ -315,6 +319,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or pre_receipt.get("scene_generator_binding_sha256")!=state.generating_checkpoint_sha256
             or pre_receipt.get("mesh_teacher_tokens_sha256")!=source_surface_tensor_sha256(batch.topology_teacher_tokens)
             or pre_receipt.get("axis_teacher_sequence_sha256")!=axis_teacher_sequence_sha256_v6(sequence)
+            or pre_receipt.get("codec_source_encoder_pooling_abi")!=MIRA_SOURCE_SURFACE_POOLING_ABI
         ):
             raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_ADMISSION_DRIFT")
         # Source rig/skin must be reindexed to the SAME discrete TESSA mesh.
@@ -366,6 +371,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             "teacher_semantics":"SOURCE_NATIVE_DENSE_SKIN_NOT_INFERRED_WEIGHTS",
             "codec_feature_abi":"IRIS_LOCAL_H_PLUS_REST_XYZ__AXIS_CAUSAL_PRE_JOINT_H",
             "skin_decoder_mode":"DOT_PRODUCT_BASELINE",
+            "codec_source_encoder_pooling_abi":MIRA_SOURCE_SURFACE_POOLING_ABI,
         }
         receipt=self.trusted_registry.get(batch.admission_key)
         if receipt is None or any(receipt.get(k)!=v for k,v in expected.items()):
@@ -377,7 +383,13 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or joints_hidden.shape[-1]!=codec.config.joint_feature_dim
         ):
             raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_PRODUCT_CODEC_FEATURE_ABI")
-        fit=codec(weights,features,joints_hidden)
+        # Same frozen TESSA rest-mesh surface quadrature will be used when
+        # AXIS regenerates source FSQ labels. Generated geometry affects
+        # conditioning only; it does not become independent source truth.
+        mass=tessa_vertex_surface_mass_v1(rest,mesh.faces)
+        fit=codec(
+            weights,features,joints_hidden,surface_vertex_mass=mass,
+        )
         # ABI parity must hold for the deployed hard-token decoder. Neither
         # expected-code soft approximation nor a second independently trained
         # MIRA decoder can substitute for exact product hard IDs.
@@ -689,6 +701,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             "source_area_skin_weight":self.source_area_skin_weight,
             "gradient_court_policy":asdict(self.gradient_court_policy),
             "model_config_sha256":self.config_sha256,
+            "codec_source_encoder_pooling_abi":MIRA_SOURCE_SURFACE_POOLING_ABI,
             "frozen_upstream_state_sha256":self.frozen_upstream_state_sha256,
             "optimizer_ownership_sha256":self.optimizer_ownership.binding_sha256,
             "step":self.step,
@@ -722,6 +735,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or payload.get("source_area_skin_weight")!=self.source_area_skin_weight
             or payload.get("gradient_court_policy")!=asdict(self.gradient_court_policy)
             or payload.get("model_config_sha256")!=self.config_sha256
+            or payload.get("codec_source_encoder_pooling_abi")!=MIRA_SOURCE_SURFACE_POOLING_ABI
             or payload.get("frozen_upstream_state_sha256")!=self.frozen_upstream_state_sha256
             or payload.get("optimizer_ownership_sha256")!=self.optimizer_ownership.binding_sha256
             or type(payload.get("step")) is not int or payload["step"]<0

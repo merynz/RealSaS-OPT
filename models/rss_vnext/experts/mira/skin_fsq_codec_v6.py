@@ -150,7 +150,10 @@ class MIRASkinFSQCodecV6(nn.Module):
             raise ValueError("MIRA_V6_CODEC_EMPTY_DOMAIN")
         return b, n, j
 
-    def _encode_latent(self, weights: Tensor, vertex_features: Tensor, joint_features: Tensor) -> Tensor:
+    def _encode_latent(
+        self, weights: Tensor, vertex_features: Tensor, joint_features: Tensor,
+        *, surface_vertex_mass: Tensor | None = None,
+    ) -> Tensor:
         b, n, j = self._check_inputs(vertex_features, joint_features)
         if weights.shape != (b, n, j):
             raise ValueError("MIRA_V6_CODEC_WEIGHT_SHAPE_DRIFT")
@@ -161,14 +164,41 @@ class MIRASkinFSQCodecV6(nn.Module):
         vf = vertex_features[:, None, :, :].expand(b, j, n, -1)
         wf = weights.transpose(1, 2).unsqueeze(-1)
         encoded = self.vertex_encode(torch.cat([vf, wf], dim=-1))
-        mean_pool = encoded.mean(dim=2)
+        if surface_vertex_mass is None:
+            # Backward-compatible generic codec API. Production source
+            # trainers explicitly pass the canonical TESSA surface mass.
+            mean_pool = encoded.mean(dim=2)
+        else:
+            if (
+                not isinstance(surface_vertex_mass, Tensor)
+                or surface_vertex_mass.shape != (b, n)
+                or surface_vertex_mass.device != encoded.device
+                or not torch.is_floating_point(surface_vertex_mass)
+                or not bool(torch.isfinite(surface_vertex_mass).all())
+                or bool((surface_vertex_mass < 0).any())
+                or bool((surface_vertex_mass.sum(dim=1) <= 0).any())
+            ):
+                raise ValueError("MIRA_V6_CODEC_SURFACE_MASS_INVALID")
+            # Area weights are geometry conditioning, not learnable source
+            # authority. Accumulate in FP32 even with BF16 codec activations.
+            area = surface_vertex_mass.detach().to(dtype=torch.float32)
+            mean_pool = (
+                (encoded.float() * area[:, None, :, None]).sum(dim=2)
+                / area.sum(dim=1)[:, None, None]
+            ).to(dtype=encoded.dtype)
         max_pool = encoded.amax(dim=2)
         joint_state = self.joint_encode(joint_features)
         latent = self.latent_head(torch.cat([mean_pool, max_pool, joint_state], dim=-1))
         return latent.view(b, j, self.config.tokens_per_joint, self.config.latent_dim)
 
-    def encode_tokens(self, weights: Tensor, vertex_features: Tensor, joint_features: Tensor) -> tuple[Tensor, Tensor, Tensor]:
-        latent = self._encode_latent(weights, vertex_features, joint_features)
+    def encode_tokens(
+        self, weights: Tensor, vertex_features: Tensor, joint_features: Tensor,
+        *, surface_vertex_mass: Tensor | None = None,
+    ) -> tuple[Tensor, Tensor, Tensor]:
+        latent = self._encode_latent(
+            weights, vertex_features, joint_features,
+            surface_vertex_mass=surface_vertex_mass,
+        )
         quantized, token_ids, hard_codes = self.quantizer(latent)
         return token_ids, quantized, hard_codes
 
@@ -209,8 +239,14 @@ class MIRASkinFSQCodecV6(nn.Module):
         )
         return self._decode_code_vectors(codes, vertex_features, joint_features)
 
-    def forward(self, weights: Tensor, vertex_features: Tensor, joint_features: Tensor) -> dict[str, Tensor]:
-        latent = self._encode_latent(weights, vertex_features, joint_features)
+    def forward(
+        self, weights: Tensor, vertex_features: Tensor, joint_features: Tensor,
+        *, surface_vertex_mass: Tensor | None = None,
+    ) -> dict[str, Tensor]:
+        latent = self._encode_latent(
+            weights, vertex_features, joint_features,
+            surface_vertex_mass=surface_vertex_mass,
+        )
         quantized, token_ids, hard_codes = self.quantizer(latent)
         # STE: forward values are identical to decode_tokens(token_ids);
         # unlike an integer-ID roundtrip, gradients from dense skin quality

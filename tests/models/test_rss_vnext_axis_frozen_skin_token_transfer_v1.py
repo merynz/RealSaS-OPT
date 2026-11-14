@@ -6,6 +6,9 @@ import pytest
 import torch
 
 from models.axis.rig_program_model_v6 import RigTokenKindV6
+from models.rss_vnext.skin_surface_mass_v1 import (
+    POOLING_ABI,tessa_vertex_surface_mass_v1,
+)
 from models.rss_vnext.axis_frozen_skin_token_transfer_v1 import (
     RSSvNextStationarySkinTokenBatchV1,
     RSSvNextStationaryAXISSkinTokenTrainerV1,
@@ -52,6 +55,9 @@ def _case():
             source_batch.source_dense_weights,
             torch.cat((mesh.local_features,mesh.rest_vertices_iris),dim=-1),
             hidden[:,joints-1],
+            surface_vertex_mass=tessa_vertex_surface_mass_v1(
+                mesh.rest_vertices_iris,mesh.faces,
+            ),
         )
     assert codes.numel()==len(skins)
     new_codes=teacher.skin_code_ids.clone()
@@ -88,6 +94,7 @@ def _case():
         "source_codec_hard_reconstruction_qualified":True,
         "generated_view_is_skin_teacher":False,
         "teacher_semantics":"EXACT_FROZEN_FSQ_SOURCE_SKIN_TOKENS",
+        "codec_source_encoder_pooling_abi":POOLING_ABI,
         "max_admitted_source_codec_weight_mae":1.,
     }}
     return model,batch,registry

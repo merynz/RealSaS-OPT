@@ -15,6 +15,7 @@ from models.rss_vnext import (
 from models.rss_vnext.realsas_virtual_camera_policy_v1 import (
     target_canonical_and_six_cameras_v1,
 )
+from models.rss_vnext.skin_surface_mass_v1 import POOLING_ABI
 from models.rss_vnext.mira_embedded_codec_source_training_v1 import (
     RSSvNextEmbeddedMIRACodecBatchV1,
     RSSvNextEmbeddedMIRASourceCodecTrainerV1,
@@ -116,6 +117,7 @@ def _fixture():
         "teacher_semantics":"SOURCE_NATIVE_DENSE_SKIN_NOT_INFERRED_WEIGHTS",
         "codec_feature_abi":"IRIS_LOCAL_H_PLUS_REST_XYZ__AXIS_CAUSAL_PRE_JOINT_H",
         "skin_decoder_mode":"DOT_PRODUCT_BASELINE",
+        "codec_source_encoder_pooling_abi":POOLING_ABI,
     }}
     return model,batch,registry
 

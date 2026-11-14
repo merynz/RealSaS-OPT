@@ -259,7 +259,11 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             rest=mesh.rest_vertices_iris.detach()
             normals=mesh.normals.detach()
         digest=axis_mesh_teacher_address_digest_v1(mesh)
-        weights=batch.source_dense_weights
+        # Independently observed source skin is a TEACHER, not a parameter
+        # to be optimized through the codec's input encoder. Detach before
+        # MIRA encode so an autograd-marked input cannot silently learn its
+        # own target or source geometry.
+        weights=batch.source_dense_weights.detach()
         v=rest.shape[1]
         if (
             weights.shape!=(1,v,n_joints)

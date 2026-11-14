@@ -8,6 +8,75 @@
 
 **Scope correction:** Eight 45° yaw directions are one optional proof/demo case, not RSS.vNext's entire product definition. The shared 3D representation may support future 3D presentation/export, but a complete 3D product renderer, material stack and game-engine export are **not automatically qualified** by the 2D compiler. 2D Presentation requires dedicated source appearance, occlusion, draw order, UV/alpha, clipping and motion consequences. Training curricula must never substitute a fixed eight-view output bank for these capabilities.
 
+## 0a. Final appearance responsibility: Graphics owns 2D Presentation (2026-11-14)
+
+The old **CAA = Complete Appearance Authority** contract was created when
+IRIS geometry and eight views were the main carriers. It is **no longer a
+separate peer product-authority stage**. Keep its valuable policy/invariants
+as **Graphics source-appearance preservation and provenance rules**; the final
+owner of 2D pixel decisions is the **Graphics Compiler + its deterministic
+native runtime**. Do not delete legacy CAA artifacts/validator without a
+versioned migration: older demos and archives still refer to them.
+
+**One canonical 3D carrier** (mesh topology/UV addressing, rig, skin, motion)
+is shared by every camera/output profile. Graphics builds persistent
+mesh-addressed source+inferred appearance fields (one UV domain, not a separate
+sprite rig per camera), then chooses per-view/per-pose frontmost faces and
+composites 2D colors/alpha. Scene canonicalization must not destroy authored
+painted shadow/highlight/outline/alpha.
+
+| Component | Evidence it contributes | What it cannot decide |
+| --- | --- | --- |
+| IRIS geometry/Graphics head on shared H(x) | candidate SDF/mesh-supported RGB, density and uncertainty; predicted hidden-surface color | observed source pixel-to-surface ownership, artwork truth, contact, visibility on unmeasured poses |
+| Semantic head on the SAME H(x) | source-trainable anonymous regions and **K-way presentation role logits**; may propose cut/sublayer grouping with UNKNOWN retained | final pixel RGB, alpha, whole-face drawable identity, front/back order or structural attachment by argmax alone |
+| TESSA + Mechanics (AXIS/MIRA) | canonical indexed faces/UV addresses, DOFs, LBS, moved vertices and surface attachment candidate | painted texture or source-verified occluded RGB |
+| Compiler Graphics | merges exact CAS origin, candidate face topology, projected original RGB and neural RGB; chooses role pass, UV sampling, source-vs-inferred provenance, physical first-hit and qualified draw-order overrides; computes edits' pixel consequences | assert original source ownership from two uncalibrated images without independent camera/ray evidence |
+| Native Graphics Runtime | execute compiled per-frame/per-camera surface interpolation and 2D alpha/depth/compositing; report face index and color provenance per pixel | invent new colors, infer semantic labels, elevate candidate to source |
+
+**Practical implementation now:**
+- `product.graphics` consumes both `tessa_candidate_graphics_logits`
+  (five typed RGB/density/uncertainty channels) **and**
+  `tessa_candidate_presentation_role_logits` from the same source-bound
+  Scene CAS, with exact TESSA face/vertex identity and checkpoint receipt.
+- The UV atlas keeps two original RGBA layers, source sample masks and
+  conflict masks **separate** from the inferred same-H texture; no blending
+  of contradictory source colors. Unobserved source UV/pose content stays
+  UNKNOWN, not a false "CAA-verified" surface.
+- Semantic K-way face-role distributions and abstaining face selections can
+  be **optionally** transported to the native 2D compositor as user-requested
+  candidate role passes. The standard complete-puppet render draws all
+  physical faces, even when semantic role is UNKNOWN. A role filter cannot
+  recolor the original RGB, invent alpha, or override physical first hit.
+  These face-level candidates are coarse; **separate drawable boundaries
+  inside one face** require topology/cut evidence and aren't solved by
+  assigning a role to an entire triangle.
+- For visible color the native compositor applies a qualified source layer
+  only with complete in-face UV bilinear support; missing/mismatched source
+  data falls back to explicitly **inferred**, not observed, material.
+  Moving visibility is calculated from deformed mesh geometry and affine
+  orthographic screen barycentrics, while learned draw order is a typed
+  candidate until independently qualified.
+- Product Proof independently replays both same-H heads from source-bound
+  CAS, recompiles the UV atlas and the `.rss` native preview **byte-for-byte**.
+  Such replay establishes implementation integrity, **not** truth of hidden
+  surfaces or inferred appearances.
+
+**Still open, not accepted as product truth:** source-camera/ray ownership
+for the two uncalibrated original images; deformation-time disocclusion,
+transparent/semi-transparent/outline support (beyond opaque triangle first
+hit); flexible intra-face drawable cuts; qualified physical occlusion vs
+art-directed drawing-order overrides; independently witnessed contact/grip,
+secondary motion and edited source appearance; released artist-quality
+product behavior for novel characters. These require source-native
+supervision and independent courts, not a CAA flag or synthetic test count.
+
+**Release condition:** For a held-out source character, render rest and
+multiple non-rest poses/cameras, compare per-pixel source RGB/alpha, face
+owner, depth, inferred-vs-source flags, draw-order and user edit consequences
+against independently rendered, source-qualified witnesses. No
+`ProductRevision` admission until these claims pass or explicitly abstain.
+A green synthetic model/Compiler test cannot claim they passed.
+
 ## 0. Reverse the dependency (do not design unteachable heads)
 
     User-visible runtime behavior and reproducible intervention

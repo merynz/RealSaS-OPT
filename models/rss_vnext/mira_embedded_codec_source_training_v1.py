@@ -695,6 +695,8 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             "codec_state_dict":self.model.mira.codec.state_dict(),
             "optimizer":self.optimizer.state_dict(),
             "torch_cpu_rng":torch.get_rng_state(),
+            "torch_cuda_rng":torch.cuda.get_rng_state_all() if torch.cuda.is_available() else [],
+            "cuda_device_count":torch.cuda.device_count() if torch.cuda.is_available() else 0,
         }
         with tempfile.NamedTemporaryFile(
             dir=target.parent,prefix="miracodec-",suffix=".pt",delete=False,
@@ -723,12 +725,16 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or payload.get("frozen_upstream_state_sha256")!=self.frozen_upstream_state_sha256
             or payload.get("optimizer_ownership_sha256")!=self.optimizer_ownership.binding_sha256
             or type(payload.get("step")) is not int or payload["step"]<0
+            or payload.get("cuda_device_count")!=(torch.cuda.device_count() if torch.cuda.is_available() else 0)
+            or not isinstance(payload.get("torch_cuda_rng"),list)
         ):
             raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_CODEC_RESUME_DRIFT")
         self.model.mira.codec.load_state_dict(payload["codec_state_dict"],strict=True)
         self.optimizer.load_state_dict(payload["optimizer"])
         self.step=payload["step"]
         torch.set_rng_state(payload["torch_cpu_rng"])
+        if torch.cuda.is_available() and payload["torch_cuda_rng"]:
+            torch.cuda.set_rng_state_all(payload["torch_cuda_rng"])
 
 
 __all__ = [

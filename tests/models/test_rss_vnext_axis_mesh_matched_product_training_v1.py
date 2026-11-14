@@ -123,3 +123,64 @@ def test_rig_only_pretrain_never_claims_product_axis_mesh_parity(tmp_path):
             scene_conditioning_policy="PRODUCT_GENERATED_SIX_VIEW",
             axis_training_policy="RIG_ONLY_PRETRAIN",
         )
+
+
+def test_axis_reads_every_tessa_face_with_winding_and_component_boundaries():
+    """Same vertex H(x) must not erase TESSA's actual face connectivity."""
+    from dataclasses import replace
+
+    net, batch, _, _ = fixture()
+    state, _, _ = net.encode_observations(batch.rgba, batch.camera_features)
+    mesh = net.build_mesh_candidate(
+        state, batch.topology_teacher_tokens[0],
+        source_authority="TEACHER_FORCED_TRAINING_ONLY",
+    )
+    faces = mesh.faces.clone()
+    face_count = int(faces.shape[0])
+    original = net._mesh_face_context(mesh)
+    assert original.shape == (1, face_count, net.cfg.iris.local_feature_dim)
+    assert torch.isfinite(original).all()
+
+    # An equally shaped, identically featured vertex bank can have different
+    # oriented face incidence. A point-only AXIS context would be identical.
+    faces[0] = faces[0, torch.tensor([0, 2, 1])]
+    alternate = net._mesh_face_context(replace(mesh, faces=faces))
+    assert not torch.allclose(original, alternate, atol=1.e-6, rtol=0)
+
+    # Component labels are arbitrary. Permuting them cannot change features
+    # or merge separate topology components into one fictitious surface.
+    relabeled = replace(
+        mesh,
+        vertex_component_ids=mesh.vertex_component_ids + 13,
+        face_component_ids=mesh.face_component_ids + 13,
+    )
+    assert torch.allclose(original, net._mesh_face_context(relabeled), atol=1.e-6, rtol=0)
+    broken = replace(mesh, face_component_ids=mesh.face_component_ids + 1)
+    with pytest.raises(ValueError, match="CONTROL_MESH_COMPONENT_FACE_IDENTITY"):
+        net._mesh_face_context(broken)
+
+
+def test_axis_face_conditioning_gradients_reach_tessa_surface_and_shared_iris():
+    """The face-token bridge participates in the same trainable model graph."""
+    net, batch, _, _ = fixture()
+    state, aux, _ = net.encode_observations(batch.rgba, batch.camera_features)
+    mesh = net.build_mesh_candidate(
+        state, batch.topology_teacher_tokens[0],
+        source_authority="TEACHER_FORCED_TRAINING_ONLY",
+    )
+    structural = net._structural_memory(state, aux)
+    face_tokens = net._mesh_face_context(mesh)
+    output = net._control_memory(state, structural, mesh)
+    assert output.shape == structural.shape
+    assert torch.isfinite(output).all()
+    assert face_tokens.requires_grad
+    assert output.requires_grad
+
+    # Every face token is consumed without arbitrary decimation; both the
+    # TESSA mesh proposal and original common spatial field remain upstream.
+    (face_tokens.square().mean() + output.square().mean()).backward()
+    face_projection_grad = net.mesh_face_to_control[-1].weight.grad
+    assert face_projection_grad is not None
+    assert float(face_projection_grad.abs().sum()) > 0
+    assert net.iris.scene.scene_queries.grad is not None
+    assert float(net.iris.scene.scene_queries.grad.abs().sum()) > 0

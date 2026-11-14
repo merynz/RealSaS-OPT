@@ -36,6 +36,15 @@ from compiler.realsas_compiler_core.graphics_runtime_v1 import (
 from compiler.realsas_compiler_core.mechanics_control_solver_v1 import (
     ControlTransformIRV1, solve_control_pose_v1, deform_mesh_lbs_v1,
 )
+from compiler.realsas_compiler_core.canonical_motion_ir_v2 import (
+    CanonicalMotionIRV2,
+)
+from compiler.realsas_compiler_core.canonical_mechanics_ir_v1 import (
+    CanonicalMechanicsIRV1,
+)
+from compiler.realsas_compiler_core.control_motion_runtime_v2 import (
+    sample_control_transforms_v2,
+)
 from compiler.realsas_compiler_core.playback_full_surface_v3 import (
     qualify_camera_v3, project_points_xyz_v3,
 )
@@ -166,6 +175,8 @@ def compile_rss_vnext_native_preview_package_v1(
     uv_atlas_cas: bytes,
     virtual_camera: Mapping[str, Any],
     control_frames: Sequence[Sequence[ControlTransformIRV1]],
+    source_motion: CanonicalMotionIRV2 | None = None,
+    source_motion_sample_times: Sequence[float] | None = None,
 ) -> tuple[bytes, dict[str, Any]]:
     validate_canonical_mesh_domain_v1(mesh)
     validate_canonical_rig_domain_v2(rig)
@@ -192,6 +203,22 @@ def compile_rss_vnext_native_preview_package_v1(
     pose_bytes, pose_hashes = _make_pose_binary(
         mesh, rig, skin, control_frames, camera,
     )
+    if (source_motion is None) != (source_motion_sample_times is None):
+        raise RuntimeError("RSS_PREVIEW_MOTION_SOURCE_BINDING_INCOMPLETE")
+    motion_times = None
+    if source_motion is not None:
+        motion_times = [float(t) for t in source_motion_sample_times]
+        if (
+            len(motion_times) != len(control_frames)
+            or len(motion_times) < 1
+            or any(not np.isfinite(t) or t < 0. or
+                   t > source_motion.duration_seconds + 1e-8
+                   for t in motion_times)
+            or any(b <= a for a,b in zip(motion_times,motion_times[1:]))
+            or source_motion.rig_lineage_hash != rig.rig_lineage_hash
+            or source_motion.control_program_hash != rig.control_program_hash
+        ):
+            raise RuntimeError("RSS_PREVIEW_MOTION_TIMELINE_OR_RIG_DRIFT")
     controls_payload = {
         "schema": "RealSaS.RSSvNext.NativePreviewControls.v1",
         "virtual_camera_is_original_source_observation": False,
@@ -200,7 +227,15 @@ def compile_rss_vnext_native_preview_package_v1(
             [asdict(row) for row in rows] for rows in control_frames
         ],
         "mechanics_pose_hashes": pose_hashes,
-        "motion_source": "USER_AUTHORED_CONTROLS_REAL_LBS_NOT_GENERATED_MOTION",
+        "motion_source": (
+            "SAMPLED_CANONICAL_CONTROL_MOTION_V2"
+            if source_motion is not None
+            else "USER_AUTHORED_CONTROLS_REAL_LBS_NOT_GENERATED_MOTION"
+        ),
+        "canonical_motion_lineage_hash": (
+            source_motion.motion_lineage_hash if source_motion is not None else None
+        ),
+        "motion_sample_times_seconds": motion_times,
         "product_revision_minted": False,
     }
     entries: OrderedDict[str,bytes] = OrderedDict([
@@ -228,6 +263,13 @@ def compile_rss_vnext_native_preview_package_v1(
         "view_index": "0",
         "color_source_layer_policy": "EXPLICIT_HINT_ONLY",
         "texture_layer_draw_order_authority": "GRAPHICS_PARTIAL_ORDER_PLUS_POSED_DEPTH",
+        "native_preview_motion_source": (
+            "SAMPLED_CANONICAL_CONTROL_MOTION_V2"
+            if source_motion is not None else "USER_AUTHORED_CONTROLS"
+        ),
+        "canonical_motion_lineage_hash": (
+            source_motion.motion_lineage_hash if source_motion is not None else "NONE"
+        ),
     }
     for name, blob in entries.items():
         manifest["sha256:" + name] = _sha(blob)
@@ -280,6 +322,34 @@ def reopen_rss_vnext_native_preview_package_v1(path: Path) -> dict[str, Any]:
         or len(data["control_frames"]) != int(manifest["frame_count"])
     ):
         raise RuntimeError("RSS_PREVIEW_REOPEN_CONTROL_STATE_DRIFT")
+    origin = data.get("motion_source")
+    if origin == "SAMPLED_CANONICAL_CONTROL_MOTION_V2":
+        times = data.get("motion_sample_times_seconds")
+        if (
+            type(times) is not list
+            or len(times) != len(data["control_frames"])
+            or any(type(t) not in (int,float) or not np.isfinite(t) or t<0.
+                   for t in times)
+            or any(b<=a for a,b in zip(times,times[1:]))
+            or manifest.get("native_preview_motion_source") != origin
+            or data.get("canonical_motion_lineage_hash") !=
+               manifest.get("canonical_motion_lineage_hash")
+            or type(data.get("canonical_motion_lineage_hash")) is not str
+            or len(data["canonical_motion_lineage_hash"]) != 64
+        ):
+            raise RuntimeError("RSS_PREVIEW_REOPEN_MOTION_TIMELINE_DRIFT")
+    elif origin in (
+        "USER_AUTHORED_CONTROLS_REAL_LBS_NOT_GENERATED_MOTION",
+        "USER_AUTHORED_EDIT_INVALIDATES_CANONICAL_MOTION",
+    ):
+        if (
+            data.get("motion_sample_times_seconds") is not None
+            or data.get("canonical_motion_lineage_hash") is not None
+            or manifest.get("canonical_motion_lineage_hash") != "NONE"
+        ):
+            raise RuntimeError("RSS_PREVIEW_REOPEN_FORGED_MOTION_AUTHORITY")
+    else:
+        raise RuntimeError("RSS_PREVIEW_REOPEN_MOTION_SOURCE_UNRECOGNIZED")
     frames = [
         [ControlTransformIRV1(
             canonical_control_id=str(row["canonical_control_id"]),
@@ -309,6 +379,55 @@ def reopen_rss_vnext_native_preview_package_v1(path: Path) -> dict[str, Any]:
         "texture_bytes": archive["texture.bin"],
         "product_revision_minted": False,
     }
+
+
+def compile_rss_vnext_canonical_motion_native_preview_v1(
+    *, mesh: CanonicalMeshIR, rig: CanonicalRigIRV2,
+    skin: CanonicalSkinIRV2, mechanics: CanonicalMechanicsIRV1,
+    graphics: RuntimeGraphicsV1, uv_atlas_cas: bytes,
+    motion: CanonicalMotionIRV2,
+) -> tuple[bytes, dict[str, Any]]:
+    """Compile actual control-track MotionIR into C++ frames via Mechanics.
+
+    No joint curves are authored; no retargeting/idle generation is performed.
+    Sampling calls the EXISTING motion quaternion-slerp interpreter, then
+    the EXISTING canonical IK/FK/LBS solver. The sample budget scales with
+    mesh size to avoid a >64MiB pose.bin in the native player.
+    """
+    if (
+        motion.rig_lineage_hash != rig.rig_lineage_hash
+        or motion.mechanics_lineage_hash != mechanics.mechanics_lineage_hash
+        or mechanics.mesh_lineage_hash != mesh.mesh_lineage_hash
+        or mechanics.skin_lineage_hash != skin.skin_lineage_hash
+    ):
+        raise RuntimeError("RSS_NATIVE_MOTION_CANONICAL_PARENT_DRIFT")
+    if len(mesh.vertices) > 65536 or len(mesh.faces) > 4096:
+        raise RuntimeError("RSS_NATIVE_MOTION_MESH_BUDGET")
+    available = (64*1024*1024 - (32 + 12*len(mesh.faces))) // (
+        max(1,len(mesh.vertices))*24
+    )
+    if not motion.control_tracks:
+        count = 1  # Rest Hold policy, not a fabricated moving Idle.
+    else:
+        if available < 2:
+            raise RuntimeError("RSS_NATIVE_MOTION_FRAME_MEMORY_BUDGET")
+        count = min(512,int(available),max(2,int(np.ceil(motion.duration_seconds*24))+1))
+    if count > 1:
+        times = tuple(float(v) for v in np.linspace(
+            0.,motion.duration_seconds,count,dtype=np.float64
+        ))
+    else:
+        times = (0.,)
+    controls = tuple(sample_control_transforms_v2(
+        motion,rig=rig,mechanics=mechanics,time_seconds=t,
+    ) for t in times)
+    return compile_rss_vnext_native_preview_package_v1(
+        mesh=mesh,rig=rig,skin=skin,graphics=graphics,
+        uv_atlas_cas=uv_atlas_cas,
+        virtual_camera=select_rss_vnext_native_preview_camera_v1(mesh),
+        control_frames=controls,
+        source_motion=motion,source_motion_sample_times=times,
+    )
 
 
 def edit_rss_vnext_native_preview_controls_v1(
@@ -343,12 +462,17 @@ def edit_rss_vnext_native_preview_controls_v1(
     old_controls["mechanics_pose_hashes"] = pose_hashes
     old_controls["edit_source_control_state_sha256"] = _sha(entries["controls.json"])
     old_controls["edit_operation"] = "CANONICAL_CONTROLS_RECOMPUTED_MECHANICS_LBS"
+    old_controls["motion_source"] = "USER_AUTHORED_EDIT_INVALIDATES_CANONICAL_MOTION"
+    old_controls["canonical_motion_lineage_hash"] = None
+    old_controls["motion_sample_times_seconds"] = None
     entries["controls.json"] = _json(old_controls)
     entries["pose.bin"] = pose_bytes
     manifest = dict(state["manifest"])
     manifest["sha256:controls.json"] = _sha(entries["controls.json"])
     manifest["sha256:pose.bin"] = _sha(pose_bytes)
     manifest["frame_count"] = str(len(frames))
+    manifest["native_preview_motion_source"] = "USER_AUTHORED_CONTROLS"
+    manifest["canonical_motion_lineage_hash"] = "NONE"
     entries["manifest.txt"] = (
         "\n".join(f"{key}={value}" for key, value in sorted(manifest.items()))
         + "\n"
@@ -363,5 +487,6 @@ __all__ = [
     "SCHEMA", "compile_rss_vnext_native_preview_package_v1",
     "reopen_rss_vnext_native_preview_package_v1",
     "select_rss_vnext_native_preview_camera_v1",
+    "compile_rss_vnext_canonical_motion_native_preview_v1",
     "edit_rss_vnext_native_preview_controls_v1",
 ]

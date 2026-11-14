@@ -366,14 +366,34 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
                 raise ValueError(
                     "RSS_VNEXT_EMBEDDED_MIRA_SOURCE_POSE_NOT_LBS_EXPLAINABLE"
                 )
+            # LBS skin weights are NOT observable if every joint in an
+            # animation moves with the same rigid transform. In particular,
+            # a single Idle pose cannot teach influence. Require actual
+            # per-vertex disagreement between *source* joint transports,
+            # and exclude uninformative poses from the codec consequence.
+            ones=torch.ones(
+                (1,v,1),device=rest_gt.device,dtype=rest_gt.dtype,
+            )
+            hom=torch.cat((rest_gt,ones),dim=-1)
+            transported=torch.einsum(
+                "bpjkc,bvc->bpvjk",mats_gt,hom,
+            )[..., :3]
+            spread=(
+                transported.amax(dim=3)-transported.amin(dim=3)
+            ).abs().amax(dim=-1)
+            informative=valid_gt & (spread>1e-5)
+            if not bool(informative.any()):
+                raise ValueError(
+                    "RSS_VNEXT_EMBEDDED_MIRA_POSE_UNINFORMATIVE_FOR_SKIN"
+                )
             predicted_pose=posed_lbs_from_joint_matrices(
                 rest_gt,fit["reconstructed_weights"].to(rest_gt.dtype),mats_gt,
             )
             pose_point_errors=F.smooth_l1_loss(
                 predicted_pose,posed_gt,reduction="none",
             ).mean(dim=-1)
-            pose_deform_loss=pose_point_errors[valid_gt].mean()
-            pose_count=int(valid_gt.sum().item())
+            pose_deform_loss=pose_point_errors[informative].mean()
+            pose_count=int(informative.sum().item())
             with torch.no_grad():
                 hard_posed=posed_lbs_from_joint_matrices(
                     rest_gt,hard.to(rest_gt.dtype),mats_gt,

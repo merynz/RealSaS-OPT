@@ -5,8 +5,9 @@ from __future__ import annotations
 References: the CVPR 2025 multi-view reference §3.2, InstantNeRF/InstantMesh S-LRM.
 Stage1/2: jointly render RGB, opacity and semantic posterior through the
 SAME IRIS H(x). Stage3: separately extract pinned FlexiCubes surface from
-the SAME scene and use BUSTED's differentiable first-party mesh raster for all RGB,
-opacity, semantics, normals, depth and deformation losses. Camera/teacher
+the SAME scene and use PyTorch3D's compiled CUDA raster (CPU: BUSTED-owned
+reference raster) for RGB, opacity, semantics, normals, depth and deformation.
+Camera/teacher
 render authority stays with independently admitted source-3D data. An
 optional second observed image never becomes six 'source' observations.
 
@@ -34,7 +35,12 @@ from .realsas_joint_slrm_render_v1 import (
     STAGE_1,STAGE_2,STAGE_3,RealSaSJointTargetV1,
     render_realsas_joint_from_shared_scene_v1,realsas_joint_stage_loss_v1,
 )
-from .realsas_flexicubes_mesh_render_v1 import render_realsas_layered_flexicubes_mesh_v1
+from .realsas_flexicubes_mesh_render_v1 import (
+    RASTER_ID as STAGE3_CPU_REFERENCE_ID,
+    PYTORCH3D_RASTER_ID,
+    stage3_default_raster_backend_v1,
+    render_realsas_layered_flexicubes_mesh_v1,
+)
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 from .training_optimizer_ownership_v1 import qualify_rss_vnext_optimizer_ownership_v1
 from .semantic_geometry_prior import RSSvNextSemanticLayerSpec
@@ -121,7 +127,7 @@ class RealSaSSLRMTrainerV1:
     each minibatch. It binds original source, generated input, cameras,
     camera rays, peeled role mask, RGB, alpha and semantic GT.
     """
-    schema="RealSaS.RSSvNext.RealSaSSLRMTrainer.v4"
+    schema="RealSaS.RSSvNext.RealSaSSLRMTrainer.v5"
 
     def __init__(
         self, model: RSSvNextUnifiedCharacterModel, optimizer: torch.optim.Optimizer,
@@ -147,6 +153,18 @@ class RealSaSSLRMTrainerV1:
             self.model,self.optimizer,
         )
         self.input_profile=input_profile
+        self.stage3_raster_device_type=next(model.parameters()).device.type
+        if self.stage3_raster_device_type not in ("cpu","cuda"):
+            raise ValueError("RSS_VNEXT_SLRM_STAGE3_RASTER_DEVICE_UNSUPPORTED")
+        backend=stage3_default_raster_backend_v1(
+            torch.device(self.stage3_raster_device_type),
+        )
+        self.stage3_raster_backend_id=(
+            PYTORCH3D_RASTER_ID if self.stage3_raster_device_type=="cuda"
+            else STAGE3_CPU_REFERENCE_ID
+        )
+        if backend is None:
+            raise ValueError("RSS_VNEXT_SLRM_STAGE3_RASTER_BACKEND_UNAVAILABLE")
         self.lpips_loss_fn=lpips_loss_fn
         if weights.lpips>0 and lpips_loss_fn is None:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_LPIPS_REQUIRED_NOT_MSE_SURROGATE")
@@ -176,7 +194,9 @@ class RealSaSSLRMTrainerV1:
         ):
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_ORIGINAL_SOURCE_REGISTRY_REQUIRED")
         self.policy_sha256=sha256(json.dumps(
-            {"weights":asdict(weights),"input_profile":input_profile},
+            {"weights":asdict(weights),"input_profile":input_profile,
+             "stage3_raster_backend":self.stage3_raster_backend_id,
+             "stage3_device":self.stage3_raster_device_type},
             sort_keys=True,separators=(",",":"),
         ).encode()).hexdigest()
         self.clip_gradient_norm=clip_gradient_norm
@@ -414,6 +434,14 @@ class RealSaSSLRMTrainerV1:
         mesh=None
         extra={}
         if teacher.stage==STAGE_3:
+            # A resumed CPU/reference objective is NOT silently equivalent
+            # to the compiled PyTorch3D CUDA stage. Device and raster
+            # identities are checkpoint-pinned at trainer construction.
+            if (
+                next(self.model.parameters()).device.type
+                != self.stage3_raster_device_type
+            ):
+                raise RuntimeError("RSS_VNEXT_SLRM_STAGE3_RASTER_ENVIRONMENT_DRIFT")
             if any(x is None for x in (
                 batch.stage3_flexicubes_extractor,batch.stage3_semantic_layer,
                 batch.stage3_camera_features,batch.stage3_hw,
@@ -447,6 +475,8 @@ class RealSaSSLRMTrainerV1:
                 height=batch.stage3_hw[0],width=batch.stage3_hw[1],
                 source_scene_prediction_sha256=scene_digest,
             )
+            if mesh.rasterizer_identity!=self.stage3_raster_backend_id:
+                raise RuntimeError("RSS_VNEXT_SLRM_STAGE3_RASTER_BACKEND_DRIFT")
             extra=dict(
                 mesh_raster=mesh,target_normal=batch.stage3_target_normal,
                 target_depth=batch.stage3_target_depth,
@@ -495,6 +525,8 @@ class RealSaSSLRMTrainerV1:
                     height=hh,width=ww,
                     source_scene_prediction_sha256=_digest(state.scene_triplanes),
                 )
+                if full_mesh.rasterizer_identity!=self.stage3_raster_backend_id:
+                    raise RuntimeError("RSS_VNEXT_SLRM_ORIGINAL_SOURCE_RASTER_BACKEND_DRIFT")
                 addr=batch.source_observed_rays.source_pixel_indices
                 flat=(addr[...,0]*hh*ww+addr[...,1]*ww+addr[...,2]).long()
                 selected_rgb=torch.gather(
@@ -570,6 +602,8 @@ class RealSaSSLRMTrainerV1:
             "teacher_registry_sha256":self.registry_sha256,
             "original_source_registry_sha256":self.original_observed_ray_registry_sha256,
             "objective_policy_sha256":self.policy_sha256,
+            "stage3_raster_backend_identity":self.stage3_raster_backend_id,
+            "stage3_raster_device_type":self.stage3_raster_device_type,
             "optimizer_ownership_binding_sha256":self.optimizer_ownership.binding_sha256,
             "global_step":self.global_step,"sampler_cursor":sampler_cursor,
             "model":self.model.state_dict(),
@@ -595,6 +629,11 @@ class RealSaSSLRMTrainerV1:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_ORIGINAL_SOURCE_DRIFT")
         if data.get("objective_policy_sha256")!=self.policy_sha256:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_OBJECTIVE_POLICY_DRIFT")
+        if (
+            data.get("stage3_raster_backend_identity")!=self.stage3_raster_backend_id
+            or data.get("stage3_raster_device_type")!=self.stage3_raster_device_type
+        ):
+            raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_STAGE3_RASTER_DRIFT")
         self._assert_optimizer_ownership()
         if data.get("optimizer_ownership_binding_sha256")!=self.optimizer_ownership.binding_sha256:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_OPTIMIZER_OWNERSHIP_DRIFT")

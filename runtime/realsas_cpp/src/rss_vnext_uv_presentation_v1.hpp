@@ -127,6 +127,19 @@ inline Texture parse_texture(const std::vector<std::uint8_t>& blob) {
     for(std::size_t i=0;i<pixels;++i) {
         if(t.inferred_mask[i]>1||t.conflict[i]>1)
             throw std::runtime_error("RSS_UV_NATIVE_INFERRED_MASK_DOMAIN");
+        // The compiler computed this mask from TWO separately preserved
+        // original colors at the SAME fitted UV texel. It is a conflict
+        // candidate, never source 3D material/visibility authority.
+        // Recompute rather than trusting a caller-supplied "no conflict".
+        const bool both=t.source_mask[i]&&t.source_mask[pixels+i];
+        bool different=false;
+        if(both)for(int channel=0;channel<4;++channel){
+            different=different||
+                t.source_rgba[4*i+channel]!=
+                t.source_rgba[4*(pixels+i)+channel];
+        }
+        if(t.conflict[i]!=static_cast<std::uint8_t>(both&&different))
+            throw std::runtime_error("RSS_UV_NATIVE_CONFLICT_MASK_DRIFT");
         if(t.inferred_mask[i]==0)for(int channel=0;channel<4;++channel)
             if(t.inferred_rgba[4*i+channel]!=0)
                 throw std::runtime_error("RSS_UV_NATIVE_UNKNOWN_INFERRED_COLOR_FORGED");
@@ -158,8 +171,13 @@ inline bool accept_edge(double v,bool inclusive){
 }
 
 // Sample a given source view ONLY when caller explicitly selects its binding.
-// Missing real texels may fall back to the same-checkpoint inferred layer.
+// Source color can claim original-pixel provenance only when EVERY bilinear
+// tap contributing nonzero weight has an original-source sample in this chart.
+// Renormalizing a single observed tap into unknown neighbors would fabricate
+// "observed" colors. Unknown coverage falls back to clearly INFERRED H(x).
 // Bilinear taps stay inside this face's UV triangle, not a neighbor's chart.
+// A disagreement between the TWO original layers remains preserved in
+// tex.conflict; selecting one view never establishes 3D surface ownership.
 inline Color sample_texture(const Texture& tex,std::uint32_t face,
                             const std::array<double,3>& bary,
                             int original_view_hint){
@@ -186,15 +204,23 @@ inline Color sample_texture(const Texture& tex,std::uint32_t face,
         double sum=0;
         for(std::size_t i=0;i<4;++i) {
             const int x=taps[i][0],y=taps[i][1];
-            if(x<0||y<0||x>=static_cast<int>(tex.width)||y>=static_cast<int>(tex.height))
+            if(weights[i]<=1e-12)continue;
+            if(x<0||y<0||x>=static_cast<int>(tex.width)||y>=static_cast<int>(tex.height)){
+                if(view>=0)return Color{}; // source support incomplete
                 continue;
+            }
             const double tu=(x+.5)/tex.width,tv=(y+.5)/tex.height;
-            if(tu<umin-1e-7||tu>umax+1e-7||tv<vmin-1e-7||tv>vmax+1e-7)
+            if(tu<umin-1e-7||tu>umax+1e-7||tv<vmin-1e-7||tv>vmax+1e-7){
+                if(view>=0)return Color{}; // never paint across chart support
                 continue;
+            }
             const auto p=static_cast<std::size_t>(y)*tex.width+x;
             const auto idx=(view<0?p:static_cast<std::size_t>(view)*tex.width*tex.height+p);
             const auto& mask=(view<0?tex.inferred_mask:tex.source_mask);
-            if(!mask[idx]||weights[i]<=0)continue;
+            if(!mask[idx]){
+                if(view>=0)return Color{}; // UNKNOWN != observed source
+                continue;
+            }
             const auto& colors=(view<0?tex.inferred_rgba:tex.source_rgba);
             for(int ch=0;ch<4;++ch)
                 out.rgba[ch]+=weights[i]*colors[4*idx+ch]/255.;

@@ -517,6 +517,20 @@ int self_test(){
     );
     if(at(still_visible,20,20)!=at(all_roles,20,20))
         throw std::runtime_error("RSS_UV_NATIVE_UNKNOWN_SUPPRESSED_PUPPET");
+    // A semi-transparent nonmatching foreground cannot be removed from
+    // the occlusion stack. The rear selected role receives exactly the
+    // foreground's remaining transmittance, never opaque rear exposure.
+    for(int y=0;y<8;++y)for(int x=1;x<=3;++x)
+        tex.inferred_rgba[4*(y*8+x)+3]=128;
+    const auto rear_through_alpha=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(1.,2.,0),64,64,0,-1,2
+    );
+    const auto visible_blue=at(rear_through_alpha,20,20);
+    if(rear_through_alpha.front_face[20*64+20]!=1||
+       visible_blue[0]!=0||visible_blue[1]!=0||
+       visible_blue[2]!=255||
+       visible_blue[3]<125||visible_blue[3]>129)
+        throw std::runtime_error("RSS_UV_NATIVE_ROLE_TRANSMITTANCE_DRIFT");
     std::cout<<"RSS_UV_NATIVE_SEMANTIC_SUBLAYER_CONSUMER_PASS\n";
     std::cout<<"RSS_UV_NATIVE_ORTHOGRAPHIC_CHART_AND_MOVING_DEPTH_PASS\n";
     std::cout<<"RSS_UV_NATIVE_POSED_DEPTH_AND_PARTIAL_ORDER_PASS\n";

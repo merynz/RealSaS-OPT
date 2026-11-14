@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import copy
 
 import pytest
 import torch
@@ -11,6 +12,9 @@ from models.rss_vnext.mira_embedded_codec_source_training_v1 import (
 from models.rss_vnext.training_engine import (
     axis_mesh_teacher_address_digest_v1,
     source_surface_tensor_sha256,
+)
+from models.rss_vnext.training_gradient_interference_v1 import (
+    RSSvNextGradientCourtPolicyV1,
 )
 from tests.models.test_rss_vnext_mira_embedded_codec_source_training_v1 import (
     DATASET,_fixture,
@@ -59,13 +63,14 @@ def source_case():
     return model,batch,skin_registry,receipt
 
 
-def trainer(model,skin_registry,area_registry,area_weight=1.):
+def trainer(model,skin_registry,area_registry,area_weight=1.,court=None):
     return RSSvNextEmbeddedMIRASourceCodecTrainerV1(
         model,torch.optim.AdamW(model.mira.codec.parameters(),lr=1e-3),
         dataset_manifest_sha256=DATASET,
         trusted_source_skin_registry=skin_registry,
         trusted_source_area_registry=area_registry,
         source_area_skin_weight=area_weight,
+        gradient_court_policy=court or RSSvNextGradientCourtPolicyV1(),
     )
 
 
@@ -166,3 +171,37 @@ def test_source_area_teacher_does_not_receive_gradient_and_is_checkpoint_bound(t
     no_area=trainer(model,skin,{},area_weight=0.)
     with pytest.raises(ValueError,match="SOURCE_CODEC_RESUME_DRIFT"):
         no_area.load_checkpoint(path)
+
+
+
+def test_codec_gradient_court_qualifies_loss_interference_without_altering_optimizer_step(tmp_path):
+    base,batch,skin,area=source_case()
+    observed=copy.deepcopy(base)
+    control=copy.deepcopy(base)
+    policy=RSSvNextGradientCourtPolicyV1(
+        every_n_steps=1,max_parameters_per_owner=24,
+        max_elements_per_owner=65536,
+    )
+    audited=trainer(observed,skin,area,court=policy)
+    plain=trainer(control,skin,area)
+    torch.manual_seed(919)
+    audit_result=audited.train_step(batch)
+    torch.manual_seed(919)
+    baseline=plain.train_step(batch)
+    report=audit_result.gradient_interference_report
+    assert report is not None
+    assert report["authority"]=="OBSERVED_SAMPLED_GRADIENTS_NOT_FULL_MODEL_OR_QUALITY"
+    assert "MIRA_HEAD" in report["owners"]
+    assert set(report["loss_families"])=={
+        "source_dense_weights","source_area_skin","fsq_quantization",
+    }
+    assert report["owners"]["MIRA_HEAD"]["sampled_scalar_elements"]>0
+    assert report["owners"]["MIRA_HEAD"]["eligible_parameter_count"]>0
+    assert report["modifies_gradient"] is False
+    assert float(audit_result.loss)==pytest.approx(float(baseline.loss),abs=1e-7)
+    for a,b in zip(observed.mira.codec.parameters(),control.mira.codec.parameters()):
+        assert torch.equal(a,b)
+    ckpt=tmp_path/"mira-audit.pt"
+    audited.save_checkpoint(ckpt)
+    with pytest.raises(ValueError,match="SOURCE_CODEC_RESUME_DRIFT"):
+        plain.load_checkpoint(ckpt)

@@ -177,3 +177,20 @@ def test_point_query_decoder_cannot_claim_dot_product_bootstrap_coverage():
     model.cfg=replace(model.cfg,skin_decoder_mode="POINT_QUERY_CROSS_ATTENTION")
     with pytest.raises(ValueError,match="CODEC_TRAINER_POLICY"):
         _trainer(model,registry)
+
+
+
+def test_codec_bootstrap_optimizer_cannot_silently_update_or_skip_other_experts():
+    model,batch,registry=_fixture()
+    with pytest.raises(ValueError,match="CODEC_OPTIMIZER_SCOPE_DRIFT"):
+        RSSvNextEmbeddedMIRASourceCodecTrainerV1(
+            model,torch.optim.AdamW(model.parameters(),lr=1e-3),
+            dataset_manifest_sha256=DATASET,
+            trusted_source_skin_registry=registry,
+        )
+    only_bias=torch.optim.AdamW(model.mira.codec.bias_head.parameters(),lr=1e-3)
+    with pytest.raises(ValueError,match="CODEC_OPTIMIZER_SCOPE_DRIFT"):
+        RSSvNextEmbeddedMIRASourceCodecTrainerV1(
+            model,only_bias,dataset_manifest_sha256=DATASET,
+            trusted_source_skin_registry=registry,
+        )

@@ -348,8 +348,26 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
                 pose_row.get(key)!=value for key,value in expected_pose.items()
             ):
                 raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_POSE_RECEIPT_DRIFT")
+            # A source-native pose may include cloth, blend-shapes,
+            # secondary motion, or non-LBS deformations. Such residuals
+            # must NOT be attributed to the MIRA skin codec. Independently
+            # replay the ORIGINAL dense skin and source matrices first;
+            # refuse to teach effects that the product skin decoder cannot
+            # represent. These witnesses are in canonical asset units.
+            with torch.no_grad():
+                source_lbs=posed_lbs_from_joint_matrices(
+                    rest_gt,weights.to(rest_gt.dtype),mats_gt,
+                )
+                residual=(source_lbs-posed_gt).abs()[
+                    valid_gt.unsqueeze(-1).expand_as(posed_gt)
+                ]
+                teacher_lbs_max=float(residual.max().item())
+            if teacher_lbs_max>1e-4:
+                raise ValueError(
+                    "RSS_VNEXT_EMBEDDED_MIRA_SOURCE_POSE_NOT_LBS_EXPLAINABLE"
+                )
             predicted_pose=posed_lbs_from_joint_matrices(
-                rest_gt,fit["reconstructed_weights"],mats_gt,
+                rest_gt,fit["reconstructed_weights"].to(rest_gt.dtype),mats_gt,
             )
             pose_point_errors=F.smooth_l1_loss(
                 predicted_pose,posed_gt,reduction="none",
@@ -358,7 +376,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             pose_count=int(valid_gt.sum().item())
             with torch.no_grad():
                 hard_posed=posed_lbs_from_joint_matrices(
-                    rest_gt,hard,mats_gt,
+                    rest_gt,hard.to(rest_gt.dtype),mats_gt,
                 )
                 hard_pose_discrepancy=float(
                     (hard_posed-predicted_pose.detach()).abs().max().item()

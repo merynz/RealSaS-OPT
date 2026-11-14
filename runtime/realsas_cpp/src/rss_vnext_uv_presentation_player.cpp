@@ -372,6 +372,30 @@ int self_test(){
     if(at(unknown_source,20,20)!=std::array<int,4>{255,0,0,255}||
        unknown_source.color_authority[20*64+20]!=2)
         throw std::runtime_error("RSS_UV_NATIVE_UNKNOWN_SOURCE_FALLBACK_TEST_FAIL");
+    // The source map has isolated pixel coverage in many real character
+    // assets. An observed tap must NEVER be renormalized across a missing
+    // neighboring texel and given source provenance.
+    const std::array<double,3> sample_bary{{.5,.25,.25}};
+    const auto supported=realsas::rss_uv_v1::sample_texture(
+        tex,0,sample_bary,0
+    );
+    if(supported.authority!=1||
+       supported.rgba[1]<.999)
+        throw std::runtime_error("RSS_UV_NATIVE_ORIGINAL_BILINEAR_SUPPORT_BASELINE");
+    const auto missing=2*8+2;
+    tex.source_mask[missing]=0;
+    for(int channel=0;channel<4;++channel)
+        tex.source_rgba[4*missing+channel]=0;
+    const auto repaired=realsas::rss_uv_v1::sample_texture(
+        tex,0,sample_bary,0
+    );
+    if(repaired.authority!=2||
+       repaired.rgba[0]<.999||
+       repaired.rgba[1]>1e-8)
+        throw std::runtime_error("RSS_UV_NATIVE_SOURCE_UNKNOWN_BLEED_FORBIDDEN");
+    tex.source_mask[missing]=1;
+    tex.source_rgba[4*missing+1]=255;
+    tex.source_rgba[4*missing+3]=255;
     auto moved=realsas::rss_uv_v1::render(graphics,tex,faces,
         posed(1.,2.,12.),64,64,0,-1);
     if(at(moved,20,20)==at(original,20,20)||at(moved,42,20)!=at(original,20,20))

@@ -1,0 +1,92 @@
+{
+  "schema": "RealSaS.Corpus370V14NativeControlRendererActionReevaluationIncident.v1",
+  "status": "REAL_SOURCE_RENDERER_INCIDENT__CAUSAL_RGBA_TRUTH_NOT_QUALIFIED",
+  "original_real_court_run_id": 42063856794,
+  "original_source_head_sha": "f008e45d0c9e7b31021372dd9c469cd47982b8a2",
+  "original_hosted_workflow_conclusion": "success",
+  "original_source_renderer_qualified_subjects": 0,
+  "original_source_geometry_and_native_control_v13b_pre_render_proven": true,
+  "source_art_or_raster_files_embedded": false,
+  "blender_version": "4.5.14 LTS",
+  "separate_renderer_falsifier_run_url": "https://github.com/merynz/RealSaS-OPT/actions/runs/42074551473",
+  "falsifier": {
+    "type": "INDEPENDENT_SELF_AUTHORED_SYNTHETIC_ANIMATED_SOURCE_ACTION__NO_THIRD_PARTY_ART",
+    "bound_original_action_and_direct_matrix_basis_override_changed_rgba_pixels": 0,
+    "same_matrix_basis_override_with_temporary_original_action_detachment_changed_rgba_pixels": 103,
+    "restored_original_action_changed_rgba_pixels": 0,
+    "runtime_original_source_image_unchanged_under_direct_unkeyed_matrix_basis": true,
+    "runtime_original_source_image_changed_under_explicit_freeze": true,
+    "real_original_Corpus370_patch_results_unverified": true
+  },
+  "original_source_independent_private_courts": [
+    {
+      "source": "CAT",
+      "subject_id": "corpus_000ca1ae51f9582fde9e",
+      "source_sha256": "1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850",
+      "private_independent_court_sha256": "870d523db430581588add659b18325f97626cb54b2f9442c4a1e44644f4874b8",
+      "private_npz_sha256": "69716446aac72cebd22eb36c840eaebd3e8eaa9c9ddfb69b37f8f0780b3b9c15",
+      "baseline_pose_camera_parity_qualified": 12,
+      "baseline_pose_camera_parity_total": 12,
+      "perturbed_pose_camera_parity_qualified": 12,
+      "perturbed_pose_camera_parity_total": 48,
+      "source_control_changed_rgba_pixel_instances": [
+        0,
+        0
+      ],
+      "active_source_face_isolation_changed_pixel_instances_validated": [
+        2066,
+        0
+      ],
+      "original_render_arms": 228
+    },
+    {
+      "source": "TRICERATOPS",
+      "subject_id": "corpus_004e16e05b90505ca23c",
+      "source_sha256": "ad66b51cc5fc44c9a3429a5b1b98a61621af08d58d102d8a817499bd6a7f5b5a",
+      "private_independent_court_sha256": "27bbeb82706cd980eaf27d6c3eac4fcf912ac67a42dc135479b830521b0900d7",
+      "private_npz_sha256": "bb9d4e3776d35f939d676c4a1400bc50ef2f36171e42a315cadf56b7ba7f42df",
+      "baseline_pose_camera_parity_qualified": 12,
+      "baseline_pose_camera_parity_total": 12,
+      "perturbed_pose_camera_parity_qualified": 0,
+      "perturbed_pose_camera_parity_total": 48,
+      "source_control_changed_rgba_pixel_instances": [
+        0,
+        0
+      ],
+      "active_source_face_isolation_changed_pixel_instances_validated": [
+        0,
+        0
+      ],
+      "original_render_arms": 228
+    },
+    {
+      "source": "COWFISH",
+      "subject_id": "corpus_00a3688e42a29045056b",
+      "source_sha256": "e6898505d56d8057c975b6376f123876dd957347282413cf3fb825754841b989",
+      "private_independent_court_sha256": "0ce966b94e1c88d668070451ba713ae4431bbf2f2cfe2f086e4222b8e314639f",
+      "private_npz_sha256": "dadaab99e081ad1b915998c1af31270e0c760f990f0837852a3447285a6457b4",
+      "baseline_pose_camera_parity_qualified": 12,
+      "baseline_pose_camera_parity_total": 12,
+      "perturbed_pose_camera_parity_qualified": 4,
+      "perturbed_pose_camera_parity_total": 48,
+      "source_control_changed_rgba_pixel_instances": [
+        0,
+        0
+      ],
+      "active_source_face_isolation_changed_pixel_instances_validated": [
+        1122,
+        0
+      ],
+      "original_render_arms": 228
+    }
+  ],
+  "assertion": "Github Actions execution completed successfully but original V14 causal 3D→RGBA court did not pass. Never promote successful jobs, original baseline parity, positive V13b vertex response or isolated source faces to qualified same original source native control raster truth.",
+  "hypothesis": "Blender real render engine re-evaluates bound original animation action, erasing transient matrix_basis perturbation; independent original action-equipped synthetic Blender 4.5.14 witness reproduces zero direct change and recovers effect under controlled action freeze. Real Corpus370 three-source freeze result pending.",
+  "next_gate": "ALL original native edited variants must survive render (pre/post exact source vertex original-to-V13b match), qualified source/soup parity, at least one measurable causal image consequence per usable control; preserve source invisible/occluded intervention UNKNOWN, never fabricated artist drawable same/different pairs.",
+  "graphics_owner_authorized": false,
+  "real_Corpus370_causal_rgba_training_authorized": false,
+  "original_native_editor_art_file_verified": false,
+  "family_admission_authorized": false,
+  "materialization_authorized": false,
+  "training_authorized": false
+}

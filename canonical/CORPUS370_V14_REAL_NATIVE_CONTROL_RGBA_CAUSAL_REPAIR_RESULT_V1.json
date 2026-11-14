@@ -1,0 +1,138 @@
+{
+  "schema": "RealSaS.Corpus370V14OriginalNativeMechanicalRGBAIndependentCourtRealResult.v1",
+  "status": "REAL_ORIGINAL_SOURCE_NATIVE_CONTROL_TO_RGBA_CAUSAL_REPAIR_3_OF_3_COURTS_PASS__DRAWABLE_OWNER_UNKNOWN",
+  "event_date_utc": "2026-11-05",
+  "original_parent_pr": 327,
+  "repair_pr": 335,
+  "source_repair_branch": "alfred/v14-native-raster-causal-persistence-v1",
+  "exact_original_native_mechanical_teacher_run_id": 42040199925,
+  "incorrect_green_partial_run_id": 42063856794,
+  "corrected_real_blender_run_id": 42075029264,
+  "corrected_real_blender_run_url": "https://github.com/merynz/RealSaS-OPT/actions/runs/42075029264",
+  "corrected_real_worker_source_sha": "b2e26301e0af9d3a0301447e1188bdfb377cb9a2",
+  "preflight_self_authored_blender_render_falsification_run_id": 42074551473,
+  "blender_version": "4.5.14 LTS",
+  "method": "original_source_native_control_5_degree_plus_minus_animation_action_frozen_render_exact_v13b_vertex_pre_post_verification_noop_and_root_sham",
+  "raster_resolution": [
+    192,
+    192
+  ],
+  "cycles_samples": 32,
+  "original_authored_poses": 3,
+  "views": [
+    0,
+    2,
+    4,
+    6
+  ],
+  "total_original_source_render_arms": 684,
+  "baseline_parity_qualified_pose_views": 36,
+  "baseline_parity_total_pose_views": 36,
+  "original_perturbed_source_vs_soup_qualified_camera_cases": 144,
+  "original_perturbed_source_vs_soup_total_camera_cases": 144,
+  "source_results": [
+    {
+      "source": "CAT",
+      "subject_id": "corpus_000ca1ae51f9582fde9e",
+      "source_sha256": "1e73aaf7d497dd7d2946badf92d189d2333f163e66dced91feb446bc9bdee850",
+      "ordinal": 0,
+      "job_id": 127412847622,
+      "private_independent_court_sha256": "7d170953a009edf482b4d0e2ad3c8c11376c7c607eedafdc84752b794d7c1f44",
+      "private_batch_sha256": "7a8c45aedad6e064c07e763bc79b83951db4bab90cbe88986d60fb8a01f17495",
+      "private_native_rgba_npz_sha256": "4ce0cf5c63976095ddca0b1eef89fe8b441a96266a9bcbabdeba91abc669c0c1",
+      "source_perturbed_control_visible_pixel_instances": [
+        11568,
+        92377
+      ],
+      "causal_active_face_isolation_pixel_instances": [
+        13093,
+        92377
+      ],
+      "parity_pass": [
+        48,
+        48
+      ],
+      "old_parity_pass": [
+        12,
+        48
+      ]
+    },
+    {
+      "source": "TRICERATOPS",
+      "subject_id": "corpus_004e16e05b90505ca23c",
+      "source_sha256": "ad66b51cc5fc44c9a3429a5b1b98a61621af08d58d102d8a817499bd6a7f5b5a",
+      "ordinal": 1,
+      "job_id": 127412847917,
+      "private_independent_court_sha256": "ebf9c9435cf77b0a068b2760d6ed7522e5d9e14c3ed85e02bdbb444a052ead10",
+      "private_batch_sha256": "1e7e75cd6e8b4a71a2eeae11b05867da7968dcaf751d726dec733b23ad7c5722",
+      "private_native_rgba_npz_sha256": "c42a93fdeba8636b2a6995259394f6015a2c35d61a2aa57d498464cd33e39e64",
+      "source_perturbed_control_visible_pixel_instances": [
+        33219,
+        22849
+      ],
+      "causal_active_face_isolation_pixel_instances": [
+        33222,
+        22847
+      ],
+      "parity_pass": [
+        48,
+        48
+      ],
+      "old_parity_pass": [
+        0,
+        48
+      ]
+    },
+    {
+      "source": "COWFISH",
+      "subject_id": "corpus_00a3688e42a29045056b",
+      "source_sha256": "e6898505d56d8057c975b6376f123876dd957347282413cf3fb825754841b989",
+      "ordinal": 2,
+      "job_id": 127412847876,
+      "private_independent_court_sha256": "348f400ecca273d540b8575f14a774b8095b08fe82a017d77bdcffa4d762e92b",
+      "private_batch_sha256": "c522da5b525b29309da639b0691f057479394ab293db586d014a52f00bf3111d",
+      "private_native_rgba_npz_sha256": "7ccefc51b621263861256da1d49c744c79d305f51aafc55cd6ede970d89916dd",
+      "source_perturbed_control_visible_pixel_instances": [
+        15355,
+        42744
+      ],
+      "causal_active_face_isolation_pixel_instances": [
+        15437,
+        42744
+      ],
+      "parity_pass": [
+        48,
+        48
+      ],
+      "old_parity_pass": [
+        4,
+        48
+      ]
+    }
+  ],
+  "origin_court_validation": {
+    "direct_independent_private_court_hash_reopened_and_matches_batch_index": true,
+    "no_source_mesh_or_rig_names_promoted_to_student_input": true,
+    "real_blender_native_animation_original_and_perturbed_source_faces_compared_to_v13b_before_and_after_render": true,
+    "original_image_vs_soup_original_control_perturbation_rgba_parity_within_bound": true,
+    "source_real_perturbed_rgba_effects_all_selected_controls_nonzero": true,
+    "original_render_noop_and_root_sham_pass": true,
+    "original_bone_control_count_not_equal_drawable_count": true
+  },
+  "study_limitations": [
+    "Partial/failed old three-source V14 court is preserved separately and not overwritten",
+    "This qualifies a bounded original-source native 3D controlled mechanical to raster consequences, not artist editable-layer identity",
+    "Not full-resolution CAA or independently proven source depth/draw order/attachment class",
+    "No unseen authors/morphology or corpus-wide joint model target qualification",
+    "Graphics candidate-layer editability and mechanical response ownership remain separately courted families",
+    "Source names and original rig control indices remain privileged teacher-only evidence"
+  ],
+  "independent_artist_same_drawable_pairs": 0,
+  "independent_artist_different_drawable_pairs": 0,
+  "graphics_owner_authorized": false,
+  "native_source_full_resolution_caa_authorized": false,
+  "iris_training_authorized": false,
+  "tessa_training_authorized": false,
+  "materialization_authorized": false,
+  "model_product_release_authorized": false
+}

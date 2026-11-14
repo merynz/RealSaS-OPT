@@ -1,0 +1,52 @@
+name: corpus370-v14-native-control-render-action-persistence-smoke-v1
+
+on:
+  push:
+    branches: [alfred/v14-native-raster-causal-persistence-v1]
+    paths:
+      - '.github/workflows/corpus370-v14-native-control-render-action-persistence-smoke-v1.yml'
+      - 'tools/corpus/blender_render_native_action_persistence_probe_v1.py'
+  pull_request:
+    paths:
+      - '.github/workflows/corpus370-v14-native-control-render-action-persistence-smoke-v1.yml'
+      - 'tools/corpus/blender_render_native_action_persistence_probe_v1.py'
+
+permissions:
+  contents: read
+
+jobs:
+  independent-real-blender-raster-animation-evaluation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download exact version of Blender used by V14 (SHA-verified)
+        run: |
+          set -euo pipefail
+          B=https://download.blender.org/release/Blender4.5
+          mkdir -p "$RUNNER_TEMP/blender45"
+          curl -fL --retry 4 --max-time 300 \
+            "$B/blender-4.5.14-linux-x64.tar.xz" \
+            -o "$RUNNER_TEMP/blender45/package.tar.xz"
+          curl -fL --retry 4 --max-time 120 \
+            "$B/blender-4.5.14.sha256" -o "$RUNNER_TEMP/blender45/checksums"
+          P="$RUNNER_TEMP/blender45/package.tar.xz"
+          P="$P" CHECKS="$RUNNER_TEMP/blender45/checksums" python3 - <<'PY'
+          import hashlib,os,re
+          from pathlib import Path
+          lines=[x for x in Path(os.environ["CHECKS"]).read_text().splitlines()
+            if "blender-4.5.14-linux-x64.tar.xz" in x]
+          assert len(lines)==1
+          h=re.findall(r"[0-9a-fA-F]{64}",lines[0])
+          assert len(h)==1
+          with open(os.environ["P"],"rb") as f:
+            assert hashlib.file_digest(f,"sha256").hexdigest()==h[0].lower()
+          PY
+          tar -xJf "$P" -C "$RUNNER_TEMP/blender45"
+          test "$(sha256sum "$RUNNER_TEMP/blender45/blender-4.5.14-linux-x64/blender" | cut -d' ' -f1)" = 050c02562f81fe80ba616a80198fa02d381e60f8b61b8d39add881f4bca0d7d8
+      - name: Execute true bpy render baseline, live animation control and frozen-action controlled renderer
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/blender45/blender-4.5.14-linux-x64/blender" \
+            --background --factory-startup \
+            --python tools/corpus/blender_render_native_action_persistence_probe_v1.py

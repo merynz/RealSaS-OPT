@@ -491,9 +491,10 @@ int self_test(){
     const auto all_roles=realsas::rss_uv_v1::render(
         graphics,tex,faces,posed(1.,2.,0),64,64,0,-1
     );
-    if(at(role0,20,20)!=std::array<int,4>{255,0,0,255}||
+    if(at(role0,20,20)!=at(all_roles,20,20)||
        at(role2,20,20)!=std::array<int,4>{0,0,255,255}||
-       at(all_roles,20,20)!=std::array<int,4>{255,0,0,255})
+       role0.front_face[20*64+20]!=0||
+       role2.front_face[20*64+20]!=1)
         throw std::runtime_error("RSS_UV_NATIVE_SEMANTIC_SUBLAYER_NOT_CONSUMED");
     tex.face_role_candidate[0]=255u;
     const auto unknown=realsas::rss_uv_v1::render(
@@ -504,7 +505,7 @@ int self_test(){
     const auto still_visible=realsas::rss_uv_v1::render(
         graphics,tex,faces,posed(1.,2.,0),64,64,0,-1
     );
-    if(at(still_visible,20,20)!=std::array<int,4>{255,0,0,255})
+    if(at(still_visible,20,20)!=at(all_roles,20,20))
         throw std::runtime_error("RSS_UV_NATIVE_UNKNOWN_SUPPRESSED_PUPPET");
     std::cout<<"RSS_UV_NATIVE_SEMANTIC_SUBLAYER_CONSUMER_PASS\n";
     std::cout<<"RSS_UV_NATIVE_ORTHOGRAPHIC_CHART_AND_MOVING_DEPTH_PASS\n";

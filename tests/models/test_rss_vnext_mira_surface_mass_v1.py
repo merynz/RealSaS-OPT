@@ -63,7 +63,9 @@ def test_zero_surface_mass_vertex_cannot_change_causal_fsq_labels():
     expanded_decode=codec.decode_tokens(
         expanded_ids,torch.cat((features,extraneous),dim=1),joints,
     )
-    assert torch.equal(base_decode,expanded_decode[:,:3])
+    # Different GEMM shapes may differ by a few FP32 ulps. Hard token
+    # identity is exact; decoded weights must agree numerically.
+    assert torch.allclose(base_decode,expanded_decode[:,:3],atol=1e-6,rtol=1e-6)
     # Real surface vertices must still influence the actual codec encoder.
     model_features=features.detach().clone().requires_grad_(True)
     fit=codec(weights,model_features,joints,surface_vertex_mass=base_mass)

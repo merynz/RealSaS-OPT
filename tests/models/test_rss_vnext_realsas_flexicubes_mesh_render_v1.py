@@ -80,15 +80,29 @@ def test_same_H_and_actual_mesh_channels_flow_to_stage3_raster_contract():
     assert witness.xyz.grad is not None
 
 
+def test_owned_reference_default_backend_runs_without_nvidia_and_backpropagates():
+    w=_witness()
+    color_head=nn.Linear(4,5)
+    role_head=nn.Linear(4,2)
+    out=render_realsas_layered_flexicubes_mesh_v1(
+        witness=w,iris=_MiniIRIS(),scene_triplanes=torch.zeros((1,3,1,1,1)),
+        graphics_head=color_head,semantic_role_head=role_head,
+        cameras=_camera(),height=16,width=16,
+        source_scene_prediction_sha256="a"*64,
+    )
+    assert out.rasterizer_identity == "BUSTED_TORCH_FIRST_HIT_DIFFERENTIABLE_STAGE3_V1"
+    assert (out.alpha > 0).any()
+    assert (out.alpha < 1).any()
+    (out.rgb_white_composite.sum()+out.alpha.sum()
+     +out.semantic_posterior[...,0].sum()+out.depth.sum()).backward()
+    assert color_head.weight.grad is not None
+    assert role_head.weight.grad is not None
+    assert w.xyz.grad is not None and torch.isfinite(w.xyz.grad).all()
+    assert w.xyz.grad.abs().sum() > 0
+
+
 def test_unqualified_source_or_non_gpu_native_backend_refused():
     w=_witness()
-    with pytest.raises(RuntimeError,match="NVDIFFRAST_GPU_REQUIRED"):
-        render_realsas_layered_flexicubes_mesh_v1(
-            witness=w,iris=_MiniIRIS(),scene_triplanes=torch.zeros((1,3,1,1,1)),
-            graphics_head=nn.Linear(4,5),semantic_role_head=nn.Linear(4,2),
-            cameras=_camera(),height=8,width=8,
-            source_scene_prediction_sha256="a"*64,
-        )
     w.source_policy="SOURCE_MEASURED"
     with pytest.raises(ValueError,match="WITNESS_AUTHORITY"):
         render_realsas_layered_flexicubes_mesh_v1(

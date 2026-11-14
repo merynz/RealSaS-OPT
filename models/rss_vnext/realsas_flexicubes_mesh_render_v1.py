@@ -1,19 +1,18 @@
 from __future__ import annotations
 
-"""Live RealSaS stage3: FlexiCubes layered mesh -> nvdiffrast RGB/semantic.
+"""Live RealSaS stage3: FlexiCubes layered mesh -> BUSTED-owned raster.
 
 Reference: CVPR 2025 §3.2 Stage3 Eq(10) uses semantic-equivalent SDF,
 FlexiCubes and mesh RGB/semantic/normal/depth raster supervision. This
 independently written adapter consumes the EXISTING PINNED NVIDIA
 FlexiCubes witness, queries the SAME IRIS H(x) for appearance and roles,
-then uses nvdiffrast's GPU differentiation primitives. It never copies
-released research code/weights and never mints source-surface ownership.
+then uses BUSTED's own PyTorch first-hit differentiable raster.
+It never copies or imports NVIDIA nvdiffrast code and never mints
+source-surface ownership.
 
-Prerequisites for actual training: local trusted NVIDIA nvdiffrast runtime
-with GPU support, aligned source-render teacher with exact camera and
-metric-depth/normal-space convention, and source-signed qualification.
-CPU unit tests use a labelled fake raster API; they do NOT prove the
-native CUDA kernel or high-resolution fidelity.
+The backend works on CPU/CUDA and preserves exact source/render authority.
+Its bounding-box triangle iteration is a correctness baseline; no production
+throughput or native CUDA kernel equivalence is claimed by CPU tests.
 """
 
 from hashlib import sha256
@@ -27,8 +26,9 @@ import torch.nn.functional as F
 from models.iris.vnext.flexicubes_v1 import vertex_normals_v1
 from .flexicubes_surface_evidence import RSSvNextFlexiCubesSurfaceEvidence
 from .realsas_joint_slrm_render_v1 import RealSaSFlexiCubesLayerRasterV1
+from .busted_raster_backend_v1 import BustedTorchRasterV1
 
-RASTER_ID="NVLABS_NVDIFFRAST_FLEXICUBES_SHARED_H_STAGE3_V1"
+RASTER_ID="BUSTED_TORCH_FIRST_HIT_DIFFERENTIABLE_STAGE3_V1"
 
 
 def _mesh_digest(vertices: Tensor,faces: Tensor) -> str:
@@ -79,7 +79,7 @@ def render_realsas_layered_flexicubes_mesh_v1(
 ) -> RealSaSFlexiCubesLayerRasterV1:
     """Differentiable mesh-stage producer for L3, from signed H(x) witness.
 
-    Per-view z-buffer/first-hit computed by NVIDIA rasterization; NDC camera
+    Per-view first-hit depth and barycentric attributes from owned raster; NDC camera
     vertical axis is flipped for top-left torch image convention.
     No average-z / whole-face single-depth shortcut is used. Full rendered
     RGB/mask/semantics/normal/depth are bound to exactly the witness mesh.
@@ -114,15 +114,7 @@ def render_realsas_layered_flexicubes_mesh_v1(
         or not bool(torch.isfinite(scene_triplanes).all())
     ):
         raise ValueError("RSS_VNEXT_REALSAS_STAGE3_SHARED_SCENE_DRIFT")
-    if witness.xyz.device.type!="cuda" and raster_backend is None:
-        raise RuntimeError("RSS_VNEXT_REALSAS_STAGE3_NVDIFFRAST_GPU_REQUIRED")
-    if raster_backend is None:
-        try:
-            import nvdiffrast.torch as dr
-        except ImportError as exc:
-            raise RuntimeError("RSS_VNEXT_REALSAS_STAGE3_NVDIFFRAST_INSTALL_REQUIRED") from exc
-    else:
-        dr=raster_backend
+    dr=BustedTorchRasterV1 if raster_backend is None else raster_backend
     if raster_context is None:
         raster_context=dr.RasterizeCudaContext()
     verts=witness.xyz[0].float()
@@ -147,7 +139,7 @@ def render_realsas_layered_flexicubes_mesh_v1(
         rast,_db=dr.rasterize(
             raster_context,clip,tri,resolution=(height,width),
         )
-        # NVIDIA nvdiffrast raster image origin is lower-left. Model and
+        # The owned raster image origin is bottom-left. Model and
         # admitted PNG teachers are top-left: explicit y axis reversal.
         coverage=(rast[...,3:4]>0).to(verts.dtype)
         sampled_position,_=dr.interpolate(
@@ -174,8 +166,8 @@ def render_realsas_layered_flexicubes_mesh_v1(
         rgba=torch.cat((
             rgb*coverage,coverage,
         ),dim=-1).contiguous()
-        # Use the official nvdiffrast triangle-edge antialias operation.
-        # Never blurrily average depths, which would invalidate z ordering.
+        # The owned raster uses differentiable soft edge coverage only;
+        # face selection and metric depth remain first-hit, not blurred.
         smooth=dr.antialias(rgba,rast,clip,tri).clamp(0.,1.)
         alpha=smooth[...,3:4]
         whitened=(smooth[...,:3]+1.-alpha).clamp(0.,1.)

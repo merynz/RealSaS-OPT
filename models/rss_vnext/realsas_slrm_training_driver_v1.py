@@ -5,7 +5,7 @@ from __future__ import annotations
 References: the CVPR 2025 multi-view reference §3.2, InstantNeRF/InstantMesh S-LRM.
 Stage1/2: jointly render RGB, opacity and semantic posterior through the
 SAME IRIS H(x). Stage3: separately extract pinned FlexiCubes surface from
-the SAME scene and use a differentiable NVIDIA mesh raster for all RGB,
+the SAME scene and use BUSTED's differentiable first-party mesh raster for all RGB,
 opacity, semantics, normals, depth and deformation losses. Camera/teacher
 render authority stays with independently admitted source-3D data. An
 optional second observed image never becomes six 'source' observations.
@@ -36,6 +36,7 @@ from .realsas_joint_slrm_render_v1 import (
 )
 from .realsas_flexicubes_mesh_render_v1 import render_realsas_layered_flexicubes_mesh_v1
 from .unified_character_model import RSSvNextUnifiedCharacterModel
+from .training_optimizer_ownership_v1 import qualify_rss_vnext_optimizer_ownership_v1
 
 
 def _sha(v: object) -> bool:
@@ -107,7 +108,7 @@ class RealSaSSLRMTrainerV1:
     each minibatch. It binds original source, generated input, cameras,
     camera rays, peeled role mask, RGB, alpha and semantic GT.
     """
-    schema="RealSaS.RSSvNext.RealSaSSLRMTrainer.v1"
+    schema="RealSaS.RSSvNext.RealSaSSLRMTrainer.v2"
 
     def __init__(
         self, model: RSSvNextUnifiedCharacterModel, optimizer: torch.optim.Optimizer,
@@ -128,6 +129,9 @@ class RealSaSSLRMTrainerV1:
         if clip_gradient_norm<=0:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_GRAD_CLIP_INVALID")
         self.model=model;self.optimizer=optimizer;self.weights=weights
+        self.optimizer_ownership=qualify_rss_vnext_optimizer_ownership_v1(
+            self.model,self.optimizer,
+        )
         self.input_profile=input_profile
         self.lpips_loss_fn=lpips_loss_fn
         if weights.lpips>0 and lpips_loss_fn is None:
@@ -364,12 +368,24 @@ class RealSaSSLRMTrainerV1:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_NONFINITE_LOSS")
         return {**parts,"total":total}
 
+    def _assert_optimizer_ownership(self)->None:
+        current=qualify_rss_vnext_optimizer_ownership_v1(
+            self.model,self.optimizer,
+        )
+        if current.binding_sha256!=self.optimizer_ownership.binding_sha256:
+            raise RuntimeError("RSS_VNEXT_REALSAS_SLRM_OPTIMIZER_PHASE_DRIFT")
+
     def train_step(self,batch:RealSaSSLRMBatchV1) -> dict[str,Tensor]:
+        self._assert_optimizer_ownership()
+        for p in self.model.parameters():
+            if not p.requires_grad:
+                p.grad=None
         self.optimizer.zero_grad(set_to_none=True)
         parts=self.objective(batch)
         parts["total"].backward()
         torch.nn.utils.clip_grad_norm_(
-            self.model.parameters(),self.clip_gradient_norm,error_if_nonfinite=True,
+            (p for p in self.model.parameters() if p.requires_grad),
+            self.clip_gradient_norm,error_if_nonfinite=True,
         )
         self.optimizer.step()
         self.global_step+=1
@@ -377,11 +393,13 @@ class RealSaSSLRMTrainerV1:
 
     def save_checkpoint(self,path:str|Path,*,sampler_cursor:int)->None:
         if sampler_cursor<0:raise ValueError("RSS_VNEXT_REALSAS_SLRM_BAD_SAMPLER_CURSOR")
+        self._assert_optimizer_ownership()
         filename=Path(path);filename.parent.mkdir(parents=True,exist_ok=True)
         payload={
             "schema":self.schema,"dataset_manifest_sha256":self.manifest_sha256,
             "teacher_registry_sha256":self.registry_sha256,
             "objective_policy_sha256":self.policy_sha256,
+            "optimizer_ownership_binding_sha256":self.optimizer_ownership.binding_sha256,
             "global_step":self.global_step,"sampler_cursor":sampler_cursor,
             "model":self.model.state_dict(),
             "optimizer":self.optimizer.state_dict(),
@@ -404,6 +422,9 @@ class RealSaSSLRMTrainerV1:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_RENDER_TRUTH_DRIFT")
         if data.get("objective_policy_sha256")!=self.policy_sha256:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_OBJECTIVE_POLICY_DRIFT")
+        self._assert_optimizer_ownership()
+        if data.get("optimizer_ownership_binding_sha256")!=self.optimizer_ownership.binding_sha256:
+            raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_OPTIMIZER_OWNERSHIP_DRIFT")
         self.model.load_state_dict(data["model"],strict=True)
         self.optimizer.load_state_dict(data["optimizer"])
         self.global_step=int(data["global_step"])

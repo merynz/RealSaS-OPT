@@ -322,6 +322,7 @@ def source_surface_tensor_sha256(value: Tensor) -> str:
     return hashlib.sha256(header + bytes([0]) + cpu.numpy().tobytes()).hexdigest()
 
 
+from .training_optimizer_ownership_v1 import qualify_rss_vnext_optimizer_ownership_v1
 from .training_gradient_interference_v1 import (
     RSSvNextGradientCourtPolicyV1,
     audit_rss_vnext_gradient_interference_v1,
@@ -336,7 +337,7 @@ class RSSvNextStructuralTrainer:
     verdicts never enter image tokens or scene forward.
     """
 
-    checkpoint_schema = "RealSaS.RSSvNext.StructuralTrainerCheckpoint.v1"
+    checkpoint_schema = "RealSaS.RSSvNext.StructuralTrainerCheckpoint.v2"
 
     def __init__(
         self,
@@ -399,6 +400,9 @@ class RSSvNextStructuralTrainer:
         self.axis_training_policy = axis_training_policy
         self.model = model
         self.optimizer = optimizer
+        self.optimizer_ownership = qualify_rss_vnext_optimizer_ownership_v1(
+            self.model, self.optimizer,
+        )
         self.weights = weights
         self.preference = preference
         self.gradient_court_policy = gradient_court_policy
@@ -1614,7 +1618,20 @@ class RSSvNextStructuralTrainer:
         report["objective_policy_sha256"] = self.objective_policy_sha256
         return report
 
+    def _assert_optimizer_ownership(self) -> None:
+        current = qualify_rss_vnext_optimizer_ownership_v1(
+            self.model, self.optimizer,
+        )
+        if current.binding_sha256 != self.optimizer_ownership.binding_sha256:
+            raise RuntimeError("RSS_VNEXT_TRAIN_OPTIMIZER_PHASE_IDENTITY_DRIFT")
+
     def train_step(self, batch: RSSvNextStructuralTrainingBatch) -> RSSvNextTrainingResult:
+        self._assert_optimizer_ownership()
+        # Phase changes may leave stale frozen tensors from a former
+        # optimizer. Never let old .grad affect the new stage's clipping.
+        for parameter in self.model.parameters():
+            if not parameter.requires_grad:
+                parameter.grad = None
         self.optimizer.zero_grad(set_to_none=True)
         result = self.objective(batch)
         if (
@@ -1624,7 +1641,8 @@ class RSSvNextStructuralTrainer:
             result.gradient_interference_report = self._measure_gradient_conflicts(result)
         result.total_loss.backward()
         grad_norm = nn.utils.clip_grad_norm_(
-            self.model.parameters(), self.weights.clip_gradient_norm,
+            (p for p in self.model.parameters() if p.requires_grad),
+            self.weights.clip_gradient_norm,
             error_if_nonfinite=True,
         )
         self.optimizer.step()
@@ -1635,6 +1653,7 @@ class RSSvNextStructuralTrainer:
     def save_checkpoint(self, path: str | Path, *, sampler_cursor: int) -> None:
         if sampler_cursor < 0:
             raise ValueError("RSS_VNEXT_TRAIN_SAMPLER_CURSOR_INVALID")
+        self._assert_optimizer_ownership()
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
@@ -1643,6 +1662,7 @@ class RSSvNextStructuralTrainer:
             "architecture_digest": architecture_digest(self.model.cfg),
             "dataset_manifest_sha256": self.dataset_manifest_sha256,
             "objective_policy_sha256": self.objective_policy_sha256,
+            "optimizer_ownership_binding_sha256": self.optimizer_ownership.binding_sha256,
             "render_registry_sha256": self.render_registry_sha256,
             "generated_conditioning_registry_sha256": self.generated_conditioning_registry_sha256,
             "surface_role_registry_sha256": self.surface_role_registry_sha256,
@@ -1685,6 +1705,9 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_DATASET_MANIFEST_DRIFT")
         if data.get("objective_policy_sha256") != self.objective_policy_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_OBJECTIVE_POLICY_DRIFT")
+        self._assert_optimizer_ownership()
+        if data.get("optimizer_ownership_binding_sha256") != self.optimizer_ownership.binding_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_OPTIMIZER_OWNERSHIP_DRIFT")
         if data.get("render_registry_sha256", "") != self.render_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_RENDER_REGISTRY_DRIFT")
         if data.get("generated_conditioning_registry_sha256", "") != self.generated_conditioning_registry_sha256:

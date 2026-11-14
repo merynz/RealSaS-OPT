@@ -586,6 +586,16 @@ class RSSvNextStructuralTrainer:
                 batch.product_generation_checkpoint_sha256,
             )):
                 raise ValueError("RSS_VNEXT_TRAIN_GENERATOR_CHECKPOINT_SHA_DOMAIN")
+            from .realsas_two_source_construction_v1 import (
+                paired_generation_binding_sha256_v1,
+            )
+            expected_binding = paired_generation_binding_sha256_v1(
+                canonical_checkpoint_sha256=batch.product_canonical_checkpoint_sha256,
+                multiview_checkpoint_sha256=batch.product_multiview_checkpoint_sha256,
+                source_binding_sha256=batch.product_source_binding_sha256,
+            )
+            if expected_binding != batch.product_generation_checkpoint_sha256:
+                raise ValueError("RSS_VNEXT_TRAIN_GENERATOR_BINDING_RECOMPUTE_DRIFT")
             receipt = self.trusted_generated_conditioning_registry.get(
                 batch.product_conditioning_admission_key
             )

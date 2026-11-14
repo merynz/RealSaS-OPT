@@ -167,7 +167,12 @@ def test_real_two_original_images_reach_editable_mechanics_rss_and_native_2d_pix
     _,_=_render(exe,archive,tmp_path,0,source_view=0,owners=True)
     # Exactly two canonical authored ROOT states have independently replayed
     # projected positions; texture color changes cannot masquerade as motion.
-    assert reopened["pose_bytes"][32+len(mesh.faces)*12:] != b""
+    projected=np.frombuffer(
+        reopened["pose_bytes"][32+len(mesh.faces)*12:],
+        dtype="<f8",
+    ).reshape(2,len(mesh.vertices),3)
+    assert not np.array_equal(projected[0],projected[1])
+    assert np.any(np.abs(projected[1,:,:2]-projected[0,:,:2])>1e-4)
 
 
 def test_rehashed_rss_package_cannot_hide_edits_that_no_longer_match_real_mechanics(

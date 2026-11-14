@@ -433,6 +433,36 @@ int main(int argc,char** argv){
             if(argc==10){owner_path=argv[8];authority_path=argv[9];}
         }
         const auto graphics=realsas::graphics_v1::parse(graphics_blob);
+        if(archive_mode){
+            // This archive's virtual axis was selected from the mesh, not
+            // registered to any of the eight learned/observed view schedules.
+            // Never accept source-view hiding or precedence under that axis,
+            // even if someone rewrites and rehashes the entire manifest.
+            if(manifest.at("virtual_preview_camera_registered_to_graphics_view")!="0"||
+               manifest.at("virtual_preview_draw_policy")!=
+                   "ALL_CANONICAL_FRAGMENTS_POSED_DEPTH_ONLY"||
+               manifest.at("texture_layer_draw_order_authority")!=
+                   "POSED_DEPTH_ONLY_FOR_UNREGISTERED_VIRTUAL_CAMERA"||
+               graphics.views.empty())
+                throw std::runtime_error(
+                    "RSS_UV_PREVIEW_UNREGISTERED_VIEW_POLICY_DRIFT"
+                );
+            const auto& view0=graphics.views[0];
+            const auto n=graphics.fragment_ids.size();
+            bool valid=view0.visible_fragment.size()==n&&
+                       view0.topological_order.size()==n&&
+                       view0.precedes.size()==n*n;
+            if(valid)for(std::size_t i=0;i<n;++i){
+                valid=valid&&view0.visible_fragment[i]==1u&&
+                      view0.topological_order[i]==i;
+            }
+            if(valid)for(const auto edge:view0.precedes)
+                valid=valid&&edge==0u;
+            if(!valid)
+                throw std::runtime_error(
+                    "RSS_UV_PREVIEW_UNREGISTERED_VIEW_POLICY_DRIFT"
+                );
+        }
         const auto texture=realsas::rss_uv_v1::parse_texture(texture_blob);
         const auto poses=parse_poses(pose_blob);
         if(frame<0||frame>=static_cast<int>(poses.frames.size())||

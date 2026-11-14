@@ -638,10 +638,20 @@ int main(int argc,char** argv){
         const auto texture=realsas::rss_uv_v1::parse_texture(texture_blob);
         if(archive_mode){
             const bool semantic=texture.role_count>0;
+            // Legacy RSUVT001 archives had no Semantic manifest keys.
+            // Keep their existing read path, but version-2 must record
+            // explicit non-source role authority with no silent fallback.
+            const auto candidate=manifest.find("semantic_role_sublayer_model_only");
+            const auto authority=manifest.find("semantic_role_sublayer_source_qualified");
             if(
-                manifest.at("semantic_role_sublayer_model_only") !=
-                    (semantic?"1":"0")||
-                manifest.at("semantic_role_sublayer_source_qualified")!="0"
+                (semantic && (
+                    candidate==manifest.end()||candidate->second!="1"||
+                    authority==manifest.end()||authority->second!="0"
+                ))||
+                (!semantic && (
+                    (candidate!=manifest.end() && candidate->second!="0")||
+                    (authority!=manifest.end() && authority->second!="0")
+                ))
             )throw std::runtime_error(
                 "RSS_UV_NATIVE_SEMANTIC_SUBLAYER_FALSE_AUTHORITY"
             );

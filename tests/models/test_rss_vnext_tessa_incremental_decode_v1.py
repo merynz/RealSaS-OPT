@@ -10,6 +10,8 @@ from models.rss_vnext import (
     RSSvNextUnifiedCharacterModel,
 )
 from models.tessa.v31.model_v31 import TESSAStructuralizerV31
+from models.rss_vnext.tessa_incremental_decode_v1 import decode_next_token_v1
+import models.rss_vnext.unified_character_model as unified_module
 
 
 @pytest.fixture(autouse=True)
@@ -36,7 +38,7 @@ def test_incremental_exact_logits_match_full_prefix_including_window_rollover():
     ids[0, 0] = model.config.BOS
     cache = None
     for length in range(1, ids.shape[1]+1):
-        next_logits, cache = model.decode_next_token_v1(
+        next_logits, cache = decode_next_token_v1(model, 
             memory=memory, token=ids[:, length-1:length], cache=cache,
         )
         reference = model.decode_tokens(
@@ -50,14 +52,14 @@ def test_incremental_exact_logits_match_full_prefix_including_window_rollover():
 def test_incremental_refuses_foreign_memory_and_training_mode():
     model, memory = _decoder()
     ids = torch.tensor([[model.config.BOS]])
-    _, cache = model.decode_next_token_v1(memory=memory, token=ids)
+    _, cache = decode_next_token_v1(model, memory=memory, token=ids)
     with pytest.raises(ValueError, match="FOREIGN_CACHE"):
-        model.decode_next_token_v1(
+        decode_next_token_v1(model, 
             memory=memory.clone(), token=ids, cache=cache,
         )
     model.train()
     with pytest.raises(RuntimeError, match="INCREMENTAL_REQUIRES_EVAL"):
-        model.decode_next_token_v1(memory=memory, token=ids)
+        decode_next_token_v1(model, memory=memory, token=ids)
 
 
 def test_teacher_free_product_calls_incremental_decoder_without_prefix_rescans(monkeypatch):
@@ -65,12 +67,13 @@ def test_teacher_free_product_calls_incremental_decoder_without_prefix_rescans(m
     net = RSSvNextUnifiedCharacterModel(
         cfg, vision_encoder=RSSvNextPatchEncoderForTests(cfg.iris.image_token_dim),
     ).eval()
-    real_decode = net.tessa.decode_next_token_v1
+    real_decode = unified_module.decode_next_token_v1
 
-    def observed(*, memory: torch.Tensor, token: torch.Tensor, cache=None):
+    def observed(tessa, *, memory: torch.Tensor, token: torch.Tensor, cache=None):
+        assert tessa is net.tessa
         if cache is not None:
             assert cache.memory is memory
-        return real_decode(memory=memory, token=token, cache=cache)
+        return real_decode(tessa, memory=memory, token=token, cache=cache)
 
     # No complete prefix decoder call is permitted in product generation.
     def forbidden(**_kwargs):

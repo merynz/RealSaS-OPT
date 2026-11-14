@@ -11,6 +11,8 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <map>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -113,6 +115,103 @@ int parse_index(const char* text){
     return v;
 }
 
+using RSSPreviewEntries=std::map<std::string,std::vector<std::uint8_t>>;
+RSSPreviewEntries parse_existing_rss_archive_v1(
+    const std::vector<std::uint8_t>& archive
+){
+    static constexpr char magic[8]={'R','S','A','S','V','2','R','1'};
+    if(archive.size()<12||std::memcmp(archive.data(),magic,8)!=0)
+        throw std::runtime_error("RSS_UV_PREVIEW_ARCHIVE_MAGIC");
+    std::size_t pos=8;
+    auto need=[&](std::size_t size){
+        if(pos>archive.size()||size>archive.size()-pos)
+            throw std::runtime_error("RSS_UV_PREVIEW_ARCHIVE_TRUNCATED");
+    };
+    auto u16=[&](){
+        need(2);
+        const auto value=static_cast<std::uint16_t>(archive[pos])|
+            static_cast<std::uint16_t>(archive[pos+1]<<8);
+        pos+=2;
+        return value;
+    };
+    auto u32=[&](){
+        need(4);
+        std::uint32_t result=0;
+        for(unsigned i=0;i<4;++i)
+            result|=static_cast<std::uint32_t>(archive[pos+i])<<(i*8);
+        pos+=4;
+        return result;
+    };
+    auto u64=[&](){
+        need(8);
+        std::uint64_t result=0;
+        for(unsigned i=0;i<8;++i)
+            result|=static_cast<std::uint64_t>(archive[pos+i])<<(i*8);
+        pos+=8;
+        return result;
+    };
+    if(u32()!=8)throw std::runtime_error("RSS_UV_PREVIEW_ARCHIVE_ENTRY_COUNT");
+    const std::set<std::string> required={
+        "manifest.txt","mesh.json","rig.json","skin.json",
+        "graphics.bin","texture.bin","pose.bin","controls.json",
+    };
+    RSSPreviewEntries entries;
+    for(int i=0;i<8;++i){
+        const auto name_length=u16();
+        if(!name_length||name_length>128)
+            throw std::runtime_error("RSS_UV_PREVIEW_ENTRY_NAME_LENGTH");
+        need(name_length);
+        const std::string name(
+            reinterpret_cast<const char*>(archive.data()+pos),name_length
+        );
+        pos+=name_length;
+        const auto length=u64();
+        if(!required.count(name)||entries.count(name)||
+           length>128u*1024u*1024u)
+            throw std::runtime_error("RSS_UV_PREVIEW_UNKNOWN_OR_DUPLICATE_ENTRY");
+        need(static_cast<std::size_t>(length));
+        entries[name]=std::vector<std::uint8_t>(
+            archive.begin()+static_cast<std::ptrdiff_t>(pos),
+            archive.begin()+static_cast<std::ptrdiff_t>(pos+length)
+        );
+        pos+=static_cast<std::size_t>(length);
+    }
+    if(entries.size()!=required.size()||pos!=archive.size())
+        throw std::runtime_error("RSS_UV_PREVIEW_ARCHIVE_TRAILING_OR_MISSING");
+    return entries;
+}
+std::map<std::string,std::string> preview_manifest(
+    const std::vector<std::uint8_t>& bytes
+){
+    const std::string source(bytes.begin(),bytes.end());
+    if(source.size()>8192)
+        throw std::runtime_error("RSS_UV_PREVIEW_MANIFEST_SIZE");
+    std::map<std::string,std::string> result;
+    std::size_t start=0;
+    while(start<source.size()){
+        auto end=source.find('\n',start);
+        if(end==std::string::npos)end=source.size();
+        const auto line=source.substr(start,end-start);
+        if(!line.empty()){
+            const auto eq=line.find('=');
+            if(eq==std::string::npos||eq==0||
+               !result.emplace(line.substr(0,eq),line.substr(eq+1)).second)
+                throw std::runtime_error("RSS_UV_PREVIEW_MANIFEST_DUPLICATE");
+        }
+        start=end+1;
+    }
+    if(
+        result.at("schema")!="RealSaS.RSSvNext.NativeInteractivePuppetPreview.v1"
+        ||result.at("admission")!="DEVELOPER_PREVIEW_NOT_PRODUCT_REVISION"
+        ||result.at("product_revision_minted")!="0"
+        ||result.at("original_source_camera_observed")!="0"
+        ||result.at("source_rgb_surface_ownership_qualified")!="0"
+        ||result.at("native_texture_preview_rendering_enabled")!="1"
+        ||result.at("view_index")!="0"
+    )throw std::runtime_error("RSS_UV_PREVIEW_FALSE_SOURCE_OR_PRODUCT_AUTHORITY");
+    return result;
+}
+
 int self_test(){
     Texture tex;
     tex.width=8;tex.height=8;tex.faces=2;
@@ -202,29 +301,67 @@ int self_test(){
 int main(int argc,char** argv){
     try {
         if(argc==2&&std::string(argv[1])=="--self-test")return self_test();
-        if(argc!=8&&argc!=10)throw std::runtime_error(
-            "USAGE: rss_uv_player graphics.bin uv.bin pose.bin frame view"
-            " source_view(-1|0|1) output.rgba [owner.i32 authority.u8]");
-        const auto graphics=realsas::graphics_v1::parse(
-            read_file(argv[1],16u*1024u*1024u)
-        );
-        const auto texture=realsas::rss_uv_v1::parse_texture(
-            read_file(argv[2],128u*1024u*1024u)
-        );
-        const auto poses=parse_poses(read_file(argv[3],64u*1024u*1024u));
-        const int frame=parse_index(argv[4]),view=parse_index(argv[5]);
-        const int source_view=parse_index(argv[6]);
+        const bool archive_mode=argc>1&&std::string(argv[1])=="--rss";
+        if(archive_mode ? (argc!=7&&argc!=9) : (argc!=8&&argc!=10))
+            throw std::runtime_error(
+                "USAGE: rss_uv_player graphics.bin uv.bin pose.bin frame view"
+                " source_view output.rgba [owner.i32 authority.u8]"
+                " OR --rss preview.rss frame view source_view output.rgba"
+                " [owner.i32 authority.u8]"
+            );
+        std::vector<std::uint8_t> graphics_blob,texture_blob,pose_blob;
+        int frame=0,view=0,source_view=-1;
+        const char* output_path=nullptr;
+        const char* owner_path=nullptr;
+        const char* authority_path=nullptr;
+        std::map<std::string,std::string> manifest;
+        if(archive_mode){
+            const auto entries=parse_existing_rss_archive_v1(
+                read_file(argv[2],160u*1024u*1024u)
+            );
+            manifest=preview_manifest(entries.at("manifest.txt"));
+            graphics_blob=entries.at("graphics.bin");
+            texture_blob=entries.at("texture.bin");
+            pose_blob=entries.at("pose.bin");
+            frame=parse_index(argv[3]);
+            view=parse_index(argv[4]);
+            source_view=parse_index(argv[5]);
+            output_path=argv[6];
+            if(argc==9){owner_path=argv[7];authority_path=argv[8];}
+            if(view!=0)
+                throw std::runtime_error("RSS_UV_PREVIEW_SINGLE_PROJECTED_VIEW_ONLY");
+        }else{
+            graphics_blob=read_file(argv[1],16u*1024u*1024u);
+            texture_blob=read_file(argv[2],128u*1024u*1024u);
+            pose_blob=read_file(argv[3],64u*1024u*1024u);
+            frame=parse_index(argv[4]);
+            view=parse_index(argv[5]);
+            source_view=parse_index(argv[6]);
+            output_path=argv[7];
+            if(argc==10){owner_path=argv[8];authority_path=argv[9];}
+        }
+        const auto graphics=realsas::graphics_v1::parse(graphics_blob);
+        const auto texture=realsas::rss_uv_v1::parse_texture(texture_blob);
+        const auto poses=parse_poses(pose_blob);
         if(frame<0||frame>=static_cast<int>(poses.frames.size())||
            view<0||view>=8||source_view < -1||source_view>1)
             throw std::runtime_error("RSS_UV_NATIVE_ARGUMENT_RANGE");
+        if(archive_mode){
+            if(
+                manifest.at("graphics_runtime_hash")!=graphics.runtime_graphics_hash
+                ||manifest.at("canonical_mesh_lineage_hash")!=texture.mesh_hash
+                ||parse_index(manifest.at("frame_count").c_str())
+                    !=static_cast<int>(poses.frames.size())
+            )throw std::runtime_error("RSS_UV_PREVIEW_MANIFEST_RUNTIME_BINDING_DRIFT");
+        }
         const auto output=realsas::rss_uv_v1::render(
             graphics,texture,poses.faces,poses.frames[frame],
             poses.width,poses.height,static_cast<std::uint32_t>(view),source_view
         );
-        write_file(argv[7],output.rgba);
-        if(argc==10) {
-            write_file(argv[8],output.front_face);
-            write_file(argv[9],output.color_authority);
+        write_file(output_path,output.rgba);
+        if(owner_path){
+            write_file(owner_path,output.front_face);
+            write_file(authority_path,output.color_authority);
         }
         std::uint64_t source_pixels=0,predicted_pixels=0;
         for(const auto authority:output.color_authority){
@@ -234,6 +371,7 @@ int main(int argc,char** argv){
         std::cout<<"RSS_UV_NATIVE_POSED_2D_RENDER_PASS"
                  <<" frame="<<frame<<" view="<<view
                  <<" source_layer="<<source_view
+                 <<" rss_archive="<<(archive_mode?1:0)
                  <<" overlap_pixels="<<output.overlapping_pixels
                  <<" graphics_order_overrides="<<output.explicit_order_overrides
                  <<" source_candidate_pixels="<<source_pixels
@@ -241,7 +379,7 @@ int main(int argc,char** argv){
                  <<" unknown_pixels="<<output.uncolored_pixels
                  <<"\n";
         return 0;
-    } catch(const std::exception& exc){
+    }catch(const std::exception& exc){
         std::cerr<<"ERROR "<<exc.what()<<"\n";
         return 2;
     }

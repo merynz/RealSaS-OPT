@@ -175,9 +175,9 @@ inline Color sample_texture(const Texture& tex,std::uint32_t face,
     const double umax=std::max({static_cast<double>(uv[0][0]),double(uv[1][0]),double(uv[2][0])});
     const double vmin=std::min({static_cast<double>(uv[0][1]),double(uv[1][1]),double(uv[2][1])});
     const double vmax=std::max({static_cast<double>(uv[0][1]),double(uv[1][1]),double(uv[2][1])});
-    const auto taps=std::array<std::array<int,2>,4>{
-        {{{x0,y0},{x0+1,y0},{x0,y0+1},{x0+1,y0+1}}}
-    };
+    const std::array<std::array<int,2>,4> taps{{
+        {x0,y0},{x0+1,y0},{x0,y0+1},{x0+1,y0+1}
+    }};
     const std::array<double,4> weights={
         (1-fx)*(1-fy),fx*(1-fy),(1-fx)*fy,fx*fy
     };

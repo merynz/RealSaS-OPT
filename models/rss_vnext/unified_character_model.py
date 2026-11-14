@@ -27,6 +27,7 @@ from models.axis.rig_program_model_v6 import (
 from models.mira.skin_fsq_codec_v6 import MIRASkinFSQCodecV6, MIRASkinFSQCodecConfig
 from models.tessa.v2.generation_v2 import TESSAGrammarStateV2
 from .animation_ready_mesh import RSSvNextAnimationReadyMesh, RSSvNextStructuralMeshCandidate
+from .tessa_incremental_decode_v1 import decode_next_token_v1
 from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefinementConfig
 from .semantic_structure import RSSvNextGenericRegionStructure
 from .early_semantic_field import RSSvNextEarlySemanticField
@@ -1017,11 +1018,18 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         ids = torch.tensor([[self.cfg.tessa.BOS]], device=rgba.device, dtype=torch.long)
         grammar = TESSAGrammarStateV2()
         failure = None
+        incremental = None
         try:
             for _ in range(limit - 1):
-                logits = self.tessa.decode_tokens(
-                    memory=out.structural_memory, input_ids=ids,
-                ).logits[0, -1]
+                # V3.1 exact rolling causal KV state shares the teacher-forced
+                # weights and semantics, avoiding O(prefix) full recomputation
+                # at every token. No token enters the cache twice.
+                logits_batch, incremental = decode_next_token_v1(
+                    self.tessa, memory=out.structural_memory,
+                    token=ids[:, -1:],
+                    cache=incremental,
+                )
+                logits = logits_batch[0]
                 allowed = grammar.allowed_token_mask(config=self.cfg.tessa, device=ids.device)
                 # Existing V2 grammar allows adjacent-coordinate start before
                 # the seed triangle; reject that path in this strict runner.

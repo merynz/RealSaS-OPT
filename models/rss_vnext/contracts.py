@@ -52,7 +52,11 @@ class RSSvNextConfig:
     skin_decoder_mode: str = "DOT_PRODUCT_BASELINE"
     skin_query_heads: int = 8
     skin_query_chunk: int = 1024
-    topology_decode_cap: int = 128
+    # 128 tokens cap encoded only a handful of triangles and was a
+    # proof-of-wiring configuration, not a generic product mesh capacity.
+    # Incremental V3.1 decoding permits a bounded larger hypothesis; this is
+    # still NOT evidence that a full high-poly topology can be generated.
+    topology_decode_cap: int = 4096
 
     def validate(self) -> None:
         self.iris.validate()
@@ -89,6 +93,8 @@ class RSSvNextConfig:
             raise ValueError("RSS_VNEXT_SKIN_QUERY_CONFIG_INVALID")
         if any(level < 2 for level in self.skin_fsq_levels):
             raise ValueError("RSS_VNEXT_FSQ_LEVEL_INVALID")
+        if self.topology_decode_cap > 131072:
+            raise ValueError("RSS_VNEXT_TOPOLOGY_TOKEN_BUDGET_EXCEEDED")
         if self.iris.camera_feature_dim != 13:
             raise ValueError("RSS_VNEXT_CAMERA_CONTRACT_DRIFT")
 

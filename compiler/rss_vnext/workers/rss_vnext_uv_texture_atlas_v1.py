@@ -29,6 +29,9 @@ from .rss_vnext_source_rgb_projection_candidate_v1 import (
 )
 
 SCHEMA = "RealSaS.RSSvNext.MeshUVTextureAtlasCandidate.v1"
+SEMANTIC_SCHEMA = "RealSaS.RSSvNext.MeshUVTextureAtlasCandidate.v2"
+ROLE_MIN_WIN_PROB = 0.5
+ROLE_MIN_MARGIN = 0.1
 ARTIFACT_TYPE = "RealSaS.RSSvNextMeshUVTextureAtlasCandidate"
 MAX_DIMENSION = 2048
 MAX_FACES = 4096
@@ -46,6 +49,10 @@ _KEYS = frozenset({
     "neural_rgb_candidate_rgba_u8",
     "neural_rgb_candidate_mask_u8",
     "neural_rgb_log_uncertainty_f16",
+})
+_ROLE_KEYS = frozenset({
+    "face_presentation_role_probabilities_f32",
+    "face_presentation_role_primary_u8",
 })
 
 
@@ -72,7 +79,7 @@ def _packing(number_of_faces: int, max_face_samples: int):
 def _archive(arrays: dict[str, np.ndarray]) -> bytes:
     out = io.BytesIO()
     with ZipFile(out, "w") as archive:
-        if set(arrays) != _KEYS:
+        if set(arrays) not in (_KEYS, _KEYS | _ROLE_KEYS):
             raise RuntimeError("TEXTURE_ATLAS_ARRAY_SCHEMA")
         for name, array in sorted(arrays.items()):
             if array.dtype.hasobject:
@@ -92,6 +99,8 @@ def compile_rss_vnext_uv_texture_atlas_v1(
     *, source_rgb_candidates: bytes, mesh: CanonicalMeshIR,
     graphics_vertex_logits: np.ndarray | None = None,
     graphics_scene_content_sha256: str | None = None,
+    presentation_role_vertex_logits: np.ndarray | None = None,
+    presentation_role_schema_id: str | None = None,
 ) -> tuple[bytes, dict[str, Any]]:
     validate_canonical_mesh_domain_v1(mesh)
     if mesh.mesh_lineage_hash != canonical_mesh_lineage_hash_v1(mesh):
@@ -122,11 +131,60 @@ def compile_rss_vnext_uv_texture_atlas_v1(
         vertex_logits = graphics_vertex_logits.astype(np.float64)
     elif graphics_scene_content_sha256 is not None:
         raise RuntimeError("TEXTURE_ATLAS_NEURAL_GRAPHICS_UNBOUND_SCENE")
+    # The Semantic presentation head and Graphics RGB head are distinct
+    # projections of ONE source-bound H(x). Their roles must not be conflated:
+    # role=secondary/focal/primary/covering is NOT opacity, source-visible,
+    # material ownership, attachment or compositor z-order authority.
+    # Consume the Semantic field into a face-addressed *candidate sublayer*;
+    # it only influences pixels when the UI explicitly requests that role.
+    has_presentation_roles = presentation_role_vertex_logits is not None
+    if has_presentation_roles:
+        if (
+            not has_neural_field
+            or type(presentation_role_schema_id) is not str
+            or not 1 <= len(presentation_role_schema_id) <= 192
+            or any(ord(c) < 32 or ord(c) > 126 for c in presentation_role_schema_id)
+        ):
+            raise RuntimeError("TEXTURE_ATLAS_SEMANTIC_GRAPHICS_SHARED_H_REQUIRED")
+        roles = np.asarray(presentation_role_vertex_logits)
+        if (
+            roles.ndim != 2 or roles.shape[0] != len(mesh.vertices)
+            or not 2 <= roles.shape[1] <= 16
+            or not np.isfinite(roles).all()
+        ):
+            raise RuntimeError("TEXTURE_ATLAS_SEMANTIC_VERTEX_ABI")
+        roles = roles.astype(np.float64, copy=False)
+        # Softmax BEFORE face aggregation: never mistake a logit average for
+        # measured drawable identity, and retain the full K-way distribution.
+        shifted = roles - roles.max(axis=1, keepdims=True)
+        exp = np.exp(np.clip(shifted, -80., 0.))
+        vertex_role_probs = exp / exp.sum(axis=1, keepdims=True)
+    elif presentation_role_schema_id is not None:
+        raise RuntimeError("TEXTURE_ATLAS_SEMANTIC_SCHEMA_WITHOUT_EVIDENCE")
+
     index = {vertex.canonical_mesh_vertex_id: i
              for i, vertex in enumerate(mesh.vertices)}
     face_indices = np.array([
         [index[k] for k in face] for face in mesh.faces
     ], dtype=np.int64)
+    face_role_probs = None
+    face_role_primary = None
+    if has_presentation_roles:
+        face_role_probs = vertex_role_probs[face_indices].mean(axis=1).astype(
+            "<f4", copy=False,
+        )
+        if not np.isfinite(face_role_probs).all():
+            raise RuntimeError("TEXTURE_ATLAS_SEMANTIC_FACE_NONFINITE")
+        ranks = np.argsort(-face_role_probs, axis=-1, kind="stable")
+        top = np.take_along_axis(face_role_probs, ranks[:, 0:1], axis=-1)[:, 0]
+        second = np.take_along_axis(face_role_probs, ranks[:, 1:2], axis=-1)[:, 0]
+        face_role_primary = np.where(
+            (top >= ROLE_MIN_WIN_PROB)
+            & ((top-second) >= ROLE_MIN_MARGIN),
+            ranks[:, 0], 255,
+        ).astype(np.uint8)
+        # Unknown roles are not default-negative face masks. They remain
+        # visible in the ordinary complete puppet raster.
     sample_faces = samples["face_index_i32"]
     sample_views = samples["view_index_u8"]
     sample_rgba = samples["source_rgba_u8"]
@@ -215,7 +273,34 @@ def compile_rss_vnext_uv_texture_atlas_v1(
     n_known = [int(has_color[i].sum()) for i in range(2)]
     n_conflicts = int(conflicts.sum())
     manifest = {
-        "schema": SCHEMA,
+        "schema": SEMANTIC_SCHEMA if has_presentation_roles else SCHEMA,
+        "semantic_role_sublayer_is_model_candidate_not_source_truth": bool(has_presentation_roles),
+        "semantic_role_sublayer_never_overrides_original_rgba": True,
+        "semantic_role_sublayer_does_not_assert_visibility_or_draw_order": True,
+        "semantic_role_schema_id": (
+            presentation_role_schema_id if has_presentation_roles else None
+        ),
+        "semantic_role_count": (
+            int(face_role_probs.shape[-1]) if has_presentation_roles else 0
+        ),
+        "semantic_role_selection_policy": (
+            "FACE_MEAN_VERTEX_SOFTMAX_ARGMAX_WITH_ABSTENTION_V1"
+            if has_presentation_roles else "UNAVAILABLE"
+        ),
+        "semantic_role_min_win_probability": (
+            ROLE_MIN_WIN_PROB if has_presentation_roles else None
+        ),
+        "semantic_role_min_margin": (
+            ROLE_MIN_MARGIN if has_presentation_roles else None
+        ),
+        "semantic_face_probability_sha256": (
+            sha256(face_role_probs.tobytes(order="C")).hexdigest()
+            if has_presentation_roles else None
+        ),
+        "semantic_face_abstention_count": (
+            int(np.count_nonzero(face_role_primary == 255))
+            if has_presentation_roles else None
+        ),
         "canonical_mesh_lineage_hash": mesh.mesh_lineage_hash,
         "original_rgb_candidate_sha256": sha256(source_rgb_candidates).hexdigest(),
         "original_source_binding_sha256": original["source_binding_sha256"],
@@ -276,6 +361,13 @@ def compile_rss_vnext_uv_texture_atlas_v1(
         "neural_rgb_candidate_mask_u8": neural_mask,
         "neural_rgb_log_uncertainty_f16": neural_log_uncertainty,
     }
+    if has_presentation_roles:
+        arrays["face_presentation_role_probabilities_f32"] = np.ascontiguousarray(
+            face_role_probs, dtype="<f4",
+        )
+        arrays["face_presentation_role_primary_u8"] = np.ascontiguousarray(
+            face_role_primary, dtype=np.uint8,
+        )
     return _archive(arrays), manifest
 
 
@@ -288,22 +380,28 @@ def reopen_rss_vnext_uv_texture_atlas_v1(
         with ZipFile(io.BytesIO(blob)) as archive:
             records = archive.infolist()
             if (
-                len(records) != len(_KEYS)
-                or {r.filename for r in records} != {key + ".npy" for key in _KEYS}
+                len(records) not in (len(_KEYS), len(_KEYS | _ROLE_KEYS))
+                or {r.filename for r in records} not in (
+                    {key + ".npy" for key in _KEYS},
+                    {key + ".npy" for key in (_KEYS | _ROLE_KEYS)},
+                )
                 or any(r.file_size > 96 * 1024 * 1024 or r.compress_type != ZIP_DEFLATED
                        for r in records)
                 or sum(r.file_size for r in records) > 96 * 1024 * 1024
             ):
                 raise RuntimeError("TEXTURE_ATLAS_REOPEN_ARCHIVE_DOMAIN")
         with np.load(io.BytesIO(blob), allow_pickle=False) as archive:
-            if set(archive.files) != _KEYS:
+            if set(archive.files) not in (_KEYS, _KEYS | _ROLE_KEYS):
                 raise RuntimeError("TEXTURE_ATLAS_REOPEN_ARCHIVE_KEYS")
-            arrays = {k: archive[k] for k in sorted(_KEYS)}
+            arrays = {k: archive[k] for k in sorted(archive.files)}
         meta = json.loads(arrays["manifest_utf8"].tobytes().decode("utf-8"))
     except (UnicodeDecodeError, KeyError, ValueError, OSError) as exc:
         raise RuntimeError("TEXTURE_ATLAS_REOPEN_PARSE_ERROR") from exc
-    if type(meta) is not dict or meta.get("schema") != SCHEMA:
+    if type(meta) is not dict or meta.get("schema") not in (SCHEMA, SEMANTIC_SCHEMA):
         raise RuntimeError("TEXTURE_ATLAS_REOPEN_MANIFEST_SCHEMA")
+    has_roles = meta["schema"] == SEMANTIC_SCHEMA
+    if set(arrays) != (_KEYS | _ROLE_KEYS if has_roles else _KEYS):
+        raise RuntimeError("TEXTURE_ATLAS_REOPEN_SEMANTIC_ARRAY_SCHEMA")
     n = meta.get("face_count")
     shape = meta.get("atlas_size")
     if (
@@ -347,8 +445,47 @@ def reopen_rss_vnext_uv_texture_atlas_v1(
         or meta.get("source_3d_surface_ownership_verified") is not False
         or meta.get("pose_conditioned_occlusion_qualified") is not False
         or meta.get("product_revision_minted") is not False
+        or meta.get("semantic_role_sublayer_never_overrides_original_rgba") is not True
+        or meta.get("semantic_role_sublayer_does_not_assert_visibility_or_draw_order") is not True
+        or meta.get("semantic_role_sublayer_is_model_candidate_not_source_truth") is not has_roles
     ):
         raise RuntimeError("TEXTURE_ATLAS_REOPEN_DTYPE_OR_FALSE_AUTHORITY")
+    if has_roles:
+        probs = arrays["face_presentation_role_probabilities_f32"]
+        roles = arrays["face_presentation_role_primary_u8"]
+        k = meta.get("semantic_role_count")
+        if (
+            type(k) is not int or not 2 <= k <= 16
+            or probs.shape != (n, k) or probs.dtype != np.dtype("<f4")
+            or roles.shape != (n,) or roles.dtype != np.uint8
+            or not np.isfinite(probs).all()
+            or np.any(probs < 0) or np.any(probs > 1)
+            or not np.allclose(probs.sum(axis=1), 1.0, rtol=0, atol=1.e-6)
+            or type(meta.get("semantic_role_schema_id")) is not str
+            or not 1 <= len(meta["semantic_role_schema_id"]) <= 192
+            or meta.get("semantic_role_selection_policy")
+                != "FACE_MEAN_VERTEX_SOFTMAX_ARGMAX_WITH_ABSTENTION_V1"
+            or meta.get("semantic_role_min_win_probability") != ROLE_MIN_WIN_PROB
+            or meta.get("semantic_role_min_margin") != ROLE_MIN_MARGIN
+            or sha256(probs.tobytes(order="C")).hexdigest()
+                != meta.get("semantic_face_probability_sha256")
+        ):
+            raise RuntimeError("TEXTURE_ATLAS_REOPEN_SEMANTIC_FACE_ABI")
+        order = np.argsort(-probs, axis=-1, kind="stable")
+        best = np.take_along_axis(probs, order[:, :1], axis=-1)[:, 0]
+        second = np.take_along_axis(probs, order[:, 1:2], axis=-1)[:, 0]
+        expected = np.where(
+            (best >= ROLE_MIN_WIN_PROB) & ((best-second) >= ROLE_MIN_MARGIN),
+            order[:, 0], 255,
+        ).astype(np.uint8)
+        if (
+            not np.array_equal(roles, expected)
+            or meta.get("semantic_face_abstention_count")
+                != int(np.count_nonzero(roles == 255))
+        ):
+            raise RuntimeError("TEXTURE_ATLAS_REOPEN_SEMANTIC_ROLE_SELECTION_DRIFT")
+    elif meta.get("semantic_role_count") != 0:
+        raise RuntimeError("TEXTURE_ATLAS_REOPEN_LEGACY_SEMANTIC_AUTHORITY")
     return arrays, meta
 
 

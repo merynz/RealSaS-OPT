@@ -547,7 +547,7 @@ def test_actual_two_image_rss_semantic_candidate_pass_uses_same_posed_pixel_owne
     ].mesh_lineage_hash==mesh.mesh_lineage_hash
 
 
-def test_native_semantic_filter_cannot_be_requested_on_legacy_atlas(tmp_path):
+def test_native_semantic_filter_refuses_out_of_range_role(tmp_path):
     archive,_,_,_,_,_=_compiled_preview_fixture(tmp_path)
     entries=read_rss_v2(archive)
     # Rendering an unknown/out-of-range candidate role must fail before

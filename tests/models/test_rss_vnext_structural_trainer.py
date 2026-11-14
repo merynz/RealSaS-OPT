@@ -103,8 +103,9 @@ def test_strict_checkpoint_resume_and_dataset_binding(tmp_path):
     for p, q in zip(net.parameters(), loaded.parameters()):
         assert torch.equal(p.detach(), q.detach())
 
+    wrong_model = make_model()
     wrong = RSSvNextStructuralTrainer(
-        make_model(), torch.optim.AdamW(make_model().parameters()),
+        wrong_model, torch.optim.AdamW(wrong_model.parameters()),
         dataset_manifest_sha256=hashlib.sha256(b"different-corpus").hexdigest(),
     )
     with pytest.raises(ValueError, match="DATASET_MANIFEST_DRIFT"):

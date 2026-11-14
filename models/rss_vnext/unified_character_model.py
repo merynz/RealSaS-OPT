@@ -179,7 +179,7 @@ class RSSvNextAuxiliaryViewLatents(nn.Module):
 
 
 class RSSvNextSkinCoupler(nn.Module):
-    """Differentiable causal FSQ expectation coupled to local surface H.
+    """Differentiable causal *hard* FSQ tokens coupled to local surface H.
 
     Joint and SkinCode positions are read from the SAME AXIS causal sequence.
     For predicting a skin code, use logits at the PRECEDING token position:
@@ -253,10 +253,19 @@ class RSSvNextSkinCoupler(nn.Module):
             if self.cfg.skin_decoder_mode == "DOT_PRODUCT_BASELINE" else None
         )
         for bi, (jstate, codes) in enumerate(zip(joint_rows, code_rows)):
+            # Soft expected codes are NOT the product's actual discrete IDs.
+            # Use the *same hard argmax IDs* that Compiler will replay.
+            # Straight-through categorical gradients keep AXIS trainable
+            # without changing the forward pose consequence.
             probabilities = torch.softmax(codes.float(), dim=-1)
-            # Expected FSQ codes from *causal logits at previous positions*;
-            # no current teacher SKIN_CODE embedding is a decoder input.
-            expected = (probabilities @ self.codebook.float()).to(dtype=jstate.dtype)
+            soft_codes = probabilities @ self.codebook.float()
+            hard_ids = codes.argmax(dim=-1)
+            hard_codes = self.codebook[hard_ids]
+            # Forward is exactly hard_codes; d/dlogits flows through
+            # soft_codes. This avoids a soft train / hard release gap.
+            hard_ste = (
+                hard_codes + (soft_codes - soft_codes.detach())
+            ).to(dtype=jstate.dtype)
             if self.cfg.skin_decoder_mode == "POINT_QUERY_CROSS_ATTENTION":
                 mask = torch.ones(
                     (1, jstate.shape[0]), device=jstate.device, dtype=torch.bool,
@@ -264,7 +273,7 @@ class RSSvNextSkinCoupler(nn.Module):
                 queried = self.spatial_decoder(
                     local_features[bi:bi+1], vertex_xyz[bi:bi+1],
                     jstate[None],
-                    expected.reshape(
+                    hard_ste.reshape(
                         1, jstate.shape[0], self.cfg.skin_tokens_per_joint,
                         self.codec.config.latent_dim,
                     ),
@@ -279,7 +288,7 @@ class RSSvNextSkinCoupler(nn.Module):
                 assert vertex_state is not None
                 joint_state = (
                     self.codec.joint_decode(jstate)
-                    + self.codec.code_decode(expected.flatten(1))
+                    + self.codec.code_decode(hard_ste.flatten(1))
                 )
                 logits = torch.matmul(
                     vertex_state[bi], joint_state.transpose(0, 1),

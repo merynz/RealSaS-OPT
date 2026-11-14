@@ -35,7 +35,6 @@ def _case():
     model.eval()
     model.requires_grad_(False)
     model.axis.skin_code_head.requires_grad_(True)
-    model.axis.skin_embedding.requires_grad_(True)
     scene=source_batch.scene
     topo=source_batch.topology_teacher_tokens
     memory=source_batch.structural_memory
@@ -108,6 +107,7 @@ def test_skin_teacher_is_exact_frozen_codec_and_only_axis_skin_head_can_train():
     trainer=_trainer(model,registry)
     frozen=model.iris.scene.scene_queries.detach().clone()
     frozen_codec=model.mira.codec.bias_head.weight.detach().clone()
+    frozen_embedding=model.axis.skin_embedding.weight.detach().clone()
     before=model.axis.skin_code_head.weight.detach().clone()
     first=trainer.train_step(batch)
     assert first.target_code_count==(
@@ -124,9 +124,11 @@ def test_skin_teacher_is_exact_frozen_codec_and_only_axis_skin_head_can_train():
     assert model.mira.codec.bias_head.weight.grad is None
     assert torch.equal(model.iris.scene.scene_queries,frozen)
     assert torch.equal(model.mira.codec.bias_head.weight,frozen_codec)
+    assert torch.equal(model.axis.skin_embedding.weight,frozen_embedding)
+    assert model.axis.skin_embedding.weight.grad is None
     assert not torch.equal(model.axis.skin_code_head.weight,before)
     # Token labels must stay stationary even after AXIS learns its SkinTokens
-    # prediction head and the autoregressive skin embedding.
+    # prediction head; even the null/padding embedding is frozen.
     second=trainer.objective(batch)
     assert second.target_code_count==first.target_code_count
 
@@ -137,6 +139,10 @@ def test_frozen_conditioning_cannot_be_silently_unfrozen_or_swapped():
     with pytest.raises(ValueError,match="UPSTREAM_MUST_BE_FROZEN"):
         _trainer(model,registry)
     model.iris.scene.scene_queries.requires_grad_(False)
+    model.axis.skin_embedding.requires_grad_(True)
+    with pytest.raises(ValueError,match="UPSTREAM_MUST_BE_FROZEN"):
+        _trainer(model,registry)
+    model.axis.skin_embedding.requires_grad_(False)
     trainer=_trainer(model,registry)
     model.axis.train()
     with pytest.raises(ValueError,match="UPSTREAM_MUST_BE_FROZEN"):

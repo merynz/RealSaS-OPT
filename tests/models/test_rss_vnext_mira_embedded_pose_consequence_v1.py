@@ -170,3 +170,23 @@ def test_pose_loss_policy_and_source_registry_bound_to_resume(tmp_path):
         no_motion.load_checkpoint(path)
     with pytest.raises(ValueError,match="POSE_LOSS_POLICY"):
         trainer(net,skin,pose,weight=-1.)
+
+
+
+def test_independently_signed_source_pose_must_actually_be_explainable_by_source_LBS():
+    net,batch,skin,pose=pose_fixture()
+    # A genuine source clip can include cloth simulation, morph-target
+    # deformations or failed joint-to-vertex alignment. Even if its exact
+    # bytes are signed, it is NOT a valid pure MIRA skin-weight teacher.
+    non_lbs=batch.source_posed_vertices.clone()
+    non_lbs[0,1,1,0]+=0.4
+    amended={
+        "source-native-motion":{
+            **pose["source-native-motion"],
+            "source_posed_vertices_sha256":source_surface_tensor_sha256(non_lbs),
+        },
+    }
+    with pytest.raises(ValueError,match="SOURCE_POSE_NOT_LBS_EXPLAINABLE"):
+        trainer(net,skin,amended).objective(replace(
+            batch,source_posed_vertices=non_lbs,
+        ))

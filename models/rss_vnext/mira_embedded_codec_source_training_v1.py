@@ -398,6 +398,24 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         pose_requested=any(value is not None for value in pose_fields) or bool(
             batch.source_pose_admission_key
         )
+        # An asset cannot supply incompatible independent rest geometries
+        # to skin-area and posed-LBS teachers in the SAME training batch.
+        # A matching mesh-address digest alone binds face indices, not
+        # necessarily the continuous source-native vertex positions.
+        if (
+            area_requested and pose_requested
+            and isinstance(batch.source_area_rest_vertices,Tensor)
+            and isinstance(batch.source_rest_vertices,Tensor)
+            and (
+                batch.source_area_rest_vertices.shape!=batch.source_rest_vertices.shape
+                or not torch.allclose(
+                    batch.source_area_rest_vertices,
+                    batch.source_rest_vertices,
+                    atol=1e-6,rtol=0.,
+                )
+            )
+        ):
+            raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_REST_FAMILY_CONFLICT")
         if pose_requested or self.pose_consequence_weight>0:
             if (
                 self.pose_consequence_weight<=0

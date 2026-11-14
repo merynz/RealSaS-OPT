@@ -45,8 +45,13 @@ painted shadow/highlight/outline/alpha.
 - Semantic K-way face-role distributions and abstaining face selections can
   be **optionally** transported to the native 2D compositor as user-requested
   candidate role passes. The standard complete-puppet render draws all
-  physical faces, even when semantic role is UNKNOWN. A role filter cannot
-  recolor the original RGB, invent alpha, or override physical first hit.
+  physical faces, even when semantic role is UNKNOWN. **A filtered role pass
+  retains all physical occluders when computing its visible contribution;**
+  a rear role is not exposed through an opaque front role. A role filter
+  cannot recolor the original RGB, invent alpha, or override physical first
+  hit. The emitted role passes are visibility-conditioned color contributions,
+  not free-standing recolorable cutout textures; recompositing semi-transparent
+  roles requires their recorded transmittance/order, not arbitrary alpha-over.
   These face-level candidates are coarse; **separate drawable boundaries
   inside one face** require topology/cut evidence and aren't solved by
   assigning a role to an entire triangle.

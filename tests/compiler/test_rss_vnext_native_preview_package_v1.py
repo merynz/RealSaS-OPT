@@ -329,3 +329,26 @@ def test_unregistered_virtual_camera_does_not_reuse_source_view_zero_visibility(
     assert converted.metadata["virtual_preview_source_view_visibility_reused"] is False
     # Never promote an unregistered virtual angle into source visibility truth.
     assert converted.metadata["source_visibility_coverage_complete"] is False
+
+
+
+def test_native_rejects_rehashed_virtual_camera_order_authority(tmp_path):
+    """An unregistered camera cannot claim view-specific ordering by metadata."""
+    archive, _, _, _, _, _ = _compiled_preview_fixture(tmp_path)
+    entries = read_rss_v2(archive)
+    original_policy = b"ALL_CANONICAL_FRAGMENTS_POSED_DEPTH_ONLY"
+    assert original_policy in entries["manifest.txt"]
+    entries["manifest.txt"] = entries["manifest.txt"].replace(
+        original_policy, b"UNREGISTERED_VIEW_USES_LEARNED_SOURCE_OCCLUSION",
+    )
+    forged = tmp_path / "forged_virtual_view_authority.rss"
+    forged.write_bytes(_entry_bytes(entries))
+    exe = _build_player(tmp_path)
+    output = tmp_path / "forged_virtual_view_authority.rgba"
+    result = subprocess.run([
+        str(exe), "--rss", str(forged),
+        "0", "0", "-1", str(output),
+    ], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "RSS_UV_PREVIEW_UNREGISTERED_VIEW_POLICY_DRIFT" in result.stderr
+    assert not output.exists()

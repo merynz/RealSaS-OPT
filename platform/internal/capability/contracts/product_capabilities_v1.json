@@ -463,7 +463,9 @@
         "raw_mesh_uv_texture_atlas_artifact_type": "RealSaS.RSSvNextMeshUVTextureAtlasCandidate",
         "raw_mesh_uv_texture_atlas_schema_version": "v1",
         "raw_mesh_uv_texture_surface_ownership_qualified": false,
-        "raw_mesh_uv_2d_draw_order_independent": true
+        "raw_mesh_uv_2d_draw_order_independent": true,
+        "raw_mesh_uv_same_h_graphics_logits_used": true,
+        "raw_mesh_uv_inferred_color_not_source_observed": true
       }
     },
     "product.motion": {

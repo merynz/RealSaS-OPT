@@ -255,6 +255,7 @@ class RSSvNextTrainingResult:
     realsas_joint_slrm_loss: Tensor | None = None
     eligible_realsas_joint_rays: int = 0
     gradient_norm: Tensor | None = None
+    gradient_interference_report: dict | None = None
 
 
 def axis_mesh_teacher_address_digest_v1(mesh) -> str:
@@ -321,6 +322,12 @@ def source_surface_tensor_sha256(value: Tensor) -> str:
     return hashlib.sha256(header + bytes([0]) + cpu.numpy().tobytes()).hexdigest()
 
 
+from .training_gradient_interference_v1 import (
+    RSSvNextGradientCourtPolicyV1,
+    audit_rss_vnext_gradient_interference_v1,
+)
+
+
 class RSSvNextStructuralTrainer:
     """Training-engine first slice: CE + consequence-driven discrete topology.
 
@@ -339,6 +346,7 @@ class RSSvNextStructuralTrainer:
         dataset_manifest_sha256: str,
         weights: RSSvNextTrainingWeights = RSSvNextTrainingWeights(),
         preference: RSSvNextTopologyPreferenceConfig = RSSvNextTopologyPreferenceConfig(),
+        gradient_court_policy: RSSvNextGradientCourtPolicyV1 = RSSvNextGradientCourtPolicyV1(),
         scene_conditioning_policy: str = "RESEARCH_CALIBRATED_TWO_VIEW",
         axis_training_policy: str = "RIG_ONLY_PRETRAIN",
         trusted_generated_conditioning_registry: Mapping[str, Mapping[str, object]] | None = None,
@@ -362,6 +370,7 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_NOT_HEX") from exc
         weights.validate()
         preference.validate()
+        gradient_court_policy.validate()
         if scene_conditioning_policy not in (
             "RESEARCH_CALIBRATED_TWO_VIEW", "PRODUCT_GENERATED_SIX_VIEW",
         ):
@@ -392,6 +401,7 @@ class RSSvNextStructuralTrainer:
         self.optimizer = optimizer
         self.weights = weights
         self.preference = preference
+        self.gradient_court_policy = gradient_court_policy
         # Freeze the full objective / topology-preference policy into the
         # resumption identity. A semantic-risk or motion weight change is a
         # different training run, not a transparent continuation of this one.
@@ -400,6 +410,7 @@ class RSSvNextStructuralTrainer:
             "preference": asdict(preference),
             "scene_conditioning_policy": self.scene_conditioning_policy,
             "axis_training_policy": self.axis_training_policy,
+            "gradient_court_policy": asdict(gradient_court_policy),
         }, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf8")).hexdigest()
         self.dataset_manifest_sha256 = dataset_manifest_sha256.lower()
         # This launcher-owned registry binds the *actual generated* scene
@@ -1568,9 +1579,49 @@ class RSSvNextStructuralTrainer:
             eligible_realsas_joint_rays=joint_rays,
         )
 
+    def _measure_gradient_conflicts(self, result: RSSvNextTrainingResult) -> dict:
+        # The same independent qualified terms that compose total_loss.
+        # A diagnostic never reweights, backpropagates, or rewrites .grad.
+        candidates = (
+            ("topology", result.topology_loss, self.weights.topology),
+            ("motion_preference", result.motion_preference_loss, self.weights.motion_preference),
+            ("source_semantics", result.source_semantic_loss, self.weights.source_semantics),
+            ("semantic_risk", result.semantic_risk_loss, self.weights.semantic_risk),
+            ("surface_roles", result.surface_role_loss, self.weights.surface_roles),
+            ("region_pairs", result.region_pair_loss, self.weights.region_pairs),
+            ("typed_relations", result.typed_relation_loss, self.weights.typed_relations),
+            ("graphics_source_rgb", result.graphics_source_rgb_loss, self.weights.graphics_source_rgb),
+            ("source_udf", result.source_udf_loss, self.weights.source_udf),
+            ("source_inside_sign", result.source_inside_sign_loss, self.weights.source_inside_sign),
+            ("axis_rig_skin_codes", result.axis_rig_skin_loss, self.weights.axis_rig_skin_codes),
+            ("anchor_face_correspondence", result.anchor_face_correspondence_loss, self.weights.anchor_face_correspondence),
+            ("flexicubes_surface", result.flexicubes_surface_loss, self.weights.flexicubes_surface),
+            ("flexicubes_animation", result.flexicubes_animation_loss, self.weights.flexicubes_animation),
+            ("novel_view", result.novel_view_loss, self.weights.novel_view),
+            ("realsas_joint_slrm", result.realsas_joint_slrm_loss, self.weights.realsas_joint_slrm),
+        )
+        report = audit_rss_vnext_gradient_interference_v1(
+            named_parameters=tuple(self.model.named_parameters()),
+            loss_terms={
+                key: (loss, float(weight))
+                for key, loss, weight in candidates
+                if loss is not None and weight > 0
+            },
+            policy=self.gradient_court_policy,
+        )
+        report["global_step_before_update"] = self.global_step
+        report["dataset_manifest_sha256"] = self.dataset_manifest_sha256
+        report["objective_policy_sha256"] = self.objective_policy_sha256
+        return report
+
     def train_step(self, batch: RSSvNextStructuralTrainingBatch) -> RSSvNextTrainingResult:
         self.optimizer.zero_grad(set_to_none=True)
         result = self.objective(batch)
+        if (
+            self.gradient_court_policy.every_n_steps > 0
+            and self.global_step % self.gradient_court_policy.every_n_steps == 0
+        ):
+            result.gradient_interference_report = self._measure_gradient_conflicts(result)
         result.total_loss.backward()
         grad_norm = nn.utils.clip_grad_norm_(
             self.model.parameters(), self.weights.clip_gradient_norm,

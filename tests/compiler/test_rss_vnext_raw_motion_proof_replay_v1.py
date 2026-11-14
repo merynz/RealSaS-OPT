@@ -87,6 +87,9 @@ def test_two_original_images_through_motion_and_independent_proof_source_replay(
         "mesh_uv_texture_atlas_recomputed_independently"
     ] is True
     assert d["raw_original_source_graphics_replay"][
+        "mesh_uv_atlas_compiled_from_real_original_rgb"
+    ] is True
+    assert d["raw_original_source_graphics_replay"][
         "mesh_uv_texture_surface_owner_source_qualified"
     ] is False
     assert d["raw_original_source_graphics_replay"][

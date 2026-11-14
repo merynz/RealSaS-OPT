@@ -254,7 +254,56 @@ def reopen_rss_vnext_native_preview_package_v1(path: Path) -> dict[str, Any]:
     }
 
 
+def edit_rss_vnext_native_preview_controls_v1(
+    *, source_package_path: Path,
+    control_frames: Sequence[Sequence[ControlTransformIRV1]],
+) -> tuple[bytes, dict[str, Any]]:
+    """Save a new actual Mechanics+LBS edit without replacing puppet identity.
+
+    The existing source .rss is fully reopened and independently replayed
+    BEFORE edits are accepted. All unchanged canonical Mesh/Rig/Skin,
+    Graphics and UV bytes are kept identical. The ONLY mutable artifacts are
+    controls.json, pose.bin, and manifest.txt. This remains a PREVIEW, never
+    a ProductRevision/verified source color.
+    """
+    state = reopen_rss_vnext_native_preview_package_v1(source_package_path)
+    entries = read_rss_v2(source_package_path)
+    frames = tuple(tuple(group) for group in control_frames)
+    pose_bytes, pose_hashes = _make_pose_binary(
+        state["mesh"], state["rig"], state["skin"],
+        frames, state["virtual_camera"],
+    )
+    old_controls = json.loads(entries["controls.json"])
+    if (
+        old_controls.get("schema") != "RealSaS.RSSvNext.NativePreviewControls.v1"
+        or old_controls.get("product_revision_minted") is not False
+        or old_controls.get("virtual_camera_is_original_source_observation") is not False
+    ):
+        raise RuntimeError("RSS_PREVIEW_EDIT_AUTHORITY_MISMATCH")
+    old_controls["control_frames"] = [
+        [asdict(row) for row in group] for group in frames
+    ]
+    old_controls["mechanics_pose_hashes"] = pose_hashes
+    old_controls["edit_source_control_state_sha256"] = _sha(entries["controls.json"])
+    old_controls["edit_operation"] = "CANONICAL_CONTROLS_RECOMPUTED_MECHANICS_LBS"
+    entries["controls.json"] = _json(old_controls)
+    entries["pose.bin"] = pose_bytes
+    manifest = dict(state["manifest"])
+    manifest["sha256:controls.json"] = _sha(entries["controls.json"])
+    manifest["sha256:pose.bin"] = _sha(pose_bytes)
+    manifest["frame_count"] = str(len(frames))
+    entries["manifest.txt"] = (
+        "\n".join(f"{key}={value}" for key, value in sorted(manifest.items()))
+        + "\n"
+    ).encode("utf-8")
+    packed = _entry_bytes(entries)
+    if len(packed) > _MAX_PREVIEW_BYTES:
+        raise RuntimeError("RSS_PREVIEW_EDIT_ARCHIVE_BUDGET")
+    return packed, manifest
+
+
 __all__ = [
     "SCHEMA", "compile_rss_vnext_native_preview_package_v1",
     "reopen_rss_vnext_native_preview_package_v1",
+    "edit_rss_vnext_native_preview_controls_v1",
 ]

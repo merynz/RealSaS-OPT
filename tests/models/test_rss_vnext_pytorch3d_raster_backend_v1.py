@@ -60,8 +60,9 @@ def _stub_compiled_api(monkeypatch, clip, faces, *, resolution):
             (ndc[:, 2] - .5) / .4,
             torch.ones_like(ndc[:, 0]),
         ), dim=-1)[None]
-        expected = clip.detach()
-        assert torch.allclose(inverse, expected, atol=1.e-6, rtol=0)
+        if clip is not None:
+            expected = clip.detach()
+            assert torch.allclose(inverse, expected, atol=1.e-6, rtol=0)
         cpu_rast, _ = BustedTorchRasterV1.rasterize(
             BustedTorchRasterV1.RasterizeCudaContext(),
             inverse, faces, resolution=(h, w),
@@ -75,8 +76,8 @@ def _stub_compiled_api(monkeypatch, clip, faces, *, resolution):
         ), dim=-1).flip(1)[:, :, :, None, :]
         # Fake signed squared distances, matching API shape/sign only.
         distances = torch.where(
-            valid, -torch.ones_like(face_idx, dtype=clip.dtype)*0.01,
-            -torch.ones_like(face_idx, dtype=clip.dtype),
+            valid, -torch.ones_like(face_idx, dtype=inverse.dtype)*0.01,
+            -torch.ones_like(face_idx, dtype=inverse.dtype),
         )
         zbuf = torch.where(
             valid, torch.ones_like(distances)*0.3,

@@ -543,9 +543,12 @@ def _source_qualified_axis_teacher_fixture(net, *, with_control=False):
 
 
 def _axis_rig_skin_trainer(net, receipt):
+    # Historical unit explicitly exercises rig-only PRETRAIN, not product
+    # TESSA-mesh-matched supervision. Product remains fail-closed by default.
     return RSSvNextStructuralTrainer(
         net, torch.optim.AdamW(net.parameters(), lr=1e-3),
         dataset_manifest_sha256="3"*64,
+        axis_training_policy="RIG_ONLY_PRETRAIN",
         weights=RSSvNextTrainingWeights(
             topology=0, motion_preference=0, source_semantics=0,
             flexicubes_surface=0, axis_rig_skin_codes=1,

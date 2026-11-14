@@ -25,6 +25,9 @@ from compiler.realsas_compiler_core.graphics_reopen_v1 import (
 from compiler.realsas_compiler_core.runtime_graphics_binary_v1 import (
     encode_runtime_graphics_v1,
 )
+from compiler.realsas_compiler_core.runtime_package_v2 import (
+    _entry_bytes, read_rss_v2,
+)
 from compiler.rss_vnext.workers.product_downstream_executor_v1 import (
     execute_graphics_capability_v1,
 )
@@ -224,3 +227,34 @@ def test_native_rejects_texture_from_another_canonical_mesh_and_bad_pose(
     ], capture_output=True, text=True)
     assert called.returncode != 0
     assert "POSE_DOMAIN" in called.stderr
+
+
+def test_native_preview_rejects_every_unhashed_payload_edit(tmp_path):
+    """C++ reopen must enforce Python .rss entry receipts, not just parse binaries.
+
+    One isolated mutation per archived payload; no digest is recomputed.
+    Existing intact worker-produced .rss rendering is tested above.
+    """
+    player, _, _, _, _, _, preview_file = _build(tmp_path)
+    original_entries = read_rss_v2(preview_file)
+    expected = {
+        "mesh.json", "rig.json", "skin.json", "graphics.bin",
+        "texture.bin", "pose.bin", "controls.json",
+    }
+    assert set(original_entries) == expected | {"manifest.txt"}
+    for name in sorted(expected):
+        entries = dict(original_entries)
+        forged_body = bytearray(entries[name])
+        assert forged_body
+        forged_body[0] ^= 1
+        entries[name] = bytes(forged_body)
+        forged_file = tmp_path / ("tampered_" + name.replace(".", "_") + ".rss")
+        output_file = tmp_path / ("tampered_" + name.replace(".", "_") + ".rgba")
+        forged_file.write_bytes(_entry_bytes(entries))
+        result = subprocess.run([
+            str(player), "--rss", str(forged_file),
+            "0", "0", "-1", str(output_file),
+        ], capture_output=True, text=True)
+        assert result.returncode != 0, name
+        assert "RSS_UV_PREVIEW_ENTRY_SHA256_MISMATCH:" + name in result.stderr
+        assert not output_file.exists()

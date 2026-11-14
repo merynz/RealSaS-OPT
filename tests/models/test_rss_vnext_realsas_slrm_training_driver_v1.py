@@ -33,6 +33,12 @@ def _batch(stage=STAGE_1,view_count=1):
     ).train()
     b,r,s,k=1,4,3,cfg.semantic_role_schema().count
     views=torch.rand((b,view_count,4,16,16))
+    # The six-view product constructs H(x) from jointly generated RGB
+    # and normals. Single-view ablation has no generated normal condition.
+    normals=(
+        torch.rand((b,6,3,16,16))*2.-1.
+        if view_count==6 else None
+    )
     cams=torch.zeros((b,view_count,13))
     import math
     for i in range(view_count):
@@ -68,6 +74,7 @@ def _batch(stage=STAGE_1,view_count=1):
         ray_xyz=xyz,ray_deltas=delta,ray_depths=depth,
         ray_directions=direc,keep_roles=keep,
         source_3d_render_target=gt,admitted_3d_render_key="admitted",
+        conditioning_normals=normals,
     )
     receipt=dict(
         admission_status="QUALIFIED_SOURCE_3D_RENDER_MULTILAYER",
@@ -81,6 +88,9 @@ def _batch(stage=STAGE_1,view_count=1):
         conditioning_authority=auth,
         conditioning_checkpoint_sha256="c"*64,
         conditioning_rgba_sha256=_digest(views),
+        conditioning_normals_sha256=(
+            _digest(normals) if normals is not None else None
+        ),
         conditioning_cameras_sha256=_digest(cams),
         ray_xyz_sha256=_digest(xyz),ray_deltas_sha256=_digest(delta),
         ray_depths_sha256=_digest(depth),ray_directions_sha256=_digest(direc),
@@ -280,3 +290,45 @@ def test_pretrained_6_view_and_research_one_view_ablation_resume_incompatible(tm
     )
     with pytest.raises(ValueError,match="CHECKPOINT_OBJECTIVE_POLICY_DRIFT"):
         alternate.load_checkpoint(filename)
+
+
+def test_six_view_joint_normal_conditioning_is_required_and_receipt_bound():
+    net,batch,receipt=_batch(STAGE_1,6)
+    trainer=_trainer(net,receipt)
+    assert trainer._verify_receipt(batch) is None
+    missing=replace(batch,conditioning_normals=None)
+    with pytest.raises(ValueError,match="SIX_VIEW_NORMAL_CONDITION_REQUIRED"):
+        trainer.objective(missing)
+    tampered=replace(
+        batch,conditioning_normals=batch.conditioning_normals.clone(),
+    )
+    tampered.conditioning_normals[0,0,0,0,0]+=.1
+    with pytest.raises(ValueError,match="RENDER_RECEIPT_DRIFT"):
+        trainer.objective(tampered)
+    # Even if a normal stream is syntactically valid, its teacher identity
+    # cannot be silently omitted by a launcher.
+    removed=dict(receipt)
+    del removed["conditioning_normals_sha256"]
+    with pytest.raises(ValueError,match="RENDER_RECEIPT_DRIFT"):
+        _trainer(net,removed).objective(batch)
+
+
+def test_one_view_ablation_cannot_smuggle_predicted_six_view_normals():
+    net,batch,receipt=_batch(STAGE_1,1)
+    normal=torch.zeros((1,1,3,16,16))
+    with pytest.raises(ValueError,match="ONE_VIEW_NORMAL_CONDITION_FORBIDDEN"):
+        _trainer(net,receipt).objective(replace(batch,conditioning_normals=normal))
+
+
+def test_stage1_and_stage2_separately_bind_same_six_view_normal_inputs():
+    for stage in (STAGE_1,STAGE_2):
+        net,batch,receipt=_batch(stage,6)
+        trainer=_trainer(net,receipt)
+        assert trainer._verify_receipt(batch) is None
+        # Per-stage semantics can change, but the conditioning behind the
+        # shared scene must be exact even for peeled-layer supervision.
+        altered=replace(
+            batch,conditioning_normals=batch.conditioning_normals.roll(1,-1),
+        )
+        with pytest.raises(ValueError,match="RENDER_RECEIPT_DRIFT"):
+            trainer.objective(altered)

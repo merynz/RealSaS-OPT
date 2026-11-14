@@ -491,11 +491,21 @@ int self_test(){
     const auto all_roles=realsas::rss_uv_v1::render(
         graphics,tex,faces,posed(1.,2.,0),64,64,0,-1
     );
+    const auto role2_when_front=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(2.,1.,0),64,64,0,-1,2
+    );
     if(at(role0,20,20)!=at(all_roles,20,20)||
-       at(role2,20,20)!=std::array<int,4>{0,0,255,255}||
+       at(role2,20,20)!=std::array<int,4>{0,0,0,0}||
+       role2.front_face[20*64+20]!=-1||
+       at(role2_when_front,20,20)!=std::array<int,4>{0,0,255,255}||
        role0.front_face[20*64+20]!=0||
-       role2.front_face[20*64+20]!=1)
+       role2_when_front.front_face[20*64+20]!=1)
         throw std::runtime_error("RSS_UV_NATIVE_SEMANTIC_SUBLAYER_NOT_CONSUMED");
+    // The role2 back layer has a fully opaque role0 occluder in front;
+    // exporting role2 must NOT expose a fake rear layer. When the posed
+    // depth order reverses, the role2 pass becomes visible automatically.
+    if(role2.overlapping_pixels==0)
+        throw std::runtime_error("RSS_UV_NATIVE_ROLE_OCCLUSION_NOT_MEASURED");
     tex.face_role_candidate[0]=255u;
     const auto unknown=realsas::rss_uv_v1::render(
         graphics,tex,faces,posed(1.,2.,0),64,64,0,-1,0

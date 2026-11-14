@@ -55,22 +55,22 @@ def main() -> None:
         # or held-out generalization.
         dropout_seed=seed+100000
         torch.manual_seed(dropout_seed)
-        with torch.no_grad():
-            before=trainer.objective(batch)
-            initial={
-                "topology":float(before.topology_loss),
-                "surface_roles":float(before.surface_role_loss),
-            }
+        before=trainer.objective(batch)
+        initial={
+            "topology":float(before.topology_loss.detach()),
+            "surface_roles":float(before.surface_role_loss.detach()),
+        }
+        del before
         torch.manual_seed(dropout_seed)
         measured=trainer.train_step(batch).gradient_interference_report
         assert measured is not None
         torch.manual_seed(dropout_seed)
-        with torch.no_grad():
-            after=trainer.objective(batch)
-            actual_deltas={
-                "topology":float(after.topology_loss)-initial["topology"],
-                "surface_roles":float(after.surface_role_loss)-initial["surface_roles"],
-            }
+        after=trainer.objective(batch)
+        actual_deltas={
+            "topology":float(after.topology_loss.detach())-initial["topology"],
+            "surface_roles":float(after.surface_role_loss.detach())-initial["surface_roles"],
+        }
+        del after
         scene=measured["owners"]["SHARED_IRIS_SCENE"]
         pair=next(x for x in scene["pairwise"]
                   if set((x["left"],x["right"]))=={"topology","surface_roles"})

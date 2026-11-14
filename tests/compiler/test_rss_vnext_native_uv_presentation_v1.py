@@ -258,3 +258,38 @@ def test_native_preview_rejects_every_unhashed_payload_edit(tmp_path):
         assert result.returncode != 0, name
         assert "RSS_UV_PREVIEW_ENTRY_SHA256_MISMATCH:" + name in result.stderr
         assert not output_file.exists()
+
+
+def test_native_rederives_source_color_conflicts_from_two_original_uv_layers(tmp_path):
+    player,gfx,uv,poses,arrays,manifest,_=_build(tmp_path)
+    # The conflict mask is a COMPILER-derived relation between source view
+    # samples, not an independent neural label. A forged one-bit receipt
+    # cannot suppress or invent disagreement, even if a caller repacks it.
+    source=np.asarray(arrays["texture_source_sample_mask_u8"])
+    rgba=np.asarray(arrays["texture_rgba_u8"])
+    expected=(source[0].astype(bool)&source[1].astype(bool)&
+        np.any(rgba[0]!=rgba[1],axis=-1))
+    conflict=np.asarray(arrays["source_view_conflict_u8"])
+    assert np.array_equal(conflict,expected.astype(np.uint8))
+    width,height=manifest["atlas_size"]
+    pixels=width*height
+    faces=manifest["face_count"]
+    conflict_offset=(
+        8+5*4+3*(4+64)+faces*3*2*4+
+        2*pixels*4+2*pixels+pixels*4+pixels
+    )
+    forged=bytearray(uv.read_bytes())
+    assert len(forged)>conflict_offset+pixels
+    flat=conflict.ravel()
+    cell=int(np.flatnonzero(flat==0)[0])
+    assert forged[conflict_offset+cell]==0
+    forged[conflict_offset+cell]=1
+    uv.write_bytes(forged)
+    output=tmp_path/"forged_conflict.rgba"
+    result=subprocess.run([
+        str(player),str(gfx),str(uv),str(poses),
+        "0","0","0",str(output),
+    ],capture_output=True,text=True)
+    assert result.returncode!=0
+    assert "RSS_UV_NATIVE_CONFLICT_MASK_DRIFT" in result.stderr
+    assert not output.exists()

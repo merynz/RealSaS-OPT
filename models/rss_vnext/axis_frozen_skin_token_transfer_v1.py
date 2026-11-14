@@ -41,7 +41,7 @@ from .training_optimizer_ownership_v1 import (
 )
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 
-SCHEMA = "RealSaS.RSSvNext.StationaryAXISSkinTokenStage.v1"
+SCHEMA = "RealSaS.RSSvNext.StationaryAXISFSQTransfer.v1"
 _ADMISSION = "QUALIFIED_NATIVE_SOURCE_FROZEN_AXIS_MIRA_SKIN_CODE_HANDOFF"
 # Important: axis.skin_embedding[0] is present in *all* BOS/JOINT
 # prefixes because the model embeds -1 (non-skin) as index 0. Updating

@@ -853,13 +853,25 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or not isinstance(payload.get("torch_cuda_rng"),list)
         ):
             raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_CODEC_RESUME_DRIFT")
+        if self.skin_decoder_mode == "POINT_QUERY_CROSS_ATTENTION":
+            if not isinstance(payload.get("spatial_decoder_state_dict"), dict):
+                raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_CODEC_RESUME_DRIFT")
+        elif payload.get("spatial_decoder_state_dict") != {}:
+            raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_CODEC_RESUME_DRIFT")
         self.model.mira.codec.load_state_dict(payload["codec_state_dict"],strict=True)
         if self.skin_decoder_mode == "POINT_QUERY_CROSS_ATTENTION":
             self.model.mira.spatial_decoder.load_state_dict(
                 payload["spatial_decoder_state_dict"], strict=True,
             )
-        elif payload.get("spatial_decoder_state_dict") != {}:
-            raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_CODEC_RESUME_DRIFT")
+        # load_state_dict increments PyTorch Parameter._version even for the
+        # byte-identical frozen DOT decoder that shares the FSQ codec. Verify
+        # ALL non-trainable state bytes against the original frozen snapshot
+        # before rebinding version counters after this controlled restore.
+        self._assert_frozen_state_identity()
+        self._frozen_parameter_versions = tuple(
+            (name, p._version) for name, p in self.model.named_parameters()
+            if name not in self._trainable_mira_names
+        )
         self.optimizer.load_state_dict(payload["optimizer"])
         self.step=payload["step"]
         torch.set_rng_state(payload["torch_cpu_rng"])

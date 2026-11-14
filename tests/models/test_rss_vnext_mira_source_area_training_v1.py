@@ -63,13 +63,14 @@ def source_case():
     return model,batch,skin_registry,receipt
 
 
-def trainer(model,skin_registry,area_registry,area_weight=1.,court=None):
+def trainer(model,skin_registry,area_registry,area_weight=1.,court=None,kl_weight=0.):
     return RSSvNextEmbeddedMIRASourceCodecTrainerV1(
         model,torch.optim.AdamW(model.mira.codec.parameters(),lr=1e-3),
         dataset_manifest_sha256=DATASET,
         trusted_source_skin_registry=skin_registry,
         trusted_source_area_registry=area_registry,
         source_area_skin_weight=area_weight,
+        source_area_skin_simplex_kl_weight=kl_weight,
         gradient_court_policy=court or RSSvNextGradientCourtPolicyV1(),
     )
 
@@ -221,3 +222,61 @@ def test_pose_and_area_source_rest_teachers_cannot_disagree_on_same_asset():
                 source_pose_admission_key="pose-source-receipt",
             ),
         )
+
+def test_native_source_area_kl_is_real_codec_objective_and_checkpoint_pinned(tmp_path):
+    model,batch,skin,area=source_case()
+    without=trainer(model,skin,area,area_weight=1.)
+    before=without.objective(batch)
+    model.mira.codec.zero_grad(set_to_none=True)
+    before.loss.backward()
+    g0=model.mira.codec.bias_head.weight.grad.detach().clone()
+    model.mira.codec.zero_grad(set_to_none=True)
+
+    engine=trainer(
+        model,skin,area,area_weight=1.,kl_weight=2.,
+        court=RSSvNextGradientCourtPolicyV1(
+            every_n_steps=1,max_parameters_per_owner=24,
+            max_elements_per_owner=65536,
+        ),
+    )
+    with_kl=engine.objective(batch)
+    assert with_kl.source_area_skin_simplex_kl_loss is not None
+    assert float(with_kl.source_area_skin_simplex_kl_loss)>0
+    with_kl.loss.backward()
+    g1=model.mira.codec.bias_head.weight.grad.detach().clone()
+    assert not torch.allclose(g0,g1,atol=1e-8)
+    model.mira.codec.zero_grad(set_to_none=True)
+    outcome=engine.train_step(batch)
+    report=outcome.gradient_interference_report
+    assert "source_area_skin_simplex_kl" in report["loss_families"]
+    assert outcome.hard_decoder_replay_max_abs_error<=1.e-5
+    target=tmp_path/"area-simplex-kl.pt"
+    engine.save_checkpoint(target)
+    clone=trainer(model,skin,area,area_weight=1.,kl_weight=2.)
+    # The gradient court policy is also part of resume identity.
+    with pytest.raises(ValueError,match="SOURCE_CODEC_RESUME_DRIFT"):
+        clone.load_checkpoint(target)
+    clone=trainer(
+        model,skin,area,area_weight=1.,kl_weight=2.,
+        court=engine.gradient_court_policy,
+    )
+    clone.load_checkpoint(target)
+    changed=trainer(
+        model,skin,area,area_weight=1.,kl_weight=1.,
+        court=engine.gradient_court_policy,
+    )
+    with pytest.raises(ValueError,match="SOURCE_CODEC_RESUME_DRIFT"):
+        changed.load_checkpoint(target)
+
+
+def test_area_kl_cannot_run_without_independent_source_area_receipt():
+    model,batch,skin,area=source_case()
+    missing=replace(
+        batch,source_area_rest_vertices=None,source_area_faces=None,
+        source_area_face_mask=None,source_area_admission_key="",
+    )
+    engine=trainer(model,skin,area,area_weight=0.,kl_weight=1.)
+    with pytest.raises(ValueError,match="SOURCE_AREA_INCOMPLETE"):
+        engine.objective(missing)
+    with pytest.raises(ValueError,match="SOURCE_AREA_KL_POLICY"):
+        trainer(model,skin,area,area_weight=0.,kl_weight=-1.)

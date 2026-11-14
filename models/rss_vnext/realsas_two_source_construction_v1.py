@@ -38,6 +38,27 @@ class RSSvNextTwoSourceConstructionV1:
     original_camera_calibrated: bool = False
 
 
+def paired_generation_binding_sha256_v1(
+    *, canonical_checkpoint_sha256: str,
+    multiview_checkpoint_sha256: str,
+    source_binding_sha256: str,
+) -> str:
+    """Exact generator binding shared by product inference and trainer."""
+    pins = (canonical_checkpoint_sha256, multiview_checkpoint_sha256, source_binding_sha256)
+    if any(
+        type(pin) is not str or len(pin) != 64
+        or any(char not in "0123456789abcdef" for char in pin)
+        for pin in pins
+    ):
+        raise ValueError("RSS_VNEXT_GENERATION_BINDING_SHA_DOMAIN")
+    return sha256(json.dumps({
+        "canonical_task_checkpoint_sha256": canonical_checkpoint_sha256,
+        "multiview_task_checkpoint_sha256": multiview_checkpoint_sha256,
+        "source_binding_sha256": source_binding_sha256,
+        "construction_abi": "RealSaS.RSSvNext.PairedTwoStageConstruction.v1",
+    }, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
 @torch.no_grad()
 def run_two_source_neural_construction_v1(
     *, model: RSSvNextUnifiedCharacterModel,
@@ -121,12 +142,11 @@ def run_two_source_neural_construction_v1(
         or not torch.equal(generated.cameras, six_view_cameras)
     ):
         raise RuntimeError("RSS_VNEXT_CONSTRUCTION_MULTIVIEW_OUTPUT_INVALID")
-    combined = sha256(json.dumps({
-        "canonical_task_checkpoint_sha256": canonical.checkpoint_sha256,
-        "multiview_task_checkpoint_sha256": generated.checkpoint_sha256,
-        "source_binding_sha256": source_binding_sha256,
-        "construction_abi": "RealSaS.RSSvNext.PairedTwoStageConstruction.v1",
-    }, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    combined = paired_generation_binding_sha256_v1(
+        canonical_checkpoint_sha256=canonical.checkpoint_sha256,
+        multiview_checkpoint_sha256=generated.checkpoint_sha256,
+        source_binding_sha256=source_binding_sha256,
+    )
     prediction = model.propose_teacher_free(
         observed_rgba, original_camera_features,
         generated_rgba=generated.rgba,
@@ -179,4 +199,5 @@ def _allowed_product_constraint_operators_v1() -> tuple[str, ...]:
 __all__ = [
     "RSSvNextTwoSourceConstructionV1",
     "run_two_source_neural_construction_v1",
+    "paired_generation_binding_sha256_v1",
 ]

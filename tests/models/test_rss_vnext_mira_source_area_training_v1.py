@@ -27,8 +27,8 @@ def deterministic():
     torch.set_num_threads(1)
 
 
-def source_case():
-    model,batch,skin_registry=_fixture()
+def source_case(mode="DOT_PRODUCT_BASELINE"):
+    model,batch,skin_registry=_fixture(mode)
     with torch.no_grad():
         mesh=model.build_mesh_candidate(
             batch.scene,batch.topology_teacher_tokens[0],
@@ -65,7 +65,9 @@ def source_case():
 
 def trainer(model,skin_registry,area_registry,area_weight=1.,court=None,kl_weight=0.):
     return RSSvNextEmbeddedMIRASourceCodecTrainerV1(
-        model,torch.optim.AdamW(model.mira.codec.parameters(),lr=1e-3),
+        model,torch.optim.AdamW(
+            (p for p in model.parameters() if p.requires_grad),lr=1e-3,
+        ),
         dataset_manifest_sha256=DATASET,
         trusted_source_skin_registry=skin_registry,
         trusted_source_area_registry=area_registry,
@@ -280,3 +282,23 @@ def test_area_kl_cannot_run_without_independent_source_area_receipt():
         engine.objective(missing)
     with pytest.raises(ValueError,match="SOURCE_AREA_KL_POLICY"):
         trainer(model,skin,area,area_weight=0.,kl_weight=-1.)
+
+
+def test_spatial_fsq_source_area_and_simplex_kl_train_actual_point_decoder():
+    model,batch,skin,area=source_case("POINT_QUERY_CROSS_ATTENTION")
+    engine=trainer(
+        model,skin,area,area_weight=1.0,kl_weight=1.0,
+    )
+    result=engine.train_step(batch)
+    assert result.source_area_skin_loss is not None
+    assert result.source_area_skin_simplex_kl_loss is not None
+    assert torch.isfinite(result.source_area_skin_loss)
+    assert torch.isfinite(result.source_area_skin_simplex_kl_loss)
+    assert result.qualified_source_area_faces==int(batch.source_area_face_mask.sum())
+    assert result.qualified_source_surface_area>0.
+    assert result.hard_decoder_replay_max_abs_error<=1e-5
+    assert model.mira.spatial_decoder.pair_score[-1].weight.grad is not None
+    assert model.mira.spatial_decoder.pair_score[-1].weight.grad.abs().sum()>0
+    assert model.mira.codec.bias_head.weight.grad is None
+    assert model.axis.kind_head.weight.grad is None
+    assert not result.product_skin_qualified

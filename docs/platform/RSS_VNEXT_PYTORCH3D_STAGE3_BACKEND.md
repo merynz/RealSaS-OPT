@@ -67,8 +67,12 @@ This is an integration of an external renderer, **not** a new raster algorithm.
 - Native CPU extension smoke is conditional; GPU smoke explicitly requires
   CUDA and fails if PyTorch3D cannot import/execute. Neither is faked by
   stand-in shapes.
-- On the actual A100 build run real PyTorch3D raster on overlapping triangles,
-  back-propagate through vertex positions and H(x) graphics/semantic heads,
+- On the actual A100 build run:
+  `PYTHONPATH=. python tools/research/rss_vnext_pytorch3d_cuda_qualification_v1.py
+  --report /tmp/rss_vnext_pytorch3d_cuda_receipt.json`
+  This probe must not run on a CPU stand-in. It records real CUDA first-hit,
+  backprop, GPU device, memory and latency, but does not itself qualify the
+  whole product. Also back-propagate through H(x) graphics/semantic heads,
   compare visible interior alpha/depth/normal and 32x32/128x128 first-hit
   pixels to CPU reference under the same camera, including tall/wide views.
 - Benchmark full representative layered-mesh Stage 3 (faces, pixels, roles,

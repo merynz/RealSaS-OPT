@@ -445,9 +445,17 @@ def reopen_rss_vnext_uv_texture_atlas_v1(
         or meta.get("source_3d_surface_ownership_verified") is not False
         or meta.get("pose_conditioned_occlusion_qualified") is not False
         or meta.get("product_revision_minted") is not False
-        or meta.get("semantic_role_sublayer_never_overrides_original_rgba") is not True
-        or meta.get("semantic_role_sublayer_does_not_assert_visibility_or_draw_order") is not True
-        or meta.get("semantic_role_sublayer_is_model_candidate_not_source_truth") is not has_roles
+        or meta.get(
+            "semantic_role_sublayer_never_overrides_original_rgba",
+            not has_roles,
+        ) is not True
+        or meta.get(
+            "semantic_role_sublayer_does_not_assert_visibility_or_draw_order",
+            not has_roles,
+        ) is not True
+        or meta.get(
+            "semantic_role_sublayer_is_model_candidate_not_source_truth", False,
+        ) is not has_roles
     ):
         raise RuntimeError("TEXTURE_ATLAS_REOPEN_DTYPE_OR_FALSE_AUTHORITY")
     if has_roles:
@@ -484,7 +492,7 @@ def reopen_rss_vnext_uv_texture_atlas_v1(
                 != int(np.count_nonzero(roles == 255))
         ):
             raise RuntimeError("TEXTURE_ATLAS_REOPEN_SEMANTIC_ROLE_SELECTION_DRIFT")
-    elif meta.get("semantic_role_count") != 0:
+    elif meta.get("semantic_role_count", 0) != 0:
         raise RuntimeError("TEXTURE_ATLAS_REOPEN_LEGACY_SEMANTIC_AUTHORITY")
     return arrays, meta
 

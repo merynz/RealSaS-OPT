@@ -115,3 +115,18 @@ def test_texture_atlas_refuses_same_source_samples_with_different_mesh_hash():
         compile_rss_vnext_uv_texture_atlas_v1(
             source_rgb_candidates=samples, mesh=mesh,
         )
+
+
+
+def test_large_generic_mesh_uv_atlas_degrades_texel_resolution_not_product_availability():
+    from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
+        _packing, MAX_DIMENSION,
+    )
+    high_sample_count = 96 * 96
+    tile, columns, width, height = _packing(4096, high_sample_count)
+    assert tile == 32
+    assert columns == 64
+    assert (width, height) == (2048, 2048)
+    assert width <= MAX_DIMENSION and height <= MAX_DIMENSION
+    assert _packing(1, high_sample_count)[0] == 96
+    assert _packing(100, 24 * 24)[0] == 24

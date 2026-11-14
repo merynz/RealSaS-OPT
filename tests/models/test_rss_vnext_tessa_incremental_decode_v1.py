@@ -65,14 +65,11 @@ def test_teacher_free_product_calls_incremental_decoder_without_prefix_rescans(m
     net = RSSvNextUnifiedCharacterModel(
         cfg, vision_encoder=RSSvNextPatchEncoderForTests(cfg.iris.image_token_dim),
     ).eval()
-    memory = {}
     real_decode = net.tessa.decode_next_token_v1
 
     def observed(*, memory: torch.Tensor, token: torch.Tensor, cache=None):
         if cache is not None:
             assert cache.memory is memory
-        memory_calls = globals().get("_unused")
-        del memory_calls
         return real_decode(memory=memory, token=token, cache=cache)
 
     # No complete prefix decoder call is permitted in product generation.

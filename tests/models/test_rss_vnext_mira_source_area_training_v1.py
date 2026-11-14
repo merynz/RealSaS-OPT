@@ -205,3 +205,19 @@ def test_codec_gradient_court_qualifies_loss_interference_without_altering_optim
     audited.save_checkpoint(ckpt)
     with pytest.raises(ValueError,match="SOURCE_CODEC_RESUME_DRIFT"):
         plain.load_checkpoint(ckpt)
+
+
+
+def test_pose_and_area_source_rest_teachers_cannot_disagree_on_same_asset():
+    model,batch,skin,area=source_case()
+    # The same source binding / TESSA face index does not suffice if two
+    # teachers bring different continuous canonical rest positions.
+    unrelated_rest=batch.source_area_rest_vertices.clone()
+    unrelated_rest[0,0,0]+=.1
+    with pytest.raises(ValueError,match="SOURCE_REST_FAMILY_CONFLICT"):
+        trainer(model,skin,area).objective(
+            replace(
+                batch,source_rest_vertices=unrelated_rest,
+                source_pose_admission_key="pose-source-receipt",
+            ),
+        )

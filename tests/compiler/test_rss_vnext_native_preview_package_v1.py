@@ -44,6 +44,7 @@ from compiler.rss_vnext.workers.rss_vnext_native_preview_package_v1 import (
     reopen_rss_vnext_native_preview_package_v1,
     edit_rss_vnext_native_preview_controls_v1,
     prepare_rss_vnext_virtual_preview_graphics_v1,
+    select_rss_vnext_eight_way_virtual_cameras_v1,
 )
 from tests.compiler.test_rss_vnext_raw_graphics_consumer_v1 import (
     _full_parent_fixture,
@@ -54,7 +55,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PLAYER_CPP = ROOT / "runtime/realsas_cpp/src/rss_vnext_uv_presentation_player.cpp"
 
 
-def _compiled_preview_fixture(tmp_path):
+def _compiled_preview_fixture(tmp_path, *, eight_way=False):
     cas, request, mechanics, skin_out = _full_parent_fixture(
         tmp_path, active_mechanics_courts=True,
     )
@@ -99,7 +100,11 @@ def _compiled_preview_fixture(tmp_path):
     )
     blob, manifest = compile_rss_vnext_native_preview_package_v1(
         mesh=mesh,rig=rig,skin=skin,graphics=graphics,
-        uv_atlas_cas=uv,virtual_camera=virtual_camera,
+        uv_atlas_cas=uv,
+        virtual_camera=(
+            select_rss_vnext_eight_way_virtual_cameras_v1(mesh,resolution=96)
+            if eight_way else virtual_camera
+        ),
         control_frames=controls,
     )
     archive = tmp_path / "real_neural_two_image_native_preview.rss"
@@ -117,10 +122,10 @@ def _build_player(tmp_path):
     return exe
 
 
-def _render(exe,archive,tmp_path,frame,*,source_view=0,owners=False):
+def _render(exe,archive,tmp_path,frame,*,source_view=0,owners=False,view=0):
     output = tmp_path / f"native_frame_{frame}_source_{source_view}.rgba"
     cmd = [
-        str(exe),"--rss",str(archive),str(frame),"0",
+        str(exe),"--rss",str(archive),str(frame),str(view),
         str(source_view),str(output),
     ]
     owner_file=tmp_path / "native_owners.i32"
@@ -352,3 +357,92 @@ def test_native_rejects_rehashed_virtual_camera_order_authority(tmp_path):
     assert result.returncode != 0
     assert "RSS_UV_PREVIEW_UNREGISTERED_VIEW_POLICY_DRIFT" in result.stderr
     assert not output.exists()
+
+
+def test_optional_eight_way_puppet_reuses_same_mechanics_and_renders_actual_native_views(
+    tmp_path,
+):
+    """A platformer still uses legacy single-camera output; eight yaw views
+    are an opt-in Presentation profile, not eight separate puppets.
+    """
+    archive,manifest,mesh,rig,skin,controls = _compiled_preview_fixture(
+        tmp_path,eight_way=True,
+    )
+    assert manifest["schema"] == (
+        "RealSaS.RSSvNext.NativeInteractivePuppetPreview.v2"
+    )
+    assert manifest["native_view_count"] == "8"
+    assert manifest["presentation_profile"] == "EIGHT_YAW_45"
+    assert manifest["product_revision_minted"] == "0"
+    reopened = reopen_rss_vnext_native_preview_package_v1(archive)
+    assert reopened["control_frames"] == controls
+    assert reopened["mesh"].mesh_lineage_hash == mesh.mesh_lineage_hash
+    assert reopened["skin"].skin_lineage_hash == skin.skin_lineage_hash
+    assert reopened["rig"].rig_lineage_hash == rig.rig_lineage_hash
+    assert len(reopened["virtual_camera"]) == 8
+    entries=read_rss_v2(archive)
+    assert entries["pose.bin"][:8] == b"RSPOSE02"
+    coords=np.frombuffer(
+        entries["pose.bin"][36+len(mesh.faces)*12:],
+        dtype="<f8",
+    ).reshape(2,8,len(mesh.vertices),3)
+    # Frame deformation is shared; each 45-degree angle changes projection.
+    assert not np.array_equal(coords[0,0],coords[0,1])
+    assert not np.array_equal(coords[0,0],coords[0,2])
+    assert not np.array_equal(coords[0,0],coords[1,0])
+    exe=_build_player(tmp_path)
+    frames=[]
+    for direction in (0,1,2,4,7):
+        image,info=_render(
+            exe,archive,tmp_path,frame=0,view=direction,source_view=-1,
+        )
+        assert image.shape == (96,96,4)
+        assert "view="+str(direction) in info
+        frames.append(image)
+    assert not np.array_equal(frames[0],frames[1])
+    new_control = next(c for c in rig.controls if c.control_kind == "ROOT")
+    edited=((ControlTransformIRV1(
+        canonical_control_id=new_control.canonical_control_id,
+        translation=(.2,.12,0.),
+    ),),)
+    data,edit_manifest=edit_rss_vnext_native_preview_controls_v1(
+        source_package_path=archive,control_frames=edited,
+    )
+    saved=tmp_path/"puppet_eight_yaw_edited.rss"
+    saved.write_bytes(data)
+    assert edit_manifest["native_view_count"] == "8"
+    after=reopen_rss_vnext_native_preview_package_v1(saved)
+    assert after["control_frames"] == edited
+    for immutable in ("mesh.json","rig.json","skin.json",
+                      "graphics.bin","texture.bin"):
+        assert read_rss_v2(saved)[immutable] == entries[immutable]
+    before_img,_=_render(exe,archive,tmp_path,0,view=1,source_view=-1)
+    after_img,_=_render(exe,saved,tmp_path,0,view=1,source_view=-1)
+    assert not np.array_equal(before_img,after_img)
+    assert after["product_revision_minted"] is False
+
+
+def test_eight_way_preview_forged_camera_is_rejected_even_when_entry_rehashed(
+    tmp_path,
+):
+    from hashlib import sha256
+    archive,_,mesh,_,_,_=_compiled_preview_fixture(tmp_path,eight_way=True)
+    entries=read_rss_v2(archive)
+    controls=json.loads(entries["controls.json"])
+    controls["virtual_cameras"][3]["yaw_degrees"]=999
+    entries["controls.json"]=json.dumps(
+        controls,sort_keys=True,separators=(",",":"),
+        ensure_ascii=False,allow_nan=False,
+    ).encode()
+    lines=entries["manifest.txt"].decode().splitlines()
+    entries["manifest.txt"]=(
+        "\n".join(
+            ("sha256:controls.json="+sha256(entries["controls.json"]).hexdigest())
+            if line.startswith("sha256:controls.json=") else line
+            for line in lines
+        )+"\n"
+    ).encode()
+    tampered=tmp_path/"forged_camera_edited.rss"
+    tampered.write_bytes(_entry_bytes(entries))
+    with pytest.raises(RuntimeError,match="EIGHT_WAY_CAMERA_POLICY_DRIFT"):
+        reopen_rss_vnext_native_preview_package_v1(tampered)

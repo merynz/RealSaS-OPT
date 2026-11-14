@@ -99,6 +99,14 @@ def test_two_original_images_neural_shape_mesh_rig_skin_mechanics_graphics_runti
     assert len(uv["face_vertex_uv_f32"]) == 1
     assert uv_manifest["draw_order_is_not_texture_atlas_authority"] is True
     assert uv_manifest["source_3d_surface_ownership_verified"] is False
+    assert uv_manifest["neural_graphics_field_source"] == (
+        "SAME_UNIFIED_H_TESSA_VERTEX_GRAPHICS_LOGITS"
+    )
+    assert uv_manifest["neural_graphics_color_texel_count"] > 0
+    assert uv_manifest["neural_graphics_rgb_is_inferred_not_observed"] is True
+    assert diagnostics["mesh_uv_neural_graphics_candidate_texels"] > 0
+    assert diagnostics["mesh_uv_neural_graphics_is_generated"] is True
+    assert uv["neural_rgb_candidate_mask_u8"].sum() > 0
     from compiler.rss_vnext.workers.rss_vnext_source_rgb_projection_candidate_v1 import (
         decode_raw_source_rgb_image_plane_candidates_v1,
     )

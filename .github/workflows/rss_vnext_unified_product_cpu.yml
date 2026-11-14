@@ -83,6 +83,7 @@ jobs:
             tests/compiler/test_rss_vnext_raw_graphics_consumer_v1.py \
             tests/compiler/test_rss_vnext_source_rgb_projection_candidate_v1.py \
             tests/compiler/test_rss_vnext_uv_texture_atlas_v1.py \
+            tests/compiler/test_rss_vnext_same_h_neural_texture_v1.py \
             tests/compiler/test_rss_vnext_raw_native_graphics_v1.py \
             tests/compiler/test_rss_vnext_raw_motion_proof_replay_v1.py \
             tests/compiler/test_product_downstream_cas_v1.py \

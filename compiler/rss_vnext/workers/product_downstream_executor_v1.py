@@ -206,6 +206,79 @@ def _raw_source_rgb_candidate_from_cas_v1(
     return build_raw_source_rgb_image_plane_candidates_v1(source=source, mesh=mesh)
 
 
+def _raw_same_h_graphics_vertex_logits_v1(
+    request: dict, read_object: Callable, mesh,
+):
+    """Read exact Shape CAS vertex graphics field, never run a second model."""
+    import numpy as np
+    from compiler.realsas_compiler_services.platform_worker.rss_vnext_cas_parent_v1 import (
+        read_rss_vnext_parent_cas_v1,
+    )
+    from compiler.rss_vnext.workers.rss_vnext_mesh_executor_v3 import (
+        RAW_SCENE, RAW_RECEIPT, SCENE_REQUIRED, MESH_KEYS, AXIS_MIRA_KEYS,
+        RAW_GRAPHICS_KEYS, _archive,
+    )
+    refs = request.get("input_artifacts") or ()
+    scenes = [
+        row for row in refs if type(row) is dict
+        and row.get("artifact_type") == RAW_SCENE
+    ]
+    receipts = [
+        row for row in refs if type(row) is dict
+        and row.get("artifact_type") == RAW_RECEIPT
+    ]
+    if (
+        len(scenes) != 1 or len(receipts) != 1
+        or scenes[0].get("schema_version") != "v1"
+        or receipts[0].get("schema_version") != "v1"
+    ):
+        raise RuntimeError("SOURCE_RGB_NEURAL_GRAPHICS_CAS_CARDINALITY")
+    scene_ref = scenes[0]
+    receipt_blob = read_rss_vnext_parent_cas_v1(
+        receipts[0], read_object, limit=2 * 1024 * 1024,
+    )
+    try:
+        receipt = json.loads(receipt_blob)
+    except (UnicodeError, ValueError) as exc:
+        raise RuntimeError("SOURCE_RGB_NEURAL_GRAPHICS_RECEIPT_INVALID") from exc
+    if (
+        type(receipt) is not dict
+        or receipt.get("scene_content_sha256") != scene_ref["content_sha256"]
+        or receipt.get("original_camera_calibrated") is not False
+        or receipt.get("product_revision_minted") is not False
+    ):
+        raise RuntimeError("SOURCE_RGB_NEURAL_GRAPHICS_SCENE_RECEIPT_DRIFT")
+    scene = _archive(
+        read_rss_vnext_parent_cas_v1(
+            scene_ref, read_object, limit=256 * 1024 * 1024,
+        ),
+        required=SCENE_REQUIRED | {"tessa_candidate_graphics_logits"},
+        allowed=SCENE_REQUIRED | MESH_KEYS | AXIS_MIRA_KEYS | RAW_GRAPHICS_KEYS,
+    )
+    field = scene["tessa_candidate_graphics_logits"]
+    id_index = {
+        row.canonical_mesh_vertex_id: i
+        for i, row in enumerate(mesh.vertices)
+    }
+    canonical_faces = np.asarray([
+        [id_index[vertex_id] for vertex_id in face]
+        for face in mesh.faces
+    ], dtype=np.int64)
+    if (
+        field.ndim != 3 or field.shape[0] != 1
+        or field.shape[1] != len(mesh.vertices)
+        or field.shape[2] < 5
+        or not np.isfinite(field).all()
+        or any(
+            row.source_candidate_vertex_id != f"RSSV:{i:08d}"
+            for i, row in enumerate(mesh.vertices)
+        )
+        or not np.array_equal(scene["tessa_candidate_faces"], canonical_faces)
+    ):
+        raise RuntimeError("SOURCE_RGB_NEURAL_GRAPHICS_VERTEX_ADDRESS_DRIFT")
+    return field[0].copy(), scene_ref["content_sha256"]
+
+
 def _seal_binary_candidate_v1(
     body: bytes, *, role: str, kind: str, put_bytes: Callable,
 ) -> dict[str, Any]:
@@ -412,8 +485,13 @@ def _replay_raw_source_graphics_proof_v1(
         uv_refs[0], read_object, limit=MAX_UV_BYTES,
     )
     _, uv_claim = reopen_rss_vnext_uv_texture_atlas_v1(uv_bytes)
+    graphics_logits, graphics_scene_digest = _raw_same_h_graphics_vertex_logits_v1(
+        request, read_object, mesh,
+    )
     uv_expected, uv_receipt = compile_rss_vnext_uv_texture_atlas_v1(
         source_rgb_candidates=expected_rgb, mesh=mesh,
+        graphics_vertex_logits=graphics_logits,
+        graphics_scene_content_sha256=graphics_scene_digest,
     )
     if (
         uv_bytes != uv_expected
@@ -551,8 +629,13 @@ def execute_graphics_capability_v1(
         from compiler.rss_vnext.workers.rss_vnext_uv_texture_atlas_v1 import (
             compile_rss_vnext_uv_texture_atlas_v1,
         )
+        graphics_logits, graphics_scene_digest = _raw_same_h_graphics_vertex_logits_v1(
+            request, read_object, mesh,
+        )
         raw_texture_atlas, raw_texture_manifest = compile_rss_vnext_uv_texture_atlas_v1(
             source_rgb_candidates=raw_source_rgb, mesh=mesh,
+            graphics_vertex_logits=graphics_logits,
+            graphics_scene_content_sha256=graphics_scene_digest,
         )
     rendered = build_runtime_graphics_v1(compiled,face_count=len(mesh.faces))
     outputs = [
@@ -611,6 +694,15 @@ def execute_graphics_capability_v1(
                 if raw_texture_manifest is not None else 0
             ),
             "mesh_uv_texture_surface_ownership_qualified": False,
+            "mesh_uv_neural_graphics_candidate_texels": (
+                raw_texture_manifest["neural_graphics_color_texel_count"]
+                if raw_texture_manifest is not None else 0
+            ),
+            "mesh_uv_neural_graphics_is_generated": True,
+            "mesh_uv_neural_graphics_source_scene_digest": (
+                raw_texture_manifest["neural_graphics_scene_content_sha256"]
+                if raw_texture_manifest is not None else None
+            ),
             "graphics_draw_order_independent_of_uv_atlas": True,
             "graphics_source_kind":source_kind,
             "mechanics_intervention_court_hash": (

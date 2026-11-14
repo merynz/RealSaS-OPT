@@ -91,7 +91,11 @@ def test_mira_source_native_pose_loss_drives_codec_and_hard_runtime_parity():
     assert result.source_pose_deformation_loss is not None
     assert torch.isfinite(result.source_pose_deformation_loss)
     assert float(result.source_pose_deformation_loss)>0
-    assert result.qualified_pose_vertex_count==int(batch.source_pose_vertex_mask.sum())
+    # Rest/Idle has all joints at the same transform and therefore no
+    # information about the skin distribution; only excited poses count.
+    assert result.qualified_pose_vertex_count==int(
+        batch.source_pose_vertex_mask[:,1:].sum()
+    )
     assert result.hard_token_pose_replay_max_abs_error<=1e-5
     assert result.hard_decoder_replay_max_abs_error<=1e-5
     assert result.sparse_zero_influence_error is not None
@@ -189,4 +193,27 @@ def test_independently_signed_source_pose_must_actually_be_explainable_by_source
     with pytest.raises(ValueError,match="SOURCE_POSE_NOT_LBS_EXPLAINABLE"):
         trainer(net,skin,amended).objective(replace(
             batch,source_posed_vertices=non_lbs,
+        ))
+
+
+
+def test_idle_only_native_pose_does_not_fake_skin_supervision():
+    net,batch,skin,pose=pose_fixture()
+    idle=torch.eye(4).view(1,1,1,4,4).expand_as(
+        batch.source_joint_skin_matrices,
+    ).clone()
+    rest_poses=batch.source_rest_vertices[:,None].expand_as(
+        batch.source_posed_vertices,
+    ).clone()
+    receipt={
+        "source-native-motion":{
+            **pose["source-native-motion"],
+            "source_joint_skin_matrices_sha256":source_surface_tensor_sha256(idle),
+            "source_posed_vertices_sha256":source_surface_tensor_sha256(rest_poses),
+        },
+    }
+    with pytest.raises(ValueError,match="POSE_UNINFORMATIVE_FOR_SKIN"):
+        trainer(net,skin,receipt).objective(replace(
+            batch,source_joint_skin_matrices=idle,
+            source_posed_vertices=rest_poses,
         ))

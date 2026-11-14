@@ -298,7 +298,7 @@ def compile_rss_vnext_native_preview_package_v1(
     skin: CanonicalSkinIRV2,
     graphics: RuntimeGraphicsV1,
     uv_atlas_cas: bytes,
-    virtual_camera: Mapping[str, Any],
+    virtual_camera: Mapping[str, Any] | Sequence[Mapping[str, Any]],
     control_frames: Sequence[Sequence[ControlTransformIRV1]],
 ) -> tuple[bytes, dict[str, Any]]:
     validate_canonical_mesh_domain_v1(mesh)
@@ -320,20 +320,41 @@ def compile_rss_vnext_native_preview_package_v1(
         uv_atlas_cas=uv_atlas_cas,
         canonical_mesh_lineage_hash=mesh.mesh_lineage_hash,
     )
+    eight_way = not isinstance(virtual_camera, Mapping)
+    if eight_way:
+        if not isinstance(virtual_camera, (tuple, list)) or len(virtual_camera) != 8:
+            raise RuntimeError("RSS_PREVIEW_EIGHT_WAY_CAMERA_CARDINALITY")
+        camera = tuple(dict(value) for value in virtual_camera)
+        if any(
+            row.get("view_index") != i
+            or row.get("yaw_degrees") != 45 * i
+            or row.get("source_camera_observed") is not False
+            or row.get("selection_policy") != "CANONICAL_Y_UP_EIGHT_YAW_DIRECTIONS_V1"
+            for i, row in enumerate(camera)
+        ):
+            raise RuntimeError("RSS_PREVIEW_EIGHT_WAY_CAMERA_POLICY_DRIFT")
+    else:
+        camera = dict(virtual_camera)
+        camera["view_index"] = 0
     preview_graphics = prepare_rss_vnext_virtual_preview_graphics_v1(
         graphics, canonical_mesh_hash=mesh.mesh_lineage_hash,
-        face_count=len(mesh.faces),
+        face_count=len(mesh.faces), all_virtual_directions=eight_way,
     )
     graphics_bytes = encode_runtime_graphics_v1(preview_graphics)
-    camera = dict(virtual_camera)
-    camera["view_index"] = 0
     pose_bytes, pose_hashes = _make_pose_binary(
         mesh, rig, skin, control_frames, camera,
     )
     controls_payload = {
-        "schema": "RealSaS.RSSvNext.NativePreviewControls.v1",
+        "schema": (
+            "RealSaS.RSSvNext.NativePreviewControls.v2"
+            if eight_way else "RealSaS.RSSvNext.NativePreviewControls.v1"
+        ),
         "virtual_camera_is_original_source_observation": False,
-        "virtual_camera": camera,
+        "virtual_camera": camera if not eight_way else None,
+        "virtual_cameras": list(camera) if eight_way else None,
+        "presentation_profile": (
+            "EIGHT_YAW_45" if eight_way else "SINGLE_CAMERA_2D"
+        ),
         "control_frames": [
             [asdict(row) for row in rows] for rows in control_frames
         ],
@@ -351,7 +372,7 @@ def compile_rss_vnext_native_preview_package_v1(
         ("controls.json", _json(controls_payload)),
     ])
     manifest = {
-        "schema": SCHEMA,
+        "schema": SCHEMA_EIGHT if eight_way else SCHEMA,
         "admission": "DEVELOPER_PREVIEW_NOT_PRODUCT_REVISION",
         "product_revision_minted": "0",
         "original_source_camera_observed": "0",
@@ -367,6 +388,8 @@ def compile_rss_vnext_native_preview_package_v1(
         "virtual_preview_draw_policy": "ALL_CANONICAL_FRAGMENTS_POSED_DEPTH_ONLY",
         "frame_count": str(len(control_frames)),
         "view_index": "0",
+        "native_view_count": "8" if eight_way else "1",
+        "presentation_profile": "EIGHT_YAW_45" if eight_way else "SINGLE_CAMERA_2D",
         "color_source_layer_policy": "EXPLICIT_HINT_ONLY",
         "texture_layer_draw_order_authority": "POSED_DEPTH_ONLY_FOR_UNREGISTERED_VIRTUAL_CAMERA",
     }
@@ -399,7 +422,7 @@ def reopen_rss_vnext_native_preview_package_v1(path: Path) -> dict[str, Any]:
             raise RuntimeError("RSS_PREVIEW_REOPEN_DUPLICATE_MANIFEST")
         manifest[key] = value
     if (
-        manifest.get("schema") != SCHEMA
+        manifest.get("schema") not in (SCHEMA, SCHEMA_EIGHT)
         or manifest.get("admission") != "DEVELOPER_PREVIEW_NOT_PRODUCT_REVISION"
         or manifest.get("product_revision_minted") != "0"
         or manifest.get("original_source_camera_observed") != "0"
@@ -413,8 +436,19 @@ def reopen_rss_vnext_native_preview_package_v1(path: Path) -> dict[str, Any]:
     rig = canonical_rig_from_dict_v2(json.loads(archive["rig.json"]))
     skin = canonical_skin_from_dict_v2(json.loads(archive["skin.json"]))
     data = json.loads(archive["controls.json"])
+    eight_way = manifest.get("schema") == SCHEMA_EIGHT
+    required_profile = "EIGHT_YAW_45" if eight_way else "SINGLE_CAMERA_2D"
+    required_count = "8" if eight_way else "1"
     if (
-        data.get("schema") != "RealSaS.RSSvNext.NativePreviewControls.v1"
+        data.get("schema") != (
+            "RealSaS.RSSvNext.NativePreviewControls.v2"
+            if eight_way else "RealSaS.RSSvNext.NativePreviewControls.v1"
+        )
+        or (
+            manifest.get("native_view_count", "1") != required_count
+            or manifest.get("presentation_profile", "SINGLE_CAMERA_2D") != required_profile
+            or data.get("presentation_profile", "SINGLE_CAMERA_2D") != required_profile
+        )
         or data.get("virtual_camera_is_original_source_observation") is not False
         or data.get("product_revision_minted") is not False
         or type(data.get("control_frames")) is not list
@@ -430,8 +464,17 @@ def reopen_rss_vnext_native_preview_package_v1(path: Path) -> dict[str, Any]:
         ) for row in group]
         for group in data["control_frames"]
     ]
+    cameras = data.get("virtual_cameras") if eight_way else data.get("virtual_camera")
+    if eight_way:
+        if not isinstance(cameras, list) or len(cameras) != 8:
+            raise RuntimeError("RSS_PREVIEW_REOPEN_EIGHT_WAY_CAMERAS_MISSING")
+        expected = select_rss_vnext_eight_way_virtual_cameras_v1(
+            mesh, resolution=cameras[0].get("resolution"),
+        )
+        if _json(list(expected)) != _json(cameras):
+            raise RuntimeError("RSS_PREVIEW_REOPEN_EIGHT_WAY_CAMERA_POLICY_DRIFT")
     pose_bytes, hashes = _make_pose_binary(
-        mesh, rig, skin, frames, data["virtual_camera"],
+        mesh, rig, skin, frames, cameras,
     )
     if (
         pose_bytes != archive["pose.bin"]
@@ -444,7 +487,7 @@ def reopen_rss_vnext_native_preview_package_v1(path: Path) -> dict[str, Any]:
     return {
         "manifest": manifest, "mesh": mesh, "rig": rig, "skin": skin,
         "control_frames": tuple(tuple(group) for group in frames),
-        "virtual_camera": data["virtual_camera"],
+        "virtual_camera": cameras,
         "pose_bytes": pose_bytes,
         "graphics_bytes": archive["graphics.bin"],
         "texture_bytes": archive["texture.bin"],
@@ -473,7 +516,10 @@ def edit_rss_vnext_native_preview_controls_v1(
     )
     old_controls = json.loads(entries["controls.json"])
     if (
-        old_controls.get("schema") != "RealSaS.RSSvNext.NativePreviewControls.v1"
+        old_controls.get("schema") not in (
+            "RealSaS.RSSvNext.NativePreviewControls.v1",
+            "RealSaS.RSSvNext.NativePreviewControls.v2",
+        )
         or old_controls.get("product_revision_minted") is not False
         or old_controls.get("virtual_camera_is_original_source_observation") is not False
     ):
@@ -501,9 +547,10 @@ def edit_rss_vnext_native_preview_controls_v1(
 
 
 __all__ = [
-    "SCHEMA", "compile_rss_vnext_native_preview_package_v1",
+    "SCHEMA", "SCHEMA_EIGHT", "compile_rss_vnext_native_preview_package_v1",
     "reopen_rss_vnext_native_preview_package_v1",
     "select_rss_vnext_native_preview_camera_v1",
+    "select_rss_vnext_eight_way_virtual_cameras_v1",
     "prepare_rss_vnext_virtual_preview_graphics_v1",
     "edit_rss_vnext_native_preview_controls_v1",
 ]

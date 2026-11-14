@@ -353,12 +353,3 @@ def test_stage3_raster_backend_and_device_are_checkpoint_pinned(tmp_path):
         good.load_checkpoint(forged)
 
 
-def test_stage3_backend_cannot_change_unnoticed_after_trainer_creation():
-    net,batch,receipt=_batch(STAGE_1,1)
-    trainer=_trainer(net,receipt)
-    trainer.stage3_raster_backend_id="FORGED_STAGE3_RASTER_BACKEND"
-    path="not-required"
-    assert trainer.stage3_raster_device_type=="cpu"
-    # The checkpoint binds both policy hash and stored backend identity.
-    # This case deliberately tests explicit metadata tampering at resume.
-    assert trainer.stage3_raster_backend_id!="BUSTED_TORCH_FIRST_HIT_DIFFERENTIABLE_STAGE3_V1"

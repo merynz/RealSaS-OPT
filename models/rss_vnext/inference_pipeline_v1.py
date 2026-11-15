@@ -31,6 +31,7 @@ from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
     validate_inference_evidence_v1,
 )
 from .inference_checkpoint_v1 import load_inference_checkpoint_v1
+from .semantic_geometry_prior import RSSvNextSemanticLayerSpec
 from .embedded_mira_decoder_v1 import (
     SCHEMA as EMBEDDED_MIRA_SCHEMA,
     encode_embedded_mira_decoder_v1,
@@ -125,6 +126,7 @@ def run_two_view_to_compiler_proposal_v1(
     generate_controls: bool = True,
     product_mode: bool = True,
     source_observation: RSSvNextTwoViewSourceObservationV1 | None = None,
+    flexicubes_extractor=None,
 ) -> dict:
     """Execute pinned checkpoint and commit the proposal with two source frames.
 
@@ -155,6 +157,11 @@ def run_two_view_to_compiler_proposal_v1(
         product_mode=product_mode,
     )
     bundle = getattr(model, "_pinned_neural_bundle", None)
+    if (
+        model.cfg.tessa_surface_requirement == "REQUIRE_SIGNED_IRIS_SURFACE"
+        and flexicubes_extractor is None
+    ):
+        raise ValueError("RSS_VNEXT_INFERENCE_PINNED_IRIS_SURFACE_REQUIRED")
     if product_mode and bundle is None:
         raise RuntimeError("RSS_VNEXT_SHAPE_THREE_STAGE_BUNDLE_REQUIRED")
     generation = None
@@ -190,6 +197,7 @@ def run_two_view_to_compiler_proposal_v1(
             multiview_seed=_generation_seed("MULTIVIEW"),
             max_topology_tokens=max_topology_tokens,
             generate_controls=generate_controls,
+            flexicubes_extractor=flexicubes_extractor,
         )
         prediction = generation.proposal
     else:
@@ -200,6 +208,12 @@ def run_two_view_to_compiler_proposal_v1(
             generate_controls=generate_controls,
             executable_constraint_operators=(
                 tuple(RIG_CONSTRAINT_OPERATOR_IDS_V1) if generate_controls else None
+            ),
+            flexicubes_extractor=flexicubes_extractor,
+            flexicubes_layer=(
+                RSSvNextSemanticLayerSpec(
+                    "all", model.cfg.semantic_role_schema().roles,
+                ) if flexicubes_extractor is not None else None
             ),
         )
     evidence = export_inference_evidence_v1(

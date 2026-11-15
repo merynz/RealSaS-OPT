@@ -352,6 +352,7 @@ def source_surface_tensor_sha256(value: Tensor) -> str:
 
 
 from .training_optimizer_ownership_v1 import qualify_rss_vnext_optimizer_ownership_v1
+from .training_phase_contract_v1 import RSSvNextStructuralTrainingPhaseContractV1
 from .training_gradient_interference_v1 import (
     RSSvNextGradientCourtPolicyV1,
     audit_rss_vnext_gradient_interference_v1,
@@ -378,6 +379,7 @@ class RSSvNextStructuralTrainer:
         weights: RSSvNextTrainingWeights = RSSvNextTrainingWeights(),
         preference: RSSvNextTopologyPreferenceConfig = RSSvNextTopologyPreferenceConfig(),
         gradient_court_policy: RSSvNextGradientCourtPolicyV1 = RSSvNextGradientCourtPolicyV1(),
+        phase_contract: RSSvNextStructuralTrainingPhaseContractV1 | None = None,
         scene_conditioning_policy: str = "RESEARCH_CALIBRATED_TWO_VIEW",
         axis_training_policy: str = "RIG_ONLY_PRETRAIN",
         trusted_generated_conditioning_registry: Mapping[str, Mapping[str, object]] | None = None,
@@ -403,6 +405,9 @@ class RSSvNextStructuralTrainer:
         weights.validate()
         preference.validate()
         gradient_court_policy.validate()
+        if phase_contract is not None:
+            phase_contract.validate(weights=weights)
+            phase_contract.assert_trainable_owners(model)
         if scene_conditioning_policy not in (
             "RESEARCH_CALIBRATED_TWO_VIEW", "PRODUCT_GENERATED_SIX_VIEW",
         ):
@@ -437,6 +442,7 @@ class RSSvNextStructuralTrainer:
         self.weights = weights
         self.preference = preference
         self.gradient_court_policy = gradient_court_policy
+        self.phase_contract = phase_contract
         # Freeze the full objective / topology-preference policy into the
         # resumption identity. A semantic-risk or motion weight change is a
         # different training run, not a transparent continuation of this one.
@@ -452,6 +458,7 @@ class RSSvNextStructuralTrainer:
             "scene_conditioning_policy": self.scene_conditioning_policy,
             "axis_training_policy": self.axis_training_policy,
             "gradient_court_policy": asdict(gradient_court_policy),
+            **({"phase_contract": asdict(phase_contract)} if phase_contract is not None else {}),
         }, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf8")).hexdigest()
         self.dataset_manifest_sha256 = dataset_manifest_sha256.lower()
         # This launcher-owned registry binds the *actual generated* scene
@@ -1902,6 +1909,8 @@ class RSSvNextStructuralTrainer:
         return report
 
     def _assert_optimizer_ownership(self) -> None:
+        if self.phase_contract is not None:
+            self.phase_contract.assert_trainable_owners(self.model)
         current = qualify_rss_vnext_optimizer_ownership_v1(
             self.model, self.optimizer,
         )
@@ -1917,6 +1926,8 @@ class RSSvNextStructuralTrainer:
                 parameter.grad = None
         self.optimizer.zero_grad(set_to_none=True)
         result = self.objective(batch)
+        if self.phase_contract is not None:
+            self.phase_contract.assert_qualified_result(result, weights=self.weights)
         if (
             self.gradient_court_policy.every_n_steps > 0
             and self.global_step % self.gradient_court_policy.every_n_steps == 0

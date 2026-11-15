@@ -45,7 +45,7 @@ from .canonical_mechanics_ir_v1 import CanonicalMechanicsIRV1
 from .mechanics_xpbd_domain_v1 import XPBDSecondaryDomainV1
 from .mechanics_xpbd_secondary_v1 import (
     XPBDSecondaryPolicyV1, XPBDSecondaryStateV1,
-    step_declared_xpbd_secondary_v1,
+    step_declared_xpbd_secondary_v1, xpbd_state_from_dict_v1,
 )
 from .mechanics_live_runtime_v1 import (
     _strict_lineage, evaluate_mechanics_intervention_frame_v1,
@@ -305,6 +305,29 @@ class ControllablePuppetSessionV1:
 
     def reset_declared_xpbd_secondary(self) -> None:
         self._xpbd_state = None
+
+    def export_xpbd_runtime_state(self) -> dict:
+        if self._xpbd_state is None:
+            raise QualificationError("PUPPET_XPBD_STATE_NOT_INITIALIZED")
+        return self._xpbd_state.to_dict()
+
+    def restore_xpbd_runtime_state(self, payload: Mapping) -> None:
+        if self._xpbd_domain is None or self._xpbd_policy is None:
+            raise QualificationError("PUPPET_XPBD_POLICY_REQUIRED_FOR_RESTORE")
+        state=xpbd_state_from_dict_v1(payload)
+        # A read-only replay of the CURRENT primary pose is the admission
+        # gate. Restoring after changing controls, rig/skin or runtime policy
+        # is forbidden; no heuristic velocity/spring state is invented.
+        primary=solve_control_pose_v1(
+            self.bundle.rig, tuple(self.control_states.values()),
+        )
+        snapshot=step_declared_xpbd_secondary_v1(
+            self.bundle.rig, primary, self._xpbd_domain, self._xpbd_policy,
+            previous_state=state,
+        )
+        if snapshot.status != "SNAPSHOT_XPBD_NO_STEP":
+            raise QualificationError("PUPPET_XPBD_RESTORE_NOT_A_SNAPSHOT")
+        self._xpbd_state=state
 
     def enable_declared_multi_goal(
         self,

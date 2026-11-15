@@ -3,6 +3,7 @@ from __future__ import annotations
 """Real consumer: primary Mechanics → XPBD pose → SAME MIRA skin/Graphics mesh."""
 
 from dataclasses import replace
+import json
 import numpy as np
 import pytest
 
@@ -194,3 +195,36 @@ def test_editor_refuses_foreign_domain_and_disabled_dt():
             replace(domain,mesh_lineage_hash="foreign"),policy,
         )
     assert session.frame().xpbd_secondary_state is None
+
+
+def test_editor_xpbd_state_save_reopen_replay_is_bitwise_deterministic():
+    bundle,domain,policy=_editor_bundle()
+    original=ControllablePuppetSessionV1(bundle)
+    original.enable_declared_xpbd_secondary(domain,policy)
+    original.frame()
+    original.set_control(ControlTransformIRV1(
+        "C_ROOT",translation=(.3,0.,0.),
+    ))
+    advanced=original.frame(dt_seconds=1./60.)
+    exported=json.loads(json.dumps(original.export_xpbd_runtime_state()))
+    assert exported["state_digest"]==advanced.xpbd_secondary_state.state_digest
+
+    reopened=ControllablePuppetSessionV1(bundle)
+    reopened.enable_declared_xpbd_secondary(domain,policy)
+    reopened.set_control(ControlTransformIRV1(
+        "C_ROOT",translation=(.3,0.,0.),
+    ))
+    reopened.restore_xpbd_runtime_state(exported)
+    assert reopened.frame().xpbd_secondary_state==advanced.xpbd_secondary_state
+    next_a=original.frame(dt_seconds=1./60.)
+    next_b=reopened.frame(dt_seconds=1./60.)
+    assert next_a.pose==next_b.pose
+    assert next_a.deformed==next_b.deformed
+    assert next_a.xpbd_secondary_state==next_b.xpbd_secondary_state
+
+    tampered=json.loads(json.dumps(exported))
+    tampered["joints"][0]["world_P"][0]+=0.01
+    with pytest.raises(QualificationError,match="STATE_DIGEST_DRIFT"):
+        reopened.restore_xpbd_runtime_state(tampered)
+    # The failed restore may not alter the live session state.
+    assert reopened.frame().xpbd_secondary_state==next_b.xpbd_secondary_state

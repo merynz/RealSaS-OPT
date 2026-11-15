@@ -151,7 +151,7 @@ def test_xpbd_state_runtime_policy_and_time_fail_closed():
               dt_seconds=1./60.)
     with pytest.raises(QualificationError,match="POLICY_DOMAIN_DRIFT"):
         _step(rig,domain,replace(policy,domain_hash="foreign"),pose)
-    with pytest.raises(QualificationError,match="STATE_JOINT_COVERAGE_DRIFT"):
+    with pytest.raises(QualificationError,match="STATE_DIGEST_DRIFT"):
         _step(rig,domain,policy,pose,
               previous_state=replace(start.state,joints=()),dt_seconds=1./60.)
 

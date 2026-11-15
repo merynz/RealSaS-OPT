@@ -18,7 +18,7 @@ reuse canonical MIRA skin and the same Graphics mesh; no duplicate puppet.
 
 from dataclasses import asdict, dataclass, field, replace
 import math
-from typing import Sequence
+from typing import Any, Mapping, Sequence
 
 import numpy as np
 
@@ -98,6 +98,60 @@ class XPBDSecondaryStateV1:
     frame_count: int
     schema_version: str = "RealSaS.XPBD.SecondaryState.v1"
     metadata: dict = field(default_factory=dict)
+    state_digest: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+def _state_digest(state: XPBDSecondaryStateV1) -> str:
+    return content_sha256({
+        k: v for k, v in state.to_dict().items() if k != "state_digest"
+    })
+
+
+def xpbd_state_from_dict_v1(payload: Mapping[str, Any]) -> XPBDSecondaryStateV1:
+    """Deserialize exact temporal state; reject modified/rehashed guess data."""
+    if not isinstance(payload, Mapping):
+        raise QualificationError("XPBD_STATE_WIRE_FORMAT_INVALID")
+    try:
+        state = XPBDSecondaryStateV1(
+            domain_hash=str(payload["domain_hash"]),
+            runtime_policy_hash=str(payload["runtime_policy_hash"]),
+            rig_lineage_hash=str(payload["rig_lineage_hash"]),
+            control_program_hash=str(payload["control_program_hash"]),
+            joints=tuple(
+                XPBDSecondaryJointStateV1(
+                    canonical_joint_id=str(j["canonical_joint_id"]),
+                    world_P=tuple(float(x) for x in j["world_P"]),
+                    world_velocity=tuple(float(x) for x in j["world_velocity"]),
+                ) for j in payload["joints"]
+            ),
+            pinned_roots=tuple(
+                (str(jid), tuple(float(x) for x in xyz))
+                for jid,xyz in payload["pinned_roots"]
+            ),
+            simulation_tick_count=payload["simulation_tick_count"],
+            frame_count=payload["frame_count"],
+            schema_version=str(payload["schema_version"]),
+            metadata=dict(payload["metadata"]),
+            state_digest=str(payload["state_digest"]),
+        )
+    except (KeyError,TypeError,ValueError,IndexError) as exc:
+        raise QualificationError("XPBD_STATE_WIRE_FORMAT_INVALID") from exc
+    if (state.schema_version != "RealSaS.XPBD.SecondaryState.v1"
+            or type(state.simulation_tick_count) is not int
+            or state.simulation_tick_count < 0
+            or type(state.frame_count) is not int or state.frame_count < 0
+            or any(not jid or _vec(j.world_P,"XPBD_STATE_WIRE_NONFINITE").shape!=(3,)
+                   or _vec(j.world_velocity,"XPBD_STATE_WIRE_NONFINITE").shape!=(3,)
+                   for j in state.joints for jid in (j.canonical_joint_id,))
+            or any(not jid or _vec(x,"XPBD_STATE_WIRE_NONFINITE").shape!=(3,)
+                   for jid,x in state.pinned_roots)):
+        raise QualificationError("XPBD_STATE_WIRE_DOMAIN_INVALID")
+    if state.state_digest != _state_digest(state):
+        raise QualificationError("XPBD_STATE_DIGEST_DRIFT")
+    return state
 
 
 @dataclass(frozen=True)
@@ -304,6 +358,8 @@ def step_declared_xpbd_secondary_v1(
         ticks, frames, steps = 0, 0, 0
         previous_roots = {jid: pp[jid] for jid in roots}
     else:
+        if previous_state.state_digest != _state_digest(previous_state):
+            raise QualificationError("XPBD_STATE_DIGEST_DRIFT")
         if (
             previous_state.schema_version != "RealSaS.XPBD.SecondaryState.v1"
             or previous_state.domain_hash != domain.domain_hash
@@ -549,6 +605,7 @@ def step_declared_xpbd_secondary_v1(
             "primary_pose_hash":primary_hash,
         },
     )
+    state=replace(state,state_digest=_state_digest(state))
     status=("INITIALIZED_XPBD_UNSIMULATED" if previous_state is None else
             "SNAPSHOT_XPBD_NO_STEP" if steps == 0 else
             "PASS_XPBD_SECONDARY_RUNTIME" if (

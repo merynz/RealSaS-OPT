@@ -245,10 +245,14 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
             for start in range(0, active_ids.numel(), self.cube_query_chunk):
                 ids = active_ids[start:start + self.cube_query_chunk]
                 corner_points = grid_xyz[:, cubes[ids].reshape(-1)]
-                def cube_head(points: Tensor):
+                # Snapshot the active-cube count: checkpoint executes
+                # this closure again during backward after the loop advances.
+                cube_count = int(ids.numel())
+
+                def cube_head(points: Tensor, *, count=cube_count):
                     corner_h = self.iris.query(
                         scene_triplanes, points,
-                    )["H"].reshape(1, ids.numel(), 8, -1)
+                    )["H"].reshape(1, count, 8, -1)
                     return self.iris.cube_extraction(corner_h)[0]
 
                 if high_resolution_training and torch.is_grad_enabled():

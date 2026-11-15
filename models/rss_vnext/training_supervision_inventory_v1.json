@@ -12,7 +12,8 @@
     "models/rss_vnext/realsas_cleanroom_render_dataset_v1.py",
     "models/rss_vnext/realsas_joint_slrm_render_v1.py",
     "models/rss_vnext/flexicubes_surface_evidence.py",
-    "models/rss_vnext/realsas_two_source_construction_v1.py"
+    "models/rss_vnext/realsas_two_source_construction_v1.py",
+    "models/rss_vnext/realsas_cleanroom_stage_batch_v1.py"
   ],
   "separation_principles": [
     "One persistent shared IRIS H(x) and source/asset identity.",
@@ -709,5 +710,6 @@
     "INTERVENTION_REQUIRED": "Cannot infer edit/drawable/contact/behavior evidence from mesh part labels alone",
     "UNTRAINED_OUTPUT": "No independently qualified active objective and acceptance proof verified"
   },
-  "audit_resolve": "Structural objective and eligibility fields are exact names from training_phase_contract_v1.LOSS_FIELDS, checked by AST regression."
+  "audit_resolve": "Structural objective and eligibility fields are exact names from training_phase_contract_v1.LOSS_FIELDS, checked by AST regression.",
+  "stage_a_stage_b_mainline_binding": "PR #576 merged to main at bc354369d1446ce8402292dd9fb9bfc21e9f09d6; source-rendered synthetic regression path verified by GitHub CI, real source corpus/GPU remain unverified"
 }

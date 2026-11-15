@@ -37,7 +37,7 @@ from .canonical_skin_ir_v2 import (
 )
 from .canonical_mechanics_ir_v1 import CanonicalMechanicsIRV1
 from .hashing import content_sha256
-from .mechanics_control_solver_v1 import DeformedMeshIRV1
+from .mechanics_control_solver_v1 import DeformedMeshIRV1, MechanicsPoseIRV1
 from .mechanics_xpbd_secondary_v1 import (
     XPBDPlaneColliderV1, XPBDSphereColliderV1,
 )
@@ -402,6 +402,31 @@ def _policy(domain: XPBDSurfaceDomainV1, policy: XPBDSurfacePolicyV1) -> str:
     if len(seen)>16 or len(domain.dynamic_vertex_ids)>4096:
         raise QualificationError("XPBD_SURFACE_CONTACT_RESOURCE_BOUND")
     return content_sha256(asdict(policy))
+
+
+def resolve_declared_xpbd_surface_joint_positions_v1(
+    pose: MechanicsPoseIRV1, policy: XPBDSurfacePolicyV1,
+) -> dict[str, Vec3]:
+    """Resolve joint collider centers from the authoritative solved pose.
+
+    This is the single bridge used by both live Mechanics and the editor;
+    callers cannot substitute a label-derived or source-rest joint location.
+    """
+    required={row.canonical_joint_id for row in policy.joint_spheres}
+    if not required:
+        return {}
+    if not isinstance(pose, MechanicsPoseIRV1):
+        raise QualificationError("XPBD_SURFACE_SOLVED_POSE_REQUIRED")
+    by_id={row.canonical_joint_id:row.solved_P for row in pose.joints}
+    if len(by_id)!=len(pose.joints) or not required<=set(by_id):
+        raise QualificationError(
+            "XPBD_SURFACE_COLLIDER_JOINT_NOT_IN_SOLVED_POSE"
+        )
+    return {
+        jid:tuple(map(float,_xyz(
+            by_id[jid],"XPBD_SURFACE_KINEMATIC_JOINT_POSITION_INVALID",
+        ))) for jid in sorted(required)
+    }
 
 
 def _state_hash(state: XPBDSurfaceStateV1) -> str:

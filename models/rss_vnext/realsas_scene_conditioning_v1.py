@@ -53,6 +53,8 @@ def encode_realsas_conditioning_into_shared_H_v1(
     conditioning_authority: str,
     generating_checkpoint_sha256: str | None = None,
     conditioning_normals: Tensor | None = None,
+    original_source_tokens: Tensor | None = None,
+    original_source_xy: Tensor | None = None,
 ) -> RealSaSSceneConditioningV1:
     """One canonical view or six aligned diffusion-generated views -> H(x).
 
@@ -147,9 +149,34 @@ def encode_realsas_conditioning_into_shared_H_v1(
             raise ValueError("RSS_VNEXT_NORMAL_RGB_PATCH_GRID_DRIFT")
         tokens = tokens + model.normal_condition_proj(normal_tokens)
     early=model.early_semantics.forward_variable_views(tokens)
-    planes=model.iris.encode_scene(
-        early.conditioned_image_tokens,xy,conditioning_cameras,
+    source_fields = (original_source_tokens, original_source_xy)
+    source_supplied = any(value is not None for value in source_fields)
+    source_required = (
+        v == 6 and original_observed_view_count == 2
+        and conditioning_authority == SIX_VIEW_PRIOR
     )
+    if (
+        source_supplied != source_required
+        or (source_required and any(value is None for value in source_fields))
+    ):
+        raise ValueError("RSS_VNEXT_GENERATED_SCENE_ORIGINAL_SOURCE_MEMORY_REQUIRED")
+    if source_required:
+        if (
+            original_source_tokens.ndim != 4
+            or original_source_tokens.shape[:2] != (b, 2)
+            or original_source_tokens.shape[-1] != model.cfg.iris.image_token_dim
+            or original_source_xy.shape != (*original_source_tokens.shape[:3], 2)
+            or any(value.device != tokens.device for value in source_fields)
+        ):
+            raise ValueError("RSS_VNEXT_GENERATED_SCENE_ORIGINAL_SOURCE_MEMORY_DOMAIN")
+        planes = model.iris.encode_scene_with_original_sources(
+            early.conditioned_image_tokens, xy, conditioning_cameras,
+            original_source_tokens, original_source_xy,
+        )
+    else:
+        planes=model.iris.encode_scene(
+            early.conditioned_image_tokens,xy,conditioning_cameras,
+        )
     if planes.ndim!=5 or planes.shape[:2]!=(b,3):
         raise ValueError("RSS_VNEXT_REALSAS_SHARED_SCENE_CARRIER_SHAPE")
     return RealSaSSceneConditioningV1(

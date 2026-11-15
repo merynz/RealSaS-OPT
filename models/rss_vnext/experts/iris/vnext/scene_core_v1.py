@@ -36,6 +36,10 @@ class CameraAwareViewBankVNextV1(nn.Module):
             nn.Linear(cfg.camera_embed_dim, cfg.scene_dim),
         )
         self.norm = nn.LayerNorm(cfg.scene_dim)
+        # Front and back are source-observed ROLE slots, not guessed cameras.
+        # The separate path never uses camera_projection.
+        self.original_view_slot_embedding = nn.Embedding(2, cfg.scene_dim)
+        nn.init.normal_(self.original_view_slot_embedding.weight, std=0.02)
 
     def forward(self, image_tokens: torch.Tensor, token_xy: torch.Tensor, camera_features: torch.Tensor) -> torch.Tensor:
         if image_tokens.ndim != 4:
@@ -46,6 +50,34 @@ class CameraAwareViewBankVNextV1(nn.Module):
         if camera_features.ndim != 3 or camera_features.shape[:2] != (b, v) or camera_features.shape[-1] != self.cfg.camera_feature_dim:
             raise ValueError("IRIS_VNEXT_CAMERA_FEATURE_SHAPE_INVALID")
         z = self.image_projection(image_tokens) + self.camera_projection(camera_features)[:, :, None, :] + self.xy_projection(token_xy)
+        return self.norm(z).reshape(b, v * t, self.cfg.scene_dim)
+
+    def forward_uncalibrated_original(
+        self, image_tokens: torch.Tensor, token_xy: torch.Tensor,
+    ) -> torch.Tensor:
+        """Camera-free FRONT/BACK evidence for the SAME triplane decoder.
+
+        The role embeddings encode which *source slot* supplied a pixel;
+        they do not make claims about a camera extrinsic or depth ray.
+        """
+        if image_tokens.ndim != 4 or image_tokens.shape[1] != 2:
+            raise ValueError("IRIS_VNEXT_ORIGINAL_SOURCE_TWO_VIEWS_REQUIRED")
+        b, v, t, c = image_tokens.shape
+        if c != self.cfg.image_token_dim or t < 1 or token_xy.shape != (b, 2, t, 2):
+            raise ValueError("IRIS_VNEXT_ORIGINAL_SOURCE_TOKEN_DOMAIN")
+        if (
+            not bool(torch.isfinite(image_tokens).all())
+            or not bool(torch.isfinite(token_xy).all())
+        ):
+            raise ValueError("IRIS_VNEXT_ORIGINAL_SOURCE_TOKEN_NUMERIC")
+        slots = self.original_view_slot_embedding(
+            torch.arange(2, device=image_tokens.device)
+        )[None, :, None, :]
+        z = (
+            self.image_projection(image_tokens)
+            + self.xy_projection(token_xy)
+            + slots
+        )
         return self.norm(z).reshape(b, v * t, self.cfg.scene_dim)
 
 
@@ -164,5 +196,28 @@ class IRISVNextSceneCoreV1(nn.Module):
         self.view_bank = CameraAwareViewBankVNextV1(cfg); self.scene = SharedSceneTriplaneVNextV1(cfg); self.field = LocalEvidenceFieldV1(cfg); self.cube_extraction = CubeExtractionHeadV1(cfg)
     def encode_scene(self, image_tokens, token_xy, camera_features):
         return self.scene(self.view_bank(image_tokens, token_xy, camera_features))
+
+    def encode_scene_with_original_sources(
+        self,
+        generated_tokens: torch.Tensor, generated_xy: torch.Tensor,
+        generated_cameras: torch.Tensor,
+        original_tokens: torch.Tensor, original_xy: torch.Tensor,
+    ) -> torch.Tensor:
+        """One decoder / one H, not an unrelated source-only scene.
+
+        Generated conditioning has virtual calibrated cameras. Original
+        FRONT/BACK source tokens have NO supplied camera, and therefore
+        cannot use the camera-projected input bank.
+        """
+        predicted = self.view_bank(
+            generated_tokens, generated_xy, generated_cameras,
+        )
+        observed = self.view_bank.forward_uncalibrated_original(
+            original_tokens, original_xy,
+        )
+        if predicted.shape[0] != observed.shape[0]:
+            raise ValueError("IRIS_VNEXT_ORIGINAL_GENERATED_BATCH_DRIFT")
+        return self.scene(torch.cat((predicted, observed), dim=1))
+
     def query(self, scene_planes, points):
         return self.field(scene_planes, points)

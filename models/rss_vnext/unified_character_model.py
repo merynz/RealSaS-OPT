@@ -648,11 +648,11 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         if self.aux_views is not None:
             raise ValueError("RSS_VNEXT_TWO_COMPETING_MULTIVIEW_CONSTRUCTORS")
         if original_camera_features is None:
-            tokens, _, early = self._observed_pixel_tokens_without_camera(
+            tokens, source_xy, early = self._observed_pixel_tokens_without_camera(
                 observed_rgba,
             )
         else:
-            tokens, _, early = self._original_source_tokens(
+            tokens, source_xy, early = self._original_source_tokens(
                 observed_rgba, original_camera_features,
             )
         from .realsas_scene_conditioning_v1 import (
@@ -668,6 +668,11 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             original_observed_view_count=2,
             conditioning_authority=SIX_VIEW_PRIOR,
             generating_checkpoint_sha256=generation_checkpoint_sha256,
+            # Source pixels reach the SAME trainable H(x) as generated views.
+            # Their patch coordinates are only image-local; no camera pose
+            # or original 3D source-ray authority is inferred here.
+            original_source_tokens=early.conditioned_image_tokens,
+            original_source_xy=source_xy,
         )
         return self._assemble_scene_from_planes(
             rgba=observed_rgba, camera_features=original_camera_features,

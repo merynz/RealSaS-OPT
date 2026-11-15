@@ -115,11 +115,51 @@ class PinnedFlexiCubesV1:
         module = _load_source_module(self.source_root)
         self.operator = module.FlexiCubes(device=str(self.device), weight_scale=self.weight_scale)
 
-    def construct_iris_grid(self, resolution: int) -> tuple[torch.Tensor, torch.Tensor]:
-        if int(resolution) < 2:
-            raise ValueError("VNEXT_FLEXICUBES_RESOLUTION_TOO_SMALL")
-        vertices, cubes = self.operator.construct_voxel_grid(int(resolution))
-        return vertices * 2.0, cubes.long()
+    def construct_iris_grid(
+        self, resolution: int | tuple[int, int, int],
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Voxel grid with exact FlexiCubes corner layout and anisotropic axes.
+
+        The upstream `construct_voxel_grid` forms 8 duplicates per cell and
+        calls `torch.unique`. That scales badly at 1.5M cells. A direct
+        lexicographic grid and analytical corner addressing use O(G+C) storage.
+        Small cubic training grids retain the verified original construction.
+        """
+        if type(resolution) is int:
+            if resolution < 2:
+                raise ValueError("VNEXT_FLEXICUBES_RESOLUTION_TOO_SMALL")
+            vertices, cubes = self.operator.construct_voxel_grid(resolution)
+            return vertices * 2.0, cubes.long()
+        if (
+            type(resolution) is not tuple or len(resolution) != 3
+            or any(type(r) is not int or r < 2 or r > 256 for r in resolution)
+        ):
+            raise ValueError("VNEXT_FLEXICUBES_ANISOTROPIC_RESOLUTION_INVALID")
+        nx, ny, nz = resolution
+        device = self.device
+        x = torch.arange(nx + 1, device=device, dtype=torch.float32) * (2.0 / nx) - 1.0
+        y = torch.arange(ny + 1, device=device, dtype=torch.float32) * (2.0 / ny) - 1.0
+        z = torch.arange(nz + 1, device=device, dtype=torch.float32) * (2.0 / nz) - 1.0
+        # Upstream torch.unique sorts vertices lexicographically: x, y, z.
+        gx, gy, gz = torch.meshgrid(x, y, z, indexing="ij")
+        vertices = torch.stack((gx, gy, gz), dim=-1).reshape(-1, 3)
+        cells = torch.arange(nx * ny * nz, device=device, dtype=torch.long)
+        cx = cells // (ny * nz)
+        cy = cells // nz % ny
+        cz = cells % nz
+        base = (cx * (ny + 1) + cy) * (nz + 1) + cz
+        # Exact pinned FlexiCubes corner order: 000,100,010,110,001,101,011,111.
+        offsets = torch.tensor(
+            [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0],
+             [0, 0, 1], [1, 0, 1], [0, 1, 1], [1, 1, 1]],
+            dtype=torch.long, device=device,
+        )
+        cube_offsets = (
+            (offsets[:, 0] * (ny + 1) + offsets[:, 1]) * (nz + 1)
+            + offsets[:, 2]
+        )
+        cubes = base[:, None] + cube_offsets[None, :]
+        return vertices, cubes
 
     def extract(
         self,
@@ -128,7 +168,7 @@ class PinnedFlexiCubesV1:
         field: torch.Tensor,
         cubes: torch.Tensor,
         raw_parameters: torch.Tensor,
-        resolution: int,
+        resolution: int | tuple[int, int, int],
         training: bool,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         if raw_parameters.shape != (cubes.shape[0], 21):
@@ -148,7 +188,7 @@ class PinnedFlexiCubesV1:
                 vertices32,
                 field32,
                 cubes,
-                int(resolution),
+                resolution,
                 beta_fx12=parameters.beta_raw,
                 alpha_fx8=parameters.alpha_raw,
                 gamma_f=parameters.gamma_raw,

@@ -1755,6 +1755,7 @@ class RSSvNextStructuralTrainer:
             and axis_pose_loss is None
             and anchor_face_loss is None
             and source_udf_loss is None and source_inside_sign_loss is None
+            and source_signed_sdf_loss is None
             and joint_loss is None
         ):
             raise ValueError("RSS_VNEXT_TRAIN_NO_QUALIFIED_OBJECTIVE")

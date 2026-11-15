@@ -413,6 +413,22 @@ class RealSaSSLRMTrainerV1:
         if not self.model.training:
             raise RuntimeError("RSS_VNEXT_REALSAS_SLRM_REQUIRES_MODEL_TRAIN_MODE")
         self._verify_receipt(batch)
+        # Product-style paired-source S-LRM can no longer train a
+        # generated-only scene: the independently received original photos
+        # are CAMERA-FREE scene-memory inputs alongside virtual-camera views.
+        # Calibrated rays remain a SEPARATE source photometric teacher.
+        original_tokens = original_xy = None
+        if (
+            batch.conditioning_authority == SIX_VIEW_PRIOR
+            and batch.original_observed_view_count == 2
+        ):
+            if batch.source_observed_rays is None:
+                raise ValueError("RSS_VNEXT_SLRM_TWO_ORIGINAL_PIXELS_REQUIRED_FOR_H")
+            raw_source = batch.source_observed_rays.original_linear_rgba.detach()
+            _, original_xy, original_early = (
+                self.model._observed_pixel_tokens_without_camera(raw_source)
+            )
+            original_tokens = original_early.conditioned_image_tokens
         state=encode_realsas_conditioning_into_shared_H_v1(
             self.model,conditioning_rgba=batch.conditioning_rgba,
             conditioning_cameras=batch.conditioning_cameras,
@@ -421,6 +437,8 @@ class RealSaSSLRMTrainerV1:
             conditioning_authority=batch.conditioning_authority,
             generating_checkpoint_sha256=batch.generating_checkpoint_sha256,
             conditioning_normals=batch.conditioning_normals,
+            original_source_tokens=original_tokens,
+            original_source_xy=original_xy,
         )
         teacher=batch.source_3d_render_target
         # Stage3 has its OWN mesh raster objective: never consume NeRF RGB,

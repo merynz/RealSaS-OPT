@@ -161,3 +161,89 @@ def test_calibrated_shape_fanout_is_explicit_alternative_not_raw_source_authorit
         report["registered_issues"]
     )
     assert report["product_e2e_qualified"] is False
+
+
+
+def test_single_rss_vnext_product_graph_and_authority_cannot_split_into_parallel_models():
+    """The existing Go/JSON catalog is THE authority, not another freeze manifest.
+
+    This protects live product selections, not training quality or release PASS.
+    Earlier research modules may coexist without becoming additional providers.
+    """
+    capabilities = read_snapshot()["capabilities"]
+    expected = {
+        "product.input", "product.shape", "product.mesh", "product.rig",
+        "product.skin", "product.mechanics", "product.graphics",
+        "product.motion", "product.proof",
+    }
+    assert set(capabilities) == expected
+
+    model = [{
+        "family": "RSSVNEXT",
+        "architecture_id": "RSS.vNext.UnifiedCharacterCompiler.v1",
+    }]
+    assert capabilities["product.shape"]["metadata"]["required_models"] == model
+    assert capabilities["product.shape"]["metadata"]["implementation_class"] == "MODEL"
+    for role in expected - {"product.shape"}:
+        assert capabilities[role]["metadata"].get("required_models", []) == []
+        assert capabilities[role]["metadata"]["implementation_class"] != "MODEL"
+
+    pass_owners = {
+        role for role in expected
+        if capabilities[role]["policy"].get("product_pass_authority") is True
+    }
+    assert pass_owners == {"product.proof"}
+    assert capabilities["product.proof"]["metadata"][
+        "product_revision_requires_independent_admission"
+    ] is True
+    assert capabilities["product.proof"]["metadata"][
+        "can_mint_product_revision"
+    ] is False
+
+    # A cycle or disconnected research entrypoint cannot masquerade as the
+    # nine-role source-to-proof production DAG.
+    visiting = set()
+    ancestors = {}
+    def preceding(role):
+        if role in visiting:
+            raise AssertionError("RSS_VNEXT_ACTIVE_PRODUCT_DAG_CYCLE")
+        if role not in ancestors:
+            visiting.add(role)
+            deps = capabilities[role]["policy"].get("dependencies", [])
+            assert len(deps) == len(set(deps)), role
+            assert set(deps).issubset(expected), role
+            ancestors[role] = set(deps)
+            for dependency in deps:
+                ancestors[role].update(preceding(dependency))
+            visiting.remove(role)
+        return ancestors[role]
+
+    assert capabilities["product.input"]["policy"].get("dependencies", []) == []
+    for role in expected:
+        preceding(role)
+    assert ancestors["product.proof"] == expected - {"product.proof"}
+    assert all(
+        "product.input" in ancestors[role]
+        for role in expected - {"product.input"}
+    )
+
+    shape = capabilities["product.shape"]["metadata"]
+    mesh = capabilities["product.mesh"]["metadata"]
+    rig = capabilities["product.rig"]["metadata"]
+    skin = capabilities["product.skin"]["metadata"]
+    mechanics = capabilities["product.mechanics"]["metadata"]
+    graphics = capabilities["product.graphics"]["metadata"]
+    motion = capabilities["product.motion"]["metadata"]
+    assert shape["input_artifact_type"] == capabilities["product.input"]["metadata"]["output_artifact_type"]
+    assert shape["output_artifact_type"] == mesh["input_shape_artifact_type"]
+    assert mesh["output_artifact_type"] == rig["input_mesh_artifact_type"]
+    assert mesh["output_artifact_type"] == skin["input_mesh_artifact_type"]
+    assert rig["output_artifact_type"] == skin["input_rig_artifact_type"]
+    assert rig["single_checkpoint_inference_reused"] is True
+    assert skin["single_checkpoint_inference_reused"] is True
+    assert rig["independent_axis_model_release_allowed"] is False
+    assert skin["independent_mira_model_release_allowed"] is False
+    assert skin["exact_embedded_mira_decoder_replayed"] is True
+    assert mechanics["dynamic_integrity_not_source_contact_or_secondary_motion"] is True
+    assert graphics["source_appearance_qualified_by_graphics_evidence"] is False
+    assert motion["default_rest_hold_policy"] == "DETERMINISTIC_ZERO_TRACK_REST_HOLD_V1"

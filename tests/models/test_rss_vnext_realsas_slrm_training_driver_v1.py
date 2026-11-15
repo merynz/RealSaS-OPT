@@ -353,3 +353,47 @@ def test_stage3_raster_backend_and_device_are_checkpoint_pinned(tmp_path):
         good.load_checkpoint(forged)
 
 
+
+
+
+def test_slrm_mesh_only_stage3_allowed_but_ray_stage_requires_real_ray_objective():
+    mesh_only=RealSaSSLRMTrainingLossWeightsV1(
+        rgb=0.,alpha=0.,semantic=0.,lpips=0.,
+        mesh_normal=1.,mesh_depth=1.,flexicubes_deformation=0.,
+    )
+    mesh_only.validate()
+    net,batch,receipt=_batch(STAGE_3,6)
+    mesh_trainer=RealSaSSLRMTrainerV1(
+        net,torch.optim.AdamW(net.parameters()),
+        dataset_manifest_sha256="f"*64,
+        trusted_source_3d_render_registry={"admitted":receipt},
+        weights=mesh_only,
+    )
+    # Product Stage3 still needs qualified real mesh and normal/depth targets,
+    # but MUST NOT demand unrelated NeRF RGB/semantic losses.
+    with pytest.raises(ValueError,match="STAGE3_MESH_RENDER_REQUIRED"):
+        mesh_trainer.objective(batch)
+
+    net,batch,receipt=_batch(STAGE_1,6)
+    ray_trainer=RealSaSSLRMTrainerV1(
+        net,torch.optim.AdamW(net.parameters()),
+        dataset_manifest_sha256="f"*64,
+        trusted_source_3d_render_registry={"admitted":receipt},
+        weights=mesh_only,
+    )
+    with pytest.raises(ValueError,match="RAY_STAGE_SUPERVISION_REQUIRED"):
+        ray_trainer.objective(batch)
+
+    degenerate=RealSaSSLRMTrainingLossWeightsV1(
+        rgb=0.,alpha=0.,semantic=0.,lpips=0.,
+        mesh_normal=0.,mesh_depth=0.,flexicubes_deformation=1.,
+    )
+    net,batch,receipt=_batch(STAGE_3,6)
+    no_mesh=RealSaSSLRMTrainerV1(
+        net,torch.optim.AdamW(net.parameters()),
+        dataset_manifest_sha256="f"*64,
+        trusted_source_3d_render_registry={"admitted":receipt},
+        weights=degenerate,
+    )
+    with pytest.raises(ValueError,match="MESH_STAGE_SUPERVISION_REQUIRED"):
+        no_mesh.objective(batch)

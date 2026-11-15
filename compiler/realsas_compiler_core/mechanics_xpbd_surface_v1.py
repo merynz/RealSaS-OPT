@@ -8,8 +8,9 @@ simulation domain. Source segmentation, proximity, and PartVerse labels do NOT
 authorize dynamics or reveal physical material parameters.
 
 The solver applies XPBD stretch/shear (triangle edges), opposite-vertex bend,
-and triangle-area constraints with per-substep Lagrange multipliers. Plane and
-sphere contacts are explicit world runtime policies. The solver modifies ONLY
+and triangle-area constraints with per-substep Lagrange multipliers. Plane and static sphere
+contacts are explicit world runtime policies. Joint-attached spheres are
+explicit canonical-joint contact proxies, interpolated across fixed steps. The solver modifies ONLY
 vertex positions of the existing DeformedMeshIRV1 and retains the original
 mesh/face addresses and the primary Mechanics pose.
 
@@ -88,6 +89,7 @@ class XPBDSurfaceJointSphereColliderV1:
     canonical_joint_id: str
     radius: float
     margin: float = 0.0
+    excluded_vertex_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -393,6 +395,10 @@ def _policy(domain: XPBDSurfaceDomainV1, policy: XPBDSurfacePolicyV1) -> str:
         _scalar(collider.radius,"XPBD_SURFACE_JOINT_SPHERE_RADIUS_INVALID",
                 positive=True,hi=1000.)
         _scalar(collider.margin,"XPBD_SURFACE_COLLIDER_MARGIN_INVALID",hi=1000.)
+        if (type(collider.excluded_vertex_ids) is not tuple
+                or len(set(collider.excluded_vertex_ids))!=len(collider.excluded_vertex_ids)
+                or not set(collider.excluded_vertex_ids)<=set(domain.dynamic_vertex_ids)):
+            raise QualificationError("XPBD_SURFACE_JOINT_SPHERE_EXCLUSION_INVALID")
     if len(seen)>16 or len(domain.dynamic_vertex_ids)>4096:
         raise QualificationError("XPBD_SURFACE_CONTACT_RESOURCE_BOUND")
     return content_sha256(asdict(policy))
@@ -678,6 +684,8 @@ def step_declared_xpbd_surface_v1(
                         pos[jid]=pos[jid]+(radius-length)*n
                         touch_count+=1
                 for collider in policy.joint_spheres:
+                    if jid in collider.excluded_vertex_ids:
+                        continue
                     diff=pos[jid]-substep_joint_centers[collider.collider_id]
                     length=float(np.linalg.norm(diff))
                     radius=collider.radius+collider.margin+policy.collision_margin
@@ -711,6 +719,8 @@ def step_declared_xpbd_surface_v1(
                 collider.radius+collider.margin+policy.collision_margin
                 -float(np.linalg.norm(pos[jid]-collider.center))))
         for collider in policy.joint_spheres:
+            if jid in collider.excluded_vertex_ids:
+                continue
             max_penetration=max(max_penetration,max(0.,
                 collider.radius+collider.margin+policy.collision_margin
                 -float(np.linalg.norm(pos[jid]-joint_centers[collider.collider_id]))))

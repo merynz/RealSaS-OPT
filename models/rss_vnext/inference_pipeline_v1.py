@@ -225,12 +225,15 @@ def run_two_view_to_compiler_proposal_v1(
             executable_constraint_operators=(
                 tuple(RIG_CONSTRAINT_OPERATOR_IDS_V1) if generate_controls else None
             ),
-            flexicubes_extractor=flexicubes_extractor,
-            flexicubes_layer=(
-                RSSvNextSemanticLayerSpec(
+            # Older research checkpoint seam accepts only the original
+            # proposal signature. Product checkpoints above require the
+            # pinned surface, so no silent topology downgrade is possible.
+            **({
+                "flexicubes_extractor": flexicubes_extractor,
+                "flexicubes_layer": RSSvNextSemanticLayerSpec(
                     "all", model.cfg.semantic_role_schema().roles,
-                ) if flexicubes_extractor is not None else None
-            ),
+                ),
+            } if flexicubes_extractor is not None else {}),
         )
     evidence = export_inference_evidence_v1(
         prediction,

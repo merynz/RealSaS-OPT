@@ -4,7 +4,7 @@
 
 ## Contract and scope
 
-A model output is only trainable through a qualified loss. A declared loss needs the exact teacher tensor, independent source lineage, valid masks and a permitted phase optimizer. A source file *containing* joints/UV/animations does not imply these teachers are admitted. The JSON inventory is the machine-readable source of this matrix: [models/rss_vnext/training_supervision_inventory_v1.json](../../models/rss_vnext/training_supervision_inventory_v1.json). Test coverage compares every structural/SLRM weight directly with the source code.
+A model output is only trainable through a qualified loss. A declared loss needs the exact teacher tensor, independent source lineage, valid masks and a permitted phase optimizer. A source file *containing* joints/UV/animations does not imply these teachers are admitted. The JSON inventory includes exact trainer result-field names, eligible-source counters and original default weights, checked against source code. It is the machine-readable source of this matrix: [models/rss_vnext/training_supervision_inventory_v1.json](../../models/rss_vnext/training_supervision_inventory_v1.json). Test coverage compares every structural/SLRM weight directly with the source code.
 
 The **same** persistent IRIS H(x) is shared across Geometry, Semantic and Graphics; TESSA owns the canonical editable control mesh/topology; AXIS owns rig/constraint proposals; MIRA owns decoded skin; Compiler resolves provenance and emits an editable Puppet; native Graphics owns final 2D appearance, including unknown/occlusion/alpha/drawable order. Source render/rig/mesh truth must not enter product inference as privileged evidence.
 
@@ -78,7 +78,7 @@ The pose objective explicitly rejects native animation whose posed vertices cann
 
 ## 4. Diffusion: Stage A, Stage B, separate alpha readout
 
-Code: [realsas_cleanroom_diffusion_training_v1.py](../../models/rss_vnext/realsas_cleanroom_diffusion_training_v1.py). **Stage A input must be TWO arbitrary source-pose rendered RGBA images** and target TWO independently rendered canonical-pose RGB views. **Stage B input must be TWO canonical rendered RGBA images** and target SIX camera-matched RGB plus SIX normal maps, with actual valid alpha masks. Both stages share the frozen image-token ABI with product inference, but the original source cameras are not virtual target cameras.
+Code: [realsas_cleanroom_diffusion_training_v1.py](../../models/rss_vnext/realsas_cleanroom_diffusion_training_v1.py), [realsas_cleanroom_render_dataset_v1.py](../../models/rss_vnext/realsas_cleanroom_render_dataset_v1.py), [realsas_cleanroom_stage_batch_v1.py](../../models/rss_vnext/realsas_cleanroom_stage_batch_v1.py). **Stage A input must be TWO arbitrary source-pose rendered RGBA images** and target TWO independently rendered canonical-pose RGB views. **Stage B input must be TWO canonical rendered RGBA images** and target SIX camera-matched RGB plus SIX normal maps, with actual valid alpha masks. Both stages share the frozen image-token ABI with product inference, but the original source cameras are not virtual target cameras.
 
 | Stage / output | Objective / targets | Masks and provenance | Required preparation |
 |---|---|---|---|
@@ -86,7 +86,7 @@ Code: [realsas_cleanroom_diffusion_training_v1.py](../../models/rss_vnext/realsa
 | **STAGE_MULTIVIEW**: PairedSourceDiffusionConditioner + row-wise RGB/normal + SD denoiser | cleanroom_diffusion_noise_microstep_v1 epsilon MSE; multiview_target_rgb_sha256[6] + multiview_target_normal_sha256[6] | multiview_target_alpha masks (same camera pairing RGB/normal); CleanroomDiffusionRenderRecordV1; source image + camera pairing | Two independently rendered canonical source RGB(A); six orthographic source-rendered RGB/normal/alpha/depth maps; fixed virtual camera frames |
 | **ALPHA_HEAD**: Stage A/B alpha_head Conv2d | admitted_alpha_head_loss_v1 BCE; renderer_alpha | trusted_valid_mask; independent source-rendered alpha/coverage | Renderer RGBA, per-stage source trust, distinct from SD epsilon MSE |
 
-**Known connector gap:** the original six-view dataset reader ignored the arbitrary-pose source pair and returned the first canonical image as reference. [PR #576](https://github.com/merynz/RealSaS-OPT/pull/576) implements the separate Stage A/B readers plus an actual frozen-encoder → source-token → denoising-loss bridge with CPU regressions. It remains a PR until all CI and main-line compatibility gates pass.
+**Stage A/B gap closed in code:** the original six-view reader ignored the two arbitrary-pose source inputs. [PR #576](https://github.com/merynz/RealSaS-OPT/pull/576) is now merged into main (bc354369d1446ce8402292dd9fb9bfc21e9f09d6; 4/4 CI). It adds distinct Stage A/B readers and an actual frozen-encoder → source-token → denoising-loss bridge. **CPU regression is not real source-render corpus or GPU quality validation.**
 
 ## 5. Trainable outputs not licensed as learned or product-ready
 

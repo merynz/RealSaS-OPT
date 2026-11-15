@@ -87,6 +87,7 @@ class RSSvNextStructuralTrainingBatch:
     product_conditioning_admission_key: str = ""
     topology_teacher_tokens: Tensor | None = None
     topology_valid_mask: Tensor | None = None
+    source_topology_admission_key: str = ""
     motion_candidate_tokens: Tensor | None = None
     motion_court: RSSvNextMotionCourt | None = None
     # Provisional trainer-level evidence, NOT a frozen Truth Foundry schema.
@@ -353,6 +354,7 @@ def source_surface_tensor_sha256(value: Tensor) -> str:
 
 from .training_optimizer_ownership_v1 import qualify_rss_vnext_optimizer_ownership_v1
 from .training_phase_contract_v1 import RSSvNextStructuralTrainingPhaseContractV1
+from .training_topology_source_admission_v1 import validate_source_topology_teacher_v1
 from .training_gradient_interference_v1 import (
     RSSvNextGradientCourtPolicyV1,
     audit_rss_vnext_gradient_interference_v1,
@@ -385,6 +387,7 @@ class RSSvNextStructuralTrainer:
         trusted_generated_conditioning_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_render_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_surface_role_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_topology_teacher_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_semantic_patch_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_region_pair_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_typed_relation_registry: Mapping[str, Mapping[str, object]] | None = None,
@@ -588,6 +591,20 @@ class RSSvNextStructuralTrainer:
                 allow_nan=False,
             ).encode("utf8")).hexdigest() if pose_snapshot else ""
         )
+        # Trust only the launcher-owned source 3D indexed-mesh topology ledger.
+        topology_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_topology_teacher_registry or {}).items()
+        }
+        self.trusted_topology_teacher_registry = MappingProxyType({
+            key: MappingProxyType(value) for key, value in topology_snapshot.items()
+        })
+        self.topology_teacher_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                topology_snapshot, sort_keys=True, separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf8")).hexdigest() if topology_snapshot else ""
+        )
         # Separate source-native face-reindex truth: a joint token/region
         # segmentation cannot self-certify contact or true NO_FACE labels.
         anchor_snapshot = {
@@ -665,6 +682,24 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_SOURCE_QUALIFICATION_KEY_MISSING")
         if not self.model.training:
             raise RuntimeError("RSS_VNEXT_TRAIN_REQUIRES_TRAIN_MODE")
+        # Production phases must bind source-native topology token bytes to
+        # an independently qualified asset, even for TESSA-only training.
+        if self.phase_contract is not None and (
+            batch.topology_teacher_tokens is not None
+            or batch.topology_valid_mask is not None
+            or bool(batch.source_topology_admission_key)
+        ):
+            validate_source_topology_teacher_v1(
+                token_ids=batch.topology_teacher_tokens,
+                valid_mask=batch.topology_valid_mask,
+                admission_key=batch.source_topology_admission_key,
+                trusted_registry=self.trusted_topology_teacher_registry,
+                dataset_manifest_sha256=self.dataset_manifest_sha256,
+                source_qualification_key=batch.source_qualification_key,
+                original_rgba=batch.rgba,
+                input_camera_features=batch.camera_features,
+                tensor_digest=source_surface_tensor_sha256,
+            )
 
         product_fields = (
             batch.product_generated_rgba, batch.product_generated_normals,
@@ -2008,6 +2043,7 @@ class RSSvNextStructuralTrainer:
             "region_pair_registry_sha256": self.region_pair_registry_sha256,
             "typed_relation_registry_sha256": self.typed_relation_registry_sha256,
             "axis_teacher_registry_sha256": self.axis_teacher_registry_sha256,
+            "topology_teacher_registry_sha256": self.topology_teacher_registry_sha256,
             "axis_pose_registry_sha256": self.axis_pose_registry_sha256,
             "anchor_face_registry_sha256": self.anchor_face_registry_sha256,
             "signed_source_registry_sha256": self.signed_source_registry_sha256,
@@ -2061,6 +2097,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_REGION_PAIR_REGISTRY_DRIFT")
         if data.get("typed_relation_registry_sha256", "") != self.typed_relation_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_TYPED_RELATION_REGISTRY_DRIFT")
+        if data.get("topology_teacher_registry_sha256", "") != self.topology_teacher_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_TOPOLOGY_TEACHER_REGISTRY_DRIFT")
         if data.get("axis_teacher_registry_sha256", "") != self.axis_teacher_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_AXIS_TEACHER_REGISTRY_DRIFT")
         if data.get("axis_pose_registry_sha256", "") != self.axis_pose_registry_sha256:

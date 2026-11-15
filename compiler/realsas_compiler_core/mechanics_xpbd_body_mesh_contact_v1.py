@@ -62,7 +62,7 @@ class PreparedXPBDBodyMeshSweptBVHV1:
     collider_faces: tuple[tuple[int, Face], ...]
     face_bvh: SweptBVHV1
     collider_edges: tuple[tuple[int, tuple[str,str]], ...]
-    edge_bvh: SweptBVHV1
+    edge_bvh: SweptBVHV1 | None
 
 
 @dataclass(frozen=True)
@@ -126,6 +126,8 @@ def prepare_xpbd_body_mesh_swept_bvh_v1(
             bounds.append(swept_aabb_from_endpoints_v1(
                 tri0,tri1,margin=collider.thickness,
             ))
+            if not collider.swept_edge_edge_ccd:
+                continue
             for a,b in ((face[0],face[1]),(face[1],face[2]),(face[2],face[0])):
                 edge=tuple(sorted((a,b)))
                 if edge in seen_edges:
@@ -139,7 +141,9 @@ def prepare_xpbd_body_mesh_swept_bvh_v1(
                 ))
     return PreparedXPBDBodyMeshSweptBVHV1(
         signature,tuple(records),prepare_swept_bvh_v1(tuple(bounds)),
-        tuple(edges),prepare_swept_bvh_v1(tuple(edge_bounds)),
+        tuple(edges),(
+            prepare_swept_bvh_v1(tuple(edge_bounds)) if edge_bounds else None
+        ),
     )
 
 
@@ -415,6 +419,8 @@ def resolve_xpbd_body_mesh_edge_contact_v1(
                 colliders,body_at_start,body_at_end,
             )):
         raise QualificationError("XPBD_BODY_SWEEP_BVH_BINDING_DRIFT")
+    if prepared_bvh.edge_bvh is None:
+        raise QualificationError("XPBD_BODY_EDGE_BVH_MISSING")
     candidates=0
     projections=0
     swept_hits=0

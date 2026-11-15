@@ -430,10 +430,26 @@ def evaluate_mechanics_intervention_frame_v1(
         requalify_declared_xpbd_surface_domain_v1(
             mesh,rig,skin,mechanics,xpbd_surface_domain,
         )
+        # A kinematic contact proxy follows the *solved* authoritative pose,
+        # never the source part label or a fabricated cloth-body relation.
+        solved_joint_positions={
+            row.canonical_joint_id:row.solved_P for row in pose.joints
+        }
+        requested_joint_ids={
+            c.canonical_joint_id for c in xpbd_surface_policy.joint_spheres
+        }
+        if not requested_joint_ids <= set(solved_joint_positions):
+            raise QualificationError(
+                "LIVE_XPBD_SURFACE_COLLIDER_JOINT_NOT_IN_SOLVED_POSE"
+            )
         surface_result=step_declared_xpbd_surface_v1(
             mesh,deformed,xpbd_surface_domain,xpbd_surface_policy,
             previous_state=xpbd_surface_previous_state,
             dt_seconds=xpbd_surface_dt_seconds,
+            joint_world_positions={
+                jid:solved_joint_positions[jid]
+                for jid in sorted(requested_joint_ids)
+            },
         )
         deformed=surface_result.deformation
     elif (xpbd_surface_domain is not None

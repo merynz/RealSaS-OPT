@@ -84,9 +84,15 @@ def iris_surface_incidence_v1(
         edge_std.unsqueeze(-1),
         (quality_sum / count.clamp_min(1.0)).unsqueeze(-1),
     ), dim=-1)
+    # A cyclic face-index rotation is the SAME triangle, so lengths must not
+    # reveal arbitrary source index-order conventions. Oriented normal still
+    # preserves the meaningful winding of the face.
+    invariant_edges = torch.sort(
+        torch.stack((e01, e12, e20), dim=-1), dim=-1,
+    ).values
     face = torch.cat((
         tri.mean(dim=1), normal,
-        torch.stack((e01, e12, e20), dim=-1),
+        invariant_edges,
         area.unsqueeze(-1),
     ), dim=-1)
     if vertex.shape != (n, 8) or face.shape != (len(faces), 10):

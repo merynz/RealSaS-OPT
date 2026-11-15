@@ -696,6 +696,22 @@ class RealSaSSLRMTrainerV1:
         self.global_step+=1
         return parts
 
+    def export_phase_handoff(self,path:str|Path):
+        """Explicit S-LRM -> structural weights transfer, never optimizer resume."""
+        from .training_phase_handoff_v1 import (
+            export_rss_vnext_training_phase_handoff_v1,
+        )
+        self._assert_optimizer_ownership()
+        return export_rss_vnext_training_phase_handoff_v1(
+            path,model=self.model,source_kind="SLRM",
+            target_kind="STRUCTURAL",source_global_step=self.global_step,
+            dataset_manifest_sha256=self.manifest_sha256,
+            source_objective_policy_sha256=self.policy_sha256,
+            source_optimizer_binding_sha256=self.optimizer_ownership.binding_sha256,
+            architecture_id=self.architecture_id,
+            architecture_digest=self.architecture_sha256,
+        )
+
     def save_checkpoint(self,path:str|Path,*,sampler_cursor:int)->None:
         if sampler_cursor<0:raise ValueError("RSS_VNEXT_REALSAS_SLRM_BAD_SAMPLER_CURSOR")
         self._assert_optimizer_ownership()

@@ -649,6 +649,7 @@ class RSSvNextStructuralTrainer:
             ).encode("utf8")).hexdigest() if joint_snapshot else ""
         )
         self.global_step = 0
+        self.phase_handoff_source_model_sha256 = ""
 
     def objective(self, batch: RSSvNextStructuralTrainingBatch) -> RSSvNextTrainingResult:
         if batch.admission_status != "QUALIFIED_FOR_THIS_SUPERVISION_FAMILY":
@@ -1932,6 +1933,49 @@ class RSSvNextStructuralTrainer:
         result.gradient_norm = grad_norm
         return result
 
+    def export_phase_handoff(
+        self, path: str | Path, *, target_kind: str = "STRUCTURAL",
+    ):
+        """Export a one-way weights-only boundary, NEVER an optimizer resume."""
+        from .training_phase_handoff_v1 import (
+            export_rss_vnext_training_phase_handoff_v1,
+        )
+        self._assert_optimizer_ownership()
+        return export_rss_vnext_training_phase_handoff_v1(
+            path, model=self.model, source_kind="STRUCTURAL",
+            target_kind=target_kind, source_global_step=self.global_step,
+            dataset_manifest_sha256=self.dataset_manifest_sha256,
+            source_objective_policy_sha256=self.objective_policy_sha256,
+            source_optimizer_binding_sha256=self.optimizer_ownership.binding_sha256,
+            architecture_id=self.model.architecture_id,
+            architecture_digest=architecture_digest(self.model.cfg),
+        )
+
+    def import_phase_handoff(
+        self, path: str | Path, *,
+        expected_source_kind: str,
+        expected_source_objective_policy_sha256: str,
+        expected_source_optimizer_binding_sha256: str,
+    ):
+        """Begin a NEW structural phase using an already-fresh optimizer."""
+        from .training_phase_handoff_v1 import (
+            import_rss_vnext_training_phase_handoff_v1,
+        )
+        self._assert_optimizer_ownership()
+        if self.global_step != 0:
+            raise ValueError("RSS_VNEXT_PHASE_HANDOFF_DESTINATION_ALREADY_TRAINED")
+        receipt = import_rss_vnext_training_phase_handoff_v1(
+            path, model=self.model, optimizer=self.optimizer,
+            target_kind="STRUCTURAL", expected_source_kind=expected_source_kind,
+            expected_source_objective_policy_sha256=expected_source_objective_policy_sha256,
+            expected_source_optimizer_binding_sha256=expected_source_optimizer_binding_sha256,
+            dataset_manifest_sha256=self.dataset_manifest_sha256,
+            architecture_id=self.model.architecture_id,
+            architecture_digest=architecture_digest(self.model.cfg),
+        )
+        self.phase_handoff_source_model_sha256 = receipt.model_state_sha256
+        return receipt
+
     def save_checkpoint(self, path: str | Path, *, sampler_cursor: int) -> None:
         if sampler_cursor < 0:
             raise ValueError("RSS_VNEXT_TRAIN_SAMPLER_CURSOR_INVALID")
@@ -1945,6 +1989,7 @@ class RSSvNextStructuralTrainer:
             "dataset_manifest_sha256": self.dataset_manifest_sha256,
             "objective_policy_sha256": self.objective_policy_sha256,
             "optimizer_ownership_binding_sha256": self.optimizer_ownership.binding_sha256,
+            "phase_handoff_source_model_sha256": self.phase_handoff_source_model_sha256,
             "render_registry_sha256": self.render_registry_sha256,
             "generated_conditioning_registry_sha256": self.generated_conditioning_registry_sha256,
             "surface_role_registry_sha256": self.surface_role_registry_sha256,
@@ -1988,6 +2033,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_DATASET_MANIFEST_DRIFT")
         if data.get("objective_policy_sha256") != self.objective_policy_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_OBJECTIVE_POLICY_DRIFT")
+        if data.get("phase_handoff_source_model_sha256", "") != self.phase_handoff_source_model_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_PHASE_ORIGIN_DRIFT")
         self._assert_optimizer_ownership()
         if data.get("optimizer_ownership_binding_sha256") != self.optimizer_ownership.binding_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_OPTIMIZER_OWNERSHIP_DRIFT")

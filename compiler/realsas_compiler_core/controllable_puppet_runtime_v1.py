@@ -7,7 +7,7 @@ bone/constraint update, slot/attachment state, clipping and hit-test separation.
 
 This is a *geometry + interaction command consumer*. It does NOT render RGB
 pixels, estimate a rig, invent attachment affinity, simulate secondary motion,
-perform cloth collision or create source appearance. Absent capability evidence
+infer cloth physics policies or create source appearance. Absent capability evidence
 raises QualificationError instead of quietly producing a convincing mock.
 """
 
@@ -53,6 +53,7 @@ from .mechanics_xpbd_surface_v1 import (
     XPBDSurfaceDomainV1, XPBDSurfacePolicyV1, XPBDSurfaceStateV1,
     requalify_declared_xpbd_surface_domain_v1,
     step_declared_xpbd_surface_v1, xpbd_surface_state_from_dict_v1,
+    resolve_declared_xpbd_surface_joint_positions_v1,
 )
 from .mechanics_live_runtime_v1 import (
     _strict_lineage, evaluate_mechanics_intervention_frame_v1,
@@ -297,6 +298,9 @@ class ControllablePuppetSessionV1:
         )
         initial=step_declared_xpbd_surface_v1(
             self.bundle.mesh,base,domain,policy,
+            joint_world_positions=resolve_declared_xpbd_surface_joint_positions_v1(
+                primary,policy,
+            ),
         )
         if initial.status!="INITIALIZED_XPBD_SURFACE_UNSIMULATED":
             raise QualificationError("PUPPET_XPBD_SURFACE_ADMISSION_FAILED")
@@ -356,6 +360,9 @@ class ControllablePuppetSessionV1:
         snapshot=step_declared_xpbd_surface_v1(
             self.bundle.mesh,primary,self._xpbd_surface_domain,
             self._xpbd_surface_policy,previous_state=decoded,
+            joint_world_positions=resolve_declared_xpbd_surface_joint_positions_v1(
+                pose,self._xpbd_surface_policy,
+            ),
         )
         if snapshot.status!="SNAPSHOT_XPBD_SURFACE_NO_STEP":
             raise QualificationError("PUPPET_XPBD_SURFACE_RESTORE_UNQUALIFIED")
@@ -639,6 +646,9 @@ class ControllablePuppetSessionV1:
                 self._xpbd_surface_policy,
                 previous_state=self._xpbd_surface_state,
                 dt_seconds=dt_seconds,
+                joint_world_positions=resolve_declared_xpbd_surface_joint_positions_v1(
+                    pose,self._xpbd_surface_policy,
+                ),
             )
             if surface.status not in {
                 "INITIALIZED_XPBD_SURFACE_UNSIMULATED",

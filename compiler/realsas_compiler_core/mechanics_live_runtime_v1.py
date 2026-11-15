@@ -43,6 +43,7 @@ from .mechanics_xpbd_surface_v1 import (
     XPBDSurfaceDomainV1, XPBDSurfacePolicyV1, XPBDSurfaceStateV1,
     requalify_declared_xpbd_surface_domain_v1,
     step_declared_xpbd_surface_v1,
+    resolve_declared_xpbd_surface_joint_positions_v1,
 )
 from .mechanics_attachment_frames_v1 import (
     AttachmentWorldFrameCourtV1,
@@ -434,6 +435,9 @@ def evaluate_mechanics_intervention_frame_v1(
             mesh,deformed,xpbd_surface_domain,xpbd_surface_policy,
             previous_state=xpbd_surface_previous_state,
             dt_seconds=xpbd_surface_dt_seconds,
+            joint_world_positions=resolve_declared_xpbd_surface_joint_positions_v1(
+                pose,xpbd_surface_policy,
+            ),
         )
         deformed=surface_result.deformation
     elif (xpbd_surface_domain is not None

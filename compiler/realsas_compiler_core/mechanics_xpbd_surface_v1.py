@@ -8,8 +8,9 @@ simulation domain. Source segmentation, proximity, and PartVerse labels do NOT
 authorize dynamics or reveal physical material parameters.
 
 The solver applies XPBD stretch/shear (triangle edges), opposite-vertex bend,
-and triangle-area constraints with per-substep Lagrange multipliers. Plane and
-sphere contacts are explicit world runtime policies. The solver modifies ONLY
+and triangle-area constraints with per-substep Lagrange multipliers. Plane and static sphere
+contacts are explicit world runtime policies. Joint-attached spheres are
+explicit canonical-joint contact proxies, interpolated across fixed steps. The solver modifies ONLY
 vertex positions of the existing DeformedMeshIRV1 and retains the original
 mesh/face addresses and the primary Mechanics pose.
 
@@ -36,7 +37,7 @@ from .canonical_skin_ir_v2 import (
 )
 from .canonical_mechanics_ir_v1 import CanonicalMechanicsIRV1
 from .hashing import content_sha256
-from .mechanics_control_solver_v1 import DeformedMeshIRV1
+from .mechanics_control_solver_v1 import DeformedMeshIRV1, MechanicsPoseIRV1
 from .mechanics_xpbd_secondary_v1 import (
     XPBDPlaneColliderV1, XPBDSphereColliderV1,
 )
@@ -81,6 +82,17 @@ class XPBDSurfaceDomainV1:
 
 
 @dataclass(frozen=True)
+class XPBDSurfaceJointSphereColliderV1:
+    """Explicit proxy attached to a canonical joint, not inferred cloth truth."""
+
+    collider_id: str
+    canonical_joint_id: str
+    radius: float
+    margin: float = 0.0
+    excluded_vertex_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class XPBDSurfacePolicyV1:
     domain_hash: str
     inverse_mass: float = 1.0
@@ -92,6 +104,7 @@ class XPBDSurfacePolicyV1:
     damping_per_second: float = 1.5
     planes: tuple[XPBDPlaneColliderV1, ...] = ()
     spheres: tuple[XPBDSphereColliderV1, ...] = ()
+    joint_spheres: tuple[XPBDSurfaceJointSphereColliderV1, ...] = field(default=(), kw_only=True)
     collision_margin: float = 0.0
     fixed_step_seconds: float = 1.0/120.0
     maximum_dt_seconds: float = 0.25
@@ -371,9 +384,49 @@ def _policy(domain: XPBDSurfaceDomainV1, policy: XPBDSurfacePolicyV1) -> str:
         _scalar(collider.radius,"XPBD_SURFACE_SPHERE_RADIUS_INVALID",
                 positive=True,hi=1000.)
         _scalar(collider.margin,"XPBD_SURFACE_COLLIDER_MARGIN_INVALID",hi=1000.)
+    for collider in policy.joint_spheres:
+        if (type(collider) is not XPBDSurfaceJointSphereColliderV1
+                or not isinstance(collider.collider_id, str)
+                or not isinstance(collider.canonical_joint_id, str)
+                or not collider.collider_id or not collider.canonical_joint_id
+                or collider.collider_id in seen):
+            raise QualificationError("XPBD_SURFACE_JOINT_SPHERE_INVALID")
+        seen.add(collider.collider_id)
+        _scalar(collider.radius,"XPBD_SURFACE_JOINT_SPHERE_RADIUS_INVALID",
+                positive=True,hi=1000.)
+        _scalar(collider.margin,"XPBD_SURFACE_COLLIDER_MARGIN_INVALID",hi=1000.)
+        if (type(collider.excluded_vertex_ids) is not tuple
+                or len(set(collider.excluded_vertex_ids))!=len(collider.excluded_vertex_ids)
+                or not set(collider.excluded_vertex_ids)<=set(domain.dynamic_vertex_ids)):
+            raise QualificationError("XPBD_SURFACE_JOINT_SPHERE_EXCLUSION_INVALID")
     if len(seen)>16 or len(domain.dynamic_vertex_ids)>4096:
         raise QualificationError("XPBD_SURFACE_CONTACT_RESOURCE_BOUND")
     return content_sha256(asdict(policy))
+
+
+def resolve_declared_xpbd_surface_joint_positions_v1(
+    pose: MechanicsPoseIRV1, policy: XPBDSurfacePolicyV1,
+) -> dict[str, Vec3]:
+    """Resolve joint collider centers from the authoritative solved pose.
+
+    This is the single bridge used by both live Mechanics and the editor;
+    callers cannot substitute a label-derived or source-rest joint location.
+    """
+    required={row.canonical_joint_id for row in policy.joint_spheres}
+    if not required:
+        return {}
+    if not isinstance(pose, MechanicsPoseIRV1):
+        raise QualificationError("XPBD_SURFACE_SOLVED_POSE_REQUIRED")
+    by_id={row.canonical_joint_id:row.solved_P for row in pose.joints}
+    if len(by_id)!=len(pose.joints) or not required<=set(by_id):
+        raise QualificationError(
+            "XPBD_SURFACE_COLLIDER_JOINT_NOT_IN_SOLVED_POSE"
+        )
+    return {
+        jid:tuple(map(float,_xyz(
+            by_id[jid],"XPBD_SURFACE_KINEMATIC_JOINT_POSITION_INVALID",
+        ))) for jid in sorted(required)
+    }
 
 
 def _state_hash(state: XPBDSurfaceStateV1) -> str:
@@ -481,8 +534,24 @@ def step_declared_xpbd_surface_v1(
     domain: XPBDSurfaceDomainV1, policy: XPBDSurfacePolicyV1,
     *, previous_state: XPBDSurfaceStateV1 | None = None,
     dt_seconds: float | None = None,
+    joint_world_positions: Mapping[str, Vec3] | None = None,
 ) -> XPBDSurfaceResultV1:
     signature=_policy(domain,policy)
+    required_joint_ids={c.canonical_joint_id for c in policy.joint_spheres}
+    if (not isinstance(joint_world_positions, Mapping)
+            and joint_world_positions is not None):
+        raise QualificationError("XPBD_SURFACE_KINEMATIC_JOINT_COVERAGE_DRIFT")
+    if set(joint_world_positions or {})!=required_joint_ids:
+        raise QualificationError("XPBD_SURFACE_KINEMATIC_JOINT_COVERAGE_DRIFT")
+    joint_world={
+        jid:_xyz(joint_world_positions[jid],
+                 "XPBD_SURFACE_KINEMATIC_JOINT_POSITION_INVALID")
+        for jid in sorted(required_joint_ids)
+    }
+    joint_centers={
+        c.collider_id:joint_world[c.canonical_joint_id]
+        for c in policy.joint_spheres
+    }
     if (
         primary_deformation.mesh_lineage_hash!=domain.mesh_lineage_hash
         or primary_deformation.skin_lineage_hash!=domain.skin_lineage_hash
@@ -514,6 +583,7 @@ def step_declared_xpbd_surface_v1(
             raise QualificationError("XPBD_SURFACE_INITIALIZE_WITHOUT_DT")
         ticks,frames,steps=0,0,0
         prior_pins={jid:primary[jid] for jid in pins}
+        prior_joint_centers={k:v.copy() for k,v in joint_centers.items()}
     else:
         if previous_state.state_hash != _state_hash(previous_state):
             raise QualificationError("XPBD_SURFACE_STATE_HASH_DRIFT")
@@ -537,7 +607,32 @@ def step_declared_xpbd_surface_v1(
         for jid in dynamic:
             pos[jid]=_xyz(rows[jid].world_P,"XPBD_SURFACE_PRIOR_POSITION_INVALID")
             velocity[jid]=_xyz(rows[jid].world_velocity,"XPBD_SURFACE_PRIOR_VELOCITY_INVALID")
+        old_centers=previous_state.metadata.get(
+            "kinematic_joint_sphere_centers", []
+        )
+        if not isinstance(old_centers,list) or any(
+            not isinstance(row,(tuple,list)) or len(row)!=2
+            for row in old_centers
+        ):
+            raise QualificationError("XPBD_SURFACE_PRIOR_KINEMATIC_CENTERS_INVALID")
+        try:
+            prior_joint_centers={
+                cid:_xyz(p,"XPBD_SURFACE_PRIOR_KINEMATIC_CENTER_INVALID")
+                for cid,p in old_centers
+            }
+        except (ValueError,TypeError) as exc:
+            raise QualificationError(
+                "XPBD_SURFACE_PRIOR_KINEMATIC_CENTERS_INVALID"
+            ) from exc
+        if (len(prior_joint_centers)!=len(old_centers)
+                or set(prior_joint_centers)!=set(joint_centers)):
+            raise QualificationError("XPBD_SURFACE_PRIOR_KINEMATIC_CENTERS_DRIFT")
         if dt_seconds is None:
+            if any(not np.array_equal(prior_joint_centers[cid],center)
+                   for cid,center in joint_centers.items()):
+                raise QualificationError(
+                    "XPBD_SURFACE_CHANGED_KINEMATIC_COLLIDER_REQUIRES_DT"
+                )
             if primary_hash!=previous_state.primary_deformation_hash:
                 raise QualificationError("XPBD_SURFACE_CHANGED_PRIMARY_REQUIRES_DT")
             steps=0
@@ -556,11 +651,23 @@ def step_declared_xpbd_surface_v1(
     damping=math.exp(-policy.damping_per_second*h)
     mass={jid:(0. if jid in pins else policy.inverse_mass)
           for jid in domain.vertex_ids}
+    # The inner XPBD constraint loop may run many times per frame.
+    # A tuple search for every particle/collider pair scales quadratically
+    # with exclusion-mask size. Reuse immutable O(1) membership instead.
+    excluded_by_collider={
+        c.collider_id:frozenset(c.excluded_vertex_ids)
+        for c in policy.joint_spheres
+    }
     touch_count=0
     for sub in range(steps):
         fraction=(sub+1)/steps
         for jid in pins:
             pos[jid]=prior_pins[jid]+fraction*(primary[jid]-prior_pins[jid])
+        substep_joint_centers={
+            cid:prior_joint_centers[cid]+fraction*(
+                joint_centers[cid]-prior_joint_centers[cid])
+            for cid in joint_centers
+        }
         before={jid:pos[jid].copy() for jid in dynamic}
         for jid in dynamic:
             pos[jid]=pos[jid]+h*damping*velocity[jid]+h*h*gravity
@@ -608,6 +715,16 @@ def step_declared_xpbd_surface_v1(
                         n=diff/length if length>1e-12 else np.array((1.,0.,0.))
                         pos[jid]=pos[jid]+(radius-length)*n
                         touch_count+=1
+                for collider in policy.joint_spheres:
+                    if jid in excluded_by_collider[collider.collider_id]:
+                        continue
+                    diff=pos[jid]-substep_joint_centers[collider.collider_id]
+                    length=float(np.linalg.norm(diff))
+                    radius=collider.radius+collider.margin+policy.collision_margin
+                    if length<radius:
+                        n=diff/length if length>1e-12 else np.array((1.,0.,0.))
+                        pos[jid]=pos[jid]+(radius-length)*n
+                        touch_count+=1
         for jid in dynamic:
             velocity[jid]=(pos[jid]-before[jid])/h
             if (not np.isfinite(pos[jid]).all()
@@ -633,6 +750,12 @@ def step_declared_xpbd_surface_v1(
             max_penetration=max(max_penetration,max(0.,
                 collider.radius+collider.margin+policy.collision_margin
                 -float(np.linalg.norm(pos[jid]-collider.center))))
+        for collider in policy.joint_spheres:
+            if jid in excluded_by_collider[collider.collider_id]:
+                continue
+            max_penetration=max(max_penetration,max(0.,
+                collider.radius+collider.margin+policy.collision_margin
+                -float(np.linalg.norm(pos[jid]-joint_centers[collider.collider_id]))))
     state=XPBDSurfaceStateV1(
         domain_hash=domain.domain_hash,
         policy_hash=signature,
@@ -647,6 +770,10 @@ def step_declared_xpbd_surface_v1(
             "authority":"EXPLICIT_XPBD_SURFACE_RUNTIME_STATE",
             "source_material_parameters_qualified":False,
             "training_authorized":False,
+            "kinematic_joint_sphere_centers":[
+                [cid,list(map(float,joint_centers[cid]))]
+                for cid in sorted(joint_centers)
+            ],
         },
     )
     state=replace(state,state_hash=_state_hash(state))
@@ -684,6 +811,7 @@ def step_declared_xpbd_surface_v1(
             "source_physics_truth_claimed":False,
             "same_canonical_mesh_and_face_addresses":True,
             "surface_self_triangle_collision_qualified":False,
+            "explicit_joint_sphere_contact_enabled":bool(policy.joint_spheres),
             "friction_qualified":False,
             "dihedral_material_bending_qualified":False,
         },

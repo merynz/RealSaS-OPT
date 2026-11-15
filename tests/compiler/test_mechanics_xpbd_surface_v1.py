@@ -14,6 +14,10 @@ from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.mechanics_control_solver_v1 import (
     ControlTransformIRV1, solve_control_pose_v1, deform_mesh_lbs_v1,
 )
+from compiler.realsas_compiler_core.mechanics_live_runtime_v1 import (
+    MechanicsInterventionStepV1, evaluate_mechanics_intervention_frame_v1,
+    evaluate_mechanics_intervention_sequence_v1,
+)
 from compiler.realsas_compiler_core.mechanics_xpbd_surface_v1 import (
     DeclaredXPBDSurfaceRequestV1, XPBDSurfacePolicyV1,
     prepare_declared_xpbd_surface_domain_v1,
@@ -244,3 +248,70 @@ def test_two_fixed_particles_do_not_divide_by_zero_or_fake_compliant_motion():
     positions["b"]=np.array((1.1,0.,0.))
     with pytest.raises(QualificationError,match="FIXED_CONSTRAINT_CONFLICT"):
         _distance_pair(positions,"a","b",1.,0.,0.,1./120.,inverse)
+
+
+def test_live_mechanics_consumes_surface_after_canonical_lbs():
+    parents,domain,policy,primary=_setup()
+    mesh,rig,skin,mechanics=parents
+    first=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,
+        xpbd_surface_domain=domain,xpbd_surface_policy=policy,
+    )
+    assert first.status=="PASS_MECHANICS_BEHAVIORAL_COURT"
+    assert first.metadata["xpbd_surface_status"]=="INITIALIZED_XPBD_SURFACE_UNSIMULATED"
+    assert first.xpbd_surface_state is not None
+    second=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,
+        xpbd_surface_domain=domain,xpbd_surface_policy=policy,
+        xpbd_surface_previous_state=first.xpbd_surface_state,
+        xpbd_surface_dt_seconds=1./60.,
+    )
+    assert second.status=="PASS_MECHANICS_BEHAVIORAL_COURT"
+    assert second.metadata["xpbd_surface_status"]=="PASS_XPBD_SURFACE_RUNTIME"
+    assert second.pose.joints==first.pose.joints
+    assert second.deformation.positions!=first.deformation.positions
+    assert second.deformation.canonical_mesh_vertex_ids==first.deformation.canonical_mesh_vertex_ids
+    assert second.xpbd_surface_state.ticks==2
+
+
+def test_live_surface_sequence_and_policy_safety():
+    parents,domain,policy,primary=_setup(gravity_xyz=(0.,0.,0.))
+    mesh,rig,skin,mechanics=parents
+    sequence=evaluate_mechanics_intervention_sequence_v1(
+        mesh,rig,skin,mechanics,
+        (MechanicsInterventionStepV1(0.),
+         MechanicsInterventionStepV1(1./60.),
+         MechanicsInterventionStepV1(2./60.)),
+        xpbd_surface_domain=domain,xpbd_surface_policy=policy,
+    )
+    assert sequence.status=="PASS_MECHANICS_BEHAVIORAL_SEQUENCE"
+    assert tuple(f.xpbd_surface_state.ticks for f in sequence.frames)==(0,2,4)
+    with pytest.raises(QualificationError,match="SURFACE_POLICY_REQUIRED"):
+        evaluate_mechanics_intervention_frame_v1(
+            mesh,rig,skin,mechanics,xpbd_surface_domain=domain,
+        )
+    forged=replace(domain,mesh_lineage_hash="foreign")
+    with pytest.raises(QualificationError,match="PARENT_LINEAGE_DRIFT"):
+        evaluate_mechanics_intervention_frame_v1(
+            mesh,rig,skin,mechanics,
+            xpbd_surface_domain=forged,xpbd_surface_policy=policy,
+        )
+
+
+def test_live_unsatisfiable_surface_contact_fails_product_court():
+    parents,domain,policy,_=_setup(planes=(
+        XPBDPlaneColliderV1("WALL",(0.,4.,0.),(0.,1.,0.)),
+    ))
+    mesh,rig,skin,mechanics=parents
+    first=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,xpbd_surface_domain=domain,
+        xpbd_surface_policy=policy,
+    )
+    second=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,xpbd_surface_domain=domain,
+        xpbd_surface_policy=policy,
+        xpbd_surface_previous_state=first.xpbd_surface_state,
+        xpbd_surface_dt_seconds=1./60.,
+    )
+    assert second.status=="FAIL_MECHANICS_BEHAVIORAL_COURT"
+    assert "XPBD_SURFACE_CONTACT_OR_MATERIAL_RESIDUAL" in second.failures

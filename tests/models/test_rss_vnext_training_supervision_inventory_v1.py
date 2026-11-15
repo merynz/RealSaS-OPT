@@ -188,3 +188,60 @@ def test_every_structural_objective_is_bound_to_the_actual_result_and_eligibilit
         assert expected_result in result_fields
         if expected_eligible is not None:
             assert expected_eligible in result_fields
+
+
+
+def test_every_instantiated_unified_expert_root_is_accounted_for():
+    """All trainable roots require either a learning route or explicit gap."""
+    source=ast.parse(
+        (ROOT/"models/rss_vnext/unified_character_model.py").read_text(
+            encoding="utf8"
+        )
+    )
+    klass=next(
+        node for node in source.body
+        if isinstance(node,ast.ClassDef)
+        and node.name=="RSSvNextUnifiedCharacterModel"
+    )
+    init=next(
+        node for node in klass.body
+        if isinstance(node,ast.FunctionDef) and node.name=="__init__"
+    )
+    roots=set()
+    for node in ast.walk(init):
+        if not isinstance(node,(ast.Assign,ast.AnnAssign)):
+            continue
+        targets=node.targets if isinstance(node,ast.Assign) else (node.target,)
+        for target in targets:
+            if (
+                isinstance(target,ast.Attribute)
+                and isinstance(target.value,ast.Name)
+                and target.value.id=="self"
+            ):
+                roots.add(target.attr)
+    roots.discard("cfg")  # Configuration value, not a learnable output.
+    catalog=_document()["model_head_catalog"]
+    names=[row["module"] for row in catalog]
+    assert len(names)==len(set(names))
+    assert len(names)>=40
+    uncovered={
+        root for root in roots
+        if not any(name==root or name.startswith(root+".") for name in names)
+    }
+    assert not uncovered, f"Uninventoried model heads/bridges: {sorted(uncovered)}"
+    for row in catalog:
+        assert row["module"] and row["output"]
+        assert row["losses"] and row["state"] and row["connection"]
+    states={row["state"] for row in catalog}
+    assert "NO_SOURCE_LOSS_VERIFIED" in states
+    assert "FROZEN_CONDITIONING" in states
+    assert "DIRECT_QUALIFIED_LOSS" in states
+
+
+def test_distinct_relation_and_uncertainty_head_gaps_are_not_hidden_by_other_loss_names():
+    catalog={row["module"]:row for row in _document()["model_head_catalog"]}
+    assert "NO_SOURCE" in catalog["relation"]["state"]
+    assert "NO_SOURCE" in catalog["deformation_quality"]["state"]
+    assert "NO_SOURCE" in catalog["iris.field.uncertainty_head"]["state"]
+    assert catalog["semantic_structure"]["state"]=="DIRECT_AND_INDIRECT"
+    assert catalog["graphics"]["state"]=="PARTIALLY_DIRECT"

@@ -148,7 +148,7 @@ def is_high_signal(path: str) -> bool:
     name = p.name
     if path in {"CURRENT_STATE.md", "SYSTEM_INDEX.md", "AGENTS.md"}:
         return True
-    if path.startswith("prereg/"):
+    if path.startswith(("prereg/", "historical/prereg/")):
         return True
     if path.startswith("canonical/"):
         if path in {

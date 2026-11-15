@@ -1,0 +1,123 @@
+{
+  "schema": "RealSaS.RootHistoricalCollectionRelocation.v1",
+  "source_main_sha": "4c4b6b57c81663cdda8d19eaf656d63e2dc62b04",
+  "reason": "VISIBLE_ROOT_REDUCTION_WITH_BYTE_PRESERVED_HISTORY",
+  "original_path_retention_in_git_history": true,
+  "paths": [
+    {
+      "old_path": "RESTORATION_STATE.md",
+      "new_path": "historical/repository/RESTORATION_STATE_20261113_LEGACY.md",
+      "original_git_blob_sha1": "ef2d4f896702ac9227918939cd6e4774094ac197"
+    },
+    {
+      "old_path": "prereg/iris/G1_SINGLE_POSE_GEOMETRY_PREREG_DRAFT.json",
+      "new_path": "historical/prereg/iris/G1_SINGLE_POSE_GEOMETRY_PREREG_DRAFT.json",
+      "original_git_blob_sha1": "415af64055225528f3946bbf0c3d694fda9a006b"
+    },
+    {
+      "old_path": "prereg/iris/G1_SINGLE_POSE_GEOMETRY_PREREG_V1.json",
+      "new_path": "historical/prereg/iris/G1_SINGLE_POSE_GEOMETRY_PREREG_V1.json",
+      "original_git_blob_sha1": "702ea74b99d2ba8aa61f2ef9718b000341c1cd02"
+    },
+    {
+      "old_path": "prereg/n1d/N1D_DESCRIPTOR_GLOBAL_FOREGROUND_TOP4_UNTOUCHED_OPENDEV_PREREG_V1.json",
+      "new_path": "historical/prereg/n1d/N1D_DESCRIPTOR_GLOBAL_FOREGROUND_TOP4_UNTOUCHED_OPENDEV_PREREG_V1.json",
+      "original_git_blob_sha1": "172348785b64045eb468527d4c911170dcf79c7b"
+    },
+    {
+      "old_path": "prereg/n1d/N1D_GLOBAL_FOREGROUND_FULL_OBSERVABLE_GFDR_PREREG_V1.json",
+      "new_path": "historical/prereg/n1d/N1D_GLOBAL_FOREGROUND_FULL_OBSERVABLE_GFDR_PREREG_V1.json",
+      "original_git_blob_sha1": "1f63d14b6c16c1470510133ca2bd3f5efdae0069"
+    },
+    {
+      "old_path": "prereg/n1d/N1D_GLOBAL_FOREGROUND_GFDR_CAUSAL_REPLAY_PREREG_V1.json",
+      "new_path": "historical/prereg/n1d/N1D_GLOBAL_FOREGROUND_GFDR_CAUSAL_REPLAY_PREREG_V1.json",
+      "original_git_blob_sha1": "29f7aac944a50665c4ae31fc6947324a0b05e586"
+    },
+    {
+      "old_path": "prereg/n1d/N1D_GLOBAL_FOREGROUND_MULTIINTERVENTION_OPENDEV_PREREG_V1.json",
+      "new_path": "historical/prereg/n1d/N1D_GLOBAL_FOREGROUND_MULTIINTERVENTION_OPENDEV_PREREG_V1.json",
+      "original_git_blob_sha1": "fca9dca905fee3f84deed5232b9f0242469db70f"
+    },
+    {
+      "old_path": "prospective/POST_DEMO_SOURCE_BACKED_2D_PRESENTATION_CARRIER_HYPOTHESIS_20260922.md",
+      "new_path": "historical/prospective/POST_DEMO_SOURCE_BACKED_2D_PRESENTATION_CARRIER_HYPOTHESIS_20260922.md",
+      "original_git_blob_sha1": "5f42cd8a22f2afe373d0ce4b9f564413b2f77048"
+    },
+    {
+      "old_path": "prospective/iris_vnext_20260829/IRIS_VNEXT_ARCHITECTURE_V6.svg",
+      "new_path": "historical/prospective/iris_vnext_20260829/IRIS_VNEXT_ARCHITECTURE_V6.svg",
+      "original_git_blob_sha1": "ed06c20351fec3fe99be994f54e707783e556bf4"
+    },
+    {
+      "old_path": "prospective/iris_vnext_20260829/IRIS_VNEXT_EXPERIMENT_PLAN_V4.md",
+      "new_path": "historical/prospective/iris_vnext_20260829/IRIS_VNEXT_EXPERIMENT_PLAN_V4.md",
+      "original_git_blob_sha1": "8e4921fd948d54463e8fcad2786aeb7760ce4cf6"
+    },
+    {
+      "old_path": "prospective/iris_vnext_20260829/OBSERVATION_CONTRACT_V1.md",
+      "new_path": "historical/prospective/iris_vnext_20260829/OBSERVATION_CONTRACT_V1.md",
+      "original_git_blob_sha1": "56b56588226d2f782ef6b72133c064ed574e832b"
+    },
+    {
+      "old_path": "prospective/iris_vnext_20260829/PROSPECTIVE_SEAL_V1.md",
+      "new_path": "historical/prospective/iris_vnext_20260829/PROSPECTIVE_SEAL_V1.md",
+      "original_git_blob_sha1": "76d7fdd50fa85e6a78e470d8af24f24c1960fe41"
+    },
+    {
+      "old_path": "research/evidence/slash_source_frame_fix_20261012/source_motion_evidence.json",
+      "new_path": "historical/research/evidence/slash_source_frame_fix_20261012/source_motion_evidence.json",
+      "original_git_blob_sha1": "22a731b930ff01272f4e5bfdd9830ea2507c810b"
+    },
+    {
+      "old_path": "restoration/COMPILER_RUNTIME_RESTORATION_RESULT_V1.json",
+      "new_path": "historical/restoration/COMPILER_RUNTIME_RESTORATION_RESULT_V1.json",
+      "original_git_blob_sha1": "cab9a3f1e205dd49721b01e5d51db20ccb84e4fc"
+    },
+    {
+      "old_path": "restoration/HISTORICAL_AUTHORITY_POINTERS_V1.json",
+      "new_path": "historical/restoration/HISTORICAL_AUTHORITY_POINTERS_V1.json",
+      "original_git_blob_sha1": "c55d52ad298e410d5bf05f53ec336f78d813484e"
+    },
+    {
+      "old_path": "restoration/MODEL_SOURCE_OWNERSHIP_AUDIT_V1_20260903.md",
+      "new_path": "historical/restoration/MODEL_SOURCE_OWNERSHIP_AUDIT_V1_20260903.md",
+      "original_git_blob_sha1": "3ce2ddd2bce888ec5676f43a6619c70da0acc9f0"
+    },
+    {
+      "old_path": "restoration/historical/v97_39/SaS_v97_39_FinalPackageSingleTruthRebind_Report.md",
+      "new_path": "historical/restoration/historical/v97_39/SaS_v97_39_FinalPackageSingleTruthRebind_Report.md",
+      "original_git_blob_sha1": "e5d95456110d8915810cb80603deb5558ddbd1ca"
+    },
+    {
+      "old_path": "notebooks/RealSaS_KNIGHT_GEPPETTO_STAGE27_FIRST_PASS_RUN_ALL.ipynb",
+      "new_path": "historical/notebooks/RealSaS_KNIGHT_GEPPETTO_STAGE27_FIRST_PASS_RUN_ALL.ipynb",
+      "original_git_blob_sha1": "664933888bfb4f03d9e69528d7d3e3b1bafbe475"
+    },
+    {
+      "old_path": "notebooks/RealSaS_KNIGHT_GEPPETTO_STAGE27_RUN_ALL.ipynb",
+      "new_path": "historical/notebooks/RealSaS_KNIGHT_GEPPETTO_STAGE27_RUN_ALL.ipynb",
+      "original_git_blob_sha1": "9c6ea459533102ad3499d41f1d4db525e2ca0a64"
+    },
+    {
+      "old_path": "notebooks/Truth139_FULL139_IRIS_Response_Evidence_Run_All_v1.ipynb",
+      "new_path": "historical/notebooks/Truth139_FULL139_IRIS_Response_Evidence_Run_All_v1.ipynb",
+      "original_git_blob_sha1": "a38080167d26fe3976c6a641c1346561a29f9c42"
+    },
+    {
+      "old_path": "notebooks/Truth139_V32_Finalize_Remaining_Truths_Run_All_v3.ipynb",
+      "new_path": "historical/notebooks/Truth139_V32_Finalize_Remaining_Truths_Run_All_v3.ipynb",
+      "original_git_blob_sha1": "b4ab839c229573ed28781b020975b3e3b56aa47f"
+    },
+    {
+      "old_path": "notebooks/Truth139_V32_Finalize_Remaining_Truths_Run_All_v4.ipynb",
+      "new_path": "historical/notebooks/Truth139_V32_Finalize_Remaining_Truths_Run_All_v4.ipynb",
+      "original_git_blob_sha1": "32a3cd757b936537eae87eea941f742a31f4e8d6"
+    },
+    {
+      "old_path": "notebooks/Truth139_V32_Finalize_Remaining_Truths_Run_All_v5.ipynb",
+      "new_path": "historical/notebooks/Truth139_V32_Finalize_Remaining_Truths_Run_All_v5.ipynb",
+      "original_git_blob_sha1": "53427191f28358cca44232be4a8f68e701d2dea3"
+    }
+  ]
+}

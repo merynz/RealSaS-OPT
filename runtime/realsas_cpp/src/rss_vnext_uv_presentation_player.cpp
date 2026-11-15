@@ -531,6 +531,62 @@ int self_test(){
        visible_blue[2]!=255||
        visible_blue[3]<125||visible_blue[3]>129)
         throw std::runtime_error("RSS_UV_NATIVE_ROLE_TRANSMITTANCE_DRIFT");
+    // Geometric occlusion must survive the complete absence of RGB.
+    // Otherwise a blue surface behind an uncolored face leaks through.
+    const auto center=static_cast<std::size_t>(20*64+20);
+    for(int y=0;y<8;++y)for(int x=1;x<=3;++x){
+        const auto p=static_cast<std::size_t>(y*8+x);
+        tex.inferred_mask[p]=0u;
+        tex.source_mask[p]=0u;
+    }
+    const auto unknown_front=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(1.,2.,0),64,64,0,-1
+    );
+    if(at(unknown_front,20,20)!=std::array<int,4>{0,0,0,0}||
+       unknown_front.unknown_occlusion[center]!=1u||
+       unknown_front.unknown_occlusion_pixels==0||
+       unknown_front.front_face[center]!=-1)
+        throw std::runtime_error("RSS_UV_NATIVE_UNKNOWN_FRONT_OCCLUSION_LEAK");
+    const auto known_front=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(2.,1.,0),64,64,0,-1
+    );
+    if(at(known_front,20,20)!=std::array<int,4>{0,0,255,255}||
+       known_front.unknown_occlusion[center]!=0u)
+        throw std::runtime_error("RSS_UV_NATIVE_UNKNOWN_BACK_BLOCKED_FRONT");
+    // A known alpha-zero texel must remain transparent, unlike UNKNOWN.
+    for(int y=0;y<8;++y)for(int x=1;x<=3;++x){
+        const auto p=static_cast<std::size_t>(y*8+x);
+        tex.inferred_mask[p]=1u;
+        tex.inferred_rgba[4*p+3]=0u;
+    }
+    const auto transparent_front=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(1.,2.,0),64,64,0,-1
+    );
+    if(at(transparent_front,20,20)!=std::array<int,4>{0,0,255,255}||
+       transparent_front.unknown_occlusion[center]!=0u)
+        throw std::runtime_error("RSS_UV_NATIVE_KNOWN_TRANSPARENCY_REGRESSION");
+    // With a translucent known front and an unknown rear, preserve only
+    // the known contribution and signal unresolved background ownership.
+    for(int y=0;y<8;++y){
+        for(int x=1;x<=3;++x){
+            const auto p=static_cast<std::size_t>(y*8+x);
+            // The preceding orthographic-gradient fixture changed the
+            // foreground RGB; reset it before asserting exact red alpha.
+            tex.inferred_rgba[4*p]=255u;
+            tex.inferred_rgba[4*p+1]=0u;
+            tex.inferred_rgba[4*p+2]=0u;
+            tex.inferred_rgba[4*p+3]=128u;
+        }
+        for(int x=4;x<=6;++x)
+            tex.inferred_mask[y*8+x]=0u;
+    }
+    const auto translucent_over_unknown=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(1.,2.,0),64,64,0,-1
+    );
+    if(at(translucent_over_unknown,20,20)!=std::array<int,4>{255,0,0,128}||
+       translucent_over_unknown.unknown_occlusion[center]!=1u)
+        throw std::runtime_error("RSS_UV_NATIVE_PARTIAL_ALPHA_UNKNOWN_REAR");
+    std::cout<<"RSS_UV_NATIVE_UNKNOWN_COVERAGE_OCCLUSION_PASS\n";
     std::cout<<"RSS_UV_NATIVE_SEMANTIC_SUBLAYER_CONSUMER_PASS\n";
     std::cout<<"RSS_UV_NATIVE_ORTHOGRAPHIC_CHART_AND_MOVING_DEPTH_PASS\n";
     std::cout<<"RSS_UV_NATIVE_POSED_DEPTH_AND_PARTIAL_ORDER_PASS\n";
@@ -541,19 +597,21 @@ int main(int argc,char** argv){
     try {
         if(argc==2&&std::string(argv[1])=="--self-test")return self_test();
         const bool archive_mode=argc>1&&std::string(argv[1])=="--rss";
-        if(archive_mode ? (argc!=7&&argc!=8&&argc!=9)
-                        : (argc!=8&&argc!=9&&argc!=10))
+        if(archive_mode ? (argc<7||argc>11)
+                        : (argc<8||argc>12))
             throw std::runtime_error(
                 "USAGE: rss_uv_player graphics.bin uv.bin pose.bin frame view"
                 " source_view output.rgba [owner.i32 authority.u8]"
                 " OR --rss preview.rss frame view source_view output.rgba"
-                " [owner.i32 authority.u8] or --role=K (model-candidate)"
+                " [owner.i32 authority.u8] [--role=K]"
+                " [--unknown-mask=path] (model-candidate)"
             );
         std::vector<std::uint8_t> graphics_blob,texture_blob,pose_blob;
         int frame=0,view=0,source_view=-1,role_filter=-1;
         const char* output_path=nullptr;
         const char* owner_path=nullptr;
         const char* authority_path=nullptr;
+        const char* unknown_mask_path=nullptr;
         std::map<std::string,std::string> manifest;
         if(archive_mode){
             const auto entries=parse_existing_rss_archive_v1(
@@ -577,13 +635,7 @@ int main(int argc,char** argv){
             view=parse_index(argv[4]);
             source_view=parse_index(argv[5]);
             output_path=argv[6];
-            if(argc==9){owner_path=argv[7];authority_path=argv[8];}
-            if(argc==8){
-                const std::string arg(argv[7]);
-                if(arg.rfind("--role=",0)!=0)
-                    throw std::runtime_error("RSS_UV_NATIVE_SEMANTIC_ARG_FORMAT");
-                role_filter=parse_index(arg.substr(7).c_str());
-            }
+            // Optional output sidecars are parsed uniformly below.
             if(manifest.at("schema")==
                 "RealSaS.RSSvNext.NativeInteractivePuppetPreview.v1"&&view!=0)
                 throw std::runtime_error("RSS_UV_PREVIEW_SINGLE_PROJECTED_VIEW_ONLY");
@@ -595,12 +647,31 @@ int main(int argc,char** argv){
             view=parse_index(argv[5]);
             source_view=parse_index(argv[6]);
             output_path=argv[7];
-            if(argc==10){owner_path=argv[8];authority_path=argv[9];}
-            if(argc==9){
-                const std::string arg(argv[8]);
-                if(arg.rfind("--role=",0)!=0)
-                    throw std::runtime_error("RSS_UV_NATIVE_SEMANTIC_ARG_FORMAT");
+            // Optional output sidecars are parsed uniformly below.
+        }
+        bool role_seen=false, unknown_seen=false;
+        for(int i=archive_mode?7:8;i<argc;){
+            const std::string arg(argv[i]);
+            if(arg.rfind("--role=",0)==0){
+                if(role_seen)
+                    throw std::runtime_error("RSS_UV_NATIVE_DUPLICATE_ROLE_ARG");
+                role_seen=true;
                 role_filter=parse_index(arg.substr(7).c_str());
+                ++i;
+            }else if(arg.rfind("--unknown-mask=",0)==0){
+                if(unknown_seen || arg.size()<=15u)
+                    throw std::runtime_error("RSS_UV_NATIVE_UNKNOWN_MASK_ARG_FORMAT");
+                unknown_seen=true;
+                unknown_mask_path=argv[i]+15;
+                ++i;
+            }else if(!owner_path && i+1<argc &&
+                     arg.rfind("--",0)!=0 &&
+                     std::string(argv[i+1]).rfind("--",0)!=0){
+                owner_path=argv[i];
+                authority_path=argv[i+1];
+                i+=2;
+            }else{
+                throw std::runtime_error("RSS_UV_NATIVE_OPTIONAL_ARG_FORMAT");
             }
         }
         const auto graphics=realsas::graphics_v1::parse(graphics_blob);
@@ -695,6 +766,11 @@ int main(int argc,char** argv){
             write_file(owner_path,output.front_face);
             write_file(authority_path,output.color_authority);
         }
+        if(unknown_mask_path){
+            // RGBA zero at this pixel is unresolved color, NOT a measured
+            // transparent background. The explicit sidecar preserves that.
+            write_file(unknown_mask_path,output.unknown_occlusion);
+        }
         std::uint64_t source_pixels=0,predicted_pixels=0;
         for(const auto authority:output.color_authority){
             if(authority==1)++source_pixels;
@@ -711,6 +787,7 @@ int main(int argc,char** argv){
                  <<" source_candidate_pixels="<<source_pixels
                  <<" inferred_pixels="<<predicted_pixels
                  <<" unknown_pixels="<<output.uncolored_pixels
+                 <<" unknown_occlusion_pixels="<<output.unknown_occlusion_pixels
                  <<"\n";
         return 0;
     }catch(const std::exception& exc){

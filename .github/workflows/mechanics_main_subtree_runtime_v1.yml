@@ -7,6 +7,8 @@ on:
     paths:
       - 'compiler/realsas_compiler_core/mechanics_control_solver_v1.py'
       - 'tests/compiler/test_mechanics_main_subtree_runtime_v1.py'
+      - 'compiler/realsas_compiler_core/mechanics_*_v1.py'
+      - 'tests/compiler/test_mechanics_*_v1.py'
       - 'docs/platform/MECHANICS_ROOT_SUBTREE_PRODUCT_RUNTIME_20261107.md'
       - '.github/workflows/mechanics_main_subtree_runtime_v1.yml'
   workflow_dispatch:
@@ -38,4 +40,13 @@ jobs:
             tests/compiler/test_control_motion_v2.py \
             tests/compiler/test_control_motion_ik_integration_v1.py \
             tests/compiler/test_v6_motion_main_integration_v1.py \
-            tests/compiler/test_mechanics_cas_worker_main_v1.py
+            tests/compiler/test_mechanics_cas_worker_main_v1.py \
+            tests/compiler/test_mechanics_secondary_runtime_contract_v1.py \
+            tests/compiler/test_mechanics_multigoal_solver_v1.py \
+            tests/compiler/test_mechanics_live_multigoal_integration_v1.py \
+            tests/compiler/test_mechanics_attachment_frames_v1.py \
+            tests/compiler/test_mechanics_oriented_ik_v1.py \
+            tests/compiler/test_mechanics_attachment_feasibility_v1.py \
+            tests/compiler/test_mechanics_relative_attachment_bridge_v1.py \
+            tests/compiler/test_mechanics_attachment_priority_v1.py \
+            tests/compiler/test_mechanics_prepared_skin_v1.py

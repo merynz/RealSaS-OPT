@@ -79,6 +79,9 @@ def test_iris_topology_descriptors_change_with_faces_and_backprop_to_xyz():
     assert ta.shape == tb.shape == (1, 2, 10)
     assert not torch.allclose(va, vb)
     assert not torch.allclose(ta, tb)
+    vr, tr = iris_surface_incidence_v1(xyz, fa[:, [1, 2, 0]])
+    torch.testing.assert_close(va, vr, atol=1.e-6, rtol=1.e-6)
+    torch.testing.assert_close(ta, tr, atol=1.e-6, rtol=1.e-6)
     (va.square().mean() + ta.square().mean()).backward()
     assert xyz.grad is not None
     assert torch.isfinite(xyz.grad).all()

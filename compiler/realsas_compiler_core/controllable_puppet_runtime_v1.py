@@ -49,6 +49,11 @@ from .mechanics_xpbd_secondary_v1 import (
     XPBDSecondaryPolicyV1, XPBDSecondaryStateV1,
     step_declared_xpbd_secondary_v1, xpbd_state_from_dict_v1,
 )
+from .mechanics_xpbd_surface_v1 import (
+    XPBDSurfaceDomainV1, XPBDSurfacePolicyV1, XPBDSurfaceStateV1,
+    requalify_declared_xpbd_surface_domain_v1,
+    step_declared_xpbd_surface_v1, xpbd_surface_state_from_dict_v1,
+)
 from .mechanics_live_runtime_v1 import (
     _strict_lineage, evaluate_mechanics_intervention_frame_v1,
 )
@@ -214,6 +219,7 @@ class PuppetRuntimeFrameV1:
     socket_view_positions: Mapping[str, tuple[float, float, float]] = field(default_factory=dict)
     socket_source_contact_qualified: bool = False
     xpbd_secondary_state: XPBDSecondaryStateV1 | None = None
+    xpbd_surface_state: XPBDSurfaceStateV1 | None = None
 
 
 @dataclass(frozen=True)
@@ -263,6 +269,97 @@ class ControllablePuppetSessionV1:
         self._xpbd_domain: XPBDSecondaryDomainV1 | None = None
         self._xpbd_policy: XPBDSecondaryPolicyV1 | None = None
         self._xpbd_state: XPBDSecondaryStateV1 | None = None
+        self._xpbd_surface_domain: XPBDSurfaceDomainV1 | None = None
+        self._xpbd_surface_policy: XPBDSurfacePolicyV1 | None = None
+        self._xpbd_surface_state: XPBDSurfaceStateV1 | None = None
+
+    def enable_declared_xpbd_surface(
+        self, domain: XPBDSurfaceDomainV1, policy: XPBDSurfacePolicyV1,
+    ) -> None:
+        if self.bundle.mechanics is None:
+            raise QualificationError("PUPPET_XPBD_SURFACE_MECHANICS_REQUIRED")
+        requalify_declared_xpbd_surface_domain_v1(
+            self.bundle.mesh,self.bundle.rig,self.bundle.skin,
+            self.bundle.mechanics,domain,
+        )
+        if self._xpbd_domain is not None:
+            active_joint_vertices={
+                vid for region in self._xpbd_domain.regions
+                for vid in region.skinned_vertex_ids
+            }
+            if set(domain.dynamic_vertex_ids) & active_joint_vertices:
+                raise QualificationError("PUPPET_XPBD_SURFACE_DOUBLE_OWNERSHIP")
+        primary=solve_control_pose_v1(
+            self.bundle.rig, tuple(self.control_states.values()),
+        )
+        base=deform_mesh_lbs_v1(
+            self.bundle.mesh,self.bundle.rig,self.bundle.skin,primary,
+        )
+        initial=step_declared_xpbd_surface_v1(
+            self.bundle.mesh,base,domain,policy,
+        )
+        if initial.status!="INITIALIZED_XPBD_SURFACE_UNSIMULATED":
+            raise QualificationError("PUPPET_XPBD_SURFACE_ADMISSION_FAILED")
+        self._xpbd_surface_domain=domain
+        self._xpbd_surface_policy=policy
+        self._xpbd_surface_state=None
+
+    def disable_declared_xpbd_surface(self) -> None:
+        self._xpbd_surface_domain=None
+        self._xpbd_surface_policy=None
+        self._xpbd_surface_state=None
+
+    def reset_declared_xpbd_surface(self) -> None:
+        self._xpbd_surface_state=None
+
+    def export_xpbd_surface_runtime_state(self) -> dict:
+        if self._xpbd_surface_state is None:
+            raise QualificationError("PUPPET_XPBD_SURFACE_STATE_NOT_INITIALIZED")
+        return self._xpbd_surface_state.to_dict()
+
+    def restore_xpbd_surface_runtime_state(self, payload: Mapping) -> None:
+        if self._xpbd_surface_domain is None or self._xpbd_surface_policy is None:
+            raise QualificationError("PUPPET_XPBD_SURFACE_POLICY_REQUIRED_FOR_RESTORE")
+        decoded=xpbd_surface_state_from_dict_v1(payload)
+        if self._mechanics_solver_mode=="DECLARED_MULTI_GOAL_V1":
+            if self.bundle.mechanics is None:
+                raise QualificationError("PUPPET_XPBD_SURFACE_MECHANICS_REQUIRED")
+            evaluated=evaluate_mechanics_intervention_frame_v1(
+                self.bundle.mesh,self.bundle.rig,self.bundle.skin,self.bundle.mechanics,
+                overrides=tuple(self.control_states.values()),
+                solver_mode="DECLARED_MULTI_GOAL_V1",
+                pinned_contact_control_ids=self._pinned_contact_control_ids,
+                pinned_world_targets=self._pinned_world_targets,
+                multi_goal_jacobian_mode="ANALYTIC_RESEARCH_V1",
+                max_allowed_constraint_residual=1e-3,
+            )
+            if evaluated.status!="PASS_MECHANICS_BEHAVIORAL_COURT":
+                raise QualificationError("PUPPET_XPBD_SURFACE_PRIMARY_UNQUALIFIED")
+            pose=evaluated.pose
+        else:
+            pose=solve_control_pose_v1(
+                self.bundle.rig,tuple(self.control_states.values()),
+            )
+        if self._xpbd_policy is not None:
+            if self._xpbd_domain is None or self._xpbd_state is None:
+                raise QualificationError("PUPPET_XPBD_SURFACE_JOINT_STATE_REQUIRED")
+            joint_snapshot=step_declared_xpbd_secondary_v1(
+                self.bundle.rig,pose,self._xpbd_domain,self._xpbd_policy,
+                previous_state=self._xpbd_state,
+            )
+            if joint_snapshot.status!="SNAPSHOT_XPBD_NO_STEP":
+                raise QualificationError("PUPPET_XPBD_SURFACE_JOINT_SNAPSHOT_INVALID")
+            pose=joint_snapshot.pose
+        primary=deform_mesh_lbs_v1(
+            self.bundle.mesh,self.bundle.rig,self.bundle.skin,pose,
+        )
+        snapshot=step_declared_xpbd_surface_v1(
+            self.bundle.mesh,primary,self._xpbd_surface_domain,
+            self._xpbd_surface_policy,previous_state=decoded,
+        )
+        if snapshot.status!="SNAPSHOT_XPBD_SURFACE_NO_STEP":
+            raise QualificationError("PUPPET_XPBD_SURFACE_RESTORE_UNQUALIFIED")
+        self._xpbd_surface_state=decoded
 
     def enable_declared_xpbd_secondary(
         self,
@@ -291,6 +388,13 @@ class ControllablePuppetSessionV1:
             self.bundle.mesh, self.bundle.rig, self.bundle.skin,
             self.bundle.mechanics, domain,
         )
+        if self._xpbd_surface_domain is not None:
+            selected_joint_vertices={
+                vid for region in domain.regions
+                for vid in region.skinned_vertex_ids
+            }
+            if set(self._xpbd_surface_domain.dynamic_vertex_ids) & selected_joint_vertices:
+                raise QualificationError("PUPPET_XPBD_SURFACE_DOUBLE_OWNERSHIP")
         # Do not change selected policy/state unless initial admission passed.
         primary = solve_control_pose_v1(
             self.bundle.rig, tuple(self.control_states.values()),
@@ -524,8 +628,28 @@ class ControllablePuppetSessionV1:
                 self.bundle.mesh, self.bundle.rig, self.bundle.skin, pose,
             )
             xpbd_next_state=xpbd.state
-        elif dt_seconds is not None:
+        elif dt_seconds is not None and self._xpbd_surface_policy is None:
             raise QualificationError("PUPPET_XPBD_DT_WITHOUT_POLICY")
+        surface_next_state=self._xpbd_surface_state
+        if self._xpbd_surface_policy is not None:
+            if self._xpbd_surface_domain is None:
+                raise QualificationError("PUPPET_XPBD_SURFACE_DOMAIN_REQUIRED")
+            surface=step_declared_xpbd_surface_v1(
+                self.bundle.mesh,deform,self._xpbd_surface_domain,
+                self._xpbd_surface_policy,
+                previous_state=self._xpbd_surface_state,
+                dt_seconds=dt_seconds,
+            )
+            if surface.status not in {
+                "INITIALIZED_XPBD_SURFACE_UNSIMULATED",
+                "SNAPSHOT_XPBD_SURFACE_NO_STEP",
+                "PASS_XPBD_SURFACE_RUNTIME",
+            }:
+                raise QualificationError(
+                    "PUPPET_XPBD_SURFACE_UNQUALIFIED:"+surface.status
+                )
+            deform=surface.deformation
+            surface_next_state=surface.state
         if tuple(deform.canonical_mesh_vertex_ids) != tuple(
             v.canonical_mesh_vertex_id for v in self.bundle.mesh.vertices
         ):
@@ -641,10 +765,12 @@ class ControllablePuppetSessionV1:
             socket_world_positions=socket_world,
             socket_view_positions=socket_view,
             xpbd_secondary_state=xpbd_next_state,
+            xpbd_surface_state=surface_next_state,
         )
         # Only commit temporal state after all canonical Graphics/Playback
         # projection and composition checks have succeeded.
         self._xpbd_state=xpbd_next_state
+        self._xpbd_surface_state=surface_next_state
         return result
 
     def inspect_graphics_depth_raster(

@@ -284,7 +284,7 @@ def test_live_surface_sequence_and_policy_safety():
          MechanicsInterventionStepV1(2./60.)),
         xpbd_surface_domain=domain,xpbd_surface_policy=policy,
     )
-    assert sequence.status=="PASS_MECHANICS_BEHAVIORAL_SEQUENCE"
+    assert sequence.status=="PASS_MECHANICS_SEQUENCE_DIAGNOSTIC"
     assert tuple(f.xpbd_surface_state.ticks for f in sequence.frames)==(0,2,4)
     with pytest.raises(QualificationError,match="SURFACE_POLICY_REQUIRED"):
         evaluate_mechanics_intervention_frame_v1(

@@ -97,7 +97,8 @@ def test_mira_codec_inventory_covers_every_source_supervised_result_family():
         "source_pose_deformation_loss","source_area_skin_loss",
         "source_area_skin_simplex_kl_loss",
     }
-    assert ids.issubset(fields)
+    # A newly introduced MIRA loss MUST be documented, even if opt-in.
+    assert ids=={name for name in fields if name.endswith("_loss") and name!="loss"}
 
 
 def test_each_loss_binds_model_output_target_mask_receipt_and_preparation():

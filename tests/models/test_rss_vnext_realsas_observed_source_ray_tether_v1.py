@@ -46,9 +46,13 @@ def source_case(stage=STAGE_1):
     )
     batch=replace(
         batch,original_observed_view_count=2,
+        original_source_rgba=source.original_linear_rgba,
         source_observed_rays=source,source_observed_admission_key="native-source-pair",
     )
-    receipt={**receipt,"original_observed_view_count":2}
+    receipt={
+        **receipt,"original_observed_view_count":2,
+        "original_source_rgba_sha256":_digest(source.original_linear_rgba),
+    }
     signed={
         "admission_status":"QUALIFIED_NATIVE_TWO_SOURCE_CAMERA_PHOTOMETRY",
         "dataset_manifest_sha256":"f"*64,
@@ -141,7 +145,11 @@ def test_independently_bound_source_field_cannot_be_replaced(field):
     else:
         changed.reshape(-1)[0]+=(.1 if changed.is_floating_point() else 1)
     forged=replace(batch,source_observed_rays=replace(original,**{field:changed}))
-    with pytest.raises(ValueError,match="ORIGINAL_SOURCE_RECEIPT_DRIFT"):
+    expected = (
+        "SOURCE_PIXEL_IDENTITY_DRIFT" if field == "original_linear_rgba"
+        else "ORIGINAL_SOURCE_RECEIPT_DRIFT"
+    )
+    with pytest.raises(ValueError,match=expected):
         make_trainer(net,receipt,signed).objective(forged)
 
 
@@ -335,3 +343,81 @@ def test_stage3_preserves_two_real_views_using_full_role_mesh_raster_not_nerf():
     assert float(outputs["observed_source_alpha_mse"])>0
     outputs["total"].backward()
     assert any(p.grad is not None and p.grad.abs().sum()>0 for p in net.graphics.parameters())
+
+
+
+def test_product_two_originals_train_shared_H_without_any_camera_ray_teacher():
+    # Product does not get calibrated source cameras; the original pixels
+    # themselves must condition H(x) in the SAME S-LRM reconstruction graph.
+    from tests.models.test_rss_vnext_realsas_slrm_training_driver_v1 import _trainer
+    net,batch,receipt = _batch(STAGE_1,6)
+    originals = torch.rand(1,2,4,16,16)
+    batch = replace(
+        batch,original_observed_view_count=2,
+        original_source_rgba=originals,
+    )
+    receipt = {
+        **receipt,"original_observed_view_count":2,
+        "original_source_rgba_sha256":_digest(originals),
+    }
+    assert batch.source_observed_rays is None
+    trainer = _trainer(net,receipt)
+    before = net.iris.scene.scene_queries.detach().clone()
+    result = trainer.train_step(batch)
+    assert torch.isfinite(result["total"])
+    assert net.iris.scene.scene_queries.grad is not None
+    assert net.iris.scene.scene_queries.grad.abs().sum()>0
+    assert not torch.equal(before,net.iris.scene.scene_queries.detach())
+    assert trainer.global_step==1
+
+
+def test_product_two_originals_hard_fail_when_missing_or_byte_modified():
+    from tests.models.test_rss_vnext_realsas_slrm_training_driver_v1 import _trainer
+    net,batch,receipt = _batch(STAGE_1,6)
+    originals = torch.rand(1,2,4,16,16)
+    batch = replace(
+        batch,original_observed_view_count=2,original_source_rgba=originals,
+    )
+    receipt = {
+        **receipt,"original_observed_view_count":2,
+        "original_source_rgba_sha256":_digest(originals),
+    }
+    trainer = _trainer(net,receipt)
+    with pytest.raises(ValueError,match="TWO_CAMERA_FREE_SOURCE_PIXELS_REQUIRED"):
+        trainer.objective(replace(batch,original_source_rgba=None))
+    tampered=originals.clone()
+    tampered[0,1,0,0,0]+=.02
+    with pytest.raises(ValueError,match="RENDER_RECEIPT_DRIFT"):
+        trainer.objective(replace(batch,original_source_rgba=tampered))
+
+
+def test_camera_ray_teacher_and_original_scene_tokens_must_be_same_pixels():
+    net,batch,receipt,signed=source_case()
+    altered=batch.original_source_rgba.clone()
+    altered[0,0,0,0,0]+=.01
+    receipt={
+        **receipt,
+        "original_source_rgba_sha256":_digest(altered),
+    }
+    with pytest.raises(ValueError,match="SOURCE_PIXEL_IDENTITY_DRIFT"):
+        make_trainer(net,receipt,signed).objective(
+            replace(batch,original_source_rgba=altered),
+        )
+
+
+def test_slrm_checkpoint_seals_architecture_and_cuda_rng_field(tmp_path):
+    from tests.models.test_rss_vnext_realsas_slrm_training_driver_v1 import _trainer
+    net,batch,receipt=_batch(STAGE_1,6)
+    trainer=_trainer(net,receipt)
+    trainer.train_step(batch)
+    path=tmp_path/"slrm-arch.pt"
+    trainer.save_checkpoint(path,sampler_cursor=11)
+    saved=torch.load(path,map_location="cpu",weights_only=True)
+    assert saved["architecture_id"]==net.architecture_id
+    assert len(saved["architecture_digest"])==64
+    assert "torch_cuda_rng" in saved
+    assert _trainer(net,receipt).load_checkpoint(path)==11
+    corrupt={**saved,"architecture_digest":"f"*64}
+    torch.save(corrupt,path)
+    with pytest.raises(ValueError,match="CHECKPOINT_ARCHITECTURE_DRIFT"):
+        _trainer(net,receipt).load_checkpoint(path)

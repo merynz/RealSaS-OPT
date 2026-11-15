@@ -298,3 +298,63 @@ def test_highres_training_requires_explicit_source_surface_receipt():
     )
     with pytest.raises(ValueError, match="TRAIN_HIGHRES_SOURCE_AND_SURFACE_REQUIRED"):
         trainer.objective(batch)
+
+
+
+def test_multi_field_teacher_cannot_supply_individually_hashed_but_conflicting_solids():
+    """Checks cross-task truth consistency before a shared IRIS update."""
+    model = _trainer_and_model()
+    batch, receipt = _tiny_sdf_batch_and_receipt(
+        model, domain="SINGLE_QUALIFIED_CLOSED_COMPONENT",
+    )
+    sdf = batch.source_signed_sdf_target
+    assert sdf is not None
+    udf = sdf.abs()
+    inside = (sdf < 0).float()
+    mask = batch.source_signed_sdf_mask
+    batch.source_udf_target = udf
+    batch.source_udf_mask = mask
+    batch.source_inside_sign_target = inside
+    batch.source_inside_sign_mask = mask
+    receipt.update({
+        "udf_target_sha256": source_surface_tensor_sha256(udf),
+        "udf_mask_sha256": source_surface_tensor_sha256(mask),
+        "inside_target_sha256": source_surface_tensor_sha256(inside),
+        "inside_mask_sha256": source_surface_tensor_sha256(mask),
+    })
+    weights = RSSvNextTrainingWeights(
+        topology=0., motion_preference=0., source_semantics=0.,
+        flexicubes_surface=0., source_signed_sdf=1.,
+        source_udf=1., source_inside_sign=1.,
+    )
+    def trainer(row):
+        return RSSvNextStructuralTrainer(
+            model, torch.optim.AdamW(model.parameters()),
+            dataset_manifest_sha256="a"*64,
+            trusted_source_field_registry={"exact": row},
+            weights=weights,
+        )
+    good = trainer(receipt).objective(batch)
+    assert good.source_udf_loss is not None
+    assert good.source_inside_sign_loss is not None
+    assert good.source_signed_sdf_loss is not None
+
+    from dataclasses import replace as dc_replace
+    incorrect_udf = udf + .2
+    wrong_udf = {
+        **receipt,
+        "udf_target_sha256": source_surface_tensor_sha256(incorrect_udf),
+    }
+    with pytest.raises(ValueError, match="SOURCE_SDF_UDF_TEACHER_CONFLICT"):
+        trainer(wrong_udf).objective(
+            dc_replace(batch, source_udf_target=incorrect_udf),
+        )
+    inverted = 1. - inside
+    wrong_sign = {
+        **receipt,
+        "inside_target_sha256": source_surface_tensor_sha256(inverted),
+    }
+    with pytest.raises(ValueError, match="SOURCE_SDF_SIGN_TEACHER_CONFLICT"):
+        trainer(wrong_sign).objective(
+            dc_replace(batch, source_inside_sign_target=inverted),
+        )

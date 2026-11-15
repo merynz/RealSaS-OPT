@@ -939,7 +939,21 @@ class RSSvNextStructuralTrainer:
             if (
                 signed is None
                 or signed.get("admission_status") != "QUALIFIED_SOURCE_SIGNED_SOLID"
-                or signed.get("source_component_domain") != "SINGLE_QUALIFIED_CLOSED_COMPONENT"
+                or signed.get("source_component_domain") not in (
+                    "SINGLE_QUALIFIED_CLOSED_COMPONENT",
+                    "EXPLICIT_QUALIFIED_CLOSED_ASSEMBLY",
+                )
+                or (
+                    signed.get("source_component_domain")
+                        == "EXPLICIT_QUALIFIED_CLOSED_ASSEMBLY"
+                    and (
+                        signed.get("assembly_boolean_operations_qualified") is not True
+                        or signed.get("sdf_distance_scope")
+                            != "EXACT_BOUNDARY_OF_THE_SAME_QUALIFIED_SOLID"
+                        or signed.get("sdf_sign_scope")
+                            != "GLOBAL_NEGATIVE_INSIDE_POSITIVE_OUTSIDE"
+                    )
+                )
                 or signed.get("dataset_manifest_sha256") != self.dataset_manifest_sha256
                 or signed.get("source_qualification_key") != batch.source_qualification_key
                 or signed.get("role_schema_id") != self.model.cfg.semantic_role_schema_id
@@ -1357,6 +1371,26 @@ class RSSvNextStructuralTrainer:
                 if not bool(torch.isfinite(target[mask]).all()):
                     raise ValueError("RSS_VNEXT_SOURCE_FIELD_TARGET_NONFINITE")
             if batch.source_signed_sdf_target is not None:
+                # All source targets refer to exactly the SAME normalized
+                # coordinates and same boundary. Reject contradictory labels
+                # even when their individual tensor hashes are valid.
+                sdf_target, sdf_mask = field_items[2]
+                if batch.source_udf_target is not None:
+                    udf_target, udf_mask = field_items[0]
+                    both = sdf_mask & udf_mask
+                    if bool(both.any()) and not bool(torch.allclose(
+                        sdf_target[both].abs(), udf_target[both],
+                        rtol=1.e-3, atol=1.e-3,
+                    )):
+                        raise ValueError("RSS_VNEXT_SOURCE_SDF_UDF_TEACHER_CONFLICT")
+                if batch.source_inside_sign_target is not None:
+                    sign_target, sign_mask = field_items[1]
+                    # A true zero level carries no unambiguous inside label.
+                    both = sdf_mask & sign_mask & (sdf_target.abs() > 1.e-5)
+                    if bool(both.any()) and not bool(torch.equal(
+                        sign_target[both] == 1., sdf_target[both] < 0.,
+                    )):
+                        raise ValueError("RSS_VNEXT_SOURCE_SDF_SIGN_TEACHER_CONFLICT")
                 # A direct SDF teacher is not recoverable from unrelated
                 # component-local UDF + occupancy. Its distance must be to
                 # the *same exact explicit solid/assembly boundary* used

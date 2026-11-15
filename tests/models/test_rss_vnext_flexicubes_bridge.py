@@ -239,6 +239,40 @@ def test_exact_fc_and_tessa_share_one_two_view_training_optimizer():
     assert net.iris.cube_extraction.net[-1].weight.grad.abs().sum() > 0
     assert net.vision.patch.weight.grad is not None
 
+    # A fully CLOSED modular assembly can teach the very same IRIS surface
+    # path as a single solid. Merely setting the class name is insufficient:
+    # its Boolean boundary and GLOBAL signed distance must be qualified.
+    qualified_assembly = {
+        **signed_receipt,
+        "source_component_domain": "EXPLICIT_QUALIFIED_CLOSED_ASSEMBLY",
+        "assembly_boolean_operations_qualified": True,
+        "sdf_distance_scope": "EXACT_BOUNDARY_OF_THE_SAME_QUALIFIED_SOLID",
+        "sdf_sign_scope": "GLOBAL_NEGATIVE_INSIDE_POSITIVE_OUTSIDE",
+    }
+
+    def assembly_trainer(source):
+        return RSSvNextStructuralTrainer(
+            net, torch.optim.AdamW(net.parameters(), lr=1e-4),
+            dataset_manifest_sha256="a"*64,
+            trusted_signed_source_registry={
+                batch.flexicubes_signed_source_admission_key: source,
+            },
+            weights=RSSvNextTrainingWeights(
+                topology=0, motion_preference=0, source_semantics=0,
+                flexicubes_surface=1,
+            ),
+        )
+
+    assert assembly_trainer(qualified_assembly).objective(batch).flexicubes_surface_loss is not None
+    for bad in (
+        {**qualified_assembly, "assembly_boolean_operations_qualified": False},
+        {**qualified_assembly, "sdf_distance_scope": "COMPONENT_LOCAL_UDF"},
+        {**qualified_assembly, "sdf_sign_scope": "UNQUALIFIED_PARITY"},
+        {**qualified_assembly, "source_component_domain": "OPEN_OR_UNKNOWN_UNSIGNED_ONLY"},
+    ):
+        with pytest.raises(ValueError, match="FC_SOURCE_SIGNED_DOMAIN_RECEIPT_DRIFT"):
+            assembly_trainer(bad).objective(batch)
+
     batch.flexicubes_signed_source_admission_key = ""
     with pytest.raises(ValueError, match="SIGNED_SOURCE_PROOF_REQUIRED"):
         trainer.objective(batch)

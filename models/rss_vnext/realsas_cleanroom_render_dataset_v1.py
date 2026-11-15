@@ -28,7 +28,9 @@ from torch.utils.data import Dataset
 from .realsas_cleanroom_diffusion_training_v1 import (
     CleanroomDiffusionRenderRecordV1,
     validate_cleanroom_render_corpus_v1,
+    STAGE_CANONICAL, STAGE_MULTIVIEW,
 )
+from .realsas_virtual_camera_policy_v1 import target_canonical_and_six_cameras_v1
 
 
 _SCHEMA="RealSaS.RSSvNext.RealSaSCleanroomRenderedSixViewDataset.v1"
@@ -107,14 +109,23 @@ def _image(file: Path, *, mode: str) -> np.ndarray:
 
 
 class RealSaSCleanroomRenderedSixViewDatasetV1(Dataset):
-    """Train/validation samples with verified 3D-source canonical supervision.
+    """Source-rendered, pose-qualified Stage A / Stage B training examples.
 
-    The training reference is the *rendered canonical source* (not the user
-    image). This is the one-reference multiview research baseline. The existing
-    paired-user-source conditioner remains an ablation in another module.
+    Stage A: TWO arbitrary source-pose RGBA -> TWO canonical pose RGB targets.
+    Stage B: TWO canonical-pose RGBA -> SIX RGB plus SIX aligned normal targets.
+
+    The original customer source camera is NEVER inferred from a target
+    render. A fixed virtual target camera policy is shared with inference.
+    The old six-view API is preserved by default for research compatibility.
     """
-    def __init__(self, manifest: str | Path, *, split: str="train") -> None:
+    def __init__(
+        self, manifest: str | Path, *, split: str="train",
+        stage: str=STAGE_MULTIVIEW,
+    ) -> None:
         super().__init__()
+        if stage not in (STAGE_CANONICAL, STAGE_MULTIVIEW):
+            raise ValueError("RSS_VNEXT_REALSAS_RENDER_STAGE_INVALID")
+        self.stage=stage
         manifest=Path(manifest)
         if not manifest.is_file() or manifest.is_symlink():
             raise ValueError("RSS_VNEXT_REALSAS_RENDER_MANIFEST_MISSING")
@@ -164,10 +175,10 @@ class RealSaSCleanroomRenderedSixViewDatasetV1(Dataset):
                     resolved[key].append(full)
             records.append(record)
             if record.split==split:
-                if not record.source_pose_truth_available:
-                    # Only canonical-render identity is valid for stage 2,
-                    # but rigless static objects cannot supervise stage 1.
-                    pass
+                # Static assets legitimately provide six-view construction,
+                # but they CANNOT teach arbitrary-pose -> canonical-pose.
+                if stage==STAGE_CANONICAL and not record.source_pose_truth_available:
+                    continue
                 self.entries.append((record,resolved))
         self.corpus_report=validate_cleanroom_render_corpus_v1(records)
         self.manifest_sha256=_digest(manifest)
@@ -180,51 +191,143 @@ class RealSaSCleanroomRenderedSixViewDatasetV1(Dataset):
 
     def __getitem__(self, index: int) -> dict[str,Any]:
         record,paths=self.entries[index]
-        # Hash again when read: an on-disk render changed during a running
-        # training job must never silently become another asset's teacher.
-        arrays={}
-        expected={
+        # Rehash the exact source/target files used by THIS stage on EVERY
+        # read: source images are model INPUTS, never unseen teacher labels.
+        keys=(
+            ("input_scene_rgb","canonical_target_rgb")
+            if self.stage==STAGE_CANONICAL
+            else (
+                "canonical_target_rgb","multiview_target_rgb",
+                "multiview_target_normal","multiview_target_alpha",
+            )
+        )
+        hashes={
+            "input_scene_rgb":record.input_scene_rgb_sha256,
             "canonical_target_rgb":record.canonical_target_rgb_sha256,
             "multiview_target_rgb":record.multiview_target_rgb_sha256,
             "multiview_target_normal":record.multiview_target_normal_sha256,
             "multiview_target_alpha":record.multiview_target_alpha_sha256,
         }
-        for key,digests in expected.items():
+        arrays={}
+        for key in keys:
             mode="MASK" if key=="multiview_target_alpha" else "RGBA"
             arrays[key]=[]
-            for file,hexdigest in zip(paths[key],digests):
+            for file,hexdigest in zip(paths[key],hashes[key]):
                 if _digest(file)!=hexdigest:
-                    raise ValueError("RSS_VNEXT_REALSAS_RENDER_TRUTH_HASH_CHANGED_DURING_TRAINING")
+                    raise ValueError(
+                        "RSS_VNEXT_REALSAS_RENDER_TRUTH_HASH_CHANGED_DURING_TRAINING"
+                    )
                 arrays[key].append(_image(file,mode=mode))
-        ref=arrays["canonical_target_rgb"][0]
-        height,width=ref.shape[:2]
-        for key,values in arrays.items():
-            if any(x.shape[:2]!=(height,width) for x in values):
-                raise ValueError("RSS_VNEXT_REALSAS_RENDER_CROSS_CAMERA_RESOLUTION_DRIFT")
+
+        # Two distinct original *files* are mandatory; a training item must
+        # not silently fold both source views into one canonical reference.
+        source=(
+            arrays["input_scene_rgb"] if self.stage==STAGE_CANONICAL
+            else arrays["canonical_target_rgb"]
+        )
+        targets=(
+            arrays["canonical_target_rgb"] if self.stage==STAGE_CANONICAL
+            else arrays["multiview_target_rgb"]
+        )
+        if len(source)!=2 or len(targets)!=(2 if self.stage==STAGE_CANONICAL else 6):
+            raise ValueError("RSS_VNEXT_REALSAS_STAGE_VIEW_CARDINALITY_DRIFT")
+        height,width=source[0].shape[:2]
+        if any(
+            image.shape[:2]!=(height,width)
+            for values in arrays.values() for image in values
+        ):
+            raise ValueError("RSS_VNEXT_REALSAS_RENDER_CROSS_CAMERA_RESOLUTION_DRIFT")
 
         def rgb(value: np.ndarray) -> torch.Tensor:
             alpha=value[:,:,3:4].astype(np.float32)/255.
             color=value[:,:,:3].astype(np.float32)/255.
-            # White composite as in RealSaS/Era3D training.
+            # Match existing RealSaS/Era3D white-composite RGB convention.
             color=color*alpha+(1.-alpha)
             return torch.from_numpy(color.transpose(2,0,1).copy())
+
+        def rgba(value: np.ndarray) -> torch.Tensor:
+            return torch.from_numpy(
+                (value.astype(np.float32)/255.).transpose(2,0,1).copy()
+            )
+
         def mask(value: np.ndarray) -> torch.Tensor:
             return torch.from_numpy(
                 (value.astype(np.float32)/255.)[None].copy()
             )
-        rgb_target=torch.stack([rgb(x) for x in arrays["multiview_target_rgb"]])
-        normal_target=torch.stack([rgb(x) for x in arrays["multiview_target_normal"]])
-        valid=torch.stack([mask(x) for x in arrays["multiview_target_alpha"]])
-        return {
-            "reference_rgb":rgb(ref),
-            "target_rgb":rgb_target,
-            "target_normal_encoded_rgb":normal_target,
-            "target_rgb_valid":valid,
-            "target_normal_valid":valid.clone(),
+
+        canonical_cameras,six_cameras=target_canonical_and_six_cameras_v1(1)
+        target_cameras=(
+            canonical_cameras[0]
+            if self.stage==STAGE_CANONICAL else
+            torch.cat((six_cameras[0],six_cameras[0]),dim=0)
+        )
+        modalities=torch.zeros(
+            (2 if self.stage==STAGE_CANONICAL else 12,),dtype=torch.long,
+        )
+        if self.stage==STAGE_MULTIVIEW:
+            modalities[6:]=1
+            target_rgb=torch.stack([rgb(x) for x in targets])
+            target_normal=torch.stack([
+                rgb(x) for x in arrays["multiview_target_normal"]
+            ])
+            target_valid=torch.stack([
+                mask(x) for x in arrays["multiview_target_alpha"]
+            ])
+        else:
+            # The canonical target PNGs are independently rendered in the
+            # source asset's canonical pose, NOT diffusion predictions.
+            target_rgb=torch.stack([rgb(x) for x in targets])
+            target_valid=torch.stack([
+                mask(x[:,:,3]) for x in targets
+            ])
+            target_normal=None
+
+        if not bool((target_valid>0).any()):
+            raise ValueError("RSS_VNEXT_REALSAS_STAGE_NO_QUALIFIED_TARGET_PIXELS")
+        sample={
+            "stage":self.stage,
+            "source_rgba":torch.stack([rgba(x) for x in source]),
+            "target_rgb":target_rgb,
+            "target_rgb_valid":target_valid,
+            "target_camera_features":target_cameras,
+            "target_modalities":modalities,
+            "target_virtual_camera_authority":
+                "FIXED_RENDER_TARGET_CAMERA_POLICY_NOT_SOURCE_OBSERVATION",
+            "source_pair_authority":(
+                "SOURCE_3D_RENDERED_TWO_ARBITRARY_POSES"
+                if self.stage==STAGE_CANONICAL else
+                "SOURCE_3D_RENDERED_TWO_CANONICAL_IMAGES"
+            ),
+            "original_source_camera_observed":False,
             "source_asset_lineage_sha256":record.source_asset_lineage_sha256,
+            "dedup_family_sha256":record.dedup_family_sha256,
+            "rights_admission_sha256":record.rights_admission_sha256,
+            "canonical_pose_definition_sha256":
+                record.neutral_pose_definition_sha256,
+            "input_pose_ids":record.input_pose_ids,
             "morphology_id":record.morphology_id,
             "split":record.split,
         }
+        if self.stage==STAGE_MULTIVIEW:
+            # Legacy single-reference baseline remains for old consumers,
+            # but the actual TWO-view conditioner must use source_rgba.
+            sample.update({
+                "reference_rgb":rgb(source[0]),
+                "target_normal_encoded_rgb":target_normal,
+                "target_normal_valid":target_valid.clone(),
+            })
+        return sample
 
 
-__all__=["RealSaSCleanroomRenderedSixViewDatasetV1"]
+class RealSaSCleanroomRenderedCanonicalPoseDatasetV1(
+    RealSaSCleanroomRenderedSixViewDatasetV1
+):
+    """Stage A: strictly two arbitrary-pose renders -> canonical pair."""
+    def __init__(self, manifest: str | Path, *, split: str="train") -> None:
+        super().__init__(manifest,split=split,stage=STAGE_CANONICAL)
+
+
+__all__=[
+    "RealSaSCleanroomRenderedSixViewDatasetV1",
+    "RealSaSCleanroomRenderedCanonicalPoseDatasetV1",
+]

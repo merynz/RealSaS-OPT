@@ -355,6 +355,9 @@ def source_surface_tensor_sha256(value: Tensor) -> str:
 from .training_optimizer_ownership_v1 import qualify_rss_vnext_optimizer_ownership_v1
 from .training_phase_contract_v1 import RSSvNextStructuralTrainingPhaseContractV1
 from .training_topology_source_admission_v1 import validate_source_topology_teacher_v1
+from .training_axis_skin_warmup_v1 import (
+    RSSvNextAxisSkinCodeWarmupV1, apply_rss_vnext_axis_skin_code_warmup_v1,
+)
 from .training_gradient_interference_v1 import (
     RSSvNextGradientCourtPolicyV1,
     audit_rss_vnext_gradient_interference_v1,
@@ -382,6 +385,7 @@ class RSSvNextStructuralTrainer:
         preference: RSSvNextTopologyPreferenceConfig = RSSvNextTopologyPreferenceConfig(),
         gradient_court_policy: RSSvNextGradientCourtPolicyV1 = RSSvNextGradientCourtPolicyV1(),
         phase_contract: RSSvNextStructuralTrainingPhaseContractV1 | None = None,
+        axis_skin_code_warmup: RSSvNextAxisSkinCodeWarmupV1 = RSSvNextAxisSkinCodeWarmupV1(),
         scene_conditioning_policy: str = "RESEARCH_CALIBRATED_TWO_VIEW",
         axis_training_policy: str = "RIG_ONLY_PRETRAIN",
         trusted_generated_conditioning_registry: Mapping[str, Mapping[str, object]] | None = None,
@@ -408,6 +412,9 @@ class RSSvNextStructuralTrainer:
         weights.validate()
         preference.validate()
         gradient_court_policy.validate()
+        axis_skin_code_warmup.validate()
+        if axis_skin_code_warmup.enabled and weights.axis_rig_skin_codes <= 0:
+            raise ValueError("RSS_VNEXT_AXIS_SKIN_WARMUP_AXIS_LOSS_REQUIRED")
         if phase_contract is not None:
             phase_contract.validate(weights=weights)
             phase_contract.assert_trainable_owners(model)
@@ -446,6 +453,7 @@ class RSSvNextStructuralTrainer:
         self.preference = preference
         self.gradient_court_policy = gradient_court_policy
         self.phase_contract = phase_contract
+        self.axis_skin_code_warmup = axis_skin_code_warmup
         # Freeze the full objective / topology-preference policy into the
         # resumption identity. A semantic-risk or motion weight change is a
         # different training run, not a transparent continuation of this one.
@@ -462,6 +470,7 @@ class RSSvNextStructuralTrainer:
             "axis_training_policy": self.axis_training_policy,
             "gradient_court_policy": asdict(gradient_court_policy),
             **({"phase_contract": asdict(phase_contract)} if phase_contract is not None else {}),
+            **({"axis_skin_code_warmup": asdict(axis_skin_code_warmup)} if axis_skin_code_warmup.enabled else {}),
         }, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf8")).hexdigest()
         self.dataset_manifest_sha256 = dataset_manifest_sha256.lower()
         # This launcher-owned registry binds the *actual generated* scene
@@ -1662,6 +1671,12 @@ class RSSvNextStructuralTrainer:
                 tokens_per_joint=self.model.cfg.skin_tokens_per_joint,
                 executable_constraint_operators=RIG_CONSTRAINT_OPERATOR_IDS_V1,
                 control_intervention_qualified=control_qualified,
+            )
+            axis_loss = apply_rss_vnext_axis_skin_code_warmup_v1(
+                raw_axis_loss=axis_loss,
+                raw_axis_loss_parts=_axis_components,
+                policy=self.axis_skin_code_warmup,
+                step=self.global_step,
             )
             n_axis = int(teacher.kind_ids.shape[0])
             if pose_requested:

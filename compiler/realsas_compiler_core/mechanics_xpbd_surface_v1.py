@@ -49,6 +49,11 @@ from .mechanics_xpbd_surface_self_contact_v1 import (
     evaluate_surface_self_contacts_v1,
 )
 from .mechanics_xpbd_contact_friction_v1 import apply_xpbd_coulomb_friction_v1
+from .mechanics_xpbd_body_mesh_contact_v1 import (
+    XPBDBodyMeshColliderV1,
+    qualify_xpbd_body_mesh_colliders_v1,
+    resolve_xpbd_body_mesh_contact_v1,
+)
 
 Vec3 = tuple[float, float, float]
 Face3 = tuple[str, str, str]
@@ -118,6 +123,10 @@ class XPBDSurfacePolicyV1:
     max_self_collision_cells: int = field(default=200000, kw_only=True)
     static_friction: float = field(default=0.0, kw_only=True)
     dynamic_friction: float = field(default=0.0, kw_only=True)
+    body_mesh_colliders: tuple[XPBDBodyMeshColliderV1, ...] = field(
+        default=(), kw_only=True,
+    )
+    max_body_mesh_candidates: int = field(default=8192, kw_only=True)
     collision_margin: float = 0.0
     fixed_step_seconds: float = 1.0/120.0
     maximum_dt_seconds: float = 0.25
@@ -393,6 +402,11 @@ def _policy(domain: XPBDSurfaceDomainV1, policy: XPBDSurfacePolicyV1) -> str:
     friction_d=_scalar(policy.dynamic_friction,"XPBD_SURFACE_DYNAMIC_FRICTION_INVALID",hi=100.)
     if friction_d>friction_s:
         raise QualificationError("XPBD_SURFACE_COULOMB_FRICTION_ORDER_INVALID")
+    if (type(policy.max_body_mesh_candidates) is not int
+            or not 1<=policy.max_body_mesh_candidates<=32768):
+        raise QualificationError("XPBD_BODY_CONTACT_CANDIDATE_POLICY_INVALID")
+    if type(policy.body_mesh_colliders) is not tuple:
+        raise QualificationError("XPBD_BODY_COLLIDER_RESOURCE_BOUND")
     seen=set()
     for collider in policy.planes:
         if not collider.collider_id or collider.collider_id in seen:
@@ -426,7 +440,9 @@ def _policy(domain: XPBDSurfaceDomainV1, policy: XPBDSurfacePolicyV1) -> str:
                 or len(set(collider.excluded_vertex_ids))!=len(collider.excluded_vertex_ids)
                 or not set(collider.excluded_vertex_ids)<=set(domain.dynamic_vertex_ids)):
             raise QualificationError("XPBD_SURFACE_JOINT_SPHERE_EXCLUSION_INVALID")
-    if len(seen)>16 or len(domain.dynamic_vertex_ids)>4096:
+    if any(c.collider_id in seen for c in policy.body_mesh_colliders):
+        raise QualificationError("XPBD_BODY_COLLIDER_ID_OVERLAP")
+    if len(seen)+len(policy.body_mesh_colliders)>16 or len(domain.dynamic_vertex_ids)>4096:
         raise QualificationError("XPBD_SURFACE_CONTACT_RESOURCE_BOUND")
     return content_sha256(asdict(policy))
 
@@ -593,6 +609,10 @@ def step_declared_xpbd_surface_v1(
         raise QualificationError("XPBD_SURFACE_PRIMARY_VERTEX_COVERAGE_DRIFT")
     primary={vid:_xyz(p,"XPBD_SURFACE_PRIMARY_POSITION_INVALID")
              for vid,p in zip(ids,primary_deformation.positions)}
+    body_ids=qualify_xpbd_body_mesh_colliders_v1(
+        mesh.faces,domain.vertex_ids,policy.body_mesh_colliders,
+    )
+    current_body={vid:primary[vid].copy() for vid in body_ids}
     primary_hash=content_sha256({
         "mesh":domain.mesh_lineage_hash,
         "skin":domain.skin_lineage_hash,
@@ -611,6 +631,7 @@ def step_declared_xpbd_surface_v1(
         ticks,frames,steps=0,0,0
         prior_pins={jid:primary[jid] for jid in pins}
         prior_joint_centers={k:v.copy() for k,v in joint_centers.items()}
+        prior_body={k:v.copy() for k,v in current_body.items()}
     else:
         if previous_state.state_hash != _state_hash(previous_state):
             raise QualificationError("XPBD_SURFACE_STATE_HASH_DRIFT")
@@ -654,7 +675,26 @@ def step_declared_xpbd_surface_v1(
         if (len(prior_joint_centers)!=len(old_centers)
                 or set(prior_joint_centers)!=set(joint_centers)):
             raise QualificationError("XPBD_SURFACE_PRIOR_KINEMATIC_CENTERS_DRIFT")
+        old_body_rows=previous_state.metadata.get("kinematic_body_mesh_vertices",[])
+        if (type(old_body_rows) is not list
+                or any(type(row) is not list or len(row)!=2 for row in old_body_rows)):
+            raise QualificationError("XPBD_BODY_STATE_VERTEX_WIRE_INVALID")
+        try:
+            prior_body={
+                str(vid):_xyz(world,"XPBD_BODY_STATE_VERTEX_NONFINITE")
+                for vid,world in old_body_rows
+            }
+        except (TypeError,ValueError) as exc:
+            raise QualificationError("XPBD_BODY_STATE_VERTEX_WIRE_INVALID") from exc
+        if (len(prior_body)!=len(old_body_rows)
+                or set(prior_body)!=set(body_ids)):
+            raise QualificationError("XPBD_BODY_STATE_VERTEX_COVERAGE_DRIFT")
         if dt_seconds is None:
+            if any(not np.array_equal(prior_body[vid],current_body[vid])
+                   for vid in body_ids):
+                raise QualificationError(
+                    "XPBD_BODY_CHANGED_PRIMARY_COLLIDER_REQUIRES_DT"
+                )
             if any(not np.array_equal(prior_joint_centers[cid],center)
                    for cid,center in joint_centers.items()):
                 raise QualificationError(
@@ -698,6 +738,11 @@ def step_declared_xpbd_surface_v1(
     friction_corrections=0
     self_contact_projections=0
     self_contact_max_candidates=0
+    body_contact_projections=0
+    body_contact_swept_hits=0
+    body_contact_max_candidates=0
+    body_contact_unresolved_sweeps=0
+    body_max_penetration=0.
     for sub in range(steps):
         fraction=(sub+1)/steps
         for jid in pins:
@@ -710,6 +755,14 @@ def step_declared_xpbd_surface_v1(
         joint_step_displacements={
             cid:(joint_centers[cid]-prior_joint_centers[cid])/steps
             for cid in joint_centers
+        }
+        body_start={
+            vid:prior_body[vid]+(sub/steps)*(current_body[vid]-prior_body[vid])
+            for vid in body_ids
+        }
+        body_end={
+            vid:prior_body[vid]+fraction*(current_body[vid]-prior_body[vid])
+            for vid in body_ids
         }
         before={jid:pos[jid].copy() for jid in dynamic}
         for jid in dynamic:
@@ -818,6 +871,31 @@ def step_declared_xpbd_surface_v1(
                 self_contact_max_candidates=max(
                     self_contact_max_candidates,self_result.candidate_pairs,
                 )
+            if policy.body_mesh_colliders:
+                body_result=resolve_xpbd_body_mesh_contact_v1(
+                    pos,before,body_start,body_end,dynamic,
+                    policy.body_mesh_colliders,
+                    max_candidates=policy.max_body_mesh_candidates,
+                    project=True,
+                )
+                body_contact_projections+=body_result.projections
+                body_contact_swept_hits+=body_result.swept_hits
+                body_contact_max_candidates=max(
+                    body_contact_max_candidates,body_result.candidates,
+                )
+        if policy.body_mesh_colliders:
+            # Admission must check the *final* solved substep, not an
+            # intermediate contact projection subsequently undone by stretch.
+            body_final=resolve_xpbd_body_mesh_contact_v1(
+                pos,before,body_start,body_end,dynamic,
+                policy.body_mesh_colliders,
+                max_candidates=policy.max_body_mesh_candidates,
+                project=False,
+            )
+            body_max_penetration=max(
+                body_max_penetration,body_final.max_penetration,
+            )
+            body_contact_unresolved_sweeps+=body_final.unresolved_sweeps
         for jid in dynamic:
             velocity[jid]=(pos[jid]-before[jid])/h
             if (not np.isfinite(pos[jid]).all()
@@ -881,6 +959,11 @@ def step_declared_xpbd_surface_v1(
                 [cid,list(map(float,joint_centers[cid]))]
                 for cid in sorted(joint_centers)
             ],
+            **({
+                "kinematic_body_mesh_vertices":[
+                    [vid,list(map(float,current_body[vid]))] for vid in body_ids
+                ]
+            } if body_ids else {}),
         },
     )
     state=replace(state,state_hash=_state_hash(state))
@@ -906,7 +989,9 @@ def step_declared_xpbd_surface_v1(
                 max_stretch<=policy.max_stretch_relative_error
                 and max_area<=policy.max_area_relative_error
                 and max_penetration<=policy.max_contact_penetration
-                and self_max_penetration<=policy.max_contact_penetration)
+                and self_max_penetration<=policy.max_contact_penetration
+                and body_max_penetration<=policy.max_contact_penetration
+                and body_contact_unresolved_sweeps==0)
             else "FAIL_XPBD_SURFACE_CONSTRAINT_RESIDUAL")
     return XPBDSurfaceResultV1(
         deformation=deformation,state=state,status=status,
@@ -928,6 +1013,18 @@ def step_declared_xpbd_surface_v1(
             "self_contact_projections":self_contact_projections,
             "self_contact_max_candidate_pairs":self_contact_max_candidates,
             "self_contact_max_penetration":self_max_penetration,
+            "body_mesh_contact_enabled":bool(policy.body_mesh_colliders),
+            "body_mesh_contact_projections":body_contact_projections,
+            "body_mesh_swept_vertex_triangle_hits":body_contact_swept_hits,
+            "body_mesh_contact_max_candidate_pairs":body_contact_max_candidates,
+            "body_mesh_contact_max_penetration":body_max_penetration,
+            "body_mesh_unresolved_sweeps":body_contact_unresolved_sweeps,
+            "body_mesh_point_triangle_linear_ccd_qualified":bool(
+                policy.body_mesh_colliders and steps>0
+                and all(c.swept_vertex_triangle_ccd for c in policy.body_mesh_colliders)
+                and status=="PASS_XPBD_SURFACE_RUNTIME"
+            ),
+            "body_mesh_edge_edge_ccd_qualified":False,
             "explicit_joint_sphere_contact_enabled":bool(policy.joint_spheres),
             "friction_qualified":False,
             "declared_rigid_contact_coulomb_friction_qualified":bool(

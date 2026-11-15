@@ -1,3 +1,7 @@
+> **ACTIVE DECISION — 2026-11-15 · RSS.vNext mainline.** The only executable product architecture is the nine-role catalog at `platform/internal/capability/contracts/product_capabilities_v1.json` (see `SYSTEM_INDEX.md`). The product has **two original image observations**, two generated canonical images, six generated RGB/normal camera-conditioned construction views, and one shared H(x) conditioned *directly* by both original patches and the generated views. The one `RSSVNEXT` ModelRelease bundles the two diffusion stages and one IRIS/TESSA/AXIS/MIRA reconstruction model; independently qualified Compiler/Graphics/Proof own subsequent authority. **Current engineering focus:** source-qualified training losses, real-corpus eligibility and unseen animation-ready mesh/rig/skin + 2D presentation validation. No automatic secondary motion or mouse-driven whole-body mechanics requirement is promoted ahead of those gates. Training readiness, ModelRelease and ProductRevision remain unproven. **All dated plans below are historical handoffs, not active instructions; do not revive their one-view/eight-real-view/FIT-era plans over the live catalog.**
+
+---
+
 > **Current work order — 2026-10-28:** Follow
 > [Truth -> LOFO notebook -> Shape integration](docs/research/truth_foundry/DELIVERY_CONTINUATION_20261028.md).
 > Reuse the same eight sources and preserved measurements. Close the outstanding

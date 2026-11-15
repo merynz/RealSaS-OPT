@@ -1,0 +1,22 @@
+name: BUSTED checkpoint installation boundary
+on:
+  pull_request:
+    paths:
+      - 'product/busted_site/checkpoint_installation.py'
+      - 'product/busted_site/server.py'
+      - 'tests/product/test_busted_checkpoint_installation.py'
+      - '.github/workflows/busted_checkpoint_boundary.yml'
+  workflow_dispatch:
+jobs:
+  checkpoint-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate checkpoint installation and public API boundary
+        run: python -m unittest tests.product.test_busted_checkpoint_installation -v
+      - name: Compile changed Python modules
+        run: python -m py_compile product/busted_site/checkpoint_installation.py product/busted_site/server.py

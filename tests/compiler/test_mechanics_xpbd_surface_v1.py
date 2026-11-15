@@ -426,3 +426,28 @@ def test_live_mechanics_resolves_joint_sphere_from_real_solved_pose():
                 XPBDSurfaceJointSphereColliderV1("other","missing",.03),
             )),
         )
+
+
+def test_joint_proxy_explicit_exclusion_protects_authored_cloth_root_region():
+    # Exclusions are canonical dynamic vertex IDs, not implicit semantics.
+    proxy=XPBDSurfaceJointSphereColliderV1(
+        "shoulder","J0",radius=.08,excluded_vertex_ids=("MV:2",),
+    )
+    parents,domain,policy,primary=_setup(
+        joint_spheres=(proxy,),gravity_xyz=(0.,0.,0.),
+    )
+    init=_simulate(parents,domain,policy,primary,
+                   joint_world_positions={"J0":(0.,0.,0.)})
+    out=_simulate(parents,domain,policy,primary,
+                  previous_state=init.state,dt_seconds=1./120.,
+                  joint_world_positions={"J0":(0.,0.,0.)})
+    assert out.status=="PASS_XPBD_SURFACE_RUNTIME"
+    assert out.contact_projections==0
+    assert out.max_contact_penetration==0.
+    assert out.deformation.positions==primary.positions
+    bad=replace(policy,joint_spheres=(replace(
+        proxy,excluded_vertex_ids=("MV:999",)
+    ),))
+    with pytest.raises(QualificationError,match="JOINT_SPHERE_EXCLUSION_INVALID"):
+        _simulate(parents,domain,bad,primary,
+                  joint_world_positions={"J0":(0.,0.,0.)})

@@ -568,8 +568,15 @@ int self_test(){
     // With a translucent known front and an unknown rear, preserve only
     // the known contribution and signal unresolved background ownership.
     for(int y=0;y<8;++y){
-        for(int x=1;x<=3;++x)
-            tex.inferred_rgba[4*(y*8+x)+3]=128u;
+        for(int x=1;x<=3;++x){
+            const auto p=static_cast<std::size_t>(y*8+x);
+            // The preceding orthographic-gradient fixture changed the
+            // foreground RGB; reset it before asserting exact red alpha.
+            tex.inferred_rgba[4*p]=255u;
+            tex.inferred_rgba[4*p+1]=0u;
+            tex.inferred_rgba[4*p+2]=0u;
+            tex.inferred_rgba[4*p+3]=128u;
+        }
         for(int x=4;x<=6;++x)
             tex.inferred_mask[y*8+x]=0u;
     }

@@ -37,7 +37,9 @@
       "source_truth_status": "NATIVE_GEOMETRY_CANDIDATE",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 1
+      "default_weight": 1,
+      "trainer_result_field": "topology_loss",
+      "eligibility_counter": "eligible_topology_examples"
     },
     {
       "id": "motion_preference",
@@ -52,7 +54,9 @@
       "source_truth_status": "NOT_OBSERVED_AS_SIMPLE_ANIMATION_DECLARATION",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0.2
+      "default_weight": 0.2,
+      "trainer_result_field": "motion_preference_loss",
+      "eligibility_counter": "qualified_preference_pairs"
     },
     {
       "id": "source_semantics",
@@ -67,7 +71,9 @@
       "source_truth_status": "NATIVE_PART_METADATA_PARTIAL",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0.2
+      "default_weight": 0.2,
+      "trainer_result_field": "source_semantic_loss",
+      "eligibility_counter": "eligible_semantic_patch_labels"
     },
     {
       "id": "semantic_risk",
@@ -82,7 +88,9 @@
       "source_truth_status": "NATIVE_PART_METADATA_PARTIAL",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "semantic_risk_loss",
+      "eligibility_counter": "eligible_semantic_patch_labels"
     },
     {
       "id": "surface_roles",
@@ -97,7 +105,9 @@
       "source_truth_status": "SOURCE_ROLE_ADDRESS_NOT_YET_VERIFIED",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "surface_role_loss",
+      "eligibility_counter": "eligible_surface_role_points"
     },
     {
       "id": "region_pairs",
@@ -112,7 +122,9 @@
       "source_truth_status": "PART_METADATA_NEEDS_SOURCE_REINDEX",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "region_pair_loss",
+      "eligibility_counter": "eligible_region_pairs"
     },
     {
       "id": "typed_relations",
@@ -127,7 +139,9 @@
       "source_truth_status": "NO_GENERAL_TRUTH_FROM_SEGMENTATION",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "typed_relation_loss",
+      "eligibility_counter": "eligible_typed_relation_channels"
     },
     {
       "id": "graphics_source_rgb",
@@ -142,7 +156,9 @@
       "source_truth_status": "FIRST_HIT_RECEIPT_REQUIRED",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "graphics_source_rgb_loss",
+      "eligibility_counter": "eligible_graphics_source_rgb_queries"
     },
     {
       "id": "source_udf",
@@ -157,7 +173,9 @@
       "source_truth_status": "NATIVE_SURFACE_CANDIDATE",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "source_udf_loss",
+      "eligibility_counter": "eligible_source_udf_queries"
     },
     {
       "id": "source_inside_sign",
@@ -172,7 +190,9 @@
       "source_truth_status": "CLOSED_SOLID_PROOF_REQUIRED",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "source_inside_sign_loss",
+      "eligibility_counter": "eligible_source_inside_sign_queries"
     },
     {
       "id": "source_signed_sdf",
@@ -187,7 +207,9 @@
       "source_truth_status": "CLOSED_SOLID_PROOF_REQUIRED",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "source_signed_sdf_loss",
+      "eligibility_counter": "eligible_source_signed_sdf_queries"
     },
     {
       "id": "axis_rig_skin_codes",
@@ -202,7 +224,9 @@
       "source_truth_status": "RIG_SKIN_NATIVE_FIELDS_CANDIDATE",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "axis_rig_skin_loss",
+      "eligibility_counter": "eligible_axis_sequences"
     },
     {
       "id": "axis_posed_surface",
@@ -217,7 +241,9 @@
       "source_truth_status": "ANIMATION_DECLARATION_NOT_POSE_TEACHER",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "axis_posed_surface_loss",
+      "eligibility_counter": "eligible_axis_pose_count"
     },
     {
       "id": "axis_dynamic_posed_surface",
@@ -232,7 +258,9 @@
       "source_truth_status": "ANIMATION_DECLARATION_NOT_POSE_TEACHER",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "axis_dynamic_posed_surface_loss",
+      "eligibility_counter": "eligible_axis_dynamic_pose_count"
     },
     {
       "id": "anchor_face_correspondence",
@@ -247,7 +275,9 @@
       "source_truth_status": "CONTACT_LABELS_UNCONFIRMED",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "anchor_face_correspondence_loss",
+      "eligibility_counter": "eligible_anchor_held_faces"
     },
     {
       "id": "flexicubes_surface",
@@ -262,7 +292,9 @@
       "source_truth_status": "SOURCE_SIGNED_PROOF_REQUIRED",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0.3
+      "default_weight": 0.3,
+      "trainer_result_field": "flexicubes_surface_loss",
+      "eligibility_counter": null
     },
     {
       "id": "flexicubes_animation",
@@ -277,7 +309,9 @@
       "source_truth_status": "POSE_SUITE_NOT_VERIFIED",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "flexicubes_animation_loss",
+      "eligibility_counter": "eligible_animation_pose_count"
     },
     {
       "id": "tessa_iris_surface_alignment",
@@ -292,7 +326,9 @@
       "source_truth_status": "CROSS_HEAD_SOURCE_BINDING_REQUIRED",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "tessa_iris_surface_alignment_loss",
+      "eligibility_counter": null
     },
     {
       "id": "novel_view",
@@ -307,7 +343,9 @@
       "source_truth_status": "EXPERIMENTAL_ALTERNATIVE",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "novel_view_loss",
+      "eligibility_counter": "eligible_novel_view_pixels"
     },
     {
       "id": "realsas_joint_slrm",
@@ -322,7 +360,9 @@
       "source_truth_status": "RENDER_TRUTH_NOT_MATERIALIZED",
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "default_weight": 0
+      "default_weight": 0,
+      "trainer_result_field": "realsas_joint_slrm_loss",
+      "eligibility_counter": "eligible_realsas_joint_rays"
     }
   ],
   "slrm": [
@@ -668,5 +708,6 @@
     "COMPUTED_REQUIRED": "Independent source mesh/rig must be normalized, reindexed and checked",
     "INTERVENTION_REQUIRED": "Cannot infer edit/drawable/contact/behavior evidence from mesh part labels alone",
     "UNTRAINED_OUTPUT": "No independently qualified active objective and acceptance proof verified"
-  }
+  },
+  "audit_resolve": "Structural objective and eligibility fields are exact names from training_phase_contract_v1.LOSS_FIELDS, checked by AST regression."
 }

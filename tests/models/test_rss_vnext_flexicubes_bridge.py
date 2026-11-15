@@ -287,3 +287,33 @@ def test_signed_source_teacher_registry_is_pinned_to_checkpoint(tmp_path):
     )
     with pytest.raises(ValueError, match="CHECKPOINT_SIGNED_SOURCE_REGISTRY_DRIFT"):
         other.load_checkpoint(path)
+
+
+def test_anisotropic_highres_grid_addresses_match_pinned_upstream_exactly():
+    """Real upstream validation: optimized indexed grid, same corners/cells.
+
+    Small anisotropic grid is deliberately affordable in the CPU source court;
+    scaling to 1.5M cells changes allocation, not the indexing semantics.
+    """
+    extractor = PinnedFlexiCubesV1(_root(), device="cpu")
+    for res in ((3, 4, 5), (8, 6, 11)):
+        direct_xyz, direct_cubes = extractor.construct_iris_grid(res)
+        upstream_xyz, upstream_cubes = extractor.operator.construct_voxel_grid(
+            list(res),
+        )
+        torch.testing.assert_close(
+            direct_xyz * .5, upstream_xyz, atol=1.01e-5, rtol=0,
+        )
+        assert torch.equal(direct_cubes, upstream_cubes)
+        field = direct_xyz.norm(dim=-1) - .65
+        learned_raw = direct_xyz.new_zeros((direct_cubes.shape[0], 21))
+        vertices, faces, regularizer = extractor.extract(
+            vertices_iris=direct_xyz, field=field,
+            cubes=direct_cubes, raw_parameters=learned_raw,
+            resolution=res, training=False,
+        )
+        assert vertices.ndim == 2 and vertices.shape[1] == 3
+        assert faces.ndim == 2 and faces.shape[1] == 3
+        assert vertices.numel() > 0 and faces.numel() > 0
+        assert torch.isfinite(vertices).all()
+        assert torch.isfinite(regularizer).all()

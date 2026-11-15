@@ -7,9 +7,9 @@ starts a NEW optimizer and a NEW global-step clock. It never imports moments,
 scheduler state, a source admission registry, or sampler position. Registries
 must be independently provided to the destination trainer.
 
-Only S-LRM -> structural and structural -> structural are currently supported;
-MIRA's separate codec training is NOT silently represented as a unified-model
-state transfer. This is a transport contract, not proof of training quality.
+The exact embedded RSS.vNext MIRA codec may also transfer into structural
+training, but only as a full unified-model state. No second-model codec
+checkpoint or unqualified external skin tokens are accepted. This is a transport contract, not proof of training quality.
 """
 
 from dataclasses import dataclass
@@ -29,6 +29,7 @@ from .training_optimizer_ownership_v1 import qualify_rss_vnext_optimizer_ownersh
 SCHEMA = "RealSaS.RSSvNext.TrainingPhaseHandoff.v1"
 TRANSITIONS = frozenset({
     ("SLRM", "STRUCTURAL"),
+    ("MIRA_CODEC", "STRUCTURAL"),
     ("STRUCTURAL", "STRUCTURAL"),
 })
 

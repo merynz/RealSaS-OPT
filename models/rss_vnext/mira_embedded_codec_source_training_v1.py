@@ -252,6 +252,22 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         )
         self.frozen_upstream_state_sha256 = self._frozen_upstream_sha256()
         self._assert_scope()
+        # The handoff policy binds the precise source-teacher supervision,
+        # decoder mode and frozen upstream identity. It is not a resume SHA.
+        self.phase_objective_policy_sha256 = _digest_json({
+            "source_phase_schema": SCHEMA,
+            "skin_decoder_mode": self.skin_decoder_mode,
+            "skin_registry_sha256": self.registry_sha256,
+            "source_pose_registry_sha256": self.pose_registry_sha256,
+            "source_area_registry_sha256": self.area_registry_sha256,
+            "pose_consequence_weight": self.pose_consequence_weight,
+            "source_area_skin_weight": self.source_area_skin_weight,
+            "source_area_skin_simplex_kl_weight": self.source_area_skin_simplex_kl_weight,
+            "gradient_court_policy": asdict(self.gradient_court_policy),
+            "source_surface_pooling_abi": MIRA_SOURCE_SURFACE_POOLING_ABI,
+            "frozen_upstream_state_sha256": self.frozen_upstream_state_sha256,
+            "architecture_digest": self.config_sha256,
+        })
         self.step = 0
 
     def _frozen_upstream_sha256(self) -> str:
@@ -783,6 +799,29 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         self.optimizer.step()
         self.step+=1
         return result
+
+    def export_phase_handoff(self, path: str | Path):
+        """Transfer THIS model's embedded, source-trained codec, not an external VAE.
+
+        The structural phase owns its own optimizer and source registries.
+        Only actual trained steps may be exported. No stage has permission
+        to label the exported skin as teacher-free ProductProof.
+        """
+        from .training_phase_handoff_v1 import (
+            export_rss_vnext_training_phase_handoff_v1,
+        )
+        self._assert_scope()
+        self._assert_frozen_state_identity()
+        return export_rss_vnext_training_phase_handoff_v1(
+            path, model=self.model,
+            source_kind="MIRA_CODEC", target_kind="STRUCTURAL",
+            source_global_step=self.step,
+            dataset_manifest_sha256=self.dataset_manifest_sha256,
+            source_objective_policy_sha256=self.phase_objective_policy_sha256,
+            source_optimizer_binding_sha256=self.optimizer_ownership.binding_sha256,
+            architecture_id=self.model.architecture_id,
+            architecture_digest=self.config_sha256,
+        )
 
     def save_checkpoint(self, path: str | Path) -> None:
         """Resume codec-first source training, not export a ProductRelease."""

@@ -440,7 +440,12 @@ def _policy(domain: XPBDSurfaceDomainV1, policy: XPBDSurfacePolicyV1) -> str:
                 or len(set(collider.excluded_vertex_ids))!=len(collider.excluded_vertex_ids)
                 or not set(collider.excluded_vertex_ids)<=set(domain.dynamic_vertex_ids)):
             raise QualificationError("XPBD_SURFACE_JOINT_SPHERE_EXCLUSION_INVALID")
-    if any(c.collider_id in seen for c in policy.body_mesh_colliders):
+    if any(
+        type(c) is not XPBDBodyMeshColliderV1
+        or not isinstance(c.collider_id,str)
+        or c.collider_id in seen
+        for c in policy.body_mesh_colliders
+    ):
         raise QualificationError("XPBD_BODY_COLLIDER_ID_OVERLAP")
     if len(seen)+len(policy.body_mesh_colliders)>16 or len(domain.dynamic_vertex_ids)>4096:
         raise QualificationError("XPBD_SURFACE_CONTACT_RESOURCE_BOUND")
@@ -884,6 +889,23 @@ def step_declared_xpbd_surface_v1(
                     body_contact_max_candidates,body_result.candidates,
                 )
         if policy.body_mesh_colliders:
+            # Anchored cloth roots cannot be moved by XPBD. If an authored
+            # body surface intersects a pin, fail the contact court unless
+            # that exact canonical vertex was explicitly excluded.
+            pin_start={
+                vid:prior_pins[vid]+(sub/steps)*(primary[vid]-prior_pins[vid])
+                for vid in pins
+            }
+            pinned_final=resolve_xpbd_body_mesh_contact_v1(
+                pos,pin_start,body_start,body_end,pins,
+                policy.body_mesh_colliders,
+                max_candidates=policy.max_body_mesh_candidates,
+                project=False,
+            )
+            body_max_penetration=max(
+                body_max_penetration,pinned_final.max_penetration,
+            )
+            body_contact_unresolved_sweeps+=pinned_final.unresolved_sweeps
             # Admission must check the *final* solved substep, not an
             # intermediate contact projection subsequently undone by stretch.
             body_final=resolve_xpbd_body_mesh_contact_v1(
@@ -941,6 +963,18 @@ def step_declared_xpbd_surface_v1(
         self_contact_max_candidates=max(
             self_contact_max_candidates,self_diagnostic.candidate_pairs,
         )
+    if policy.body_mesh_colliders and steps==0:
+        # Admission/snapshot is not a simulation step. Still reject already
+        # impossible pinned-root contact; no silent solver ownership change.
+        pinned_check=resolve_xpbd_body_mesh_contact_v1(
+            pos,{vid:pos[vid] for vid in pins},
+            current_body,current_body,pins,
+            policy.body_mesh_colliders,
+            max_candidates=policy.max_body_mesh_candidates,
+            project=False,check_sweeps=False,
+        )
+        if pinned_check.max_penetration>policy.max_contact_penetration:
+            raise QualificationError("XPBD_BODY_PINNED_CONTACT_UNSATISFIABLE")
     state=XPBDSurfaceStateV1(
         domain_hash=domain.domain_hash,
         policy_hash=signature,

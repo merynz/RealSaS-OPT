@@ -597,19 +597,21 @@ int main(int argc,char** argv){
     try {
         if(argc==2&&std::string(argv[1])=="--self-test")return self_test();
         const bool archive_mode=argc>1&&std::string(argv[1])=="--rss";
-        if(archive_mode ? (argc!=7&&argc!=8&&argc!=9)
-                        : (argc!=8&&argc!=9&&argc!=10))
+        if(archive_mode ? (argc<7||argc>11)
+                        : (argc<8||argc>12))
             throw std::runtime_error(
                 "USAGE: rss_uv_player graphics.bin uv.bin pose.bin frame view"
                 " source_view output.rgba [owner.i32 authority.u8]"
                 " OR --rss preview.rss frame view source_view output.rgba"
-                " [owner.i32 authority.u8] or --role=K (model-candidate)"
+                " [owner.i32 authority.u8] [--role=K]"
+                " [--unknown-mask=path] (model-candidate)"
             );
         std::vector<std::uint8_t> graphics_blob,texture_blob,pose_blob;
         int frame=0,view=0,source_view=-1,role_filter=-1;
         const char* output_path=nullptr;
         const char* owner_path=nullptr;
         const char* authority_path=nullptr;
+        const char* unknown_mask_path=nullptr;
         std::map<std::string,std::string> manifest;
         if(archive_mode){
             const auto entries=parse_existing_rss_archive_v1(
@@ -633,13 +635,7 @@ int main(int argc,char** argv){
             view=parse_index(argv[4]);
             source_view=parse_index(argv[5]);
             output_path=argv[6];
-            if(argc==9){owner_path=argv[7];authority_path=argv[8];}
-            if(argc==8){
-                const std::string arg(argv[7]);
-                if(arg.rfind("--role=",0)!=0)
-                    throw std::runtime_error("RSS_UV_NATIVE_SEMANTIC_ARG_FORMAT");
-                role_filter=parse_index(arg.substr(7).c_str());
-            }
+            // Optional output sidecars are parsed uniformly below.
             if(manifest.at("schema")==
                 "RealSaS.RSSvNext.NativeInteractivePuppetPreview.v1"&&view!=0)
                 throw std::runtime_error("RSS_UV_PREVIEW_SINGLE_PROJECTED_VIEW_ONLY");
@@ -651,12 +647,31 @@ int main(int argc,char** argv){
             view=parse_index(argv[5]);
             source_view=parse_index(argv[6]);
             output_path=argv[7];
-            if(argc==10){owner_path=argv[8];authority_path=argv[9];}
-            if(argc==9){
-                const std::string arg(argv[8]);
-                if(arg.rfind("--role=",0)!=0)
-                    throw std::runtime_error("RSS_UV_NATIVE_SEMANTIC_ARG_FORMAT");
+            // Optional output sidecars are parsed uniformly below.
+        }
+        bool role_seen=false, unknown_seen=false;
+        for(int i=archive_mode?7:8;i<argc;){
+            const std::string arg(argv[i]);
+            if(arg.rfind("--role=",0)==0){
+                if(role_seen)
+                    throw std::runtime_error("RSS_UV_NATIVE_DUPLICATE_ROLE_ARG");
+                role_seen=true;
                 role_filter=parse_index(arg.substr(7).c_str());
+                ++i;
+            }else if(arg.rfind("--unknown-mask=",0)==0){
+                if(unknown_seen || arg.size()<=15u)
+                    throw std::runtime_error("RSS_UV_NATIVE_UNKNOWN_MASK_ARG_FORMAT");
+                unknown_seen=true;
+                unknown_mask_path=argv[i]+15;
+                ++i;
+            }else if(!owner_path && i+1<argc &&
+                     arg.rfind("--",0)!=0 &&
+                     std::string(argv[i+1]).rfind("--",0)!=0){
+                owner_path=argv[i];
+                authority_path=argv[i+1];
+                i+=2;
+            }else{
+                throw std::runtime_error("RSS_UV_NATIVE_OPTIONAL_ARG_FORMAT");
             }
         }
         const auto graphics=realsas::graphics_v1::parse(graphics_blob);
@@ -750,6 +765,11 @@ int main(int argc,char** argv){
         if(owner_path){
             write_file(owner_path,output.front_face);
             write_file(authority_path,output.color_authority);
+        }
+        if(unknown_mask_path){
+            // RGBA zero at this pixel is unresolved color, NOT a measured
+            // transparent background. The explicit sidecar preserves that.
+            write_file(unknown_mask_path,output.unknown_occlusion);
         }
         std::uint64_t source_pixels=0,predicted_pixels=0;
         for(const auto authority:output.color_authority){

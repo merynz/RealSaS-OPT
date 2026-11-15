@@ -11,6 +11,7 @@ import pytest
 from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import (
     CanonicalMeshVertexIR, canonical_mesh_lineage_hash_v1,
 )
+from compiler.realsas_compiler_core.canonical_mechanics_ir_v1 import CanonicalMechanicsIRV1
 from compiler.realsas_compiler_core.canonical_skin_ir_v2 import CanonicalSkinRowIRV2
 from compiler.realsas_compiler_core.mechanics_control_solver_v1 import (
     ControlTransformIRV1, deform_mesh_lbs_v1, solve_control_pose_v1,
@@ -128,9 +129,23 @@ def test_prepared_live_motion_and_intervention_runtime_match_default_kernel():
         evaluate_mechanics_intervention_frame_v1,
         evaluate_mechanics_intervention_sequence_v1,
     )
-    from tests.compiler.test_mechanics_control_solver_v1 import _mechanics_fixture
     mesh,rig,skin,prepared=_objects()
-    mechanics=_mechanics_fixture(mesh,rig,skin)
+    # Current main's test_mechanics_control_solver_v1 does not export the
+    # historical research helper. Build the same typed diagnostic receipt
+    # from this test's exact source fixture instead.
+    mechanics=CanonicalMechanicsIRV1(
+        mesh_lineage_hash=mesh.mesh_lineage_hash,
+        rig_lineage_hash=rig.rig_lineage_hash,
+        deform_structure_hash=rig.deform_structure_hash,
+        control_program_hash=rig.control_program_hash,
+        skin_lineage_hash=skin.skin_lineage_hash,
+        constraint_schedule=tuple(c.canonical_constraint_id for c in rig.constraints),
+        executable_operator_ids=("IK",),
+        rest_pose_hash="4"*64,
+        qualification_hash="5"*64,
+        mechanics_lineage_hash="6"*64,
+        metadata={"authority":"COMPILER_CANONICAL_MECHANICS"},
+    )
     transforms=(ControlTransformIRV1("C_ROOT",translation=(0.8,-0.3,0.25)),)
     old=evaluate_mechanics_intervention_frame_v1(
         mesh,rig,skin,mechanics,overrides=transforms,

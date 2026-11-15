@@ -158,6 +158,7 @@ def test_real_canonical_mesh_uv_texture_renders_two_poses_in_cpp(
     )
     assert "RSS_UV_NATIVE_POSED_DEPTH_AND_PARTIAL_ORDER_PASS" in selftest.stdout
     assert "RSS_UV_NATIVE_ORTHOGRAPHIC_CHART_AND_MOVING_DEPTH_PASS" in selftest.stdout
+    assert "RSS_UV_NATIVE_UNKNOWN_COVERAGE_OCCLUSION_PASS" in selftest.stdout
 
     front, summary = _render(
         player, gfx, uv, poses, tmp_path, frame=0, source_view=0, owner=True,
@@ -179,6 +180,19 @@ def test_real_canonical_mesh_uv_texture_renders_two_poses_in_cpp(
     assert run.returncode == 0, run.stderr
     assert "rss_archive=1" in run.stdout
     actual = np.frombuffer(output.read_bytes(), dtype=np.uint8).reshape(128,128,4)
+    # The native consumer must expose unresolved geometric coverage to UI
+    # instead of silently presenting it as observed transparent background.
+    unknown_mask = tmp_path / "unresolved_coverage.u8"
+    mask_run = subprocess.run([
+        str(player), "--rss", str(preview_file),
+        "0", "0", "-1", str(output),
+        f"--unknown-mask={unknown_mask}",
+    ], capture_output=True, text=True)
+    assert mask_run.returncode == 0, mask_run.stderr
+    mask = np.frombuffer(unknown_mask.read_bytes(), dtype=np.uint8)
+    assert mask.shape == (128 * 128,)
+    assert set(np.unique(mask)).issubset({0, 1})
+    assert "unknown_occlusion_pixels=" in mask_run.stdout
     assert np.count_nonzero(actual[:,:,3]) > 25
     assert np.count_nonzero(front[:, :, 3]) > 25
     assert np.count_nonzero(inferred[:, :, 3]) > 25

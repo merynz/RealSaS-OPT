@@ -106,7 +106,7 @@ class _FakeExtractor:
         self.n_cells = int(cubes.shape[0])
         self.active_params = int((raw_parameters.abs().sum(dim=-1) > 0).sum())
         self.resolution_seen = resolution
-        assert training is False
+        self.training_seen = bool(training)
         # Fake fixed connectivity proves bounded dataflow, not FC geometry.
         verts = vertices_iris[:4]
         faces = torch.tensor([[0, 1, 2], [0, 2, 3]], dtype=torch.long)
@@ -132,6 +132,7 @@ def test_product_surface_queries_bounded_chunks_and_only_active_cubes():
             field_policy="SIGNED_HYPOTHESIS_ONLY",
         )
     assert adapter.resolution_seen == (6,5,7)
+    assert adapter.training_seen is False
     assert adapter.n_cells == 6*5*7
     assert 0 < adapter.active_params < adapter.n_cells
     assert iris.max_query <= max(17, 3*8, 2)
@@ -238,3 +239,62 @@ def test_modular_union_sdf_requires_real_assembly_proof_not_component_parity():
     )
     with pytest.raises(ValueError, match="SOURCE_SDF_EXACT_SOLID_PROOF_REQUIRED"):
         no_solid.objective(batch)
+
+
+def test_explicit_highres_training_recomputes_chunks_and_backprops_to_cube_head():
+    iris = _AnalyticIRIS().train()
+    role = nn.Linear(8, 4).train()
+    bridge = RSSvNextFlexiCubesEvidenceBridge(
+        iris, resolution=3,
+        inference_resolution=(6, 5, 7),
+        field_query_chunk=17, cube_query_chunk=3, surface_query_chunk=2,
+        max_cubes=512,
+    ).train()
+    fake = _FakeExtractor()
+    layer = RSSvNextSemanticLayerSpec("all", realsas_style_generic_schema().roles)
+    evidence = bridge(
+        torch.ones(1, 3, 2, 2, 2),
+        extractor=fake, role_head=role,
+        schema=realsas_style_generic_schema(), layer=layer,
+        field_policy="SIGNED_HYPOTHESIS_ONLY",
+        high_resolution_training=True,
+    )
+    assert fake.training_seen is True
+    loss = (
+        evidence.cube_parameters.square().sum()
+        + evidence.presentation_role_logits.square().mean()
+    )
+    loss.backward()
+    assert iris.max_query <= max(17, 3*8, 2)
+    assert iris.cube_extraction[-1].weight.grad is not None
+    assert iris.cube_extraction[-1].weight.grad.abs().sum() > 0
+    assert role.weight.grad is not None
+    assert role.weight.grad.abs().sum() > 0
+    bridge.eval()
+    with pytest.raises(ValueError, match="HIGHRES_TRAIN_PROFILE_INVALID"):
+        bridge(
+            torch.ones(1, 3, 2, 2, 2),
+            extractor=fake, role_head=role,
+            schema=realsas_style_generic_schema(), layer=layer,
+            field_policy="SIGNED_HYPOTHESIS_ONLY",
+            high_resolution_training=True,
+        )
+
+
+def test_highres_training_requires_explicit_source_surface_receipt():
+    model = _trainer_and_model()
+    batch, receipt = _tiny_sdf_batch_and_receipt(
+        model, domain="SINGLE_QUALIFIED_CLOSED_COMPONENT",
+    )
+    batch.flexicubes_high_resolution_training = True
+    trainer = RSSvNextStructuralTrainer(
+        model, torch.optim.AdamW(model.parameters()),
+        dataset_manifest_sha256="a"*64,
+        trusted_source_field_registry={"exact": receipt},
+        weights=RSSvNextTrainingWeights(
+            topology=0., motion_preference=0., source_semantics=0.,
+            flexicubes_surface=0., source_signed_sdf=1.,
+        ),
+    )
+    with pytest.raises(ValueError, match="TRAIN_HIGHRES_SOURCE_AND_SURFACE_REQUIRED"):
+        trainer.objective(batch)

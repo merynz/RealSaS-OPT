@@ -39,6 +39,11 @@ from .mechanics_xpbd_secondary_v1 import (
     XPBDSecondaryStateV1,
     step_declared_xpbd_secondary_v1,
 )
+from .mechanics_xpbd_surface_v1 import (
+    XPBDSurfaceDomainV1, XPBDSurfacePolicyV1, XPBDSurfaceStateV1,
+    requalify_declared_xpbd_surface_domain_v1,
+    step_declared_xpbd_surface_v1,
+)
 from .mechanics_attachment_frames_v1 import (
     AttachmentWorldFrameCourtV1,
     evaluate_attachment_world_frames_v1,
@@ -71,6 +76,7 @@ class MechanicsInterventionFrameV1:
     rank_policy_candidate_keys: tuple[tuple[str, str], ...] = ()
     secondary_motion_state: SecondaryMotionStateV1 | None = None
     xpbd_secondary_state: XPBDSecondaryStateV1 | None = None
+    xpbd_surface_state: XPBDSurfaceStateV1 | None = None
     attachment_frames: AttachmentWorldFrameCourtV1 | None = None
     relative_attachment_court: RelativeAttachmentBridgeCourtV1 | None = None
     metadata: dict = field(default_factory=dict)
@@ -222,6 +228,10 @@ def evaluate_mechanics_intervention_frame_v1(
     xpbd_secondary_policy: XPBDSecondaryPolicyV1 | None = None,
     xpbd_secondary_previous_state: XPBDSecondaryStateV1 | None = None,
     xpbd_secondary_dt_seconds: float | None = None,
+    xpbd_surface_domain: XPBDSurfaceDomainV1 | None = None,
+    xpbd_surface_policy: XPBDSurfacePolicyV1 | None = None,
+    xpbd_surface_previous_state: XPBDSurfaceStateV1 | None = None,
+    xpbd_surface_dt_seconds: float | None = None,
 ) -> MechanicsInterventionFrameV1:
     _strict_lineage(mesh, rig, skin, mechanics)
     limit_residual = _finite_tolerance(
@@ -347,7 +357,8 @@ def evaluate_mechanics_intervention_frame_v1(
     )
     if secondary_motion_policy is not None and xpbd_secondary_policy is not None:
         raise QualificationError("LIVE_MECHANICS_SECONDARY_SOLVER_DOUBLE_OWNERSHIP")
-    if (secondary_motion_policy is not None or xpbd_secondary_policy is not None) and (
+    if (secondary_motion_policy is not None or xpbd_secondary_policy is not None
+            or xpbd_surface_policy is not None) and (
         (multi_status is not None and multi_status != "PASS_MULTIGOAL_BEHAVIORAL_COURT")
         or primary_constraint_residual > limit_residual
         or attachment_result.status != "PASS_ATTACHMENT_FRAME_COURT"
@@ -403,6 +414,32 @@ def evaluate_mechanics_intervention_frame_v1(
         if prepared_skin is not None
         else deform_mesh_lbs_v1(mesh, rig, skin, pose)
     )
+    surface_result=None
+    if xpbd_surface_policy is not None:
+        if xpbd_surface_domain is None:
+            raise QualificationError("LIVE_XPBD_SURFACE_DOMAIN_REQUIRED")
+        if xpbd_secondary_domain is not None:
+            # Surface material vertices may be pinned to secondary bones, but
+            # two solvers cannot independently own the same deformable vertex.
+            joint_surface_owned={
+                vid for region in xpbd_secondary_domain.regions
+                for vid in region.skinned_vertex_ids
+            }
+            if set(xpbd_surface_domain.dynamic_vertex_ids)&joint_surface_owned:
+                raise QualificationError("LIVE_XPBD_JOINT_SURFACE_DOUBLE_OWNERSHIP")
+        requalify_declared_xpbd_surface_domain_v1(
+            mesh,rig,skin,mechanics,xpbd_surface_domain,
+        )
+        surface_result=step_declared_xpbd_surface_v1(
+            mesh,deformed,xpbd_surface_domain,xpbd_surface_policy,
+            previous_state=xpbd_surface_previous_state,
+            dt_seconds=xpbd_surface_dt_seconds,
+        )
+        deformed=surface_result.deformation
+    elif (xpbd_surface_domain is not None
+          or xpbd_surface_previous_state is not None
+          or xpbd_surface_dt_seconds is not None):
+        raise QualificationError("LIVE_XPBD_SURFACE_POLICY_REQUIRED")
     maximum_residual = max((abs(float(v)) for _, v in pose.constraint_residuals), default=0.0)
     if not math.isfinite(maximum_residual):
         raise QualificationError("LIVE_MECHANICS_RESIDUAL_NONFINITE")
@@ -421,6 +458,12 @@ def evaluate_mechanics_intervention_frame_v1(
         "SNAPSHOT_XPBD_NO_STEP",
     }):
         failures.append("XPBD_PENETRATION_OR_SEGMENT_RESIDUAL")
+    if (surface_result is not None and surface_result.status not in {
+        "PASS_XPBD_SURFACE_RUNTIME",
+        "INITIALIZED_XPBD_SURFACE_UNSIMULATED",
+        "SNAPSHOT_XPBD_SURFACE_NO_STEP",
+    }):
+        failures.append("XPBD_SURFACE_CONTACT_OR_MATERIAL_RESIDUAL")
     if attachment_result.status != "PASS_ATTACHMENT_FRAME_COURT":
         failures.append("ATTACHMENT_FRAME_NOT_QUALIFIED")
     if (relative_result is not None and
@@ -441,6 +484,7 @@ def evaluate_mechanics_intervention_frame_v1(
         rank_policy_candidate_keys=solved_rank_keys,
         secondary_motion_state=secondary_result.state if secondary_result is not None else None,
         xpbd_secondary_state=xpbd_result.state if xpbd_result is not None else None,
+        xpbd_surface_state=surface_result.state if surface_result is not None else None,
         attachment_frames=attachment_result,
         relative_attachment_court=relative_result,
         metadata={
@@ -477,6 +521,20 @@ def evaluate_mechanics_intervention_frame_v1(
             "attachment_max_position_residual_world": attachment_result.max_target_position_residual_world,
             "attachment_orientation_mode": attachment_orientation_mode,
             "attachment_orientation_solver_is_opt_in": True,
+            "xpbd_surface_status": (
+                surface_result.status if surface_result is not None else "DISABLED"
+            ),
+            "xpbd_surface_contact_projections": (
+                surface_result.contact_projections if surface_result is not None else 0
+            ),
+            "xpbd_surface_max_stretch_error": (
+                surface_result.max_stretch_relative_error
+                if surface_result is not None else None
+            ),
+            "xpbd_surface_max_area_error": (
+                surface_result.max_area_relative_error
+                if surface_result is not None else None
+            ),
             "secondary_motion_mode": (
                 "DECLARED_XPBD_SECONDARY_V1" if xpbd_result is not None
                 else "CRITICALLY_DAMPED_DECLARED_CHAIN_RESEARCH"
@@ -541,6 +599,8 @@ def evaluate_mechanics_intervention_sequence_v1(
     secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,
     xpbd_secondary_domain: XPBDSecondaryDomainV1 | None = None,
     xpbd_secondary_policy: XPBDSecondaryPolicyV1 | None = None,
+    xpbd_surface_domain: XPBDSurfaceDomainV1 | None = None,
+    xpbd_surface_policy: XPBDSurfacePolicyV1 | None = None,
 ) -> MechanicsInterventionSequenceV1:
     if not steps:
         raise QualificationError("LIVE_MECHANICS_SEQUENCE_EMPTY")
@@ -563,6 +623,7 @@ def evaluate_mechanics_intervention_sequence_v1(
     warm_start_frame_count = 0
     prev_secondary_state: SecondaryMotionStateV1 | None = None
     prev_xpbd_state: XPBDSecondaryStateV1 | None = None
+    prev_surface_state: XPBDSurfaceStateV1 | None = None
     prev_rank_selection: tuple[tuple[str,str], ...] | None = None
     rank_selection_changes=0
     rank_selection_reused=0
@@ -610,6 +671,17 @@ def evaluate_mechanics_intervention_sequence_v1(
                 float(step.time_seconds - steps[index-1].time_seconds)
                 if xpbd_secondary_policy is not None and index else None
             ),
+            xpbd_surface_domain=xpbd_surface_domain,
+            xpbd_surface_policy=xpbd_surface_policy,
+            xpbd_surface_previous_state=prev_surface_state,
+            xpbd_surface_dt_seconds=(
+                float(step.time_seconds - steps[index-1].time_seconds)
+                if xpbd_surface_policy is not None and index else None
+            ),
+        )
+        prev_surface_state = (
+            frame.xpbd_surface_state
+            if frame.status == "PASS_MECHANICS_BEHAVIORAL_COURT" else None
         )
         prev_xpbd_state = (
             frame.xpbd_secondary_state

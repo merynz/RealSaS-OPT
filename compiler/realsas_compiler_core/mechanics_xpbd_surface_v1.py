@@ -871,7 +871,11 @@ def step_declared_xpbd_surface_v1(
             "solver_family":"XPBD_COMPLIANT_SURFACE_PARTICLES",
             "source_physics_truth_claimed":False,
             "same_canonical_mesh_and_face_addresses":True,
-            "surface_self_triangle_collision_qualified":bool(self_topology is not None and steps>0 and status=="PASS_XPBD_SURFACE_RUNTIME"),
+            "surface_self_triangle_collision_qualified":False,
+            "discrete_vertex_triangle_edge_edge_contact_residual_qualified":bool(
+                self_topology is not None and steps>0
+                and status=="PASS_XPBD_SURFACE_RUNTIME"
+            ),
             "self_collision_discrete_only":True,
             "self_contact_vertex_triangle_and_edge_edge_enabled":bool(self_topology),
             "self_contact_projections":self_contact_projections,

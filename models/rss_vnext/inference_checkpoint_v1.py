@@ -75,8 +75,17 @@ def _load_config(value: Any) -> RSSvNextConfig:
     if not isinstance(value, Mapping) or set(value) != {f.name for f in fields(RSSvNextConfig)}:
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_CONFIG_KEYS")
     payload = dict(value)
+    # JSON sidecars serialize tuple axes as arrays. Normalize only this
+    # explicitly typed spatial ABI, preserving every other exact field key.
+    if not isinstance(payload["iris"], Mapping):
+        raise RuntimeError("RSS_VNEXT_CHECKPOINT_IRIS_CONFIG")
+    iris = dict(payload["iris"])
+    resolution = iris.get("extraction_inference_resolution")
+    if not isinstance(resolution, (list, tuple)):
+        raise RuntimeError("RSS_VNEXT_CHECKPOINT_IRIS_RESOLUTION_SEQUENCE")
+    iris["extraction_inference_resolution"] = tuple(resolution)
     payload["iris"] = _exact_config(
-        IRISVNextConfigV1, payload["iris"], "RSS_VNEXT_CHECKPOINT_IRIS_CONFIG"
+        IRISVNextConfigV1, iris, "RSS_VNEXT_CHECKPOINT_IRIS_CONFIG"
     )
     payload["tessa"] = _exact_config(
         TESSAStructuralizerConfigV3, payload["tessa"], "RSS_VNEXT_CHECKPOINT_TESSA_CONFIG"

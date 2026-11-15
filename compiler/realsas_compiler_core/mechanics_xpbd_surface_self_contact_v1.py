@@ -132,6 +132,9 @@ def _pairs(
     edge_grid: dict[tuple[int,int,int], list[int]] = {}
     for fi, face in enumerate(topology.faces):
         p = np.stack([positions[v] for v in face])
+        area_cross=np.cross(p[1]-p[0],p[2]-p[0])
+        if float(area_cross@area_cross)<=1e-24:
+            raise QualificationError("XPBD_SELF_CONTACT_DEGENERATE_MOVING_FACE")
         for cell in _cells(p.min(axis=0)-thickness, p.max(axis=0)+thickness,
                            cell_size, 1024):
             face_grid.setdefault(cell, []).append(fi)

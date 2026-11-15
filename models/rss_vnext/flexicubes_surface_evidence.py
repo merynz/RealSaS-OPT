@@ -82,16 +82,44 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
         resolution: int = 16,
         max_cubes: int = 32768,
         max_output_vertices: int = 131072,
+        inference_resolution: tuple[int, int, int] | None = None,
+        inference_max_cubes: int = 1500000,
+        inference_max_output_vertices: int = 1000000,
+        field_query_chunk: int = 16384,
+        cube_query_chunk: int = 2048,
+        surface_query_chunk: int = 16384,
     ) -> None:
         super().__init__()
         if not 2 <= resolution <= 64 or max_cubes < 1 or max_output_vertices < 4:
             raise ValueError("RSS_VNEXT_FC_RESOURCE_CONFIG_INVALID")
         if resolution ** 3 > max_cubes:
             raise ValueError("RSS_VNEXT_FC_CUBE_BUDGET_EXCEEDED")
+        if inference_resolution is not None and (
+            type(inference_resolution) is not tuple
+            or len(inference_resolution) != 3
+            or any(type(v) is not int or v < 2 or v > 256 for v in inference_resolution)
+            or inference_resolution[0] * inference_resolution[1] * inference_resolution[2]
+                > inference_max_cubes
+        ):
+            raise ValueError("RSS_VNEXT_FC_INFERENCE_RESOLUTION_BUDGET")
+        if (
+            not 0 < inference_max_cubes <= 1500000
+            or not 4 <= inference_max_output_vertices <= 2000000
+            or any(type(x) is not int or not 1 <= x <= 131072 for x in (
+                field_query_chunk, cube_query_chunk, surface_query_chunk,
+            ))
+        ):
+            raise ValueError("RSS_VNEXT_FC_INFERENCE_RESOURCE_BUDGET")
         self.iris = iris  # same instance shared by all neural experts
         self.resolution = resolution
         self.max_cubes = max_cubes
         self.max_output_vertices = max_output_vertices
+        self.inference_resolution = inference_resolution
+        self.inference_max_cubes = inference_max_cubes
+        self.inference_max_output_vertices = inference_max_output_vertices
+        self.field_query_chunk = field_query_chunk
+        self.cube_query_chunk = cube_query_chunk
+        self.surface_query_chunk = surface_query_chunk
 
     def forward(
         self,
@@ -121,21 +149,47 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
             raise ValueError("RSS_VNEXT_FC_SHARED_SCENE_INVALID")
         if not hasattr(extractor, "construct_iris_grid") or not hasattr(extractor, "extract"):
             raise ValueError("RSS_VNEXT_FC_PINNED_ADAPTER_INTERFACE_REQUIRED")
-        grid, cubes = extractor.construct_iris_grid(self.resolution)
+        resolution = (
+            self.resolution if self.training or self.inference_resolution is None
+            else self.inference_resolution
+        )
+        product_highres = isinstance(resolution, tuple)
+        cube_budget = self.inference_max_cubes if product_highres else self.max_cubes
+        vertex_budget = (
+            self.inference_max_output_vertices if product_highres
+            else self.max_output_vertices
+        )
+        grid, cubes = extractor.construct_iris_grid(resolution)
         if grid.ndim != 2 or grid.shape[1] != 3 or cubes.ndim != 2 or cubes.shape[1] != 8:
             raise ValueError("RSS_VNEXT_FC_GRID_CONTRACT")
         if grid.device != scene_triplanes.device or cubes.device != scene_triplanes.device:
             raise ValueError("RSS_VNEXT_FC_DEVICE_DRIFT")
-        if cubes.dtype != torch.long or cubes.numel() == 0 or cubes.shape[0] > self.max_cubes:
+        if cubes.dtype != torch.long or cubes.numel() == 0 or cubes.shape[0] > cube_budget:
             raise ValueError("RSS_VNEXT_FC_CUBE_DOMAIN_INVALID")
         if int(cubes.min()) < 0 or int(cubes.max()) >= len(grid):
             raise ValueError("RSS_VNEXT_FC_GRID_CORNER_RANGE")
 
         grid_xyz = grid[None].to(dtype=scene_triplanes.dtype)
-        observations = self.iris.query(scene_triplanes, grid_xyz)
-        field = observations["field"]
-        h = observations["H"]
-        role_logits = role_head(h)
+        h = None
+        if product_highres:
+            # Product-only: query the exact same learned H(x) in bounded slabs.
+            # Never create a 1.5M x 384 local-feature tensor in memory.
+            field_chunks, role_chunks, delta_chunks = [], [], []
+            for first in range(0, len(grid), self.field_query_chunk):
+                point_chunk = grid_xyz[:, first:first + self.field_query_chunk]
+                out = self.iris.query(scene_triplanes, point_chunk)
+                field_chunks.append(out["field"])
+                role_chunks.append(role_head(out["H"]))
+                delta_chunks.append(out["extraction_delta"])
+            field = torch.cat(field_chunks, dim=1)
+            role_logits = torch.cat(role_chunks, dim=1)
+            grid_delta = torch.cat(delta_chunks, dim=1)[0]
+        else:
+            observations = self.iris.query(scene_triplanes, grid_xyz)
+            field = observations["field"]
+            h = observations["H"]
+            role_logits = role_head(h)
+            grid_delta = observations["extraction_delta"][0]
         if role_logits.shape != (1, grid.shape[0], schema.count):
             raise ValueError("RSS_VNEXT_FC_ROLE_HEAD_WIDTH")
         field_layer = semantic_equivalent_signed_field(
@@ -151,7 +205,6 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
 
         # Preserve learned deformed voxel positions; coordinate magnitude is
         # bounded by the scene core's extraction_delta head.
-        grid_delta = observations["extraction_delta"][0]
         if grid_delta.shape != grid.shape:
             raise ValueError("RSS_VNEXT_FC_GRID_DEFORMATION_SHAPE")
         free_room = (1 - grid_xyz[0].abs()).clamp_min(0)
@@ -159,25 +212,57 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
 
         # Cube-extraction parameters arise from 8 *original* corner features,
         # using the existing 21-way head; no source mesh/skin teacher enters.
-        corners = h[:, cubes]  # [1,C,8,H]
-        raw = self.iris.cube_extraction(corners)
-        if raw.shape != (1, cubes.shape[0], 21):
+        if product_highres:
+            # FlexiCubes indexes per-cube parameters only for sign-changing
+            # cells. Avoid predicting 21 parameters for every empty voxel.
+            inside = field_layer[0] < 0
+            cube_inside = inside[cubes]
+            active = cube_inside.any(dim=-1) & ~cube_inside.all(dim=-1)
+            active_ids = active.nonzero(as_tuple=False).flatten()
+            if not active_ids.numel():
+                raise ValueError("RSS_VNEXT_FC_NO_SIGN_CHANGE_ABSTAIN")
+            raw = deformed_grid.new_zeros((cubes.shape[0], 21))
+            for start in range(0, active_ids.numel(), self.cube_query_chunk):
+                ids = active_ids[start:start + self.cube_query_chunk]
+                corner_points = grid_xyz[:, cubes[ids].reshape(-1)]
+                corner_h = self.iris.query(
+                    scene_triplanes, corner_points,
+                )["H"].reshape(1, ids.numel(), 8, -1)
+                predicted = self.iris.cube_extraction(corner_h)[0]
+                raw[ids] = predicted
+            raw_for_operator = raw
+        else:
+            corners = h[:, cubes]  # [1,C,8,H]
+            raw = self.iris.cube_extraction(corners)
+            raw_for_operator = raw[0]
+        if raw_for_operator.shape != (cubes.shape[0], 21):
             raise ValueError("RSS_VNEXT_FC_CUBE_HEAD_WIDTH")
         extracted_xyz, faces, regularizer = extractor.extract(
             vertices_iris=deformed_grid,
             field=field_layer[0],
             cubes=cubes,
-            raw_parameters=raw[0],
-            resolution=self.resolution,
+            raw_parameters=raw_for_operator,
+            resolution=resolution,
             training=bool(self.training),
         )
-        if extracted_xyz.ndim != 2 or extracted_xyz.shape[-1] != 3 or len(extracted_xyz) > self.max_output_vertices:
+        if extracted_xyz.ndim != 2 or extracted_xyz.shape[-1] != 3 or len(extracted_xyz) > vertex_budget:
             raise ValueError("RSS_VNEXT_FC_OUTPUT_VERTEX_BUDGET")
         if faces.ndim != 2 or faces.shape[-1] != 3 or not faces.numel():
             raise ValueError("RSS_VNEXT_FC_EMPTY_SURFACE")
         # Sample H at the differentiably extracted surface. TESSA consumes
         # these tokens but never treats their face indices as its own output.
-        local = self.iris.query(scene_triplanes, extracted_xyz[None])["H"]
+        if product_highres:
+            local_chunks = []
+            for start in range(0, len(extracted_xyz), self.surface_query_chunk):
+                local_chunks.append(
+                    self.iris.query(
+                        scene_triplanes,
+                        extracted_xyz[None, start:start + self.surface_query_chunk],
+                    )["H"]
+                )
+            local = torch.cat(local_chunks, dim=1)
+        else:
+            local = self.iris.query(scene_triplanes, extracted_xyz[None])["H"]
         result = RSSvNextFlexiCubesSurfaceEvidence(
             xyz=extracted_xyz[None],
             faces=faces,
@@ -186,11 +271,14 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
             regularizer=regularizer,
             sample_grid_xyz=grid_xyz,
             signed_field_grid=field_layer,
-            cube_parameters=raw[0],
+            cube_parameters=raw_for_operator,
             source_policy=field_policy,
             layer_name=layer.name,
         )
-        result.validate(carrier_dim=h.shape[-1], role_count=schema.count)
+        result.validate(
+            carrier_dim=self.iris.cfg.local_feature_dim,
+            role_count=schema.count,
+        )
         return result
 
 

@@ -13,6 +13,7 @@ from compiler.realsas_compiler_core.canonical_mechanics_ir_v1 import (
 from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import (
     canonical_mesh_lineage_hash_v1,
 )
+from compiler.realsas_compiler_core.hashing import content_sha256
 from compiler.realsas_compiler_core.controllable_puppet_runtime_v1 import (
     ControllablePuppetSessionV1,
 )
@@ -228,3 +229,23 @@ def test_editor_xpbd_state_save_reopen_replay_is_bitwise_deterministic():
         reopened.restore_xpbd_runtime_state(tampered)
     # The failed restore may not alter the live session state.
     assert reopened.frame().xpbd_secondary_state==next_b.xpbd_secondary_state
+
+
+def test_rehashed_forged_xpbd_domain_does_not_bypass_compiler_surface_authority():
+    bundle,domain,policy=_editor_bundle()
+    forged=replace(domain,regions=(replace(
+        domain.regions[0],skinned_vertex_ids=("MV:0",),
+    ),),domain_hash="")
+    forged=replace(forged,domain_hash=content_sha256({
+        k:v for k,v in forged.to_dict().items() if k!="domain_hash"
+    }))
+    fake_policy=replace(policy,domain_hash=forged.domain_hash)
+    with pytest.raises(QualificationError,match="REQUALIFICATION_BYTE_OR_SOURCE_DRIFT"):
+        ControllablePuppetSessionV1(bundle).enable_declared_xpbd_secondary(
+            forged,fake_policy,
+        )
+    with pytest.raises(QualificationError,match="REQUALIFICATION_BYTE_OR_SOURCE_DRIFT"):
+        evaluate_mechanics_intervention_frame_v1(
+            bundle.mesh,bundle.rig,bundle.skin,bundle.mechanics,
+            xpbd_secondary_domain=forged,xpbd_secondary_policy=fake_policy,
+        )

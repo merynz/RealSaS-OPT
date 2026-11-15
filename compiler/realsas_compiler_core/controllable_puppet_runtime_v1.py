@@ -42,7 +42,9 @@ from .playback_runtime_v3 import (
 from .canonical_rig_ir_v2 import CanonicalRigIRV2, validate_canonical_rig_domain_v2
 from .canonical_skin_ir_v2 import CanonicalSkinIRV2, validate_canonical_skin_domain_v2
 from .canonical_mechanics_ir_v1 import CanonicalMechanicsIRV1
-from .mechanics_xpbd_domain_v1 import XPBDSecondaryDomainV1
+from .mechanics_xpbd_domain_v1 import (
+    XPBDSecondaryDomainV1, requalify_declared_xpbd_secondary_domain_v1,
+)
 from .mechanics_xpbd_secondary_v1 import (
     XPBDSecondaryPolicyV1, XPBDSecondaryStateV1,
     step_declared_xpbd_secondary_v1, xpbd_state_from_dict_v1,
@@ -283,9 +285,13 @@ class ControllablePuppetSessionV1:
             or policy.domain_hash != domain.domain_hash
         ):
             raise QualificationError("PUPPET_XPBD_DOMAIN_LINEAGE_DRIFT")
-        # Full surface and policy validation happens in the XPBD executor.
-        # Do not change currently selected policy/state unless initial
-        # admission has really succeeded.
+        # Rebuild the surface/chain ownership proof from the current exact
+        # canonical parents. Rehashed but altered domains are never accepted.
+        requalify_declared_xpbd_secondary_domain_v1(
+            self.bundle.mesh, self.bundle.rig, self.bundle.skin,
+            self.bundle.mechanics, domain,
+        )
+        # Do not change selected policy/state unless initial admission passed.
         primary = solve_control_pose_v1(
             self.bundle.rig, tuple(self.control_states.values()),
         )

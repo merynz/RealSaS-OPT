@@ -31,7 +31,9 @@ from .mechanics_secondary_motion_v1 import (
     SecondaryMotionStateV1,
     step_secondary_motion_v1,
 )
-from .mechanics_xpbd_domain_v1 import XPBDSecondaryDomainV1
+from .mechanics_xpbd_domain_v1 import (
+    XPBDSecondaryDomainV1, requalify_declared_xpbd_secondary_domain_v1,
+)
 from .mechanics_xpbd_secondary_v1 import (
     XPBDSecondaryPolicyV1,
     XPBDSecondaryStateV1,
@@ -376,6 +378,9 @@ def evaluate_mechanics_intervention_frame_v1(
             or xpbd_secondary_domain.control_program_hash != rig.control_program_hash
         ):
             raise QualificationError("LIVE_XPBD_CANONICAL_DOMAIN_LINEAGE_DRIFT")
+        requalify_declared_xpbd_secondary_domain_v1(
+            mesh, rig, skin, mechanics, xpbd_secondary_domain,
+        )
         xpbd_result = step_declared_xpbd_secondary_v1(
             rig, pose, xpbd_secondary_domain, xpbd_secondary_policy,
             previous_state=xpbd_secondary_previous_state,

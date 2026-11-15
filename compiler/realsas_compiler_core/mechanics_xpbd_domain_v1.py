@@ -243,6 +243,34 @@ def prepare_declared_xpbd_secondary_domain_v1(
     )
 
 
+def requalify_declared_xpbd_secondary_domain_v1(
+    mesh: CanonicalMeshIR,
+    rig: CanonicalRigIRV2,
+    skin: CanonicalSkinIRV2,
+    mechanics: CanonicalMechanicsIRV1,
+    domain: XPBDSecondaryDomainV1,
+) -> None:
+    """Re-admit a deserialized domain against current source parent IRs.
+
+    Hash consistency alone never proves that a canonical surface address or
+    chain owner was qualified. Rebuild the deterministic admission, using the
+    exact declared chain IDs and threshold, and compare *all* typed fields.
+    """
+    if type(domain) is not XPBDSecondaryDomainV1 or not domain.regions:
+        raise QualificationError("XPBD_SECONDARY_REQUALIFICATION_DOMAIN_INVALID")
+    threshold=domain.regions[0].skin_support_threshold
+    if any(row.skin_support_threshold != threshold for row in domain.regions):
+        raise QualificationError("XPBD_SECONDARY_REQUALIFICATION_THRESHOLD_DRIFT")
+    expected=prepare_declared_xpbd_secondary_domain_v1(
+        mesh,rig,skin,mechanics,DeclaredXPBDSecondaryRequestV1(
+            canonical_chain_ids=tuple(r.canonical_chain_id for r in domain.regions),
+            skin_support_threshold=threshold,
+        ),
+    )
+    if expected.to_dict()!=domain.to_dict():
+        raise QualificationError("XPBD_SECONDARY_REQUALIFICATION_BYTE_OR_SOURCE_DRIFT")
+
+
 def require_promoted_xpbd_solver_v1(
     domain: XPBDSecondaryDomainV1, *, source_module_path: str | Path
 ):
@@ -286,5 +314,6 @@ __all__ = [
     "XPBDChainDomainV1",
     "XPBDSecondaryDomainV1",
     "prepare_declared_xpbd_secondary_domain_v1",
+    "requalify_declared_xpbd_secondary_domain_v1",
     "require_promoted_xpbd_solver_v1",
 ]

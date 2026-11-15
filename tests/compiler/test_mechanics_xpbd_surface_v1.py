@@ -350,7 +350,11 @@ def test_explicit_joint_sphere_moves_by_substep_and_survives_json_replay():
     twice=_simulate(parents,domain,policy,primary,
                     previous_state=halfway.state,dt_seconds=1./120.,
                     joint_world_positions=final_center)
-    assert twice.state==one.state
+    # One two-tick frame and two one-tick frames have the same physical state,
+    # but intentionally different frame-event counters and state hashes.
+    assert twice.state.particles==one.state.particles
+    assert twice.state.ticks==one.state.ticks==2
+    assert twice.state.frames==2 and one.state.frames==1
     assert twice.deformation.positions==one.deformation.positions
     restored=xpbd_surface_state_from_dict_v1(
         json.loads(json.dumps(one.state.to_dict()))

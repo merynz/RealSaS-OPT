@@ -29,6 +29,7 @@ class XPBDBodyMeshColliderV1:
     source_faces: tuple[Face, ...]
     thickness: float = 0.005
     swept_vertex_triangle_ccd: bool = True
+    excluded_cloth_vertex_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -68,6 +69,17 @@ def qualify_xpbd_body_mesh_colliders_v1(
             raise QualificationError("XPBD_BODY_COLLIDER_THICKNESS_INVALID") from exc
         if not math.isfinite(thickness) or thickness<=0. or thickness>1.:
             raise QualificationError("XPBD_BODY_COLLIDER_THICKNESS_INVALID")
+        if (type(collider.excluded_cloth_vertex_ids) is not tuple
+                or any(type(v) is not str or not v for v in collider.excluded_cloth_vertex_ids)
+                or len(set(collider.excluded_cloth_vertex_ids))!=len(collider.excluded_cloth_vertex_ids)
+                or not set(collider.excluded_cloth_vertex_ids)<=cloth):
+            raise QualificationError("XPBD_BODY_COLLIDER_EXCLUSION_INVALID")
+        if any(
+            type(face) is not tuple or len(face)!=3
+            or any(type(v) is not str for v in face)
+            for face in collider.source_faces
+        ):
+            raise QualificationError("XPBD_BODY_COLLIDER_FACE_INVALID")
         if len(set(collider.source_faces))!=len(collider.source_faces):
             raise QualificationError("XPBD_BODY_COLLIDER_FACE_DUPLICATE")
         for face in collider.source_faces:
@@ -188,6 +200,8 @@ def resolve_xpbd_body_mesh_contact_v1(
             if float(n0@n1)<=0.:
                 raise QualificationError("XPBD_BODY_COLLIDER_POSED_FACE_FLIPPED")
             for vid in dynamic_vertex_ids:
+                if vid in collider.excluded_cloth_vertex_ids:
+                    continue
                 p0=np.asarray(previous_positions[vid],dtype=np.float64)
                 p1=np.asarray(positions[vid],dtype=np.float64)
                 if not _candidate(p0,p1,tri0,tri1,collider.thickness):

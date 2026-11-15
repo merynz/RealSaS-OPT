@@ -151,7 +151,8 @@ def test_opt_in_surface_self_contact_state_replay_and_fail_closed_policy():
     out=_simulate(parents,domain,policy,primary,
                   previous_state=start.state,dt_seconds=1./60.)
     assert out.status=="PASS_XPBD_SURFACE_RUNTIME"
-    assert out.metadata["surface_self_triangle_collision_qualified"] is True
+    assert out.metadata["surface_self_triangle_collision_qualified"] is False
+    assert out.metadata["discrete_vertex_triangle_edge_edge_contact_residual_qualified"] is True
     assert out.metadata["self_contact_vertex_triangle_and_edge_edge_enabled"] is True
     assert out.metadata["self_contact_max_penetration"]==0.
     assert out.deformation.canonical_mesh_vertex_ids==primary.canonical_mesh_vertex_ids

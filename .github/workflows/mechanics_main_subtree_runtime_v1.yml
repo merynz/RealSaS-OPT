@@ -59,4 +59,5 @@ jobs:
             tests/compiler/test_mechanics_xpbd_surface_self_contact_v1.py \
             tests/compiler/test_mechanics_xpbd_contact_friction_v1.py \
             tests/compiler/test_mechanics_xpbd_body_mesh_contact_v1.py \
-            tests/compiler/test_mechanics_xpbd_swept_bvh_v1.py
+            tests/compiler/test_mechanics_xpbd_swept_bvh_v1.py \
+            tests/compiler/test_mechanics_xpbd_body_edge_ccd_v1.py

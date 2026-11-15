@@ -1,8 +1,8 @@
-> **One physical product model:** [`rss_vnext/`](rss_vnext/) contains the unified model and [`experts/`](rss_vnext/experts/) houses IRIS, TESSA, AXIS, MIRA source. The original `models.iris`, `models.tessa`, `models.axis` and `models.mira` Python module names remain stable through the declared package search path; there are not four ModelReleases. See [relocation manifest](rss_vnext/EXPERT_SOURCE_RELOCATION_V1.json).
+> **One product ModelRelease, three neural execution stages:** the pinned bundle contains a two-image canonicalization stage, a six-view RGB/normal generation stage, and **one reconstruction model** with shared IRIS H(x) plus TESSA/AXIS/MIRA experts. These are not three competing product providers. The original `models.iris`, `models.tessa`, `models.axis` and `models.mira` import names point to the one physical expert source tree under [`rss_vnext/experts/`](rss_vnext/experts/). See [the active system index](../SYSTEM_INDEX.md) and [relocation manifest](rss_vnext/EXPERT_SOURCE_RELOCATION_V1.json).
 
 # Models · unified RSS.vNext
 
-The current product target is **one RSSVNEXT release, one inference**, with independently addressable specialist evidence. **Model proposals are not canonical compiler output.** The exact runtime model selection comes from `../platform/internal/capability/contracts/product_capabilities_v1.json` on the checked-out branch.
+The current product target is **one RSSVNEXT release with one reconstruction inference over six generated views + direct original source tokens**, yielding independently addressable specialist evidence. **Model proposals are not canonical compiler output.** The exact runtime model selection comes from `../platform/internal/capability/contracts/product_capabilities_v1.json` on the checked-out branch.
 
 | Specialist | Current source | Role |
 | --- | --- | --- |

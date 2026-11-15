@@ -20,6 +20,7 @@ from compiler.realsas_compiler_core.mechanics_live_runtime_v1 import (
 )
 from compiler.realsas_compiler_core.mechanics_xpbd_surface_v1 import (
     DeclaredXPBDSurfaceRequestV1, XPBDSurfacePolicyV1,
+    XPBDSurfaceJointSphereColliderV1,
     prepare_declared_xpbd_surface_domain_v1,
     requalify_declared_xpbd_surface_domain_v1,
     step_declared_xpbd_surface_v1, xpbd_surface_state_from_dict_v1,
@@ -315,3 +316,109 @@ def test_live_unsatisfiable_surface_contact_fails_product_court():
     )
     assert second.status=="FAIL_MECHANICS_BEHAVIORAL_COURT"
     assert "XPBD_SURFACE_CONTACT_OR_MATERIAL_RESIDUAL" in second.failures
+
+
+def test_explicit_joint_sphere_moves_by_substep_and_survives_json_replay():
+    # The proxy is authored; neither its radius nor its activation is derived
+    # from a PartVerse label. The joint center can move between fixed ticks.
+    proxy=XPBDSurfaceJointSphereColliderV1("torso_proxy","J0",radius=.08)
+    parents,domain,policy,primary=_setup(
+        joint_spheres=(proxy,),gravity_xyz=(0.,0.,0.),
+        max_stretch_relative_error=.2,max_area_relative_error=.25,
+    )
+    start_center={"J0":(0.,-1.,0.)}
+    final_center={"J0":(0.,-.02,0.)}
+    init=_simulate(parents,domain,policy,primary,
+                   joint_world_positions=start_center)
+    assert init.status=="INITIALIZED_XPBD_SURFACE_UNSIMULATED"
+    one=_simulate(parents,domain,policy,primary,
+                  previous_state=init.state,dt_seconds=1./60.,
+                  joint_world_positions=final_center)
+    assert one.status=="PASS_XPBD_SURFACE_RUNTIME"
+    assert one.contact_projections>0
+    assert one.max_contact_penetration<=policy.max_contact_penetration
+    assert one.metadata["explicit_joint_sphere_contact_enabled"] is True
+    assert one.state.metadata["kinematic_joint_sphere_centers"]==[
+        ["torso_proxy",[0.,-.02,0.]]
+    ]
+    state=xpbd_surface_state_from_dict_v1(
+        json.loads(json.dumps(init.state.to_dict()))
+    )
+    halfway=_simulate(parents,domain,policy,primary,
+                      previous_state=state,dt_seconds=1./120.,
+                      joint_world_positions={"J0":(0.,-.51,0.)})
+    twice=_simulate(parents,domain,policy,primary,
+                    previous_state=halfway.state,dt_seconds=1./120.,
+                    joint_world_positions=final_center)
+    assert twice.state==one.state
+    assert twice.deformation.positions==one.deformation.positions
+    restored=xpbd_surface_state_from_dict_v1(
+        json.loads(json.dumps(one.state.to_dict()))
+    )
+    snapshot=_simulate(parents,domain,policy,primary,
+                       previous_state=restored,
+                       joint_world_positions=final_center)
+    assert snapshot.status=="SNAPSHOT_XPBD_SURFACE_NO_STEP"
+    assert snapshot.state==one.state
+
+
+def test_joint_sphere_requires_qualified_joint_pose_and_rejects_time_teleport():
+    proxy=XPBDSurfaceJointSphereColliderV1("body","J0",radius=.08)
+    parents,domain,policy,primary=_setup(joint_spheres=(proxy,))
+    with pytest.raises(QualificationError,match="KINEMATIC_JOINT_COVERAGE_DRIFT"):
+        _simulate(parents,domain,policy,primary)
+    with pytest.raises(QualificationError,match="KINEMATIC_JOINT_COVERAGE_DRIFT"):
+        _simulate(parents,domain,policy,primary,
+                  joint_world_positions={"other":(0.,0.,0.)})
+    with pytest.raises(QualificationError,match="KINEMATIC_JOINT_POSITION_INVALID"):
+        _simulate(parents,domain,policy,primary,
+                  joint_world_positions={"J0":(float("nan"),0.,0.)})
+    start=_simulate(parents,domain,policy,primary,
+                    joint_world_positions={"J0":(0.,-1.,0.)})
+    with pytest.raises(QualificationError,match="CHANGED_KINEMATIC_COLLIDER_REQUIRES_DT"):
+        _simulate(parents,domain,policy,primary,
+                  previous_state=start.state,
+                  joint_world_positions={"J0":(0.,-.8,0.)})
+    tampered=json.loads(json.dumps(start.state.to_dict()))
+    tampered["metadata"]["kinematic_joint_sphere_centers"][0][1][0]=7.
+    with pytest.raises(QualificationError,match="STATE_HASH_DRIFT"):
+        xpbd_surface_state_from_dict_v1(tampered)
+    with pytest.raises(QualificationError,match="JOINT_SPHERE_INVALID"):
+        _simulate(parents,domain,replace(policy,joint_spheres=(
+            proxy,proxy
+        )),primary,joint_world_positions={"J0":(0.,-1.,0.)})
+
+
+def test_live_mechanics_resolves_joint_sphere_from_real_solved_pose():
+    proxy=XPBDSurfaceJointSphereColliderV1("joint0_body","J0",radius=.03)
+    parents,domain,policy,_=_setup(
+        joint_spheres=(proxy,),gravity_xyz=(0.,0.,0.),
+        max_stretch_relative_error=.2,max_area_relative_error=.25,
+    )
+    mesh,rig,skin,mechanics=parents
+    initial=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,
+        xpbd_surface_domain=domain,xpbd_surface_policy=policy,
+    )
+    assert initial.status=="PASS_MECHANICS_BEHAVIORAL_COURT"
+    joint0=next(row for row in initial.pose.joints
+                if row.canonical_joint_id=="J0")
+    assert initial.xpbd_surface_state.metadata[
+        "kinematic_joint_sphere_centers"
+    ]==[["joint0_body",list(joint0.solved_P)]]
+    subsequent=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,
+        xpbd_surface_domain=domain,xpbd_surface_policy=policy,
+        xpbd_surface_previous_state=initial.xpbd_surface_state,
+        xpbd_surface_dt_seconds=1./60.,
+    )
+    assert subsequent.metadata["xpbd_surface_status"]=="PASS_XPBD_SURFACE_RUNTIME"
+    assert subsequent.xpbd_surface_state.ticks==2
+    with pytest.raises(QualificationError,match="COLLIDER_JOINT_NOT_IN_SOLVED_POSE"):
+        evaluate_mechanics_intervention_frame_v1(
+            mesh,rig,skin,mechanics,
+            xpbd_surface_domain=domain,
+            xpbd_surface_policy=replace(policy,joint_spheres=(
+                XPBDSurfaceJointSphereColliderV1("other","missing",.03),
+            )),
+        )

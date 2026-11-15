@@ -40,7 +40,7 @@ def _declared_default_weights(relative: str, klass: str) -> dict[str, float]:
     }
 
 
-def _phase_loss_names()->set[str]:
+def _phase_loss_fields()->dict[str,tuple[str,str|None]]:
     tree=ast.parse(
         (ROOT/"models/rss_vnext/training_phase_contract_v1.py").read_text(
             encoding="utf8"
@@ -52,7 +52,11 @@ def _phase_loss_names()->set[str]:
         and any(isinstance(x,ast.Name) and x.id=="LOSS_FIELDS"
                 for x in node.targets)
     )
-    return set(ast.literal_eval(field.value))
+    return ast.literal_eval(field.value)
+
+
+def _phase_loss_names()->set[str]:
+    return set(_phase_loss_fields())
 
 
 def _document():
@@ -168,3 +172,19 @@ def test_inventory_default_weight_values_are_exactly_mainline_values():
             actual.pop("clip_gradient_norm")
         recorded={x["id"]:x["default_weight"] for x in inventory[group]}
         assert actual==recorded
+
+
+
+def test_every_structural_objective_is_bound_to_the_actual_result_and_eligibility_field():
+    inventory=_document()
+    actual=_phase_loss_fields()
+    result_fields=_declared_class_field_names(
+        "models/rss_vnext/training_engine.py", "RSSvNextTrainingResult"
+    )
+    for item in inventory["structural"]:
+        expected_result,expected_eligible=actual[item["id"]]
+        assert item["trainer_result_field"]==expected_result
+        assert item["eligibility_counter"]==expected_eligible
+        assert expected_result in result_fields
+        if expected_eligible is not None:
+            assert expected_eligible in result_fields

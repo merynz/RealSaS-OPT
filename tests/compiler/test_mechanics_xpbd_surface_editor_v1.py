@@ -20,6 +20,7 @@ from compiler.realsas_compiler_core.mechanics_xpbd_secondary_v1 import (
 )
 from compiler.realsas_compiler_core.mechanics_xpbd_surface_v1 import (
     DeclaredXPBDSurfaceRequestV1, XPBDSurfacePolicyV1,
+    XPBDSurfaceJointSphereColliderV1,
     prepare_declared_xpbd_surface_domain_v1,
 )
 from compiler.realsas_compiler_core.types import QualificationError
@@ -126,3 +127,35 @@ def test_editor_does_not_advance_physics_or_grant_label_authority_implicitly():
     session.frame()
     with pytest.raises(QualificationError,match="STATE_WIRE"):
         session.restore_xpbd_surface_runtime_state({"random":"payload"})
+
+
+def test_editor_joint_attached_collider_pose_snapshot_and_reopen():
+    bundle,domain,base_policy=_editor()
+    jid=bundle.rig.joints[0].canonical_joint_id
+    proxy=XPBDSurfaceJointSphereColliderV1(
+        "explicit_body_proxy",jid,radius=1.e-5,
+    )
+    policy=replace(base_policy,joint_spheres=(proxy,))
+    editor=ControllablePuppetSessionV1(bundle)
+    editor.enable_declared_xpbd_surface(domain,policy)
+    first=editor.frame()
+    expected_joint=next(row.solved_P for row in first.pose.joints
+                        if row.canonical_joint_id==jid)
+    expected_centers=[["explicit_body_proxy",list(expected_joint)]]
+    assert first.xpbd_surface_state.metadata[
+        "kinematic_joint_sphere_centers"
+    ]==expected_centers
+    editor.set_view_index(2)
+    assert editor.frame().xpbd_surface_state==first.xpbd_surface_state
+    editor.set_view_index(0)
+    advanced=editor.frame(dt_seconds=1./60.)
+    assert advanced.xpbd_surface_state.ticks==2
+    checkpoint=json.loads(json.dumps(editor.export_xpbd_surface_runtime_state()))
+    reopened=ControllablePuppetSessionV1(bundle)
+    reopened.enable_declared_xpbd_surface(domain,policy)
+    reopened.restore_xpbd_surface_runtime_state(checkpoint)
+    assert reopened.frame().xpbd_surface_state==advanced.xpbd_surface_state
+    original_next=editor.frame(dt_seconds=1./60.)
+    reopened_next=reopened.frame(dt_seconds=1./60.)
+    assert original_next.deformed==reopened_next.deformed
+    assert original_next.xpbd_surface_state==reopened_next.xpbd_surface_state

@@ -104,7 +104,7 @@ class XPBDSurfacePolicyV1:
     damping_per_second: float = 1.5
     planes: tuple[XPBDPlaneColliderV1, ...] = ()
     spheres: tuple[XPBDSphereColliderV1, ...] = ()
-    joint_spheres: tuple[XPBDSurfaceJointSphereColliderV1, ...] = ()
+    joint_spheres: tuple[XPBDSurfaceJointSphereColliderV1, ...] = field(default=(), kw_only=True)
     collision_margin: float = 0.0
     fixed_step_seconds: float = 1.0/120.0
     maximum_dt_seconds: float = 0.25

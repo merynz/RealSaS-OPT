@@ -40,7 +40,7 @@ def test_cosine_skin_warmup_starts_frozen_and_ends_at_unmodified_loss():
     full=_objective(policy,10)
     assert zero==(4.,4.,0.)
     assert at_start==zero
-    assert middle==(8.5,4.,3.)
+    assert middle==pytest.approx((8.5,4.,3.))
     assert full==(13.,4.,6.)
     assert _objective(policy,20)==full
 

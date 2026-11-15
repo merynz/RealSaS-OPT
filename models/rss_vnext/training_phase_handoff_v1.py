@@ -105,7 +105,7 @@ def export_rss_vnext_training_phase_handoff_v1(
         or not _hex_digest(source_optimizer_binding_sha256)
     ):
         raise ValueError("RSS_VNEXT_PHASE_HANDOFF_SOURCE_POLICY_INVALID")
-    state = model.state_dict()
+    state = dict(model.state_dict())
     digest = _model_state_digest(state)
     receipt = RSSvNextTrainingPhaseHandoffReceiptV1(
         schema=SCHEMA,

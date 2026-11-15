@@ -502,7 +502,10 @@ class RealSaSSLRMTrainerV1:
                 role_head=self.model.presentation_role_head,
                 schema=self.model.cfg.semantic_role_schema(),
                 layer=layer,field_policy="SIGNED_HYPOTHESIS_ONLY",
-                high_resolution_training=batch.stage3_high_resolution_training,
+                # Preserve the existing Stage3 raster mock seam on the
+                # default profile; true high-res uses the new typed contract.
+                **({"high_resolution_training": True}
+                  if batch.stage3_high_resolution_training else {}),
             )
             scene_digest=_digest(state.scene_triplanes)
             mesh=render_realsas_layered_flexicubes_mesh_v1(
@@ -554,7 +557,8 @@ class RealSaSSLRMTrainerV1:
                     role_head=self.model.presentation_role_head,
                     schema=schema,layer=source_layer,
                     field_policy="SIGNED_HYPOTHESIS_ONLY",
-                    high_resolution_training=batch.stage3_high_resolution_training,
+                    **({"high_resolution_training": True}
+                      if batch.stage3_high_resolution_training else {}),
                 )
                 full_mesh=render_realsas_layered_flexicubes_mesh_v1(
                     witness=full_witness,iris=self.model.iris,

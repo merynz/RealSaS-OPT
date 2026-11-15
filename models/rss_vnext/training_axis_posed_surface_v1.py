@@ -61,9 +61,10 @@ def qualified_unified_posed_surface_objective_v1(
         or joint_skin_matrices.shape[0] != 1
         or joint_skin_matrices.shape[2:] != (predicted_skin.shape[-1], 4, 4)
         or not 1 <= joint_skin_matrices.shape[1] <= 16
+        or predicted_skin.shape[-1] < 2
         or source_rest_surface_samples.ndim != 2
         or source_rest_surface_samples.shape[-1] != 3
-        or not 4 <= source_rest_surface_samples.shape[0] <= 2048
+        or not 3 <= source_rest_surface_samples.shape[0] <= 2048
         or source_posed_surface_samples.ndim != 3
         or source_posed_surface_samples.shape[:2]
         != (joint_skin_matrices.shape[1], source_rest_surface_samples.shape[0])
@@ -92,6 +93,19 @@ def qualified_unified_posed_surface_objective_v1(
         or not bool(torch.isfinite(predicted_skin).all())
     ):
         raise ValueError("RSS_VNEXT_UNIFIED_POSE_NUMERIC_OR_TEACHER_GRAD_INVALID")
+
+    # An Idle/global rigid transform is not evidence of skin articulation.
+    # Require different joint transports at at least one admitted source pose;
+    # unexcited poses can still appear, but cannot qualify the whole batch.
+    with torch.no_grad():
+        rest = source_rest_surface_samples
+        homogeneous = torch.cat((rest, torch.ones_like(rest[:, :1])), dim=-1)
+        per_joint = torch.einsum(
+            "bpjkc,vc->bpvjk", joint_skin_matrices, homogeneous,
+        )[..., :3]
+        spread = (per_joint.amax(dim=3) - per_joint.amin(dim=3)).abs().amax(dim=-1)
+        if not bool((spread[0, valid_pose_mask] > 1e-5).any()):
+            raise ValueError("RSS_VNEXT_UNIFIED_POSE_NO_DIFFERENTIAL_JOINT_MOTION")
 
     losses = source_pose_surface_consequence_loss(
         mesh,

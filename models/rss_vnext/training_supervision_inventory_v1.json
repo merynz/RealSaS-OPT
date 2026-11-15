@@ -999,7 +999,28 @@
       "losses": "axis_dynamic_posed_surface; quality head NO source label",
       "state": "PARTIALLY_DIRECT",
       "connection": "Continuous geometry and skin share TESSA/AXIS/MIRA identity, no new topology; do not mark quality head trained"
+    },
+    {
+      "module": "affordance_to_memory",
+      "output": "Learned affordance logits projected into shared TESSA context",
+      "losses": "topology and AXIS downstream only; NO independent affordance teacher verified",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Native motion/rig and source typed deformations needed for explicit source affordance labels"
+    },
+    {
+      "module": "aux_to_scene",
+      "output": "Optional experimental auxiliary-view latents projected into shared scene memory",
+      "losses": "novel_view experimental; topology downstream",
+      "state": "RESEARCH_ONLY",
+      "connection": "Configured product six-view diffusion excludes parallel auxiliary latents"
+    },
+    {
+      "module": "control_norm",
+      "output": "LayerNorm of fused AXIS/TESSA structural context",
+      "losses": "axis_rig_skin_codes, axis posed consequence",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Part of same mesh-face/memory-to-rig execution, not an independent teacher head"
     }
   ],
-  "model_head_catalog_scope": "Named expert outputs and important context bridges from RSSvNextUnifiedCharacterModel.__init__ + forward. Trainable output existence is NOT a qualified teacher nor an unseen product certificate."
+  "model_head_catalog_scope": "Covers named expert outputs and internal context bridges in RSSvNextUnifiedCharacterModel.__init__; output existence does NOT prove source training. Static AST tests keep all assigned trainable module roots inventoried."
 }

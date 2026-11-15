@@ -5,6 +5,7 @@ import math
 import torch
 import torch.nn.functional as F
 from torch import nn
+from torch.utils.checkpoint import checkpoint
 
 from .contracts_v1 import IRISVNextConfigV1
 from .flexicubes_v1 import FLEXICUBES_PARAMETER_SEMANTICS, split_flexicubes_parameters_v1
@@ -100,7 +101,18 @@ class SharedSceneTriplaneVNextV1(nn.Module):
         pos = _plane_coordinates(p, device=memory.device, dtype=memory.dtype)
         q = self.scene_queries.to(memory) + self.query_position(pos)
         q = q.reshape(1, 3 * p * p, d).expand(b, -1, -1)
-        scene = self.decoder(q, memory).reshape(b, 3, p, p, d).permute(0, 1, 4, 2, 3).contiguous()
+        # Identical weights/decoder order in training and inference.  Recompute
+        # attention activations rather than retaining all sixteen layers.
+        # No extra decoder exists and state_dict keys remain stable.
+        if self.training and self.cfg.scene_gradient_checkpointing:
+            hidden = q
+            for layer in self.decoder.layers:
+                hidden = checkpoint(layer, hidden, memory, use_reentrant=False)
+            if self.decoder.norm is not None:
+                hidden = self.decoder.norm(hidden)
+        else:
+            hidden = self.decoder(q, memory)
+        scene = hidden.reshape(b, 3, p, p, d).permute(0, 1, 4, 2, 3).contiguous()
         up = self.upsample(scene.reshape(b * 3, d, p, p))
         return up.reshape(b, 3, self.cfg.plane_channels, up.shape[-2], up.shape[-1])
 

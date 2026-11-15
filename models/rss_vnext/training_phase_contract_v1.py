@@ -45,6 +45,8 @@ class RSSvNextStructuralTrainingPhaseContractV1:
     trainable_parameter_prefixes: tuple[str, ...]
     allowed_positive_objectives: tuple[str, ...]
     required_any_qualified_loss_groups: tuple[tuple[str, ...], ...]
+    # Explicit active owners must receive a differentiable gradient per step.
+    required_gradient_parameter_prefixes: tuple[str, ...] = ()
 
     def validate(self, *, weights=None) -> None:
         if (
@@ -62,6 +64,18 @@ class RSSvNextStructuralTrainingPhaseContractV1:
             or not self.required_any_qualified_loss_groups
         ):
             raise ValueError("RSS_VNEXT_PHASE_CONTRACT_INVALID")
+        if (
+            type(self.required_gradient_parameter_prefixes) is not tuple
+            or len(set(self.required_gradient_parameter_prefixes))
+                != len(self.required_gradient_parameter_prefixes)
+            or any(
+                type(prefix) is not str or not prefix.endswith(".")
+                or not any(prefix.startswith(owner)
+                           for owner in self.trainable_parameter_prefixes)
+                for prefix in self.required_gradient_parameter_prefixes
+            )
+        ):
+            raise ValueError("RSS_VNEXT_PHASE_REQUIRED_GRADIENT_PREFIX_INVALID")
         for group in self.required_any_qualified_loss_groups:
             if (type(group) is not tuple or not group
                 or len(set(group))!=len(group)
@@ -111,6 +125,30 @@ class RSSvNextStructuralTrainingPhaseContractV1:
                 parameter.grad=None
         self.assert_trainable_owners(model)
         return tuple(n for n,p in model.named_parameters() if p.requires_grad)
+
+    def assert_required_gradients(self, model: nn.Module) -> None:
+        """After backward and BEFORE optimizer.step, reject an inactive head.
+
+        Zero gradients can occur at convergence; absent gradients indicate an
+        unconnected computation. The requirement is explicit and phase-local.
+        """
+        self.validate()
+        self.assert_trainable_owners(model)
+        for prefix in self.required_gradient_parameter_prefixes:
+            params = [
+                p for name, p in model.named_parameters()
+                if name.startswith(prefix) and p.requires_grad
+            ]
+            if not params:
+                raise ValueError("RSS_VNEXT_PHASE_REQUIRED_GRADIENT_OWNER_MISSING:"+prefix)
+            live = [p.grad for p in params if p.grad is not None]
+            if not live:
+                raise ValueError("RSS_VNEXT_PHASE_REQUIRED_GRADIENT_MISSING:"+prefix)
+            if any(
+                grad.is_sparse or not bool(torch.isfinite(grad).all())
+                for grad in live
+            ):
+                raise ValueError("RSS_VNEXT_PHASE_REQUIRED_GRADIENT_NONFINITE:"+prefix)
 
     def assert_qualified_result(self,result,*,weights)->None:
         """A zero-valued but qualified loss is valid; an absent loss is not."""

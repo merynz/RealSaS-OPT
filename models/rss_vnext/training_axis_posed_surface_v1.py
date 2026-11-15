@@ -30,6 +30,7 @@ def qualified_unified_posed_surface_objective_v1(
     valid_pose_mask: Tensor,
     receipt: Mapping[str, object] | None,
     expected_receipt: Mapping[str, object],
+    refined_vertices: Tensor | None = None,
 ) -> tuple[Tensor, int, Tensor]:
     """Return (static+posed surface loss, eligible poses, posed-only loss).
 
@@ -114,6 +115,7 @@ def qualified_unified_posed_surface_objective_v1(
         source_rest_surface_samples,
         source_posed_surface_samples,
         valid_pose_mask=valid_pose_mask,
+        refined_vertices=refined_vertices,
     )
     if not bool(torch.isfinite(losses["total"])):
         raise ValueError("RSS_VNEXT_UNIFIED_POSE_LOSS_NONFINITE")

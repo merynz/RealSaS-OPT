@@ -196,6 +196,7 @@ class RSSvNextTrainingWeights:
     source_signed_sdf: float = 0.0    # opt-in: exact boundary + sign for qualified solid
     axis_rig_skin_codes: float = 0.0  # opt-in: source rig and MIRA-codec-bound FSQ teacher
     axis_posed_surface: float = 0.0  # opt-in: source motion consequence through TESSA+AXIS+MIRA
+    axis_dynamic_posed_surface: float = 0.0  # opt-in: same qualified source pose supervises live dynamic refinement
     anchor_face_correspondence: float = 0.0  # source-native directed face labels
     flexicubes_surface: float = 0.3
     flexicubes_animation: float = 0.0  # explicit opt-in on admitted source motion
@@ -219,7 +220,7 @@ class RSSvNextTrainingWeights:
             self.surface_roles, self.region_pairs, self.typed_relations,
             self.graphics_source_rgb,
             self.source_udf, self.source_inside_sign, self.source_signed_sdf,
-            self.axis_rig_skin_codes, self.axis_posed_surface, self.anchor_face_correspondence, self.flexicubes_surface, self.flexicubes_animation,
+            self.axis_rig_skin_codes, self.axis_posed_surface, self.axis_dynamic_posed_surface, self.anchor_face_correspondence, self.flexicubes_surface, self.flexicubes_animation,
             self.tessa_iris_surface_alignment,
             self.novel_view, self.realsas_joint_slrm,
         ) < 0:
@@ -229,7 +230,7 @@ class RSSvNextTrainingWeights:
             + self.source_semantics + self.semantic_risk + self.surface_roles + self.region_pairs
             + self.typed_relations + self.graphics_source_rgb + self.source_udf + self.source_inside_sign
             + self.source_signed_sdf
-            + self.axis_rig_skin_codes + self.axis_posed_surface + self.anchor_face_correspondence + self.flexicubes_surface
+            + self.axis_rig_skin_codes + self.axis_posed_surface + self.axis_dynamic_posed_surface + self.anchor_face_correspondence + self.flexicubes_surface
             + self.flexicubes_animation + self.novel_view
             + self.tessa_iris_surface_alignment
             + self.realsas_joint_slrm <= 0
@@ -269,6 +270,8 @@ class RSSvNextTrainingResult:
     eligible_source_signed_sdf_queries: int = 0
     axis_rig_skin_loss: Tensor | None = None
     axis_posed_surface_loss: Tensor | None = None
+    axis_dynamic_posed_surface_loss: Tensor | None = None
+    eligible_axis_dynamic_pose_count: int = 0
     eligible_axis_pose_count: int = 0
     eligible_axis_sequences: int = 0
     axis_training_conditioning: str = "NO_AXIS_OBJECTIVE"
@@ -415,6 +418,12 @@ class RSSvNextStructuralTrainer:
         axis_skin_code_warmup.validate()
         if axis_skin_code_warmup.enabled and weights.axis_rig_skin_codes <= 0:
             raise ValueError("RSS_VNEXT_AXIS_SKIN_WARMUP_AXIS_LOSS_REQUIRED")
+        if weights.axis_dynamic_posed_surface > 0 and (
+            weights.axis_posed_surface <= 0
+            or weights.axis_rig_skin_codes <= 0
+            or axis_training_policy != "PRODUCT_MESH_MATCHED_REQUIRED"
+        ):
+            raise ValueError("RSS_VNEXT_DYNAMIC_POSE_REQUIRES_QUALIFIED_AXIS_AND_STATIC_POSE")
         if phase_contract is not None:
             phase_contract.validate(weights=weights)
             phase_contract.assert_trainable_owners(model)
@@ -462,7 +471,7 @@ class RSSvNextStructuralTrainer:
             # identities; enabling it creates a distinct objective policy.
             "weights": {k: v for k, v in asdict(weights).items()
                         if not (
-                            k in ("axis_posed_surface", "tessa_iris_surface_alignment")
+                            k in ("axis_posed_surface", "axis_dynamic_posed_surface", "tessa_iris_surface_alignment")
                             and v == 0.
                         )},
             "preference": asdict(preference),
@@ -1567,7 +1576,9 @@ class RSSvNextStructuralTrainer:
             n_graphics_rgb = int(source_mask.sum().item())
         axis_loss = None
         axis_pose_loss = None
+        axis_dynamic_pose_loss = None
         axis_pose_count = 0
+        axis_dynamic_pose_count = 0
         pose_fields = (
             batch.axis_pose_joint_skin_matrices,
             batch.axis_pose_rest_surface_samples,
@@ -1683,7 +1694,7 @@ class RSSvNextStructuralTrainer:
                 if matched_axis_mesh is None or matched_axis_memory is None:
                     raise ValueError("RSS_VNEXT_UNIFIED_POSE_MATCHED_TESSA_REQUIRED")
                 controls = self.model.axis(matched_axis_memory, teacher)
-                predicted_skin, _, _ = self.model.mira(
+                predicted_skin, _, predicted_joint_features = self.model.mira(
                     matched_axis_mesh.local_features,
                     matched_axis_mesh.rest_vertices_iris,
                     controls["hidden"], controls["skin_code_logits"], teacher,
@@ -1718,6 +1729,32 @@ class RSSvNextStructuralTrainer:
                         expected_receipt=expected_pose,
                     )
                 )
+                if self.weights.axis_dynamic_posed_surface > 0:
+                    # This is the *same* source-qualified TESSA mesh, AXIS
+                    # causal joint order and pinned MIRA hard-token skin.
+                    # The dynamic head receives real gradients from source
+                    # rest/posed surfaces, not a synthetic ready/not-ready bit.
+                    dynamic = self.model.dynamic_refine(
+                        matched_axis_mesh, predicted_skin,
+                        predicted_joint_features,
+                    )
+                    axis_dynamic_pose_loss, axis_dynamic_pose_count, _ = (
+                        qualified_unified_posed_surface_objective_v1(
+                            mesh=matched_axis_mesh,
+                            predicted_skin=dynamic.weights,
+                            refined_vertices=dynamic.vertices,
+                            joint_skin_matrices=pose_fields[0],
+                            source_rest_surface_samples=pose_fields[1],
+                            source_posed_surface_samples=pose_fields[2],
+                            valid_pose_mask=pose_fields[3],
+                            receipt=self.trusted_axis_pose_registry.get(
+                                batch.axis_pose_admission_key,
+                            ),
+                            expected_receipt=expected_pose,
+                        )
+                    )
+                    if axis_dynamic_pose_count != axis_pose_count:
+                        raise RuntimeError("RSS_VNEXT_DYNAMIC_POSE_SOURCE_COVERAGE_DRIFT")
         anchor_face_loss = None
         eligible_anchor_held = eligible_anchor_holder = eligible_anchor_negative = 0
         anchor_requested = (
@@ -1844,7 +1881,7 @@ class RSSvNextStructuralTrainer:
             and region_pair_loss is None
             and typed_relation_loss is None
             and graphics_rgb_loss is None and axis_loss is None
-            and axis_pose_loss is None
+            and axis_pose_loss is None and axis_dynamic_pose_loss is None
             and anchor_face_loss is None
             and source_udf_loss is None and source_inside_sign_loss is None
             and source_signed_sdf_loss is None
@@ -1867,6 +1904,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.source_signed_sdf, source_signed_sdf_loss),
                 (self.weights.axis_rig_skin_codes, axis_loss),
                 (self.weights.axis_posed_surface, axis_pose_loss),
+                (self.weights.axis_dynamic_posed_surface, axis_dynamic_pose_loss),
                 (self.weights.anchor_face_correspondence, anchor_face_loss),
                 (self.weights.flexicubes_surface, fc_loss),
                 (self.weights.flexicubes_animation, fc_anim_loss),
@@ -1909,7 +1947,9 @@ class RSSvNextStructuralTrainer:
             eligible_source_signed_sdf_queries=n_source_signed_sdf,
             axis_rig_skin_loss=axis_loss,
             axis_posed_surface_loss=axis_pose_loss,
+            axis_dynamic_posed_surface_loss=axis_dynamic_pose_loss,
             eligible_axis_pose_count=axis_pose_count,
+            eligible_axis_dynamic_pose_count=axis_dynamic_pose_count,
             eligible_axis_sequences=n_axis,
             axis_training_conditioning=axis_conditioning,
             anchor_face_correspondence_loss=anchor_face_loss,
@@ -1937,6 +1977,7 @@ class RSSvNextStructuralTrainer:
             ("source_signed_sdf", result.source_signed_sdf_loss, self.weights.source_signed_sdf),
             ("axis_rig_skin_codes", result.axis_rig_skin_loss, self.weights.axis_rig_skin_codes),
             ("axis_posed_surface", result.axis_posed_surface_loss, self.weights.axis_posed_surface),
+            ("axis_dynamic_posed_surface", result.axis_dynamic_posed_surface_loss, self.weights.axis_dynamic_posed_surface),
             ("anchor_face_correspondence", result.anchor_face_correspondence_loss, self.weights.anchor_face_correspondence),
             ("flexicubes_surface", result.flexicubes_surface_loss, self.weights.flexicubes_surface),
             ("flexicubes_animation", result.flexicubes_animation_loss, self.weights.flexicubes_animation),

@@ -270,6 +270,7 @@ def source_pose_surface_consequence_loss(
     *,
     valid_pose_mask: Tensor,
     max_sampled_faces: int = 384,
+    refined_vertices: Tensor | None = None,
 ) -> dict[str, Tensor]:
     """Differentiable source-conditioned motion geometry loss.
 
@@ -292,11 +293,25 @@ def source_pose_surface_consequence_loss(
     if (valid_pose_mask.shape != (source_skin_matrices.shape[1],)
             or valid_pose_mask.dtype != torch.bool or not bool(valid_pose_mask.any())):
         raise ValueError("RSS_VNEXT_POSE_REFERENCE_MASK_INVALID")
+    # A dynamic-refinement proposal may adjust continuous rest XYZ, never
+    # vertex ID, face incidence or the source-qualified teacher geometry.
+    # The original mesh remains authoritative for teacher correspondence.
+    rest = mesh.rest_vertices_iris
+    if refined_vertices is not None:
+        if (
+            not isinstance(refined_vertices, Tensor)
+            or refined_vertices.shape != rest.shape
+            or refined_vertices.device != rest.device
+            or refined_vertices.dtype != rest.dtype
+            or not bool(torch.isfinite(refined_vertices).all())
+        ):
+            raise ValueError("RSS_VNEXT_POSE_REFINED_REST_DOMAIN_INVALID")
+        rest = refined_vertices
     posed = posed_lbs_from_joint_matrices(
-        mesh.rest_vertices_iris, weights, source_skin_matrices,
+        rest, weights, source_skin_matrices,
     )
     static_points = _area_weighted_surface_witnesses(
-        mesh.rest_vertices_iris, mesh.faces, face_budget=max_sampled_faces,
+        rest, mesh.faces, face_budget=max_sampled_faces,
     )
     static_error = _two_way_surface_chamfer(static_points, source_rest_samples)
     pose_losses = []

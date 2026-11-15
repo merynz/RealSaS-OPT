@@ -15,15 +15,18 @@ class IRISVNextConfigV1:
 
     image_token_dim: int = 384
     camera_feature_dim: int = 13
-    scene_dim: int = 512
+    scene_dim: int = 1024
     camera_embed_dim: int = 128
     plane_size: int = 32
-    plane_channels: int = 96
+    plane_channels: int = 80
     field_hidden_dim: int = 384
     field_residual_blocks: int = 6
     local_feature_dim: int = 384
-    attention_heads: int = 8
-    scene_layers: int = 6
+    attention_heads: int = 16
+    scene_layers: int = 16
+    # Full S-LRM-scale decoder uses activation recomputation to avoid storing
+    # 16 complete 3072-query attention stacks in the training graph.
+    scene_gradient_checkpointing: bool = True
     feedforward_multiplier: int = 4
     dropout: float = 0.0
 
@@ -71,6 +74,8 @@ class IRISVNextConfigV1:
         )
         if min(positive) <= 0:
             raise ValueError("IRIS_VNEXT_CONFIG_DIMENSION_INVALID")
+        if type(self.scene_gradient_checkpointing) is not bool:
+            raise ValueError("IRIS_VNEXT_SCENE_CHECKPOINTING_MUST_BE_BOOL")
         if self.scene_dim % self.attention_heads:
             raise ValueError("IRIS_VNEXT_SCENE_HEAD_WIDTH_MISMATCH")
         if self.topology_width % self.topology_heads:

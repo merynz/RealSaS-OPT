@@ -10,7 +10,7 @@ moving-triangle coplanarity over LINEAR fixed-substep trajectories. This is
 NOT general edge-edge CCD, coplanar overlap CCD, or full cloth collision.
 """
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 import math
 from typing import Mapping
 
@@ -18,6 +18,11 @@ import numpy as np
 
 from .types import QualificationError
 from .mechanics_xpbd_surface_self_contact_v1 import _closest_triangle
+from .hashing import content_sha256
+from .mechanics_xpbd_swept_bvh_v1 import (
+    SweptBVHV1, prepare_swept_bvh_v1, query_swept_bvh_v1,
+    swept_aabb_from_endpoints_v1,
+)
 
 Face = tuple[str, str, str]
 Vec = np.ndarray
@@ -39,6 +44,74 @@ class XPBDBodyMeshContactResultV1:
     candidates: int
     max_penetration: float
     unresolved_sweeps: int
+    broadphase_visited_nodes: int = 0
+    broadphase_examined_primitives: int = 0
+
+
+@dataclass(frozen=True)
+class PreparedXPBDBodyMeshSweptBVHV1:
+    """Bound to the exact canonical body trajectories and authored colliders.
+
+    Prepared once per fixed physics substep and reused across all XPBD
+    iterations. A stale/mismatched index is rejected by its content hash.
+    """
+
+    binding_hash: str
+    collider_faces: tuple[tuple[int, Face], ...]
+    face_bvh: SweptBVHV1
+
+
+def _body_sweep_binding_v1(
+    colliders: tuple[XPBDBodyMeshColliderV1, ...],
+    body_at_start: Mapping[str, Vec],
+    body_at_end: Mapping[str, Vec],
+) -> str:
+    identifiers=sorted({
+        vid for c in colliders for face in c.source_faces for vid in face
+    })
+    rows=[]
+    for vid in identifiers:
+        try:
+            start=np.asarray(body_at_start[vid],dtype=np.float64)
+            end=np.asarray(body_at_end[vid],dtype=np.float64)
+        except (KeyError,ValueError,TypeError) as exc:
+            raise QualificationError("XPBD_BODY_SWEEP_VERTEX_COVERAGE_INVALID") from exc
+        if (start.shape!=(3,) or end.shape!=(3,)
+                or not np.isfinite(start).all() or not np.isfinite(end).all()):
+            raise QualificationError("XPBD_BODY_SWEEP_VERTEX_NONFINITE")
+        rows.append((vid,tuple(map(float,start)),tuple(map(float,end))))
+    return content_sha256({
+        "canonical_body_vertices": rows,
+        "authored_colliders": [asdict(c) for c in colliders],
+    })
+
+
+def prepare_xpbd_body_mesh_swept_bvh_v1(
+    colliders: tuple[XPBDBodyMeshColliderV1, ...],
+    body_at_start: Mapping[str, Vec],
+    body_at_end: Mapping[str, Vec],
+) -> PreparedXPBDBodyMeshSweptBVHV1:
+    """Construct body-face swept bounds once for the current fixed substep."""
+    if not colliders:
+        raise QualificationError("XPBD_BODY_SWEEP_BVH_EMPTY")
+    signature=_body_sweep_binding_v1(colliders,body_at_start,body_at_end)
+    records=[]
+    bounds=[]
+    for ci,collider in enumerate(colliders):
+        for face in collider.source_faces:
+            tri0=tuple(np.asarray(body_at_start[vid],dtype=np.float64) for vid in face)
+            tri1=tuple(np.asarray(body_at_end[vid],dtype=np.float64) for vid in face)
+            n0=_unit_triangle_normal(tri0)
+            n1=_unit_triangle_normal(tri1)
+            if float(n0@n1)<=0.:
+                raise QualificationError("XPBD_BODY_COLLIDER_POSED_FACE_FLIPPED")
+            records.append((ci,face))
+            bounds.append(swept_aabb_from_endpoints_v1(
+                tri0,tri1,margin=collider.thickness,
+            ))
+    return PreparedXPBDBodyMeshSweptBVHV1(
+        signature,tuple(records),prepare_swept_bvh_v1(tuple(bounds)),
+    )
 
 
 def qualify_xpbd_body_mesh_colliders_v1(
@@ -177,6 +250,7 @@ def resolve_xpbd_body_mesh_contact_v1(
     max_candidates: int,
     project: bool,
     check_sweeps: bool = True,
+    prepared_bvh: PreparedXPBDBodyMeshSweptBVHV1 | None = None,
 ) -> XPBDBodyMeshContactResultV1:
     """One deterministic iteration; body positions are immutable kinematic inputs.
 
@@ -184,22 +258,49 @@ def resolve_xpbd_body_mesh_contact_v1(
     The body at each endpoint follows linear interpolation between MIRA-skinned
     primary deformations. Moving-triangle roots catch full-step tunneling.
     """
-    if type(max_candidates) is not int or max_candidates<1:
+    if type(max_candidates) is not int or not 1<=max_candidates<=32768:
         raise QualificationError("XPBD_BODY_CONTACT_CANDIDATE_POLICY_INVALID")
+    if prepared_bvh is None:
+        prepared_bvh=prepare_xpbd_body_mesh_swept_bvh_v1(
+            colliders,body_at_start,body_at_end,
+        )
+    elif (type(prepared_bvh) is not PreparedXPBDBodyMeshSweptBVHV1
+            or prepared_bvh.binding_hash!=_body_sweep_binding_v1(
+                colliders,body_at_start,body_at_end,
+            )):
+        raise QualificationError("XPBD_BODY_SWEEP_BVH_BINDING_DRIFT")
     candidates=0
     projections=0
     hits=0
     unresolved=0
     maximum=0.
-    for collider in colliders:
-        for face in collider.source_faces:
-            tri0=tuple(np.asarray(body_at_start[k],dtype=np.float64) for k in face)
-            tri1=tuple(np.asarray(body_at_end[k],dtype=np.float64) for k in face)
-            n0=_unit_triangle_normal(tri0)
-            n1=_unit_triangle_normal(tri1)
-            if float(n0@n1)<=0.:
-                raise QualificationError("XPBD_BODY_COLLIDER_POSED_FACE_FLIPPED")
-            for vid in dynamic_vertex_ids:
+    visited=0
+    examined=0
+    # One BVH query per cloth trajectory. Body faces are not scanned for
+    # each cloth vertex; candidate pairs are then sorted in canonical face
+    # order and cloth-ID order for the same deterministic solver schedule.
+    by_face:dict[int,list[str]]={}
+    for vid in dynamic_vertex_ids:
+        p0=np.asarray(previous_positions[vid],dtype=np.float64)
+        p1=np.asarray(positions[vid],dtype=np.float64)
+        query=swept_aabb_from_endpoints_v1((p0,),(p1,),margin=0.)
+        matches=query_swept_bvh_v1(
+            prepared_bvh.face_bvh,query,max_candidates=max_candidates,
+        )
+        visited+=matches.visited_nodes
+        examined+=matches.examined_leaf_primitives
+        for face_index in matches.candidate_indices:
+            by_face.setdefault(face_index,[]).append(vid)
+    for face_index in sorted(by_face):
+        ci,face=prepared_bvh.collider_faces[face_index]
+        collider=colliders[ci]
+        tri0=tuple(np.asarray(body_at_start[k],dtype=np.float64) for k in face)
+        tri1=tuple(np.asarray(body_at_end[k],dtype=np.float64) for k in face)
+        n0=_unit_triangle_normal(tri0)
+        n1=_unit_triangle_normal(tri1)
+        if float(n0@n1)<=0.:
+            raise QualificationError("XPBD_BODY_COLLIDER_POSED_FACE_FLIPPED")
+        for vid in by_face[face_index]:
                 if vid in collider.excluded_cloth_vertex_ids:
                     continue
                 p0=np.asarray(previous_positions[vid],dtype=np.float64)
@@ -244,4 +345,6 @@ def resolve_xpbd_body_mesh_contact_v1(
     return XPBDBodyMeshContactResultV1(
         projections=projections,swept_hits=hits,candidates=candidates,
         max_penetration=maximum,unresolved_sweeps=unresolved,
+        broadphase_visited_nodes=visited,
+        broadphase_examined_primitives=examined,
     )

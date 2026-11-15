@@ -266,6 +266,15 @@ def step_declared_xpbd_secondary_v1(
         raise QualificationError("XPBD_POSE_JOINT_COVERAGE_DRIFT")
     pp = {jid: _vec(j.solved_P, "XPBD_PRIMARY_POSE_NONFINITE")
           for jid, j in primary.items()}
+    primary_hash = content_sha256({
+        "rig": primary_pose.rig_lineage_hash,
+        "control": primary_pose.control_program_hash,
+        "joints": [
+            {"id": j.canonical_joint_id, "P": j.solved_P,
+             "R": j.rotation_basis, "scale": j.scale}
+            for j in primary_pose.joints
+        ],
+    })
     for j in primary_pose.joints:
         R = np.asarray(j.rotation_basis, dtype=np.float64)
         if (R.shape != (3, 3) or not np.isfinite(R).all()
@@ -324,13 +333,21 @@ def step_declared_xpbd_secondary_v1(
             velocities[jid] = _vec(
                 old[jid].world_velocity, "XPBD_STATE_VELOCITY_INVALID"
             )
-        dt = _number(dt_seconds, code="XPBD_DT_INVALID",
-                     low=0., high=policy.max_dt_seconds, inclusive_low=False)
-        nominal = dt / policy.fixed_step_seconds
-        steps = int(round(nominal))
-        if (steps < 1 or steps > policy.maximum_substeps
-                or abs(nominal-steps) > 1e-7):
-            raise QualificationError("XPBD_FIXED_TICK_PARTITION_INVALID")
+        if dt_seconds is None:
+            # Editor depth/picking queries may render the same simulation
+            # frame repeatedly. They must not consume a time step, nor
+            # silently reuse stale dynamics after any primary pose change.
+            if previous_state.metadata.get("primary_pose_hash") != primary_hash:
+                raise QualificationError("XPBD_SNAPSHOT_PRIMARY_CHANGED_REQUIRES_DT")
+            steps = 0
+        else:
+            dt = _number(dt_seconds, code="XPBD_DT_INVALID",
+                         low=0., high=policy.max_dt_seconds, inclusive_low=False)
+            nominal = dt / policy.fixed_step_seconds
+            steps = int(round(nominal))
+            if (steps < 1 or steps > policy.maximum_substeps
+                    or abs(nominal-steps) > 1e-7):
+                raise QualificationError("XPBD_FIXED_TICK_PARTITION_INVALID")
         ticks, frames = previous_state.simulation_tick_count, previous_state.frame_count
 
     gravity = _vec(policy.gravity_xyz, "XPBD_GRAVITY_NONFINITE")
@@ -529,9 +546,11 @@ def step_declared_xpbd_secondary_v1(
             "training_authorized":False,
             "constraints_lambdas_reset_per_substep":True,
             "source_contact_qualified":False,
+            "primary_pose_hash":primary_hash,
         },
     )
-    status=("INITIALIZED_XPBD_UNSIMULATED" if steps==0 else
+    status=("INITIALIZED_XPBD_UNSIMULATED" if previous_state is None else
+            "SNAPSHOT_XPBD_NO_STEP" if steps == 0 else
             "PASS_XPBD_SECONDARY_RUNTIME" if (
                 max_len<=policy.maximum_segment_relative_error
                 and penetration<=policy.maximum_contact_penetration)

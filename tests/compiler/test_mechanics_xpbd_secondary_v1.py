@@ -125,6 +125,18 @@ def test_xpbd_unsatisfiable_collision_is_not_reported_as_pass():
     assert output.max_segment_relative_error>.02
 
 
+def test_xpbd_frame_snapshot_is_read_only_and_rejects_stale_primary():
+    rig,domain,policy,pose=_setup(gravity_xyz=(0.,0.,0.))
+    start=_step(rig,domain,policy,pose)
+    snapshot=_step(rig,domain,policy,pose,previous_state=start.state)
+    assert snapshot.status=="SNAPSHOT_XPBD_NO_STEP"
+    assert snapshot.state==start.state
+    assert snapshot.pose.joints==pose.joints
+    with pytest.raises(QualificationError,match="SNAPSHOT_PRIMARY_CHANGED_REQUIRES_DT"):
+        _step(rig,domain,policy,_translated(pose,.3),
+              previous_state=start.state)
+
+
 def test_xpbd_state_runtime_policy_and_time_fail_closed():
     rig,domain,policy,pose=_setup()
     start=_step(rig,domain,policy,pose)

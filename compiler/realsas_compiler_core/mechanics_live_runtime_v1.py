@@ -31,6 +31,12 @@ from .mechanics_secondary_motion_v1 import (
     SecondaryMotionStateV1,
     step_secondary_motion_v1,
 )
+from .mechanics_xpbd_domain_v1 import XPBDSecondaryDomainV1
+from .mechanics_xpbd_secondary_v1 import (
+    XPBDSecondaryPolicyV1,
+    XPBDSecondaryStateV1,
+    step_declared_xpbd_secondary_v1,
+)
 from .mechanics_attachment_frames_v1 import (
     AttachmentWorldFrameCourtV1,
     evaluate_attachment_world_frames_v1,
@@ -62,6 +68,7 @@ class MechanicsInterventionFrameV1:
     joint_parameter_solution_rad: tuple[tuple[str, str, float], ...] = ()
     rank_policy_candidate_keys: tuple[tuple[str, str], ...] = ()
     secondary_motion_state: SecondaryMotionStateV1 | None = None
+    xpbd_secondary_state: XPBDSecondaryStateV1 | None = None
     attachment_frames: AttachmentWorldFrameCourtV1 | None = None
     relative_attachment_court: RelativeAttachmentBridgeCourtV1 | None = None
     metadata: dict = field(default_factory=dict)
@@ -209,6 +216,10 @@ def evaluate_mechanics_intervention_frame_v1(
     secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,
     secondary_motion_previous_state: SecondaryMotionStateV1 | None = None,
     secondary_motion_dt_seconds: float | None = None,
+    xpbd_secondary_domain: XPBDSecondaryDomainV1 | None = None,
+    xpbd_secondary_policy: XPBDSecondaryPolicyV1 | None = None,
+    xpbd_secondary_previous_state: XPBDSecondaryStateV1 | None = None,
+    xpbd_secondary_dt_seconds: float | None = None,
 ) -> MechanicsInterventionFrameV1:
     _strict_lineage(mesh, rig, skin, mechanics)
     limit_residual = _finite_tolerance(
@@ -332,7 +343,9 @@ def evaluate_mechanics_intervention_frame_v1(
     primary_constraint_residual = max(
         (abs(float(v)) for _,v in pose.constraint_residuals),default=0.0,
     )
-    if secondary_motion_policy is not None and (
+    if secondary_motion_policy is not None and xpbd_secondary_policy is not None:
+        raise QualificationError("LIVE_MECHANICS_SECONDARY_SOLVER_DOUBLE_OWNERSHIP")
+    if (secondary_motion_policy is not None or xpbd_secondary_policy is not None) and (
         (multi_status is not None and multi_status != "PASS_MULTIGOAL_BEHAVIORAL_COURT")
         or primary_constraint_residual > limit_residual
         or attachment_result.status != "PASS_ATTACHMENT_FRAME_COURT"
@@ -350,6 +363,31 @@ def evaluate_mechanics_intervention_frame_v1(
         pose = secondary_result.pose
     elif secondary_motion_previous_state is not None or secondary_motion_dt_seconds is not None:
         raise QualificationError("LIVE_MECHANICS_SECONDARY_POLICY_REQUIRED")
+    xpbd_result = None
+    if xpbd_secondary_policy is not None:
+        if xpbd_secondary_domain is None:
+            raise QualificationError("LIVE_XPBD_SECONDARY_DOMAIN_REQUIRED")
+        if (
+            xpbd_secondary_domain.mesh_lineage_hash != mesh.mesh_lineage_hash
+            or xpbd_secondary_domain.rig_lineage_hash != rig.rig_lineage_hash
+            or xpbd_secondary_domain.skin_lineage_hash != skin.skin_lineage_hash
+            or xpbd_secondary_domain.mechanics_lineage_hash != mechanics.mechanics_lineage_hash
+            or xpbd_secondary_domain.deform_structure_hash != rig.deform_structure_hash
+            or xpbd_secondary_domain.control_program_hash != rig.control_program_hash
+        ):
+            raise QualificationError("LIVE_XPBD_CANONICAL_DOMAIN_LINEAGE_DRIFT")
+        xpbd_result = step_declared_xpbd_secondary_v1(
+            rig, pose, xpbd_secondary_domain, xpbd_secondary_policy,
+            previous_state=xpbd_secondary_previous_state,
+            dt_seconds=xpbd_secondary_dt_seconds,
+        )
+        pose = xpbd_result.pose
+    elif (
+        xpbd_secondary_domain is not None
+        or xpbd_secondary_previous_state is not None
+        or xpbd_secondary_dt_seconds is not None
+    ):
+        raise QualificationError("LIVE_XPBD_SECONDARY_POLICY_REQUIRED")
     deformed = (
         deform_prepared_mechanics_skin_v1(
             prepared_skin, pose,
@@ -373,6 +411,11 @@ def evaluate_mechanics_intervention_frame_v1(
         failures.append("MULTIGOAL_SOLVER_NOT_QUALIFIED")
     if secondary_result is not None and secondary_result.status != "PASS_SECONDARY_MOTION_BOUNDED":
         failures.append("SECONDARY_MOTION_BOUNDS_EXCEEDED")
+    if (xpbd_result is not None and xpbd_result.status not in {
+        "PASS_XPBD_SECONDARY_RUNTIME", "INITIALIZED_XPBD_UNSIMULATED",
+        "SNAPSHOT_XPBD_NO_STEP",
+    }):
+        failures.append("XPBD_PENETRATION_OR_SEGMENT_RESIDUAL")
     if attachment_result.status != "PASS_ATTACHMENT_FRAME_COURT":
         failures.append("ATTACHMENT_FRAME_NOT_QUALIFIED")
     if (relative_result is not None and
@@ -392,6 +435,7 @@ def evaluate_mechanics_intervention_frame_v1(
         joint_parameter_solution_rad=solved_parameters,
         rank_policy_candidate_keys=solved_rank_keys,
         secondary_motion_state=secondary_result.state if secondary_result is not None else None,
+        xpbd_secondary_state=xpbd_result.state if xpbd_result is not None else None,
         attachment_frames=attachment_result,
         relative_attachment_court=relative_result,
         metadata={
@@ -429,8 +473,26 @@ def evaluate_mechanics_intervention_frame_v1(
             "attachment_orientation_mode": attachment_orientation_mode,
             "attachment_orientation_solver_is_opt_in": True,
             "secondary_motion_mode": (
-                "CRITICALLY_DAMPED_DECLARED_CHAIN_RESEARCH"
+                "DECLARED_XPBD_SECONDARY_V1" if xpbd_result is not None
+                else "CRITICALLY_DAMPED_DECLARED_CHAIN_RESEARCH"
                 if secondary_result is not None else "DISABLED"
+            ),
+            "xpbd_status": xpbd_result.status if xpbd_result is not None else "DISABLED",
+            "xpbd_contact_projections": (
+                xpbd_result.applied_contact_projections
+                if xpbd_result is not None else 0
+            ),
+            "xpbd_max_segment_relative_error": (
+                xpbd_result.max_segment_relative_error
+                if xpbd_result is not None else None
+            ),
+            "xpbd_max_contact_penetration": (
+                xpbd_result.max_contact_penetration
+                if xpbd_result is not None else None
+            ),
+            "xpbd_unsimulated_initialization": (
+                xpbd_result is not None
+                and xpbd_result.status == "INITIALIZED_XPBD_UNSIMULATED"
             ),
             "secondary_motion_max_segment_length_error": (
                 secondary_result.max_secondary_segment_error
@@ -472,6 +534,8 @@ def evaluate_mechanics_intervention_sequence_v1(
     attachment_orientation_tolerance_rad: float = 1e-3,
     relative_attachment_bridges: tuple[DeclaredRelativeAttachmentBridgeV1, ...] = (),
     secondary_motion_policy: SecondaryMotionPolicyV1 | None = None,
+    xpbd_secondary_domain: XPBDSecondaryDomainV1 | None = None,
+    xpbd_secondary_policy: XPBDSecondaryPolicyV1 | None = None,
 ) -> MechanicsInterventionSequenceV1:
     if not steps:
         raise QualificationError("LIVE_MECHANICS_SEQUENCE_EMPTY")
@@ -493,6 +557,7 @@ def evaluate_mechanics_intervention_sequence_v1(
     prev_solution: tuple[tuple[str, str, float], ...] | None = None
     warm_start_frame_count = 0
     prev_secondary_state: SecondaryMotionStateV1 | None = None
+    prev_xpbd_state: XPBDSecondaryStateV1 | None = None
     prev_rank_selection: tuple[tuple[str,str], ...] | None = None
     rank_selection_changes=0
     rank_selection_reused=0
@@ -533,6 +598,17 @@ def evaluate_mechanics_intervention_sequence_v1(
                 float(step.time_seconds - steps[index-1].time_seconds)
                 if secondary_motion_policy is not None and index else None
             ),
+            xpbd_secondary_domain=xpbd_secondary_domain,
+            xpbd_secondary_policy=xpbd_secondary_policy,
+            xpbd_secondary_previous_state=prev_xpbd_state,
+            xpbd_secondary_dt_seconds=(
+                float(step.time_seconds - steps[index-1].time_seconds)
+                if xpbd_secondary_policy is not None and index else None
+            ),
+        )
+        prev_xpbd_state = (
+            frame.xpbd_secondary_state
+            if frame.status == "PASS_MECHANICS_BEHAVIORAL_COURT" else None
         )
         prev_secondary_state = (
             frame.secondary_motion_state

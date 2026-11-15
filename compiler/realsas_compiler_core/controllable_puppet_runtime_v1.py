@@ -42,6 +42,11 @@ from .playback_runtime_v3 import (
 from .canonical_rig_ir_v2 import CanonicalRigIRV2, validate_canonical_rig_domain_v2
 from .canonical_skin_ir_v2 import CanonicalSkinIRV2, validate_canonical_skin_domain_v2
 from .canonical_mechanics_ir_v1 import CanonicalMechanicsIRV1
+from .mechanics_xpbd_domain_v1 import XPBDSecondaryDomainV1
+from .mechanics_xpbd_secondary_v1 import (
+    XPBDSecondaryPolicyV1, XPBDSecondaryStateV1,
+    step_declared_xpbd_secondary_v1,
+)
 from .mechanics_live_runtime_v1 import (
     _strict_lineage, evaluate_mechanics_intervention_frame_v1,
 )
@@ -206,6 +211,7 @@ class PuppetRuntimeFrameV1:
     socket_world_positions: Mapping[str, tuple[float, float, float]] = field(default_factory=dict)
     socket_view_positions: Mapping[str, tuple[float, float, float]] = field(default_factory=dict)
     socket_source_contact_qualified: bool = False
+    xpbd_secondary_state: XPBDSecondaryStateV1 | None = None
 
 
 @dataclass(frozen=True)
@@ -252,6 +258,53 @@ class ControllablePuppetSessionV1:
         self._mechanics_solver_mode = "FABRIK_V1"
         self._pinned_contact_control_ids: tuple[str, ...] = ()
         self._pinned_world_targets: Mapping[str, tuple[float, float, float]] | None = None
+        self._xpbd_domain: XPBDSecondaryDomainV1 | None = None
+        self._xpbd_policy: XPBDSecondaryPolicyV1 | None = None
+        self._xpbd_state: XPBDSecondaryStateV1 | None = None
+
+    def enable_declared_xpbd_secondary(
+        self,
+        domain: XPBDSecondaryDomainV1,
+        policy: XPBDSecondaryPolicyV1,
+    ) -> None:
+        """Enable only compiler-qualified, explicitly selected XPBD regions.
+
+        The simulation is initialized on the first frame and thereafter
+        advances ONLY when the caller provides dt_seconds. View changes,
+        selection, Graphics depth queries and repeated frame() are snapshots.
+        """
+        if self.bundle.mechanics is None:
+            raise QualificationError("PUPPET_XPBD_MECHANICS_PARENT_REQUIRED")
+        if (
+            domain.mesh_lineage_hash != self.bundle.mesh.mesh_lineage_hash
+            or domain.rig_lineage_hash != self.bundle.rig.rig_lineage_hash
+            or domain.skin_lineage_hash != self.bundle.skin.skin_lineage_hash
+            or domain.mechanics_lineage_hash != self.bundle.mechanics.mechanics_lineage_hash
+            or policy.domain_hash != domain.domain_hash
+        ):
+            raise QualificationError("PUPPET_XPBD_DOMAIN_LINEAGE_DRIFT")
+        # Full surface and policy validation happens in the XPBD executor.
+        # Do not change currently selected policy/state unless initial
+        # admission has really succeeded.
+        primary = solve_control_pose_v1(
+            self.bundle.rig, tuple(self.control_states.values()),
+        )
+        checked = step_declared_xpbd_secondary_v1(
+            self.bundle.rig, primary, domain, policy,
+        )
+        if checked.status != "INITIALIZED_XPBD_UNSIMULATED":
+            raise QualificationError("PUPPET_XPBD_INITIAL_ADMISSION_FAILED")
+        self._xpbd_domain = domain
+        self._xpbd_policy = policy
+        self._xpbd_state = None
+
+    def disable_declared_xpbd_secondary(self) -> None:
+        self._xpbd_domain = None
+        self._xpbd_policy = None
+        self._xpbd_state = None
+
+    def reset_declared_xpbd_secondary(self) -> None:
+        self._xpbd_state = None
 
     def enable_declared_multi_goal(
         self,
@@ -388,7 +441,7 @@ class ControllablePuppetSessionV1:
                 raise QualificationError("PUPPET_RUNTIME_ATTACHMENT_NOT_BOUND_IN_ALL_VIEWS")
         self.active_attachments[slot_id] = attachment_id
 
-    def frame(self) -> PuppetRuntimeFrameV1:
+    def frame(self, *, dt_seconds: float | None = None) -> PuppetRuntimeFrameV1:
         if self._mechanics_solver_mode == "DECLARED_MULTI_GOAL_V1":
             if self.bundle.mechanics is None:
                 raise QualificationError("PUPPET_RUNTIME_MULTI_GOAL_MECHANICS_PARENT_REQUIRED")
@@ -415,6 +468,35 @@ class ControllablePuppetSessionV1:
             deform = deform_mesh_lbs_v1(
                 self.bundle.mesh, self.bundle.rig, self.bundle.skin, pose,
             )
+        xpbd_next_state = self._xpbd_state
+        if self._xpbd_policy is not None:
+            if self._xpbd_domain is None:
+                raise QualificationError("PUPPET_XPBD_DOMAIN_REQUIRED")
+            if self._mechanics_solver_mode == "DECLARED_MULTI_GOAL_V1" and (
+                executed.status != "PASS_MECHANICS_BEHAVIORAL_COURT"
+            ):
+                raise QualificationError("PUPPET_XPBD_UNQUALIFIED_PRIMARY")
+            xpbd = step_declared_xpbd_secondary_v1(
+                self.bundle.rig, pose, self._xpbd_domain,
+                self._xpbd_policy,
+                previous_state=self._xpbd_state,
+                dt_seconds=dt_seconds,
+            )
+            if xpbd.status not in {
+                "INITIALIZED_XPBD_UNSIMULATED",
+                "SNAPSHOT_XPBD_NO_STEP",
+                "PASS_XPBD_SECONDARY_RUNTIME",
+            }:
+                raise QualificationError(
+                    "PUPPET_XPBD_UNQUALIFIED:" + xpbd.status
+                )
+            pose=xpbd.pose
+            deform=deform_mesh_lbs_v1(
+                self.bundle.mesh, self.bundle.rig, self.bundle.skin, pose,
+            )
+            xpbd_next_state=xpbd.state
+        elif dt_seconds is not None:
+            raise QualificationError("PUPPET_XPBD_DT_WITHOUT_POLICY")
         if tuple(deform.canonical_mesh_vertex_ids) != tuple(
             v.canonical_mesh_vertex_id for v in self.bundle.mesh.vertices
         ):
@@ -519,7 +601,7 @@ class ControllablePuppetSessionV1:
                     )
                 ),
             )
-        return PuppetRuntimeFrameV1(
+        result = PuppetRuntimeFrameV1(
             view_id=self.view_id,
             meshes=tuple(visible),
             composition=frame,
@@ -529,7 +611,12 @@ class ControllablePuppetSessionV1:
             graphics_projection=graphics_projection,
             socket_world_positions=socket_world,
             socket_view_positions=socket_view,
+            xpbd_secondary_state=xpbd_next_state,
         )
+        # Only commit temporal state after all canonical Graphics/Playback
+        # projection and composition checks have succeeded.
+        self._xpbd_state=xpbd_next_state
+        return result
 
     def inspect_graphics_depth_raster(
         self, width: int, height: int,

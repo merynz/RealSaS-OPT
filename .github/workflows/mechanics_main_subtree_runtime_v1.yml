@@ -52,4 +52,5 @@ jobs:
             tests/compiler/test_mechanics_prepared_skin_v1.py \
             tests/compiler/test_mechanics_xpbd_domain_v1.py \
             tests/compiler/test_controllable_puppet_multigoal_editor_v1.py \
-            tests/compiler/test_mechanics_xpbd_secondary_v1.py
+            tests/compiler/test_mechanics_xpbd_secondary_v1.py \
+            tests/compiler/test_mechanics_xpbd_product_bridge_v1.py

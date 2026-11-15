@@ -16,8 +16,9 @@ mesh/face addresses and the primary Mechanics pose.
 
 Optional discrete point-triangle and edge-edge self-contact are resolved by
 the same canonical surface particles. This is not swept CCD and it does not
-resolve face-face coplanar overlaps, tearing, friction, dihedral calibrated
-bending or source material coefficients.
+resolve face-face coplanar overlaps, tearing, self-contact friction, dihedral calibrated
+bending or source material coefficients. Static/dynamic Coulomb corrections
+for declared world and joint sphere contacts remain optional runtime policy.
 """
 
 from dataclasses import asdict, dataclass, field, replace
@@ -47,6 +48,7 @@ from .mechanics_xpbd_surface_self_contact_v1 import (
     prepare_surface_self_contact_topology_v1,
     evaluate_surface_self_contacts_v1,
 )
+from .mechanics_xpbd_contact_friction_v1 import apply_xpbd_coulomb_friction_v1
 
 Vec3 = tuple[float, float, float]
 Face3 = tuple[str, str, str]
@@ -114,6 +116,8 @@ class XPBDSurfacePolicyV1:
     self_collision_compliance: float = field(default=0.0, kw_only=True)
     max_self_collision_pairs: int = field(default=16384, kw_only=True)
     max_self_collision_cells: int = field(default=200000, kw_only=True)
+    static_friction: float = field(default=0.0, kw_only=True)
+    dynamic_friction: float = field(default=0.0, kw_only=True)
     collision_margin: float = 0.0
     fixed_step_seconds: float = 1.0/120.0
     maximum_dt_seconds: float = 0.25
@@ -385,6 +389,10 @@ def _policy(domain: XPBDSurfaceDomainV1, policy: XPBDSurfacePolicyV1) -> str:
     if (policy.self_collision_thickness == 0.
             and policy.self_collision_compliance != 0.):
         raise QualificationError("XPBD_SELF_CONTACT_INACTIVE_COMPLIANCE")
+    friction_s=_scalar(policy.static_friction,"XPBD_SURFACE_STATIC_FRICTION_INVALID",hi=100.)
+    friction_d=_scalar(policy.dynamic_friction,"XPBD_SURFACE_DYNAMIC_FRICTION_INVALID",hi=100.)
+    if friction_d>friction_s:
+        raise QualificationError("XPBD_SURFACE_COULOMB_FRICTION_ORDER_INVALID")
     seen=set()
     for collider in policy.planes:
         if not collider.collider_id or collider.collider_id in seen:
@@ -687,6 +695,7 @@ def step_declared_xpbd_surface_v1(
         float(np.median([e[2] for e in domain.stretch_edges])),
     ) if self_topology is not None else 0.
     touch_count=0
+    friction_corrections=0
     self_contact_projections=0
     self_contact_max_candidates=0
     for sub in range(steps):
@@ -698,6 +707,10 @@ def step_declared_xpbd_surface_v1(
                 joint_centers[cid]-prior_joint_centers[cid])
             for cid in joint_centers
         }
+        joint_step_displacements={
+            cid:(joint_centers[cid]-prior_joint_centers[cid])/steps
+            for cid in joint_centers
+        }
         before={jid:pos[jid].copy() for jid in dynamic}
         for jid in dynamic:
             pos[jid]=pos[jid]+h*damping*velocity[jid]+h*h*gravity
@@ -705,6 +718,7 @@ def step_declared_xpbd_surface_v1(
         lambda_bend=np.zeros(len(domain.bend_edges),dtype=np.float64)
         lambda_area=np.zeros(len(domain.selected_faces),dtype=np.float64)
         lambda_follow=np.zeros((len(dynamic),3),dtype=np.float64)
+        contact_normal_budget:dict[tuple[str,str],float]={}
         lambda_self:dict[tuple, float]={}
         for _ in range(policy.iterations):
             for index,(a,b,rest) in enumerate(domain.stretch_edges):
@@ -736,16 +750,36 @@ def step_declared_xpbd_surface_v1(
                     C=float(np.dot(pos[jid]-collider.point,n)
                             -collider.margin-policy.collision_margin)
                     if C<0.:
-                        pos[jid]=pos[jid]-C*n
+                        depth=-C
+                        pos[jid]=pos[jid]+depth*n
                         touch_count+=1
+                        if policy.static_friction>0.:
+                            key=(jid,collider.collider_id)
+                            contact_normal_budget[key]=contact_normal_budget.get(key,0.)+depth
+                            pos[jid],friction_applied=apply_xpbd_coulomb_friction_v1(
+                                pos[jid],before[jid],n,contact_normal_budget[key],
+                                static_friction=policy.static_friction,
+                                dynamic_friction=policy.dynamic_friction,
+                            )
+                            friction_corrections+=int(friction_applied)
                 for collider in policy.spheres:
                     diff=pos[jid]-collider.center
                     length=float(np.linalg.norm(diff))
                     radius=collider.radius+collider.margin+policy.collision_margin
                     if length<radius:
                         n=diff/length if length>1e-12 else np.array((1.,0.,0.))
-                        pos[jid]=pos[jid]+(radius-length)*n
+                        depth=radius-length
+                        pos[jid]=pos[jid]+depth*n
                         touch_count+=1
+                        if policy.static_friction>0.:
+                            key=(jid,collider.collider_id)
+                            contact_normal_budget[key]=contact_normal_budget.get(key,0.)+depth
+                            pos[jid],friction_applied=apply_xpbd_coulomb_friction_v1(
+                                pos[jid],before[jid],n,contact_normal_budget[key],
+                                static_friction=policy.static_friction,
+                                dynamic_friction=policy.dynamic_friction,
+                            )
+                            friction_corrections+=int(friction_applied)
                 for collider in policy.joint_spheres:
                     if jid in excluded_by_collider[collider.collider_id]:
                         continue
@@ -754,8 +788,21 @@ def step_declared_xpbd_surface_v1(
                     radius=collider.radius+collider.margin+policy.collision_margin
                     if length<radius:
                         n=diff/length if length>1e-12 else np.array((1.,0.,0.))
-                        pos[jid]=pos[jid]+(radius-length)*n
+                        depth=radius-length
+                        pos[jid]=pos[jid]+depth*n
                         touch_count+=1
+                        if policy.static_friction>0.:
+                            key=(jid,collider.collider_id)
+                            contact_normal_budget[key]=contact_normal_budget.get(key,0.)+depth
+                            pos[jid],friction_applied=apply_xpbd_coulomb_friction_v1(
+                                pos[jid],before[jid],n,contact_normal_budget[key],
+                                static_friction=policy.static_friction,
+                                dynamic_friction=policy.dynamic_friction,
+                                collider_step_displacement=joint_step_displacements[
+                                    collider.collider_id
+                                ],
+                            )
+                            friction_corrections+=int(friction_applied)
             if self_topology is not None:
                 self_result=evaluate_surface_self_contacts_v1(
                     pos,mass,self_topology,
@@ -883,6 +930,12 @@ def step_declared_xpbd_surface_v1(
             "self_contact_max_penetration":self_max_penetration,
             "explicit_joint_sphere_contact_enabled":bool(policy.joint_spheres),
             "friction_qualified":False,
+            "declared_rigid_contact_coulomb_friction_qualified":bool(
+                policy.static_friction>0. and steps>0
+                and status=="PASS_XPBD_SURFACE_RUNTIME"
+            ),
+            "friction_contact_corrections":friction_corrections,
+            "self_contact_friction_qualified":False,
             "dihedral_material_bending_qualified":False,
         },
     )

@@ -80,8 +80,8 @@ def test_parallel_and_coplanar_unresolved_sweeps_fail_closed():
         )
     with pytest.raises(QualificationError,match="PARALLEL_NORMAL_UNSUPPORTED"):
         evaluate_swept_body_edge_pair_v1(
-            (v(-1.,0.,.01),v(1.,0.,.01)),
-            (v(-1.,0.,.01),v(1.,0.,.01)),
+            (v(-1.,0.,0.),v(1.,0.,0.)),
+            (v(-1.,0.,0.),v(1.,0.,0.)),
             (v(-1.,0.,0.),v(1.,0.,0.)),
             (v(-1.,0.,0.),v(1.,0.,0.)),
             thickness=.03,check_sweeps=False,

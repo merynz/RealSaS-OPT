@@ -861,6 +861,26 @@ class RSSvNextStructuralTrainer:
             )
             novel_loss = novel_objective["total"]
             novel_count = int(batch.novel_view_rgb_mask.sum().item())
+        # The production structural decoder must be conditioned on the
+        # predicted IRIS surface at BOTH training and free-running inference.
+        # Source mesh tokens remain teacher-only; this is not a substitute
+        # for independently qualified closed-solid source provenance.
+        tessa_surface_needed = (
+            self.model.cfg.tessa_surface_requirement == "REQUIRE_SIGNED_IRIS_SURFACE"
+            and (
+                (self.weights.topology > 0 and batch.topology_teacher_tokens is not None)
+                or (self.weights.motion_preference > 0 and batch.motion_candidate_tokens is not None)
+                or (
+                    self.axis_training_policy == "PRODUCT_MESH_MATCHED_REQUIRED"
+                    and batch.axis_teacher_sequence is not None
+                )
+            )
+        )
+        if tessa_surface_needed and (
+            batch.flexicubes_extractor is None
+            or batch.flexicubes_layer is None
+        ):
+            raise ValueError("RSS_VNEXT_TRAIN_TESSA_IRIS_SURFACE_REQUIRED")
         fc_surface = None
         fc_loss = None
         fc_anim_loss = None
@@ -877,6 +897,7 @@ class RSSvNextStructuralTrainer:
                 or (
                     batch.flexicubes_reference_surface_xyz is None
                     and batch.flexicubes_animation_teacher is None
+                    and not tessa_surface_needed
                 )
             ):
                 raise ValueError("RSS_VNEXT_FC_TRAIN_SIGNED_SOURCE_PROOF_REQUIRED")
@@ -922,10 +943,12 @@ class RSSvNextStructuralTrainer:
             ):
                 raise ValueError("RSS_VNEXT_FC_TRAIN_REFERENCE_SURFACE_INVALID")
             if (
-                self.weights.flexicubes_surface > 0 and target is not None
-            ) or (
-                self.weights.flexicubes_animation > 0
-                and batch.flexicubes_animation_teacher is not None
+                tessa_surface_needed
+                or (self.weights.flexicubes_surface > 0 and target is not None)
+                or (
+                    self.weights.flexicubes_animation > 0
+                    and batch.flexicubes_animation_teacher is not None
+                )
             ):
                 fc_surface = self.model.fc_surface_bridge(
                     state.scene_triplanes,
@@ -962,6 +985,8 @@ class RSSvNextStructuralTrainer:
                     fc_anim_count = result.pose_count
         elif batch.flexicubes_signed_source_admission_key:
             raise ValueError("RSS_VNEXT_FC_TRAIN_ORPHAN_QUALIFICATION")
+        if tessa_surface_needed and fc_surface is None:
+            raise RuntimeError("RSS_VNEXT_TRAIN_TESSA_IRIS_SURFACE_NOT_EXTRACTED")
         memory = self.model._structural_memory(
             state, aux, flexicubes=fc_surface,
         )

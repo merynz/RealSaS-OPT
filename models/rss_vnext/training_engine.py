@@ -170,6 +170,9 @@ class RSSvNextStructuralTrainingBatch:
     # Requires qualified source, mesh coordinate/camera bind and sample proof.
     flexicubes_extractor: object | None = None
     flexicubes_layer: RSSvNextSemanticLayerSpec | None = None
+    # Quality-stage refinement on the same 100x100x150 grid as production.
+    # Explicitly opt-in; source court and memory profile must be qualified.
+    flexicubes_high_resolution_training: bool = False
     flexicubes_reference_surface_xyz: Tensor | None = None  # [1,M,3]
     flexicubes_animation_teacher: RSSvNextFCAnimationTeacher | None = None
     flexicubes_signed_source_admission_key: str = ""
@@ -895,6 +898,16 @@ class RSSvNextStructuralTrainer:
             or batch.flexicubes_layer is None
         ):
             raise ValueError("RSS_VNEXT_TRAIN_TESSA_IRIS_SURFACE_REQUIRED")
+        if type(batch.flexicubes_high_resolution_training) is not bool:
+            raise ValueError("RSS_VNEXT_TRAIN_HIGHRES_PROFILE_TYPE")
+        if batch.flexicubes_high_resolution_training and (
+            batch.flexicubes_extractor is None
+            or batch.flexicubes_layer is None
+            or batch.flexicubes_reference_surface_xyz is None
+            or self.weights.flexicubes_surface <= 0
+            or not batch.flexicubes_signed_source_admission_key
+        ):
+            raise ValueError("RSS_VNEXT_TRAIN_HIGHRES_SOURCE_AND_SURFACE_REQUIRED")
         fc_surface = None
         fc_loss = None
         fc_anim_loss = None
@@ -971,6 +984,7 @@ class RSSvNextStructuralTrainer:
                     schema=self.model.cfg.semantic_role_schema(),
                     layer=batch.flexicubes_layer,
                     field_policy="SIGNED_HYPOTHESIS_ONLY",
+                    high_resolution_training=batch.flexicubes_high_resolution_training,
                 )
                 # Only source samples are supervision. Neural/proposed FC
                 # vertices enter the differentiable path back into H(x).

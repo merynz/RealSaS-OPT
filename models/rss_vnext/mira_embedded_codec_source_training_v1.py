@@ -272,7 +272,8 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             "pose_consequence_weight": self.pose_consequence_weight,
             "source_area_skin_weight": self.source_area_skin_weight,
             "source_area_skin_simplex_kl_weight": self.source_area_skin_simplex_kl_weight,
-            "source_sparse_influence_weight": self.source_sparse_influence_weight,
+            **({"source_sparse_influence_weight": self.source_sparse_influence_weight}
+               if self.source_sparse_influence_weight > 0 else {}),
             "gradient_court_policy": asdict(self.gradient_court_policy),
             "source_surface_pooling_abi": MIRA_SOURCE_SURFACE_POOLING_ABI,
             "frozen_upstream_state_sha256": self.frozen_upstream_state_sha256,

@@ -651,6 +651,13 @@ def step_declared_xpbd_surface_v1(
     damping=math.exp(-policy.damping_per_second*h)
     mass={jid:(0. if jid in pins else policy.inverse_mass)
           for jid in domain.vertex_ids}
+    # The inner XPBD constraint loop may run many times per frame.
+    # A tuple search for every particle/collider pair scales quadratically
+    # with exclusion-mask size. Reuse immutable O(1) membership instead.
+    excluded_by_collider={
+        c.collider_id:frozenset(c.excluded_vertex_ids)
+        for c in policy.joint_spheres
+    }
     touch_count=0
     for sub in range(steps):
         fraction=(sub+1)/steps
@@ -709,7 +716,7 @@ def step_declared_xpbd_surface_v1(
                         pos[jid]=pos[jid]+(radius-length)*n
                         touch_count+=1
                 for collider in policy.joint_spheres:
-                    if jid in collider.excluded_vertex_ids:
+                    if jid in excluded_by_collider[collider.collider_id]:
                         continue
                     diff=pos[jid]-substep_joint_centers[collider.collider_id]
                     length=float(np.linalg.norm(diff))
@@ -744,7 +751,7 @@ def step_declared_xpbd_surface_v1(
                 collider.radius+collider.margin+policy.collision_margin
                 -float(np.linalg.norm(pos[jid]-collider.center))))
         for collider in policy.joint_spheres:
-            if jid in collider.excluded_vertex_ids:
+            if jid in excluded_by_collider[collider.collider_id]:
                 continue
             max_penetration=max(max_penetration,max(0.,
                 collider.radius+collider.margin+policy.collision_margin

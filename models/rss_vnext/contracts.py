@@ -23,6 +23,10 @@ class RSSvNextConfig:
 
     # This is the actual product observation contract. No external 8-view path.
     observed_views: int = 2
+    # In product six-generated-view reconstruction, the original source
+    # patch tokens MUST reach the same H(x) decoder without invented cameras.
+    # A checkpoint without this field is a different, incompatible graph.
+    original_source_direct_h_conditioning: bool = True
     # Total observations + predictions (NOT count of added images):
     # 0=disabled; 6=>2 source+4 predictions; 8=>2 source+6 predictions.
     constructed_total_views: int = 0
@@ -68,6 +72,8 @@ class RSSvNextConfig:
             raise ValueError("RSS_VNEXT_SEMANTIC_ROLE_FIELD_WIDTH_DRIFT")
         if self.observed_views != 2:
             raise ValueError("RSS_VNEXT_REQUIRES_EXACTLY_FRONT_BACK")
+        if self.original_source_direct_h_conditioning is not True:
+            raise ValueError("RSS_VNEXT_DIRECT_ORIGINAL_SOURCE_H_REQUIRED")
         if self.constructed_total_views not in (0, 6, 8):
             raise ValueError("RSS_VNEXT_TOTAL_VIEW_COUNT_INVALID")
         if not (2 <= self.query_grid_side <= 32):

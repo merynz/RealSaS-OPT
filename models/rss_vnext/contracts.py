@@ -20,6 +20,9 @@ from .semantic_geometry_prior import RSSvNextSemanticRoleSchema
 class RSSvNextConfig:
     iris: IRISVNextConfigV1 = field(default_factory=IRISVNextConfigV1)
     tessa: TESSAStructuralizerConfigV3 = field(default_factory=TESSAStructuralizerConfigV3)
+    # Product TESSA must read an actual IRIS surface before generating topology.
+    # Research/diagnostic tests can explicitly exercise the legacy ablation.
+    tessa_surface_requirement: str = "REQUIRE_SIGNED_IRIS_SURFACE"
 
     # This is the actual product observation contract. No external 8-view path.
     observed_views: int = 2
@@ -65,6 +68,10 @@ class RSSvNextConfig:
     def validate(self) -> None:
         self.iris.validate()
         self.tessa.validate()
+        if self.tessa_surface_requirement not in (
+            "REQUIRE_SIGNED_IRIS_SURFACE", "OPTIONAL_RESEARCH",
+        ):
+            raise ValueError("RSS_VNEXT_TESSA_SURFACE_POLICY_INVALID")
         self.semantic_role_schema().validate()
         if self.graphics_channels != 5:
             raise ValueError("RSS_VNEXT_GRAPHICS_FIELD_REQUIRES_FIVE_TYPED_CHANNELS")
@@ -126,11 +133,13 @@ class RSSvNextConfig:
     @classmethod
     def tiny_for_test(cls) -> "RSSvNextConfig":
         return cls(
+            tessa_surface_requirement="OPTIONAL_RESEARCH",
             iris=IRISVNextConfigV1(
                 image_token_dim=32, scene_dim=32, camera_embed_dim=16,
                 plane_size=2, plane_channels=8, field_hidden_dim=32,
                 field_residual_blocks=2, local_feature_dim=32,
                 attention_heads=4, scene_layers=1,
+                scene_gradient_checkpointing=False,
                 topology_width=32, topology_heads=4,
                 topology_decoder_layers=1, topology_memory_tokens=8,
                 topology_source_width=16, extraction_training_resolution=4,

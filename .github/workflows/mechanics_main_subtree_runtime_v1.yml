@@ -49,4 +49,5 @@ jobs:
             tests/compiler/test_mechanics_attachment_feasibility_v1.py \
             tests/compiler/test_mechanics_relative_attachment_bridge_v1.py \
             tests/compiler/test_mechanics_attachment_priority_v1.py \
-            tests/compiler/test_mechanics_prepared_skin_v1.py
+            tests/compiler/test_mechanics_prepared_skin_v1.py \
+            tests/compiler/test_mechanics_xpbd_domain_v1.py

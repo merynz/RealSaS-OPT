@@ -41,6 +41,10 @@ from .playback_runtime_v3 import (
 )
 from .canonical_rig_ir_v2 import CanonicalRigIRV2, validate_canonical_rig_domain_v2
 from .canonical_skin_ir_v2 import CanonicalSkinIRV2, validate_canonical_skin_domain_v2
+from .canonical_mechanics_ir_v1 import CanonicalMechanicsIRV1
+from .mechanics_live_runtime_v1 import (
+    _strict_lineage, evaluate_mechanics_intervention_frame_v1,
+)
 from .types import QualificationError
 from .graphics_runtime_v1 import (
     RuntimeGraphicsV1, validate_runtime_graphics_v1,
@@ -83,6 +87,7 @@ class ControllablePuppetBundleV1:
     product_qualification_receipt: str
     schema_version: str = "RealSaS.ControllablePuppetBundle.v1"
     graphics: RuntimeGraphicsV1 | None = None
+    mechanics: CanonicalMechanicsIRV1 | None = None
 
     def validate(self) -> dict[str, CameraProjectionV3]:
         """Reject unaddressed topology and unqualified consumer input."""
@@ -102,6 +107,8 @@ class ControllablePuppetBundleV1:
         validate_canonical_mesh_domain_v1(self.mesh)
         validate_canonical_rig_domain_v2(self.rig)
         validate_canonical_skin_domain_v2(self.skin)
+        if self.mechanics is not None:
+            _strict_lineage(self.mesh, self.rig, self.skin, self.mechanics)
         if self.graphics is not None:
             validate_runtime_graphics_v1(
                 self.graphics,
@@ -242,6 +249,58 @@ class ControllablePuppetSessionV1:
         self.selected: PuppetPickV1 | None = None
         self._controls = {c.canonical_control_id: c for c in bundle.rig.controls}
         self._binding = {x.attachment_id: x for x in bundle.selection_bindings}
+        self._mechanics_solver_mode = "FABRIK_V1"
+        self._pinned_contact_control_ids: tuple[str, ...] = ()
+        self._pinned_world_targets: Mapping[str, tuple[float, float, float]] | None = None
+
+    def enable_declared_multi_goal(
+        self,
+        *,
+        pinned_contact_control_ids: tuple[str, ...] = (),
+        pinned_world_targets: Mapping[str, tuple[float, float, float]] | None = None,
+    ) -> None:
+        """Opt into executable multi-goal/pinned-contact runtime, no new truth.
+
+        Requires a typed CanonicalMechanics artifact. A pin is an explicit
+        runtime goal, NOT source-observed contact. Missing/invalid constraints
+        must fail closed; the old FABRIK path is never silently substituted.
+        """
+        if self.bundle.mechanics is None:
+            raise QualificationError("PUPPET_RUNTIME_MULTI_GOAL_MECHANICS_PARENT_REQUIRED")
+        # The research multi-goal solver currently accepts single-input IK
+        # effectors; a two-input FABRIK pole is NOT silently discarded.
+        # Keep the original FABRIK session active for such rigs.
+        if any(
+            c.operator_id != "IK"
+            or len(c.input_canonical_control_ids) != 1
+            or self._controls[c.input_canonical_control_ids[0]].control_kind != "IK_EFFECTOR"
+            for c in self.bundle.rig.constraints
+        ):
+            raise QualificationError("PUPPET_RUNTIME_MULTI_GOAL_POLE_OR_OPERATOR_UNSUPPORTED")
+        pins = pinned_contact_control_ids
+        if (type(pins) is not tuple or len(pins) > 32
+                or len(set(pins)) != len(pins)
+                or any(p not in self._controls for p in pins)):
+            raise QualificationError("PUPPET_RUNTIME_MULTI_GOAL_PINS_INVALID")
+        supplied = None
+        if pinned_world_targets is not None:
+            if (not isinstance(pinned_world_targets, Mapping)
+                    or set(pinned_world_targets) != set(pins)):
+                raise QualificationError("PUPPET_RUNTIME_MULTI_GOAL_PIN_TARGET_DOMAIN")
+            supplied = {}
+            for control_id, xyz in pinned_world_targets.items():
+                if (len(xyz) != 3
+                        or not all(math.isfinite(float(v)) for v in xyz)):
+                    raise QualificationError("PUPPET_RUNTIME_MULTI_GOAL_PIN_TARGET_INVALID")
+                supplied[control_id] = tuple(map(float, xyz))
+        self._mechanics_solver_mode = "DECLARED_MULTI_GOAL_V1"
+        self._pinned_contact_control_ids = pins
+        self._pinned_world_targets = supplied
+
+    def disable_declared_multi_goal(self) -> None:
+        self._mechanics_solver_mode = "FABRIK_V1"
+        self._pinned_contact_control_ids = ()
+        self._pinned_world_targets = None
 
     @property
     def view_id(self) -> str:
@@ -330,12 +389,32 @@ class ControllablePuppetSessionV1:
         self.active_attachments[slot_id] = attachment_id
 
     def frame(self) -> PuppetRuntimeFrameV1:
-        pose = solve_control_pose_v1(
-            self.bundle.rig, tuple(self.control_states.values()),
-        )
-        deform = deform_mesh_lbs_v1(
-            self.bundle.mesh, self.bundle.rig, self.bundle.skin, pose,
-        )
+        if self._mechanics_solver_mode == "DECLARED_MULTI_GOAL_V1":
+            if self.bundle.mechanics is None:
+                raise QualificationError("PUPPET_RUNTIME_MULTI_GOAL_MECHANICS_PARENT_REQUIRED")
+            executed = evaluate_mechanics_intervention_frame_v1(
+                self.bundle.mesh, self.bundle.rig, self.bundle.skin,
+                self.bundle.mechanics,
+                overrides=tuple(self.control_states.values()),
+                solver_mode="DECLARED_MULTI_GOAL_V1",
+                pinned_contact_control_ids=self._pinned_contact_control_ids,
+                pinned_world_targets=self._pinned_world_targets,
+                multi_goal_jacobian_mode="ANALYTIC_RESEARCH_V1",
+                max_allowed_constraint_residual=1e-3,
+            )
+            if executed.status != "PASS_MECHANICS_BEHAVIORAL_COURT":
+                raise QualificationError(
+                    "PUPPET_RUNTIME_MULTI_GOAL_UNQUALIFIED:"
+                    + ",".join(executed.failures)
+                )
+            pose, deform = executed.pose, executed.deformation
+        else:
+            pose = solve_control_pose_v1(
+                self.bundle.rig, tuple(self.control_states.values()),
+            )
+            deform = deform_mesh_lbs_v1(
+                self.bundle.mesh, self.bundle.rig, self.bundle.skin, pose,
+            )
         if tuple(deform.canonical_mesh_vertex_ids) != tuple(
             v.canonical_mesh_vertex_id for v in self.bundle.mesh.vertices
         ):

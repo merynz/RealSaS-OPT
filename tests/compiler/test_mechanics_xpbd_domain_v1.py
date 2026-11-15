@@ -3,7 +3,10 @@ from __future__ import annotations
 """XPBD ownership admission; no unqualified legacy numerics or source labels."""
 
 from dataclasses import replace
+from hashlib import sha256
 import pytest
+
+from compiler.realsas_compiler_core import mechanics_xpbd_domain_v1 as xpbd_domain
 
 from compiler.realsas_compiler_core.canonical_mechanics_ir_v1 import (
     CanonicalMechanicsIRV1,
@@ -115,11 +118,24 @@ def test_fails_closed_on_hash_drift_and_resource_policy():
         ))
 
 
-def test_old_xpbd_bytes_are_pinned_but_not_executable_in_current_main():
+def test_old_xpbd_source_bytes_are_pinned_but_not_executable_in_current_main(
+    tmp_path, monkeypatch,
+):
     domain = _prepare(_fixture())
+    source = tmp_path / "secondary_xpbd.py"
+    source.write_bytes(b"fake XPBD module bytes; never executable")
     with pytest.raises(QualificationError, match="HISTORICAL_SOURCE_HASH_MISMATCH"):
-        require_promoted_xpbd_solver_v1(domain, source_sha256="0" * 64)
-    with pytest.raises(QualificationError, match="SOLVER_NOT_PROMOTED"):
+        require_promoted_xpbd_solver_v1(domain, source_module_path=source)
+    with pytest.raises(QualificationError, match="DOMAIN_UNQUALIFIED"):
         require_promoted_xpbd_solver_v1(
-            domain, source_sha256=HISTORICAL_XPBD_SOURCE_SHA256,
+            replace(domain, domain_hash="0" * 64),
+            source_module_path=source,
         )
+    # A test-only altered expected digest reaches the *independent* registry
+    # gate. No claim is made that these bytes are the genuine v0.5 solver.
+    monkeypatch.setattr(
+        xpbd_domain, "HISTORICAL_XPBD_SOURCE_SHA256",
+        sha256(source.read_bytes()).hexdigest(),
+    )
+    with pytest.raises(QualificationError, match="SOLVER_NOT_PROMOTED"):
+        require_promoted_xpbd_solver_v1(domain, source_module_path=source)

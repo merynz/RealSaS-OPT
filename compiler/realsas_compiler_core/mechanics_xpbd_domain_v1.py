@@ -12,12 +12,15 @@ parity are independently checked and promoted.
 """
 
 from dataclasses import asdict, dataclass, field
+from hashlib import sha256
+from inspect import getsourcefile
+from pathlib import Path
 import math
 from typing import Any
 
-from .canonical_mesh_ir_v1 import CanonicalMeshIR
-from .canonical_rig_ir_v2 import CanonicalRigIRV2
-from .canonical_skin_ir_v2 import CanonicalSkinIRV2
+from .canonical_mesh_ir_v1 import CanonicalMeshIR, validate_canonical_mesh_domain_v1
+from .canonical_rig_ir_v2 import CanonicalRigIRV2, validate_canonical_rig_domain_v2
+from .canonical_skin_ir_v2 import CanonicalSkinIRV2, validate_canonical_skin_domain_v2
 from .canonical_mechanics_ir_v1 import CanonicalMechanicsIRV1
 from .hashing import content_sha256
 from .solver_registry import SOLVER_AUTHORITY, resolve_promoted_solver
@@ -109,6 +112,16 @@ def prepare_declared_xpbd_secondary_domain_v1(
         or not 1 <= request.max_surface_vertices <= 100_000
     ):
         raise QualificationError("XPBD_SECONDARY_RESOURCE_POLICY_INVALID")
+    validate_canonical_mesh_domain_v1(mesh)
+    validate_canonical_rig_domain_v2(rig)
+    validate_canonical_skin_domain_v2(skin)
+    if (
+        mesh.metadata.get("authority") != "COMPILER_CANONICAL_MESH"
+        or rig.metadata.get("authority") != "COMPILER_CANONICAL_RIG"
+        or skin.metadata.get("authority") != "COMPILER_CANONICAL_SKIN"
+        or mechanics.metadata.get("authority") != "COMPILER_CANONICAL_MECHANICS"
+    ):
+        raise QualificationError("XPBD_SECONDARY_CANONICAL_AUTHORITY_REQUIRED")
     if len(set(v.canonical_mesh_vertex_id for v in mesh.vertices)) != len(mesh.vertices):
         raise QualificationError("XPBD_SECONDARY_DUPLICATE_MESH_VERTEX")
     mesh_vertex_ids = {v.canonical_mesh_vertex_id for v in mesh.vertices}
@@ -231,22 +244,40 @@ def prepare_declared_xpbd_secondary_domain_v1(
 
 
 def require_promoted_xpbd_solver_v1(
-    domain: XPBDSecondaryDomainV1, *, source_sha256: str
+    domain: XPBDSecondaryDomainV1, *, source_module_path: str | Path
 ):
-    """Fail closed until original historical source and API pass promotion."""
-    if domain.schema_version != XPBD_SECONDARY_DOMAIN_VERSION or not domain.regions:
-        raise QualificationError("XPBD_SECONDARY_DOMAIN_UNQUALIFIED")
+    """Verify actual historical bytes AND the selected executable's file.
+
+    A caller-provided SHA string is never accepted as a source byte witness.
+    This is a promotion gate, not a general source-code loader or a new
+    numerical implementation.
+    """
+    payload = domain.to_dict()
+    content = {k: v for k, v in payload.items() if k != "domain_hash"}
     if (
-        not isinstance(source_sha256, str)
-        or source_sha256 != HISTORICAL_XPBD_SOURCE_SHA256
+        domain.schema_version != XPBD_SECONDARY_DOMAIN_VERSION
+        or not domain.regions
+        or domain.metadata.get("domain_authority") != "EXPLICIT_RUNTIME_POLICY"
+        or domain.domain_hash != content_sha256(content)
     ):
+        raise QualificationError("XPBD_SECONDARY_DOMAIN_UNQUALIFIED")
+    try:
+        path = Path(source_module_path).resolve(strict=True)
+        raw = path.read_bytes()
+    except (OSError, TypeError, ValueError) as exc:
+        raise QualificationError("XPBD_SECONDARY_HISTORICAL_SOURCE_UNAVAILABLE") from exc
+    if sha256(raw).hexdigest() != HISTORICAL_XPBD_SOURCE_SHA256:
         raise QualificationError("XPBD_SECONDARY_HISTORICAL_SOURCE_HASH_MISMATCH")
     if (
         SOLVER_AUTHORITY["XPBD"].current_main_status
         != "CANONICAL_MAINLINE_EXECUTABLE"
     ):
         raise QualificationError("XPBD_SECONDARY_SOLVER_NOT_PROMOTED")
-    return resolve_promoted_solver("XPBD")
+    solver = resolve_promoted_solver("XPBD")
+    origin = getsourcefile(solver)
+    if origin is None or Path(origin).resolve() != path:
+        raise QualificationError("XPBD_SECONDARY_EXECUTABLE_SOURCE_DRIFT")
+    return solver
 
 
 __all__ = [

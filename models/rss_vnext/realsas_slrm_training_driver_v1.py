@@ -120,7 +120,7 @@ class RealSaSSLRMTrainingLossWeightsV1:
         for value in asdict(self).values():
             if type(value) not in (float,int) or not math.isfinite(value) or value<0:
                 raise ValueError("RSS_VNEXT_REALSAS_SLRM_LOSS_WEIGHT_DOMAIN")
-        if self.rgb+self.alpha+self.semantic+self.lpips<=0:
+        if sum(asdict(self).values()) <= 0:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_NO_ACTIVE_LOSS")
 
 
@@ -284,6 +284,21 @@ class RealSaSSLRMTrainerV1:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_SOURCE_TARGET_REQUIRED")
         if t.stage not in (STAGE_1,STAGE_2,STAGE_3):
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_UNKNOWN_STAGE")
+        # SkinTokens/AniGen-style curriculum: the same trainable H(x) may
+        # enter independent stages. Do not require ray RGB/semantic losses
+        # during a source-qualified PyTorch3D mesh-only refinement stage.
+        ray_objectives=(
+            self.weights.rgb+self.weights.alpha
+            +self.weights.semantic+self.weights.lpips
+            +self.weights.observed_source_rgb+self.weights.observed_source_alpha
+        )
+        mesh_objectives=(
+            self.weights.mesh_normal+self.weights.mesh_depth
+        )
+        if t.stage in (STAGE_1,STAGE_2) and ray_objectives<=0:
+            raise ValueError("RSS_VNEXT_SLRM_RAY_STAGE_SUPERVISION_REQUIRED")
+        if t.stage==STAGE_3 and ray_objectives+mesh_objectives<=0:
+            raise ValueError("RSS_VNEXT_SLRM_MESH_STAGE_SUPERVISION_REQUIRED")
         inputs={
             "admission_status":"QUALIFIED_SOURCE_3D_RENDER_MULTILAYER",
             "slrm_training_input_profile":self.input_profile,

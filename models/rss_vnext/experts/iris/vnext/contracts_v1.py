@@ -45,6 +45,13 @@ class IRISVNextConfigV1:
     # a separately sealed coarse-to-fine resolution policy; this value is not a
     # runtime/mobile mesh-density promise.
     extraction_training_resolution: int = 24
+    # StdGEN mesh inference reference: 100 x 100 x 150 cells (1.5M).
+    # Never expand the low-resolution training gradient court to this volume.
+    extraction_inference_resolution: tuple[int, int, int] = (100, 100, 150)
+    extraction_field_query_chunk: int = 16384
+    extraction_cube_query_chunk: int = 2048
+    extraction_surface_query_chunk: int = 16384
+    extraction_inference_max_vertices: int = 1000000
     surface_witness_count: int = 1024
     flexicubes_weight_scale: float = 0.99
 
@@ -88,6 +95,27 @@ class IRISVNextConfigV1:
             raise ValueError("IRIS_VNEXT_EXTRACTION_DELTA_INVALID")
         if self.extraction_training_resolution < 2:
             raise ValueError("IRIS_VNEXT_EXTRACTION_RESOLUTION_INVALID")
+        resolution = self.extraction_inference_resolution
+        if (
+            type(resolution) is not tuple or len(resolution) != 3
+            or any(type(r) is not int or not 2 <= r <= 256 for r in resolution)
+            or resolution[0] * resolution[1] * resolution[2] > 1500000
+        ):
+            raise ValueError("IRIS_VNEXT_INFERENCE_RESOLUTION_BUDGET_INVALID")
+        if any(
+            type(v) is not int or not 1 <= v <= 131072
+            for v in (
+                self.extraction_field_query_chunk,
+                self.extraction_cube_query_chunk,
+                self.extraction_surface_query_chunk,
+            )
+        ):
+            raise ValueError("IRIS_VNEXT_EXTRACTION_CHUNK_INVALID")
+        if (
+            type(self.extraction_inference_max_vertices) is not int
+            or not 4 <= self.extraction_inference_max_vertices <= 2000000
+        ):
+            raise ValueError("IRIS_VNEXT_INFERENCE_OUTPUT_BUDGET_INVALID")
         if not (0.0 < float(self.flexicubes_weight_scale) < 1.0):
             raise ValueError("IRIS_VNEXT_FLEXICUBES_WEIGHT_SCALE_INVALID")
 

@@ -40,6 +40,7 @@ from .multiview_construction import (
 from .semantic_geometry_prior import (
     RSSvNextSemanticLayerSpec, semantic_equivalent_signed_field,
 )
+from .surface_topology_context_v1 import iris_surface_incidence_v1
 from .flexicubes_surface_evidence import (
     RSSvNextFlexiCubesEvidenceBridge,
     RSSvNextFlexiCubesSurfaceEvidence,
@@ -493,6 +494,14 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             self.iris, resolution=cfg.iris.extraction_training_resolution,
         )
         self.fc_surface_position = nn.Linear(3, h, bias=False)
+        # Predicted FlexiCubes face incidence is part of TESSA conditioning,
+        # never a second canonical topology or a source teacher shortcut.
+        self.fc_surface_incidence = nn.Sequential(
+            nn.LayerNorm(8), nn.Linear(8, h, bias=False),
+        )
+        self.fc_face_geometry = nn.Sequential(
+            nn.LayerNorm(10), nn.Linear(10, h, bias=False),
+        )
         # Deliberate EXPERIMENTAL alternative, not RealSaS's upstream
         # multiclass diffusion. It renders from the SAME 2-source Z/H.
         self.constructed_view_renderer = RSSvNextViewFieldRenderer(
@@ -743,14 +752,35 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             ix = torch.linspace(
                 0, n - 1, cap, device=surface_source.device,
             ).long()
+            vertex_incidence, face_geometry = iris_surface_incidence_v1(
+                flexicubes.xyz, flexicubes.faces,
+            )
             witness_features = (
                 flexicubes.local_features[:, ix]
                 + self.fc_surface_position(flexicubes.xyz[:, ix])
+                + self.fc_surface_incidence(vertex_incidence[:, ix])
+                + self.articulation_prior(flexicubes.local_features[:, ix])
                 + self.presentation_roles_to_memory(
                     torch.softmax(flexicubes.presentation_role_logits[:, ix], dim=-1),
                 )
             )
-            surface_source = torch.cat((surface_source, witness_features), dim=1)
+            # TESSA also receives explicit triangle tokens, using the actual
+            # predicted face indices (not only xyz point samples). A bounded
+            # deterministic subset controls memory while preserving gradients
+            # to IRIS geometry, local H and semantic appearance.
+            nf = flexicubes.faces.shape[0]
+            fi = torch.linspace(
+                0, nf - 1, min(256, nf), device=surface_source.device,
+            ).long()
+            face_ids = flexicubes.faces[fi]
+            face_tokens = (
+                flexicubes.local_features[:, face_ids].mean(dim=2)
+                + self.fc_face_geometry(face_geometry[:, fi])
+                + self.fc_surface_position(face_geometry[:, fi, :3])
+            )
+            surface_source = torch.cat(
+                (surface_source, witness_features, face_tokens), dim=1,
+            )
         return self.tessa.encode_memory(
             scene_source=scene_src,
             surface_source=surface_source,
@@ -907,6 +937,11 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 layer=flexicubes_layer,
                 field_policy="SIGNED_HYPOTHESIS_ONLY",
             )
+        if (
+            self.cfg.tessa_surface_requirement == "REQUIRE_SIGNED_IRIS_SURFACE"
+            and topology_prefix is not None and surface_witness is None
+        ):
+            raise ValueError("RSS_VNEXT_TESSA_IRIS_SURFACE_REQUIRED")
         structural_memory = self._structural_memory(
             state, auxiliary, flexicubes=surface_witness,
         )
@@ -979,6 +1014,8 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         *, generated_rgba: Tensor, generated_cameras: Tensor,
         generated_normals: Tensor, generation_checkpoint_sha256: str,
         source_binding_sha256: str,
+        flexicubes_extractor=None,
+        flexicubes_layer: RSSvNextSemanticLayerSpec | None = None,
     ) -> RSSvNextOutput:
         state = self.encode_generated_multiview(
             observed_rgba, original_camera_features,
@@ -987,7 +1024,11 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             generation_checkpoint_sha256=generation_checkpoint_sha256,
             source_binding_sha256=source_binding_sha256,
         )
-        return self._forward_from_state(state, None, None)
+        return self._forward_from_state(
+            state, None, None,
+            flexicubes_extractor=flexicubes_extractor,
+            flexicubes_layer=flexicubes_layer,
+        )
 
     def query_semantic_equivalent_field(
         self,
@@ -1085,6 +1126,8 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         generated_normals: Tensor | None = None,
         generation_checkpoint_sha256: str | None = None,
         source_binding_sha256: str | None = None,
+        flexicubes_extractor=None,
+        flexicubes_layer: RSSvNextSemanticLayerSpec | None = None,
     ) -> dict:
         """Free-running constrained topology and mechanical proposal.
 
@@ -1106,6 +1149,11 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             raise ValueError("RSS_VNEXT_UNUSED_COMPILER_CAPABILITIES")
         if rgba.shape[0] != 1:
             raise ValueError("RSS_VNEXT_MESH_GENERATION_BATCH_ONE_ONLY")
+        if (
+            self.cfg.tessa_surface_requirement == "REQUIRE_SIGNED_IRIS_SURFACE"
+            and (flexicubes_extractor is None or flexicubes_layer is None)
+        ):
+            raise ValueError("RSS_VNEXT_TESSA_IRIS_SURFACE_REQUIRED")
         supplied = (
             generated_rgba, generated_cameras, generated_normals,
             generation_checkpoint_sha256, source_binding_sha256,
@@ -1119,13 +1167,24 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 generated_normals=generated_normals,
                 generation_checkpoint_sha256=generation_checkpoint_sha256,
                 source_binding_sha256=source_binding_sha256,
+                flexicubes_extractor=flexicubes_extractor,
+                flexicubes_layer=flexicubes_layer,
             )
         elif camera_features is None:
             raise RuntimeError("RSS_VNEXT_UNCALIBRATED_SOURCE_REQUIRES_GENERATED_MULTIVIEW")
         elif getattr(self, "construction_requires_generated_multiview", False):
             raise RuntimeError("RSS_VNEXT_CHECKPOINT_REQUIRES_CANONICAL_MULTIVIEW")
         else:
-            out = self(rgba, camera_features)
+            out = self(
+                rgba, camera_features,
+                flexicubes_extractor=flexicubes_extractor,
+                flexicubes_layer=flexicubes_layer,
+            )
+        if (
+            self.cfg.tessa_surface_requirement == "REQUIRE_SIGNED_IRIS_SURFACE"
+            and out.flexicubes_surface_evidence is None
+        ):
+            raise RuntimeError("RSS_VNEXT_TESSA_IRIS_SURFACE_NOT_EXTRACTED")
         limit = min(max_topology_tokens or self.cfg.topology_decode_cap,
                     self.cfg.topology_decode_cap)
         if limit < 2:

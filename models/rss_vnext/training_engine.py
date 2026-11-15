@@ -939,7 +939,21 @@ class RSSvNextStructuralTrainer:
             if (
                 signed is None
                 or signed.get("admission_status") != "QUALIFIED_SOURCE_SIGNED_SOLID"
-                or signed.get("source_component_domain") != "SINGLE_QUALIFIED_CLOSED_COMPONENT"
+                or signed.get("source_component_domain") not in (
+                    "SINGLE_QUALIFIED_CLOSED_COMPONENT",
+                    "EXPLICIT_QUALIFIED_CLOSED_ASSEMBLY",
+                )
+                or (
+                    signed.get("source_component_domain")
+                        == "EXPLICIT_QUALIFIED_CLOSED_ASSEMBLY"
+                    and (
+                        signed.get("assembly_boolean_operations_qualified") is not True
+                        or signed.get("sdf_distance_scope")
+                            != "EXACT_BOUNDARY_OF_THE_SAME_QUALIFIED_SOLID"
+                        or signed.get("sdf_sign_scope")
+                            != "GLOBAL_NEGATIVE_INSIDE_POSITIVE_OUTSIDE"
+                    )
+                )
                 or signed.get("dataset_manifest_sha256") != self.dataset_manifest_sha256
                 or signed.get("source_qualification_key") != batch.source_qualification_key
                 or signed.get("role_schema_id") != self.model.cfg.semantic_role_schema_id

@@ -531,6 +531,55 @@ int self_test(){
        visible_blue[2]!=255||
        visible_blue[3]<125||visible_blue[3]>129)
         throw std::runtime_error("RSS_UV_NATIVE_ROLE_TRANSMITTANCE_DRIFT");
+    // Geometric occlusion must survive the complete absence of RGB.
+    // Otherwise a blue surface behind an uncolored face leaks through.
+    const auto center=static_cast<std::size_t>(20*64+20);
+    for(int y=0;y<8;++y)for(int x=1;x<=3;++x){
+        const auto p=static_cast<std::size_t>(y*8+x);
+        tex.inferred_mask[p]=0u;
+        tex.source_mask[p]=0u;
+    }
+    const auto unknown_front=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(1.,2.,0),64,64,0,-1
+    );
+    if(at(unknown_front,20,20)!=std::array<int,4>{0,0,0,0}||
+       unknown_front.unknown_occlusion[center]!=1u||
+       unknown_front.unknown_occlusion_pixels==0||
+       unknown_front.front_face[center]!=-1)
+        throw std::runtime_error("RSS_UV_NATIVE_UNKNOWN_FRONT_OCCLUSION_LEAK");
+    const auto known_front=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(2.,1.,0),64,64,0,-1
+    );
+    if(at(known_front,20,20)!=std::array<int,4>{0,0,255,255}||
+       known_front.unknown_occlusion[center]!=0u)
+        throw std::runtime_error("RSS_UV_NATIVE_UNKNOWN_BACK_BLOCKED_FRONT");
+    // A known alpha-zero texel must remain transparent, unlike UNKNOWN.
+    for(int y=0;y<8;++y)for(int x=1;x<=3;++x){
+        const auto p=static_cast<std::size_t>(y*8+x);
+        tex.inferred_mask[p]=1u;
+        tex.inferred_rgba[4*p+3]=0u;
+    }
+    const auto transparent_front=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(1.,2.,0),64,64,0,-1
+    );
+    if(at(transparent_front,20,20)!=std::array<int,4>{0,0,255,255}||
+       transparent_front.unknown_occlusion[center]!=0u)
+        throw std::runtime_error("RSS_UV_NATIVE_KNOWN_TRANSPARENCY_REGRESSION");
+    // With a translucent known front and an unknown rear, preserve only
+    // the known contribution and signal unresolved background ownership.
+    for(int y=0;y<8;++y){
+        for(int x=1;x<=3;++x)
+            tex.inferred_rgba[4*(y*8+x)+3]=128u;
+        for(int x=4;x<=6;++x)
+            tex.inferred_mask[y*8+x]=0u;
+    }
+    const auto translucent_over_unknown=realsas::rss_uv_v1::render(
+        graphics,tex,faces,posed(1.,2.,0),64,64,0,-1
+    );
+    if(at(translucent_over_unknown,20,20)!=std::array<int,4>{255,0,0,128}||
+       translucent_over_unknown.unknown_occlusion[center]!=1u)
+        throw std::runtime_error("RSS_UV_NATIVE_PARTIAL_ALPHA_UNKNOWN_REAR");
+    std::cout<<"RSS_UV_NATIVE_UNKNOWN_COVERAGE_OCCLUSION_PASS\n";
     std::cout<<"RSS_UV_NATIVE_SEMANTIC_SUBLAYER_CONSUMER_PASS\n";
     std::cout<<"RSS_UV_NATIVE_ORTHOGRAPHIC_CHART_AND_MOVING_DEPTH_PASS\n";
     std::cout<<"RSS_UV_NATIVE_POSED_DEPTH_AND_PARTIAL_ORDER_PASS\n";
@@ -711,6 +760,7 @@ int main(int argc,char** argv){
                  <<" source_candidate_pixels="<<source_pixels
                  <<" inferred_pixels="<<predicted_pixels
                  <<" unknown_pixels="<<output.uncolored_pixels
+                 <<" unknown_occlusion_pixels="<<output.unknown_occlusion_pixels
                  <<"\n";
         return 0;
     }catch(const std::exception& exc){

@@ -200,7 +200,13 @@ struct PixelImage {
     std::vector<std::uint8_t> rgba;
     std::vector<std::int32_t> front_face;
     std::vector<std::uint8_t> color_authority;
-    std::uint64_t overlapping_pixels{},explicit_order_overrides{},uncolored_pixels{};
+    // 1 where a geometrically covered but color-unknown front hit stopped
+    // compositing. This is not source alpha or an assertion of opacity.
+    // Consumers MUST NOT treat a zero RGBA value at such a pixel as observed
+    // transparent background. The visible color remains unresolved.
+    std::vector<std::uint8_t> unknown_occlusion;
+    std::uint64_t overlapping_pixels{},explicit_order_overrides{},uncolored_pixels{},
+                  unknown_occlusion_pixels{};
 };
 
 inline double orient(const Projected& a,const Projected& b,double x,double y){
@@ -369,7 +375,9 @@ inline PixelImage render(const graphics_v1::State& graphics,const Texture& textu
             if(!(depth>0.)||!std::isfinite(depth))
                 throw std::runtime_error("RSS_UV_NATIVE_ORTHOGRAPHIC_DEPTH_DOMAIN");
             const auto color=sample_texture(texture,f,bary,original_view_hint);
-            if(color.authority==0||color.rgba[3]<=1e-12)continue;
+            // Missing RGB != alpha=0. Retain the triangle as an unresolved
+            // occluder; a known transparent texel still contributes no hit.
+            if(color.authority!=0 && color.rgba[3]<=1e-12)continue;
             const auto p=static_cast<std::size_t>(y)*width+x;
             if(layers[p].size()>=32)
                 throw std::runtime_error("RSS_UV_NATIVE_LAYER_OVERFLOW");
@@ -381,6 +389,7 @@ inline PixelImage render(const graphics_v1::State& graphics,const Texture& textu
     output.rgba.resize(pixels*4,0);
     output.front_face.resize(pixels,-1);
     output.color_authority.resize(pixels,0);
+    output.unknown_occlusion.resize(pixels,0);
     const auto q8=[](double x)->std::uint8_t{
         return static_cast<std::uint8_t>(std::floor(std::max(0.,std::min(1.,x))*255.+.5));
     };
@@ -407,6 +416,15 @@ inline PixelImage render(const graphics_v1::State& graphics,const Texture& textu
         // only its *already attenuated* visible part.
         for(auto idx:order){
             const auto& layer=hits[idx];
+            if(layer.color.authority==0){
+                // UNKNOWN source/H(x) RGB is not a transparent hole. Stop
+                // before a known-colored rear face can bleed through. Do not
+                // invent RGB or claim an alpha value for the unknown surface.
+                output.unknown_occlusion[pixel]=1u;
+                ++output.unknown_occlusion_pixels;
+                physical_transmittance=0.;
+                break;
+            }
             const auto& rgba=layer.color.rgba;
             const double contribution=physical_transmittance*rgba[3];
             const bool selected=(
@@ -425,6 +443,8 @@ inline PixelImage render(const graphics_v1::State& graphics,const Texture& textu
             physical_transmittance*=1.-rgba[3];
             if(physical_transmittance<=1e-12)break;
         }
+        if(accum[3]<=1e-12 && output.unknown_occlusion[pixel])
+            ++output.uncolored_pixels;
         if(accum[3]>1e-12)
             for(int ch=0;ch<3;++ch)
                 output.rgba[4*pixel+ch]=q8(accum[ch]/accum[3]);

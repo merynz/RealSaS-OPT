@@ -85,6 +85,7 @@ class RealSaSSLRMBatchV1:
     source_3d_render_target: RealSaSJointTargetV1
     admitted_3d_render_key: str
     stage3_flexicubes_extractor: object | None = None
+    stage3_high_resolution_training: bool = False
     stage3_semantic_layer: object | None = None
     stage3_camera_features: Tensor | None = None
     stage3_hw: tuple[int,int] | None = None
@@ -455,6 +456,10 @@ class RealSaSSLRMTrainerV1:
             )
         mesh=None
         extra={}
+        if type(batch.stage3_high_resolution_training) is not bool:
+            raise ValueError("RSS_VNEXT_SLRM_STAGE3_RESOLUTION_POLICY_TYPE")
+        if batch.stage3_high_resolution_training and teacher.stage != STAGE_3:
+            raise ValueError("RSS_VNEXT_SLRM_HIGHRES_REQUIRES_STAGE3")
         if teacher.stage==STAGE_3:
             # A resumed CPU/reference objective is NOT silently equivalent
             # to the compiled PyTorch3D CUDA stage. Device and raster
@@ -478,6 +483,17 @@ class RealSaSSLRMTrainerV1:
             ].get("independently_qualified_closed_signed_source")
             if signed is not True:
                 raise ValueError("RSS_VNEXT_REALSAS_SLRM_STAGE3_SOURCE_SIGN_NOT_ADMITTED")
+            # High-resolution gradient refinement is an explicit Stage3
+            # operation. Its source receipt must pin the exact grid, since
+            # coarse Stage3 and high-res Stage3 are NOT interchangeable.
+            if batch.stage3_high_resolution_training:
+                expected = list(
+                    self.model.cfg.iris.extraction_inference_resolution,
+                )
+                if self.trusted_source_3d_render_registry[
+                    batch.admitted_3d_render_key
+                ].get("stage3_refinement_grid_xyz") != expected:
+                    raise ValueError("RSS_VNEXT_SLRM_HIGHRES_GRID_RECEIPT_REQUIRED")
             layer=batch.stage3_semantic_layer
             if layer.name!=teacher.layer_name:
                 raise ValueError("RSS_VNEXT_REALSAS_SLRM_STAGE3_SEMANTIC_LAYER_DRIFT")
@@ -486,6 +502,10 @@ class RealSaSSLRMTrainerV1:
                 role_head=self.model.presentation_role_head,
                 schema=self.model.cfg.semantic_role_schema(),
                 layer=layer,field_policy="SIGNED_HYPOTHESIS_ONLY",
+                # Preserve the existing Stage3 raster mock seam on the
+                # default profile; true high-res uses the new typed contract.
+                **({"high_resolution_training": True}
+                  if batch.stage3_high_resolution_training else {}),
             )
             scene_digest=_digest(state.scene_triplanes)
             mesh=render_realsas_layered_flexicubes_mesh_v1(
@@ -537,6 +557,8 @@ class RealSaSSLRMTrainerV1:
                     role_head=self.model.presentation_role_head,
                     schema=schema,layer=source_layer,
                     field_policy="SIGNED_HYPOTHESIS_ONLY",
+                    **({"high_resolution_training": True}
+                      if batch.stage3_high_resolution_training else {}),
                 )
                 full_mesh=render_realsas_layered_flexicubes_mesh_v1(
                     witness=full_witness,iris=self.model.iris,

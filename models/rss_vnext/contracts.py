@@ -143,6 +143,11 @@ class RSSvNextConfig:
                 topology_width=32, topology_heads=4,
                 topology_decoder_layers=1, topology_memory_tokens=8,
                 topology_source_width=16, extraction_training_resolution=4,
+                extraction_inference_resolution=(4, 4, 4),
+                extraction_field_query_chunk=16,
+                extraction_cube_query_chunk=8,
+                extraction_surface_query_chunk=16,
+                extraction_inference_max_vertices=256,
                 surface_witness_count=16,
             ),
             tessa=TESSAStructuralizerConfigV3(

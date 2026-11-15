@@ -14,9 +14,10 @@ explicit canonical-joint contact proxies, interpolated across fixed steps. The s
 vertex positions of the existing DeformedMeshIRV1 and retains the original
 mesh/face addresses and the primary Mechanics pose.
 
-Not yet implemented: triangle-triangle self contact, dihedral material bending,
-tearing, friction or calibrated source cloth properties. These must not be
-reported as qualified by this module's PASS status.
+Optional discrete point-triangle and edge-edge self-contact are resolved by
+the same canonical surface particles. This is not swept CCD and it does not
+resolve face-face coplanar overlaps, tearing, friction, dihedral calibrated
+bending or source material coefficients.
 """
 
 from dataclasses import asdict, dataclass, field, replace
@@ -42,6 +43,10 @@ from .mechanics_xpbd_secondary_v1 import (
     XPBDPlaneColliderV1, XPBDSphereColliderV1,
 )
 from .types import QualificationError
+from .mechanics_xpbd_surface_self_contact_v1 import (
+    prepare_surface_self_contact_topology_v1,
+    evaluate_surface_self_contacts_v1,
+)
 
 Vec3 = tuple[float, float, float]
 Face3 = tuple[str, str, str]
@@ -105,6 +110,10 @@ class XPBDSurfacePolicyV1:
     planes: tuple[XPBDPlaneColliderV1, ...] = ()
     spheres: tuple[XPBDSphereColliderV1, ...] = ()
     joint_spheres: tuple[XPBDSurfaceJointSphereColliderV1, ...] = field(default=(), kw_only=True)
+    self_collision_thickness: float = field(default=0.0, kw_only=True)
+    self_collision_compliance: float = field(default=0.0, kw_only=True)
+    max_self_collision_pairs: int = field(default=16384, kw_only=True)
+    max_self_collision_cells: int = field(default=200000, kw_only=True)
     collision_margin: float = 0.0
     fixed_step_seconds: float = 1.0/120.0
     maximum_dt_seconds: float = 0.25
@@ -366,6 +375,16 @@ def _policy(domain: XPBDSurfaceDomainV1, policy: XPBDSurfacePolicyV1) -> str:
     for key in ("max_stretch_relative_error","max_area_relative_error",
                 "max_contact_penetration"):
         _scalar(getattr(policy,key),"XPBD_SURFACE_RESIDUAL_POLICY_INVALID",hi=0.5)
+    _scalar(policy.self_collision_thickness,"XPBD_SELF_CONTACT_THICKNESS_INVALID",hi=100.)
+    _scalar(policy.self_collision_compliance,"XPBD_SELF_CONTACT_COMPLIANCE_INVALID",hi=10.)
+    if (type(policy.max_self_collision_pairs) is not int
+            or not 1<=policy.max_self_collision_pairs<=32768
+            or type(policy.max_self_collision_cells) is not int
+            or not 1<=policy.max_self_collision_cells<=200000):
+        raise QualificationError("XPBD_SELF_CONTACT_RESOURCE_POLICY_INVALID")
+    if (policy.self_collision_thickness == 0.
+            and policy.self_collision_compliance != 0.):
+        raise QualificationError("XPBD_SELF_CONTACT_INACTIVE_COMPLIANCE")
     seen=set()
     for collider in policy.planes:
         if not collider.collider_id or collider.collider_id in seen:
@@ -658,7 +677,18 @@ def step_declared_xpbd_surface_v1(
         c.collider_id:frozenset(c.excluded_vertex_ids)
         for c in policy.joint_spheres
     }
+    self_topology=(
+        prepare_surface_self_contact_topology_v1(
+            domain.selected_faces,domain.stretch_edges,
+        ) if policy.self_collision_thickness>0. else None
+    )
+    self_cell_size=max(
+        2.*policy.self_collision_thickness,
+        float(np.median([e[2] for e in domain.stretch_edges])),
+    ) if self_topology is not None else 0.
     touch_count=0
+    self_contact_projections=0
+    self_contact_max_candidates=0
     for sub in range(steps):
         fraction=(sub+1)/steps
         for jid in pins:
@@ -675,6 +705,7 @@ def step_declared_xpbd_surface_v1(
         lambda_bend=np.zeros(len(domain.bend_edges),dtype=np.float64)
         lambda_area=np.zeros(len(domain.selected_faces),dtype=np.float64)
         lambda_follow=np.zeros((len(dynamic),3),dtype=np.float64)
+        lambda_self:dict[tuple, float]={}
         for _ in range(policy.iterations):
             for index,(a,b,rest) in enumerate(domain.stretch_edges):
                 lambda_stretch[index]=_distance_pair(
@@ -725,6 +756,21 @@ def step_declared_xpbd_surface_v1(
                         n=diff/length if length>1e-12 else np.array((1.,0.,0.))
                         pos[jid]=pos[jid]+(radius-length)*n
                         touch_count+=1
+            if self_topology is not None:
+                self_result=evaluate_surface_self_contacts_v1(
+                    pos,mass,self_topology,
+                    thickness=policy.self_collision_thickness,
+                    cell_size=self_cell_size,
+                    compliance=policy.self_collision_compliance,
+                    step_seconds=h,
+                    max_pairs=policy.max_self_collision_pairs,
+                    max_cells=policy.max_self_collision_cells,
+                    lambdas=lambda_self,project=True,
+                )
+                self_contact_projections+=self_result.projections
+                self_contact_max_candidates=max(
+                    self_contact_max_candidates,self_result.candidate_pairs,
+                )
         for jid in dynamic:
             velocity[jid]=(pos[jid]-before[jid])/h
             if (not np.isfinite(pos[jid]).all()
@@ -756,6 +802,20 @@ def step_declared_xpbd_surface_v1(
             max_penetration=max(max_penetration,max(0.,
                 collider.radius+collider.margin+policy.collision_margin
                 -float(np.linalg.norm(pos[jid]-joint_centers[collider.collider_id]))))
+    self_max_penetration=0.
+    if self_topology is not None and steps>0:
+        self_diagnostic=evaluate_surface_self_contacts_v1(
+            pos,mass,self_topology,
+            thickness=policy.self_collision_thickness,
+            cell_size=self_cell_size,
+            max_pairs=policy.max_self_collision_pairs,
+            max_cells=policy.max_self_collision_cells,
+            project=False,
+        )
+        self_max_penetration=self_diagnostic.maximum_penetration
+        self_contact_max_candidates=max(
+            self_contact_max_candidates,self_diagnostic.candidate_pairs,
+        )
     state=XPBDSurfaceStateV1(
         domain_hash=domain.domain_hash,
         policy_hash=signature,
@@ -798,7 +858,8 @@ def step_declared_xpbd_surface_v1(
             else "PASS_XPBD_SURFACE_RUNTIME" if (
                 max_stretch<=policy.max_stretch_relative_error
                 and max_area<=policy.max_area_relative_error
-                and max_penetration<=policy.max_contact_penetration)
+                and max_penetration<=policy.max_contact_penetration
+                and self_max_penetration<=policy.max_contact_penetration)
             else "FAIL_XPBD_SURFACE_CONSTRAINT_RESIDUAL")
     return XPBDSurfaceResultV1(
         deformation=deformation,state=state,status=status,
@@ -810,7 +871,12 @@ def step_declared_xpbd_surface_v1(
             "solver_family":"XPBD_COMPLIANT_SURFACE_PARTICLES",
             "source_physics_truth_claimed":False,
             "same_canonical_mesh_and_face_addresses":True,
-            "surface_self_triangle_collision_qualified":False,
+            "surface_self_triangle_collision_qualified":bool(self_topology is not None and steps>0 and status=="PASS_XPBD_SURFACE_RUNTIME"),
+            "self_collision_discrete_only":True,
+            "self_contact_vertex_triangle_and_edge_edge_enabled":bool(self_topology),
+            "self_contact_projections":self_contact_projections,
+            "self_contact_max_candidate_pairs":self_contact_max_candidates,
+            "self_contact_max_penetration":self_max_penetration,
             "explicit_joint_sphere_contact_enabled":bool(policy.joint_spheres),
             "friction_qualified":False,
             "dihedral_material_bending_qualified":False,

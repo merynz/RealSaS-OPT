@@ -2025,6 +2025,8 @@ class RSSvNextStructuralTrainer:
         ):
             result.gradient_interference_report = self._measure_gradient_conflicts(result)
         result.total_loss.backward()
+        if self.phase_contract is not None:
+            self.phase_contract.assert_required_gradients(self.model)
         grad_norm = nn.utils.clip_grad_norm_(
             (p for p in self.model.parameters() if p.requires_grad),
             self.weights.clip_gradient_norm,

@@ -119,6 +119,13 @@ def test_body_selection_cannot_relabel_cloth_vertices_or_foreign_faces():
             (XPBDBodyMeshColliderV1("body",(FACE,)),
              XPBDBodyMeshColliderV1("other",(FACE,))),
         )
+    with pytest.raises(QualificationError,match="EXCLUSION_INVALID"):
+        qualify_xpbd_body_mesh_colliders_v1(
+            faces,("MV:0",),
+            (XPBDBodyMeshColliderV1(
+                "body",(FACE,),excluded_cloth_vertex_ids=("foreign",),
+            ),),
+        )
 
 
 def _source():
@@ -217,3 +224,56 @@ def test_body_mesh_contact_explicit_candidate_resource_bound():
              swept_vertex_triangle_ccd=False),),
             max_candidates=1,project=True,
         )
+
+
+def test_pinned_cloth_body_intersection_must_be_explicitly_excluded():
+    mesh,domain,primary=_source()
+    intruding=XPBDBodyMeshColliderV1(
+        "body",(FACE,),thickness=.1,
+    )
+    policy=XPBDSurfacePolicyV1(
+        domain_hash=domain.domain_hash,
+        body_mesh_colliders=(intruding,),
+    )
+    with pytest.raises(QualificationError,match="BODY_PINNED_CONTACT_UNSATISFIABLE"):
+        step_declared_xpbd_surface_v1(mesh,primary,domain,policy)
+    excluded=replace(intruding,excluded_cloth_vertex_ids=domain.pinned_vertex_ids)
+    admitted=step_declared_xpbd_surface_v1(
+        mesh,primary,domain,replace(policy,body_mesh_colliders=(excluded,)),
+    )
+    assert admitted.status=="INITIALIZED_XPBD_SURFACE_UNSIMULATED"
+
+
+def test_moving_body_linear_time_partition_preserves_physical_tick_state():
+    mesh,domain,primary=_source()
+    body=XPBDBodyMeshColliderV1("body",(FACE,),thickness=.01)
+    policy=XPBDSurfacePolicyV1(
+        domain_hash=domain.domain_hash,body_mesh_colliders=(body,),
+        gravity_xyz=(0.,0.,0.),follow_compliance=1.,
+    )
+    start=step_declared_xpbd_surface_v1(mesh,primary,domain,policy)
+    def shifted(dz):
+        values=list(primary.positions)
+        values[4:]=[tuple((x,y,z+dz)) for x,y,z in values[4:]]
+        return replace(primary,positions=tuple(values))
+    middle=shifted(.01)
+    final=shifted(.02)
+    one=step_declared_xpbd_surface_v1(
+        mesh,final,domain,policy,
+        previous_state=start.state,dt_seconds=1./60.,
+    )
+    half=step_declared_xpbd_surface_v1(
+        mesh,middle,domain,policy,
+        previous_state=start.state,dt_seconds=1./120.,
+    )
+    twice=step_declared_xpbd_surface_v1(
+        mesh,final,domain,policy,
+        previous_state=half.state,dt_seconds=1./120.,
+    )
+    assert one.state.ticks==twice.state.ticks==2
+    assert one.state.particles==twice.state.particles
+    assert one.deformation.positions==twice.deformation.positions
+    assert one.state.frames==1 and twice.state.frames==2
+    assert one.state.metadata["kinematic_body_mesh_vertices"]==twice.state.metadata[
+        "kinematic_body_mesh_vertices"
+    ]

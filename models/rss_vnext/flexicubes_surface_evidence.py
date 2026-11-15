@@ -20,6 +20,7 @@ from dataclasses import dataclass
 
 import torch
 from torch import Tensor, nn
+from torch.utils.checkpoint import checkpoint
 
 from models.iris.vnext.scene_core_v1 import IRISVNextSceneCoreV1
 from .semantic_geometry_prior import (
@@ -130,6 +131,7 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
         schema: RSSvNextSemanticRoleSchema,
         layer: RSSvNextSemanticLayerSpec,
         field_policy: str,
+        high_resolution_training: bool = False,
     ) -> RSSvNextFlexiCubesSurfaceEvidence:
         """Surface evidence from existing Z/H, with no teacher geometry inputs.
 
@@ -149,9 +151,18 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
             raise ValueError("RSS_VNEXT_FC_SHARED_SCENE_INVALID")
         if not hasattr(extractor, "construct_iris_grid") or not hasattr(extractor, "extract"):
             raise ValueError("RSS_VNEXT_FC_PINNED_ADAPTER_INTERFACE_REQUIRED")
+        if type(high_resolution_training) is not bool:
+            raise ValueError("RSS_VNEXT_FC_HIGHRES_TRAIN_PROFILE_TYPE")
+        if high_resolution_training and (
+            not self.training or self.inference_resolution is None
+        ):
+            raise ValueError("RSS_VNEXT_FC_HIGHRES_TRAIN_PROFILE_INVALID")
         resolution = (
-            self.resolution if self.training or self.inference_resolution is None
-            else self.inference_resolution
+            self.inference_resolution
+            if high_resolution_training or (
+                not self.training and self.inference_resolution is not None
+            )
+            else self.resolution
         )
         product_highres = isinstance(resolution, tuple)
         cube_budget = self.inference_max_cubes if product_highres else self.max_cubes
@@ -175,12 +186,21 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
             # Product-only: query the exact same learned H(x) in bounded slabs.
             # Never create a 1.5M x 384 local-feature tensor in memory.
             field_chunks, role_chunks, delta_chunks = [], [], []
+            def field_and_semantic(points: Tensor):
+                out = self.iris.query(scene_triplanes, points)
+                return out["field"], role_head(out["H"]), out["extraction_delta"]
+
             for first in range(0, len(grid), self.field_query_chunk):
                 point_chunk = grid_xyz[:, first:first + self.field_query_chunk]
-                out = self.iris.query(scene_triplanes, point_chunk)
-                field_chunks.append(out["field"])
-                role_chunks.append(role_head(out["H"]))
-                delta_chunks.append(out["extraction_delta"])
+                if high_resolution_training and torch.is_grad_enabled():
+                    f, roles, delta = checkpoint(
+                        field_and_semantic, point_chunk, use_reentrant=False,
+                    )
+                else:
+                    f, roles, delta = field_and_semantic(point_chunk)
+                field_chunks.append(f)
+                role_chunks.append(roles)
+                delta_chunks.append(delta)
             field = torch.cat(field_chunks, dim=1)
             role_logits = torch.cat(role_chunks, dim=1)
             grid_delta = torch.cat(delta_chunks, dim=1)[0]
@@ -225,10 +245,18 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
             for start in range(0, active_ids.numel(), self.cube_query_chunk):
                 ids = active_ids[start:start + self.cube_query_chunk]
                 corner_points = grid_xyz[:, cubes[ids].reshape(-1)]
-                corner_h = self.iris.query(
-                    scene_triplanes, corner_points,
-                )["H"].reshape(1, ids.numel(), 8, -1)
-                predicted = self.iris.cube_extraction(corner_h)[0]
+                def cube_head(points: Tensor):
+                    corner_h = self.iris.query(
+                        scene_triplanes, points,
+                    )["H"].reshape(1, ids.numel(), 8, -1)
+                    return self.iris.cube_extraction(corner_h)[0]
+
+                if high_resolution_training and torch.is_grad_enabled():
+                    predicted = checkpoint(
+                        cube_head, corner_points, use_reentrant=False,
+                    )
+                else:
+                    predicted = cube_head(corner_points)
                 raw[ids] = predicted
             raw_for_operator = raw
         else:
@@ -254,12 +282,15 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
         if product_highres:
             local_chunks = []
             for start in range(0, len(extracted_xyz), self.surface_query_chunk):
-                local_chunks.append(
-                    self.iris.query(
-                        scene_triplanes,
-                        extracted_xyz[None, start:start + self.surface_query_chunk],
-                    )["H"]
-                )
+                points = extracted_xyz[None, start:start + self.surface_query_chunk]
+                if high_resolution_training and torch.is_grad_enabled():
+                    part = checkpoint(
+                        lambda xyz: self.iris.query(scene_triplanes, xyz)["H"],
+                        points, use_reentrant=False,
+                    )
+                else:
+                    part = self.iris.query(scene_triplanes, points)["H"]
+                local_chunks.append(part)
             local = torch.cat(local_chunks, dim=1)
         else:
             local = self.iris.query(scene_triplanes, extracted_xyz[None])["H"]

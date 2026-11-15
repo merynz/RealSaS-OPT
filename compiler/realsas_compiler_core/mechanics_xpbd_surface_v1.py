@@ -425,7 +425,15 @@ def _distance_pair(pos: dict[str,np.ndarray], a: str,b: str,
     n=d/length
     wa,wb=inv_mass[a],inv_mass[b]
     alpha=compliance/(h*h)
-    dl=-(length-rest+alpha*lam)/(wa+wb+alpha)
+    denominator=wa+wb+alpha
+    if denominator<=1e-18:
+        # Two fixed vertices with zero compliance have no movable DOF.
+        # If they already satisfy their constraint, it is a no-op;
+        # otherwise this frame's authored pins are geometrically incompatible.
+        if abs(length-rest)>1e-8:
+            raise QualificationError("XPBD_SURFACE_FIXED_CONSTRAINT_CONFLICT")
+        return lam
+    dl=-(length-rest+alpha*lam)/denominator
     pos[a]=pos[a]+wa*dl*n
     pos[b]=pos[b]-wb*dl*n
     return lam+dl
@@ -450,6 +458,8 @@ def _triangle_xpbd(
     den=sum(inv_mass[j]*float(g@g) for j,g in zip(face,grads))
     alpha=compliance/(h*h)
     if den+alpha<=1e-18:
+        if abs(area-rest)>1e-8:
+            raise QualificationError("XPBD_SURFACE_FIXED_AREA_CONFLICT")
         return lam
     dl=-(area-rest+alpha*lam)/(den+alpha)
     for jid,g in zip(face,grads):

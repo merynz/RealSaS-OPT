@@ -19,6 +19,7 @@ from compiler.realsas_compiler_core.mechanics_xpbd_surface_v1 import (
     prepare_declared_xpbd_surface_domain_v1,
     requalify_declared_xpbd_surface_domain_v1,
     step_declared_xpbd_surface_v1, xpbd_surface_state_from_dict_v1,
+    _distance_pair,
 )
 from compiler.realsas_compiler_core.mechanics_xpbd_secondary_v1 import (
     XPBDPlaneColliderV1, XPBDSphereColliderV1,
@@ -232,3 +233,14 @@ def test_surface_policy_and_state_fail_closed():
             XPBDPlaneColliderV1("x",(0.,0.,0.),(0.,1.,0.)),
             XPBDPlaneColliderV1("x",(0.,0.,0.),(0.,1.,0.)),
         )),primary)
+
+
+def test_two_fixed_particles_do_not_divide_by_zero_or_fake_compliant_motion():
+    positions={"a":np.array((0.,0.,0.)), "b":np.array((1.,0.,0.))}
+    inverse={"a":0., "b":0.}
+    assert _distance_pair(positions,"a","b",1.,0.,0.,1./120.,inverse)==0.
+    assert np.array_equal(positions["a"],(0.,0.,0.))
+    assert np.array_equal(positions["b"],(1.,0.,0.))
+    positions["b"]=np.array((1.1,0.,0.))
+    with pytest.raises(QualificationError,match="FIXED_CONSTRAINT_CONFLICT"):
+        _distance_pair(positions,"a","b",1.,0.,0.,1./120.,inverse)

@@ -711,5 +711,295 @@
     "UNTRAINED_OUTPUT": "No independently qualified active objective and acceptance proof verified"
   },
   "audit_resolve": "Structural objective and eligibility fields are exact names from training_phase_contract_v1.LOSS_FIELDS, checked by AST regression.",
-  "stage_a_stage_b_mainline_binding": "PR #576 merged to main at bc354369d1446ce8402292dd9fb9bfc21e9f09d6; source-rendered synthetic regression path verified by GitHub CI, real source corpus/GPU remain unverified"
+  "stage_a_stage_b_mainline_binding": "PR #576 merged to main at bc354369d1446ce8402292dd9fb9bfc21e9f09d6; source-rendered synthetic regression path verified by GitHub CI, real source corpus/GPU remain unverified",
+  "model_head_catalog": [
+    {
+      "module": "vision",
+      "output": "Original image tokens and patch coordinates (2 source images)",
+      "losses": "NO TRAINABLE LOSS: frozen DINO features",
+      "state": "FROZEN_CONDITIONING",
+      "connection": "Only original source RGBA; source-camera authority unknown until separately calibrated; product input patch-size 14 vs image_size 512 unresolved"
+    },
+    {
+      "module": "early_semantics",
+      "output": "source_patch_logits, source_evidence_uncertainty and early conditioned image tokens",
+      "losses": "source_semantics, semantic_risk; downstream H(x)",
+      "state": "DIRECT_AND_INDIRECT",
+      "connection": "Two original patch anchors; independently qualified per-axis patch masks; does not create 3D drawable labels"
+    },
+    {
+      "module": "iris.view_bank",
+      "output": "Camera-aware generated image features; original camera-free source bank",
+      "losses": "SLRM renderer and all downstream experts via single H(x)",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Generated virtual view cameras are never original measured cameras"
+    },
+    {
+      "module": "iris.scene",
+      "output": "Shared scene triplane features (single persistent H(x))",
+      "losses": "SLRM RGB/alpha/semantic, signed field, FC, TESSA/AXIS/MIRA consequences",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "One carrier for Geometry/Semantic/Graphics and Mechanics; not three independently predicted scenes"
+    },
+    {
+      "module": "iris.field.field_head",
+      "output": "field (signed-solid hypothesis and FC extraction field)",
+      "losses": "source_signed_sdf; S-LRM Stage3 and flexicubes_surface",
+      "state": "DIRECT_AND_INDIRECT",
+      "connection": "Closed-solid source signed distance required; open/UDF cannot supply global sign"
+    },
+    {
+      "module": "iris.field.uncertainty_head",
+      "output": "geometry.log_uncertainty",
+      "losses": "NO INDEPENDENT VERIFIED SOURCE CALIBRATION LOSS",
+      "state": "NO_SOURCE_LOSS_VERIFIED",
+      "connection": "Do not call uncertainty calibrated from the presence of this output"
+    },
+    {
+      "module": "iris.field.delta_head",
+      "output": "geometry.extraction_delta (bounded grid deformation)",
+      "losses": "flexicubes_surface, SLRM Stage3 normal/depth via differentiable FC",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Continuous deformation only; not a reindex of canonical TESSA faces"
+    },
+    {
+      "module": "iris.cube_extraction",
+      "output": "21 FP32 FlexiCubes beta12/alpha8/gamma1 raw extraction parameters",
+      "losses": "flexicubes_surface; SLRM Stage3 raster through pinned FC operator",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "No direct 21-vector source label; preserve pinned Nvidia operator and same signed field"
+    },
+    {
+      "module": "normal_condition_proj",
+      "output": "Generated six normal-image tokens feed canonical scene",
+      "losses": "SLRM stages/geometry/semantic as downstream H(x)",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "No direct normal-token regression; input normal maps generated and checkpoint pinned"
+    },
+    {
+      "module": "semantic_evidence_to_memory",
+      "output": "Projected early semantic evidence in TESSA memory",
+      "losses": "topology and downstream mesh/control losses",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Source patch labels not 3D part/drawable identities"
+    },
+    {
+      "module": "presentation_role_head",
+      "output": "3D semantic presentation roles and per-voxel probabilities",
+      "losses": "surface_roles; S-LRM semantic_ce; realsas_joint_slrm",
+      "state": "DIRECT_AND_INDIRECT",
+      "connection": "Source qualified 3D semantic layer render; unknown/occluded separately masked"
+    },
+    {
+      "module": "presentation_roles_to_memory",
+      "output": "Presentation role evidence in structural memory",
+      "losses": "TESSA topology and downstream mesh/AXIS objectives",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Only contextual semantic evidence, not final Graphics draw order"
+    },
+    {
+      "module": "udf",
+      "output": "Nonnegative unsigned distance at H(x)",
+      "losses": "source_udf",
+      "state": "DIRECT_QUALIFIED_LOSS",
+      "connection": "Surface-distance teacher permitted on open/unknown meshes"
+    },
+    {
+      "module": "sign_logit",
+      "output": "Occupancy/inside sign logit at H(x)",
+      "losses": "source_inside_sign",
+      "state": "DIRECT_QUALIFIED_LOSS",
+      "connection": "Only exact closed solid/assembly signs; open UDF does not grant sign"
+    },
+    {
+      "module": "semantic",
+      "output": "Region-slot logits plus UNKNOWN",
+      "losses": "region_pairs; typed_relations",
+      "state": "DIRECT_QUALIFIED_LOSS",
+      "connection": "Region co-membership distinct from edit drawable and directed attachment"
+    },
+    {
+      "module": "semantic_structure",
+      "output": "Region memberships, relation logit graph, relation valid masks and tokens",
+      "losses": "region_pairs; typed_relations; downstream topology/AXIS",
+      "state": "DIRECT_AND_INDIRECT",
+      "connection": "Typed channel proofs from independent edit/cut/motion/source"
+    },
+    {
+      "module": "semantic_to_memory",
+      "output": "Semantic region logits projected into TESSA memory",
+      "losses": "topology; AXIS downstream",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Do not allow semantic head to create a separate unbound geometry scene"
+    },
+    {
+      "module": "region_graph_to_memory",
+      "output": "Incoming/outgoing typed relation context for same H(x)",
+      "losses": "topology; axis_rig_skin_codes and pose",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Directed edge semantics are source-qualified; not inferred from anonymous parts"
+    },
+    {
+      "module": "affordance",
+      "output": "Deformation/region affordance logits plus UNKNOWN",
+      "losses": "Downstream topology/AXIS only; NO INDEPENDENT AFFORDANCE LABEL VERIFIED",
+      "state": "NO_SOURCE_DIRECT_LOSS_VERIFIED",
+      "connection": "Body and appendage class priors must not become universal human bone template"
+    },
+    {
+      "module": "articulation_prior",
+      "output": "Mechanics-aware structural memory features",
+      "losses": "topology and AXIS supervision indirectly",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "No second rig representation; native source motion needed for quality"
+    },
+    {
+      "module": "graphics",
+      "output": "At H(x): RGB additive logits, density logit, appearance uncertainty channel",
+      "losses": "graphics_source_rgb; S-LRM rgb/alpha/lpips; realsas_joint_slrm",
+      "state": "PARTIALLY_DIRECT",
+      "connection": "Source RGB alone does not supervise density/alpha/hidden appearance; ray renderer couples density and semantic"
+    },
+    {
+      "module": "presentation",
+      "output": "Presentation-context embeddings for TESSA memory",
+      "losses": "topology and mesh/AXIS downstream",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Not independent source-final RGB; Graphics pixel authority remains in runtime"
+    },
+    {
+      "module": "graphics_to_memory",
+      "output": "Graphics features entering TESSA presentation memory",
+      "losses": "topology downstream; source ray losses via H(x)",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Appearance evidence must not override mesh identity"
+    },
+    {
+      "module": "surface_refine",
+      "output": "Continuous rest XYZ proposal on same H(x) query address",
+      "losses": "tessa_iris_surface_alignment; indirect motion posed consequence",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Continuous rest correction does not mint new face topology"
+    },
+    {
+      "module": "deformation_quality",
+      "output": "structural_quality_logits [4]",
+      "losses": "NO INDEPENDENT SOURCE QUALITY LABEL VERIFIED",
+      "state": "NO_SOURCE_LOSS_VERIFIED",
+      "connection": "Explicitly keep out of ProductProof release until physical quality classification exists"
+    },
+    {
+      "module": "relation",
+      "output": "pair-specific _relation_logits at model forward",
+      "losses": "NO MATCHED SOURCE LOSS IN ACTIVE STRUCTURAL TRAINER VERIFIED",
+      "state": "NO_SOURCE_LOSS_VERIFIED",
+      "connection": "Different from semantic_structure.region_relation_logits consumed by typed_relations"
+    },
+    {
+      "module": "aux_views",
+      "output": "Experimental auxiliary view latents and uncertainty",
+      "losses": "novel_view experimental and downstream structural memory",
+      "state": "RESEARCH_ONLY",
+      "connection": "Not to be run in parallel with product two-stage generated six-view diffusion"
+    },
+    {
+      "module": "tessa",
+      "output": "Structural scene/surface/presentation memory and canonical indexed topology token logits",
+      "losses": "topology, motion_preference, tessa_iris_surface_alignment",
+      "state": "DIRECT_AND_INDIRECT",
+      "connection": "Control mesh face incidence and token budget separate from high-resolution FC surface"
+    },
+    {
+      "module": "control_cross",
+      "output": "TESSA + H(x)/face vertex + relation memory for AXIS",
+      "losses": "axis_rig_skin_codes, axis_posed_surface, anchor_face_correspondence",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Same source mesh address and joint order used for free and teacher-forced execution"
+    },
+    {
+      "module": "mesh_face_to_control",
+      "output": "Every indexed TESSA face geometry/context token",
+      "losses": "axis_rig_skin_codes, source posed consequence",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Not a pooled point-only avatar rig; exact face identity preserved"
+    },
+    {
+      "module": "axis",
+      "output": "Causal rig token kinds, joint frame/position, constraints, FSQ skin-code logits",
+      "losses": "axis_rig_skin_codes, axis_posed_surface, anchor_face_correspondence",
+      "state": "DIRECT_AND_INDIRECT",
+      "connection": "Real source hierarchy, interventions, AXIS causal token grammar, frozen MIRA codec"
+    },
+    {
+      "module": "anchor_face_correspondence",
+      "output": "Held/HOLDER/negative directed TESSA face associations",
+      "losses": "anchor_face_correspondence",
+      "state": "DIRECT_QUALIFIED_LOSS",
+      "connection": "Source-native socket/control/face labels; unknown face is masked"
+    },
+    {
+      "module": "mira.codec",
+      "output": "Source skin FSQ latent encoder/decoder and hard replay",
+      "losses": "reconstruction_loss, quantization_loss, source_area_skin_loss, source_pose_deformation_loss",
+      "state": "DIRECT_QUALIFIED_LOSS",
+      "connection": "Codec-first source native skin training; hard ID exact decoder parity, then freeze"
+    },
+    {
+      "module": "mira.spatial_decoder",
+      "output": "Vertex H(x)/XYZ/normal-to-joint decoded influence weights",
+      "losses": "MIRA source skin codec + axis_posed_surface",
+      "state": "DIRECT_AND_INDIRECT",
+      "connection": "Point-query mode or dot mode selected once per product; no unrelated second decoder"
+    },
+    {
+      "module": "mesh_bridge",
+      "output": "Animation-ready TESSA mesh, vertices/faces/normals/local H",
+      "losses": "topology, TESSA/IRIS alignment, source pose/skin downstream",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Persistent TESSA canonical mechanical topology is final control mesh authority"
+    },
+    {
+      "module": "fc_surface_bridge",
+      "output": "IRIS signed field -> FC differentiable surface witness / semantic role logits",
+      "losses": "flexicubes_surface, flexicubes_animation, S-LRM Stage3 mesh render",
+      "state": "DIRECT_AND_INDIRECT",
+      "connection": "Predicted FC mesh NOT replacement source teacher or canonical TESSA mesh; signed domain qualified"
+    },
+    {
+      "module": "fc_surface_position",
+      "output": "Surface vertex XYZ projection into TESSA memory",
+      "losses": "topology/AXIS downstream",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Same FC witness H and global surface addresses"
+    },
+    {
+      "module": "fc_surface_incidence",
+      "output": "FC surface local face incidence embeddings",
+      "losses": "topology/AXIS downstream",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Preserve triangles as structural evidence; no independent face supervision"
+    },
+    {
+      "module": "fc_face_geometry",
+      "output": "FC face geometric features for TESSA contextual decoding",
+      "losses": "topology/AXIS downstream",
+      "state": "INDIRECT_QUALIFIED_GRADIENT",
+      "connection": "Same FC surface and signed hypothesis"
+    },
+    {
+      "module": "constructed_view_renderer",
+      "output": "Experimental ray-conditioned RGB/normal view images",
+      "losses": "graphics_source_rgb; novel_view",
+      "state": "EXPERIMENTAL_PARTIAL",
+      "connection": "Post-scene experimental renderer distinct from product Stage A/B multiview diffusion"
+    },
+    {
+      "module": "dynamic_refine",
+      "output": "Source-qualified corrected rest vertices, skin weights and a quality head",
+      "losses": "axis_dynamic_posed_surface; quality head NO source label",
+      "state": "PARTIALLY_DIRECT",
+      "connection": "Continuous geometry and skin share TESSA/AXIS/MIRA identity, no new topology; do not mark quality head trained"
+    }
+  ],
+  "model_head_catalog_scope": "Named expert outputs and important context bridges from RSSvNextUnifiedCharacterModel.__init__ + forward. Trainable output existence is NOT a qualified teacher nor an unseen product certificate."
 }

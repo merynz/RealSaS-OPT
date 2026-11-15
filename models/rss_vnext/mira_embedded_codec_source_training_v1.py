@@ -94,6 +94,7 @@ class RSSvNextEmbeddedMIRACodecResultV1:
     sparse_nonzero_influence_error: float | None = None
     source_area_skin_loss: Tensor | None = None
     source_area_skin_simplex_kl_loss: Tensor | None = None
+    source_sparse_balanced_influence_loss: Tensor | None = None
     qualified_source_area_faces: int = 0
     qualified_source_surface_area: float = 0.
     gradient_interference_report: dict | None = None
@@ -134,6 +135,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         trusted_source_area_registry: Mapping[str, Mapping[str, Any]] | None = None,
         source_area_skin_weight: float = 0.,
         source_area_skin_simplex_kl_weight: float = 0.,
+        source_sparse_influence_weight: float = 0.,
         gradient_court_policy: RSSvNextGradientCourtPolicyV1 = RSSvNextGradientCourtPolicyV1(),
     ):
         if (
@@ -171,6 +173,12 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or source_area_skin_simplex_kl_weight<0
         ):
             raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_AREA_KL_POLICY")
+        if (
+            type(source_sparse_influence_weight) not in (float,int)
+            or not __import__("math").isfinite(source_sparse_influence_weight)
+            or source_sparse_influence_weight<0
+        ):
+            raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_SOURCE_SPARSE_POLICY")
         # Only the deployed decoder and its FSQ encoder are trainable.
         # Point-query mode does NOT optimize a disconnected dot-product
         # decoder; dot mode does NOT train the unused spatial decoder.
@@ -233,6 +241,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         self.area_registry_sha256=_digest_json(area_snapshot)
         self.source_area_skin_weight=float(source_area_skin_weight)
         self.source_area_skin_simplex_kl_weight=float(source_area_skin_simplex_kl_weight)
+        self.source_sparse_influence_weight=float(source_sparse_influence_weight)
         self.gradient_court_policy=gradient_court_policy
         self.config_sha256 = architecture_digest(model.cfg)
         # Codec-first uses a stationary upstream scene/mesh/causal-JOINT
@@ -263,6 +272,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             "pose_consequence_weight": self.pose_consequence_weight,
             "source_area_skin_weight": self.source_area_skin_weight,
             "source_area_skin_simplex_kl_weight": self.source_area_skin_simplex_kl_weight,
+            "source_sparse_influence_weight": self.source_sparse_influence_weight,
             "gradient_court_policy": asdict(self.gradient_court_policy),
             "source_surface_pooling_abi": MIRA_SOURCE_SURFACE_POOLING_ABI,
             "frozen_upstream_state_sha256": self.frozen_upstream_state_sha256,
@@ -700,6 +710,23 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
                 )
             if hard_pose_discrepancy>1.e-5:
                 raise RuntimeError("RSS_VNEXT_EMBEDDED_MIRA_POSE_TOKEN_REPLAY_DRIFT")
+        # UniRig-style independent zero/nonzero influence balancing.
+        # Only independently admitted dense source skin supplies the target.
+        # The group means prevent the many true-zero channels from
+        # overwhelming tiny but mechanically important nonzero influences.
+        sparse_loss=None
+        if self.source_sparse_influence_weight>0:
+            live_error=(fit["reconstructed_weights"]-weights).abs()
+            sparse_zero=weights<1.e-5
+            sparse_nonzero=~sparse_zero
+            groups=[]
+            if bool(sparse_zero.any()):
+                groups.append(live_error[sparse_zero].mean())
+            if bool(sparse_nonzero.any()):
+                groups.append(live_error[sparse_nonzero].mean())
+            if not groups:
+                raise ValueError("RSS_VNEXT_EMBEDDED_MIRA_NO_QUALIFIED_INFLUENCE")
+            sparse_loss=torch.stack(groups).mean()
         with torch.no_grad():
             error=(fit["reconstructed_weights"].detach()-weights).abs()
             zero=weights<1.e-5
@@ -716,6 +743,9 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             ) + (
                 self.source_area_skin_simplex_kl_weight*source_area_simplex_kl_loss
                 if source_area_simplex_kl_loss is not None else 0.
+            ) + (
+                self.source_sparse_influence_weight*sparse_loss
+                if sparse_loss is not None else 0.
             ),reconstruction_loss=fit["reconstruction_loss"],
             quantization_loss=fit["quantization_loss"],token_ids=fit["token_ids"],
             mesh_address_digest=digest,
@@ -725,6 +755,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             hard_token_pose_replay_max_abs_error=hard_pose_discrepancy,
             sparse_zero_influence_error=zero_error,
             sparse_nonzero_influence_error=nonzero_error,
+            source_sparse_balanced_influence_loss=sparse_loss,
             source_area_skin_loss=source_area_loss,
             source_area_skin_simplex_kl_loss=source_area_simplex_kl_loss,
             qualified_source_area_faces=area_faces,
@@ -756,6 +787,11 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             families["source_area_skin_simplex_kl"]=(
                 result.source_area_skin_simplex_kl_loss,
                 self.source_area_skin_simplex_kl_weight,
+            )
+        if result.source_sparse_balanced_influence_loss is not None:
+            families["source_sparse_balanced_influence"]=(
+                result.source_sparse_balanced_influence_loss,
+                self.source_sparse_influence_weight,
             )
         report=audit_rss_vnext_gradient_interference_v1(
             named_parameters=tuple(
@@ -840,6 +876,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             "area_registry_sha256":self.area_registry_sha256,
             "source_area_skin_weight":self.source_area_skin_weight,
             "source_area_skin_simplex_kl_weight":self.source_area_skin_simplex_kl_weight,
+            "source_sparse_influence_weight":self.source_sparse_influence_weight,
             "gradient_court_policy":asdict(self.gradient_court_policy),
             "model_config_sha256":self.config_sha256,
             "codec_source_encoder_pooling_abi":MIRA_SOURCE_SURFACE_POOLING_ABI,
@@ -882,6 +919,7 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
             or payload.get("area_registry_sha256")!=self.area_registry_sha256
             or payload.get("source_area_skin_weight")!=self.source_area_skin_weight
             or payload.get("source_area_skin_simplex_kl_weight")!=self.source_area_skin_simplex_kl_weight
+            or payload.get("source_sparse_influence_weight",0.)!=self.source_sparse_influence_weight
             or payload.get("gradient_court_policy")!=asdict(self.gradient_court_policy)
             or payload.get("model_config_sha256")!=self.config_sha256
             or payload.get("codec_source_encoder_pooling_abi")!=MIRA_SOURCE_SURFACE_POOLING_ABI

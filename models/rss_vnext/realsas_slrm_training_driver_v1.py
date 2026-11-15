@@ -84,6 +84,9 @@ class RealSaSSLRMBatchV1:
     keep_roles: Tensor          # [B,R,K]
     source_3d_render_target: RealSaSJointTargetV1
     admitted_3d_render_key: str
+    # The two real user/source images condition H(x) WITHOUT calibrated
+    # cameras. This is independent of the optional camera-qualified ray teacher.
+    original_source_rgba: Tensor | None = None
     stage3_flexicubes_extractor: object | None = None
     stage3_high_resolution_training: bool = False
     stage3_semantic_layer: object | None = None
@@ -132,7 +135,7 @@ class RealSaSSLRMTrainerV1:
     each minibatch. It binds original source, generated input, cameras,
     camera rays, peeled role mask, RGB, alpha and semantic GT.
     """
-    schema="RealSaS.RSSvNext.RealSaSSLRMTrainer.v5"
+    schema="RealSaS.RSSvNext.RealSaSSLRMTrainer.v6"
 
     def __init__(
         self, model: RSSvNextUnifiedCharacterModel, optimizer: torch.optim.Optimizer,
@@ -154,6 +157,12 @@ class RealSaSSLRMTrainerV1:
         if clip_gradient_norm<=0:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_GRAD_CLIP_INVALID")
         self.model=model;self.optimizer=optimizer;self.weights=weights
+        # Same architecture identity as the structural trainer. An S-LRM
+        # checkpoint with the same tensor SHAPES but different semantics may
+        # not be silently resumed.
+        from .training_engine import architecture_digest
+        self.architecture_id=model.architecture_id
+        self.architecture_sha256=architecture_digest(model.cfg)
         self.optimizer_ownership=qualify_rss_vnext_optimizer_ownership_v1(
             self.model,self.optimizer,
         )
@@ -224,6 +233,32 @@ class RealSaSSLRMTrainerV1:
             ))
         ):
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_SIX_VIEW_BASELINE_VS_ONE_VIEW_ABLATION")
+        # Independently admitted 3D renders are supervision; ORIGINAL two
+        # images are camera-free conditioning, and never require a 3D ray
+        # calibration receipt. This separation is required for product input.
+        original_rgba = batch.original_source_rgba
+        paired_source = (
+            self.input_profile == REALSAS_SIX_VIEW_TRAINING_PROFILE
+            and batch.original_observed_view_count == 2
+        )
+        if paired_source:
+            if (
+                not isinstance(original_rgba, Tensor)
+                or original_rgba.ndim != 5
+                or original_rgba.shape[0] != batch.conditioning_rgba.shape[0]
+                or original_rgba.shape[1:3] != (2, 4)
+                or original_rgba.dtype != batch.conditioning_rgba.dtype
+                or original_rgba.device != batch.conditioning_rgba.device
+                or min(original_rgba.shape[-2:]) < 8
+                or max(original_rgba.shape[-2:]) > 2048
+                or not bool(torch.isfinite(original_rgba).all())
+                or bool(((original_rgba < 0) | (original_rgba > 1)).any())
+            ):
+                raise ValueError("RSS_VNEXT_SLRM_TWO_CAMERA_FREE_SOURCE_PIXELS_REQUIRED")
+        elif original_rgba is not None:
+            raise ValueError("RSS_VNEXT_SLRM_ORIGINAL_PIXEL_PROFILE_DRIFT")
+        if batch.original_observed_view_count == 2 and not paired_source:
+            raise ValueError("RSS_VNEXT_SLRM_TWO_ORIGINALS_REQUIRE_SIX_VIEW_PROFILE")
         # Six generated RGB views without their normal-map partner are not
         # the joint RGB+normal construction prescribed for this product
         # profile. Omitting normals silently leaves normal_condition_proj
@@ -255,6 +290,8 @@ class RealSaSSLRMTrainerV1:
             "dataset_manifest_sha256":self.manifest_sha256,
             "original_source_binding_sha256":batch.source_binding_sha256,
             "original_observed_view_count":batch.original_observed_view_count,
+            **({"original_source_rgba_sha256":_digest(original_rgba)}
+               if paired_source else {}),
             "conditioning_authority":batch.conditioning_authority,
             "conditioning_checkpoint_sha256":batch.generating_checkpoint_sha256,
             "conditioning_rgba_sha256":_digest(batch.conditioning_rgba),
@@ -368,6 +405,13 @@ class RealSaSSLRMTrainerV1:
         if t.generated_completion_used_as_truth:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_GENERATED_TEACHER_FORBIDDEN")
         source=batch.source_observed_rays
+        # A calibrated source-ray teacher may exist as an ADDITIONAL loss.
+        # Its original pixels must match the camera-free source tokens byte
+        # for byte, never a different pair with a valid camera receipt.
+        if paired_source and source is not None and not torch.equal(
+            original_rgba.detach(), source.original_linear_rgba.detach(),
+        ):
+            raise ValueError("RSS_VNEXT_SLRM_SOURCE_PIXEL_IDENTITY_DRIFT")
         key=batch.source_observed_admission_key
         source_enabled=(
             self.weights.observed_source_rgb>0 or
@@ -423,9 +467,9 @@ class RealSaSSLRMTrainerV1:
             batch.conditioning_authority == SIX_VIEW_PRIOR
             and batch.original_observed_view_count == 2
         ):
-            if batch.source_observed_rays is None:
+            if batch.original_source_rgba is None:
                 raise ValueError("RSS_VNEXT_SLRM_TWO_ORIGINAL_PIXELS_REQUIRED_FOR_H")
-            raw_source = batch.source_observed_rays.original_linear_rgba.detach()
+            raw_source = batch.original_source_rgba.detach()
             _, original_xy, original_early = (
                 self.model._observed_pixel_tokens_without_camera(raw_source)
             )
@@ -643,6 +687,8 @@ class RealSaSSLRMTrainerV1:
         filename=Path(path);filename.parent.mkdir(parents=True,exist_ok=True)
         payload={
             "schema":self.schema,"dataset_manifest_sha256":self.manifest_sha256,
+            "architecture_id":self.architecture_id,
+            "architecture_digest":self.architecture_sha256,
             "teacher_registry_sha256":self.registry_sha256,
             "original_source_registry_sha256":self.original_observed_ray_registry_sha256,
             "objective_policy_sha256":self.policy_sha256,
@@ -653,6 +699,7 @@ class RealSaSSLRMTrainerV1:
             "model":self.model.state_dict(),
             "optimizer":self.optimizer.state_dict(),
             "torch_cpu_rng":torch.get_rng_state(),
+            "torch_cuda_rng":torch.cuda.get_rng_state_all() if torch.cuda.is_available() else [],
         }
         with tempfile.NamedTemporaryFile(dir=filename.parent,prefix="slrm-",suffix=".pt",delete=False) as f:
             tmp=Path(f.name)
@@ -667,6 +714,11 @@ class RealSaSSLRMTrainerV1:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_SCHEMA")
         if data.get("dataset_manifest_sha256")!=self.manifest_sha256:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_CORPUS_DRIFT")
+        if (
+            data.get("architecture_id")!=self.architecture_id
+            or data.get("architecture_digest")!=self.architecture_sha256
+        ):
+            raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_ARCHITECTURE_DRIFT")
         if data.get("teacher_registry_sha256")!=self.registry_sha256:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_CHECKPOINT_RENDER_TRUTH_DRIFT")
         if data.get("original_source_registry_sha256")!=self.original_observed_ray_registry_sha256:
@@ -685,6 +737,8 @@ class RealSaSSLRMTrainerV1:
         self.optimizer.load_state_dict(data["optimizer"])
         self.global_step=int(data["global_step"])
         torch.set_rng_state(data["torch_cpu_rng"])
+        if torch.cuda.is_available() and data.get("torch_cuda_rng"):
+            torch.cuda.set_rng_state_all(data["torch_cuda_rng"])
         return int(data["sampler_cursor"])
 
 

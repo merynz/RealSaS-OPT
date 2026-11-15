@@ -77,9 +77,9 @@ def _license_allowed(row):
         or not _digest(proof)
         or attribution is not None and not _digest(attribution)):
         raise ValueError("RSS_VNEXT_COVERAGE_LICENSE_RECEIPT_INVALID")
-    allowed=(ident in ("CC0-1.0","MIT")
-             or ident.startswith("CC-BY-"))
-    if ident.startswith("CC-BY-") and not _digest(attribution):
+    cc_by=ident in ("CC-BY-1.0","CC-BY-2.0","CC-BY-2.5","CC-BY-3.0","CC-BY-4.0")
+    allowed=(ident in ("CC0-1.0","MIT") or cc_by)
+    if cc_by and not _digest(attribution):
         return False,"MISSING_CC_BY_ATTRIBUTION_RECEIPT"
     if noai:
         return False,"EXPLICIT_NOAI"

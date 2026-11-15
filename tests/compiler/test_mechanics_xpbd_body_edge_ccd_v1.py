@@ -144,9 +144,12 @@ def test_direct_edge_ccd_rejects_stale_bvh_and_candidate_budget():
             (("a","b",2.),),mass,(collider,),
             max_candidates=10,project=False,prepared_bvh=bvh,
         )
+    # Verify the budget on the PRE-solve swept crossing, not on the
+    # already separated output returned by _direct_edge_solver.
+    crossing={k:v(x[0],x[1],-.3) for k,x in now.items()}
     with pytest.raises(QualificationError,match="CANDIDATE_BOUND"):
         resolve_xpbd_body_mesh_edge_contact_v1(
-            now,before,start,end,(("a","b",2.),),mass,(collider,),
+            crossing,before,start,end,(("a","b",2.),),mass,(collider,),
             max_candidates=1,project=False,prepared_bvh=bvh,
         )
 

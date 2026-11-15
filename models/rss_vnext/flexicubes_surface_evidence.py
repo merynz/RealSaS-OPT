@@ -276,7 +276,7 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
             layer_name=layer.name,
         )
         result.validate(
-            carrier_dim=self.iris.cfg.local_feature_dim,
+            carrier_dim=local.shape[-1],
             role_count=schema.count,
         )
         return result

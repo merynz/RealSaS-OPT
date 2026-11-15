@@ -161,7 +161,23 @@ def run_two_view_to_compiler_proposal_v1(
         model.cfg.tessa_surface_requirement == "REQUIRE_SIGNED_IRIS_SURFACE"
         and flexicubes_extractor is None
     ):
-        raise ValueError("RSS_VNEXT_INFERENCE_PINNED_IRIS_SURFACE_REQUIRED")
+        # Use the exact pinned source operator already installed for product
+        # ShapeInference (not a new rasterizer or a second mesh generator).
+        from models.iris.vnext.flexicubes_v1 import PinnedFlexiCubesV1
+        source_root = os.environ.get("REALSAS_FLEXICUBES_ROOT", "").strip()
+        deploy_root = os.environ.get("REALSAS_DEPLOY_ROOT", "").strip()
+        if source_root:
+            pinned_root = Path(source_root).expanduser().resolve()
+        elif deploy_root:
+            pinned_root = (
+                Path(deploy_root).expanduser().resolve()
+                / "foundations" / "flexicubes" / "source"
+            )
+        else:
+            raise ValueError("RSS_VNEXT_INFERENCE_PINNED_IRIS_SURFACE_REQUIRED")
+        flexicubes_extractor = PinnedFlexiCubesV1(
+            pinned_root, device=observed_rgba.device,
+        )
     if product_mode and bundle is None:
         raise RuntimeError("RSS_VNEXT_SHAPE_THREE_STAGE_BUNDLE_REQUIRED")
     generation = None

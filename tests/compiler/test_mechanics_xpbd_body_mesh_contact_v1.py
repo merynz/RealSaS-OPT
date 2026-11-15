@@ -23,6 +23,9 @@ from compiler.realsas_compiler_core.canonical_skin_ir_v2 import canonical_skin_l
 from compiler.realsas_compiler_core.mechanics_control_solver_v1 import (
     solve_control_pose_v1, deform_mesh_lbs_v1,
 )
+from compiler.realsas_compiler_core.mechanics_live_runtime_v1 import (
+    evaluate_mechanics_intervention_frame_v1,
+)
 from compiler.realsas_compiler_core.types import QualificationError
 from tests.compiler.test_mechanics_control_solver_v1 import _rig,_skin,_support
 from tests.compiler.test_mechanics_xpbd_surface_v1 import _parents,F0,F1
@@ -128,7 +131,7 @@ def test_body_selection_cannot_relabel_cloth_vertices_or_foreign_faces():
         )
 
 
-def _source():
+def _source(*, include_mechanics=False):
     cape,_,_,old_mechanics=_parents()
     vertices=list(cape.vertices)
     for i,xyz in enumerate(((-1.,-1.,.05),(2.,-1.,.05),(.5,2.,.05)),4):
@@ -168,7 +171,7 @@ def _source():
         ),
     )
     primary=deform_mesh_lbs_v1(m,rig,skin,solve_control_pose_v1(rig,()))
-    return m,domain,primary
+    return (m,domain,primary,rig,skin,mech) if include_mechanics else (m,domain,primary)
 
 
 def test_live_product_surface_consumes_canonical_body_addresses_and_json_replay():
@@ -277,3 +280,35 @@ def test_moving_body_linear_time_partition_preserves_physical_tick_state():
     assert one.state.metadata["kinematic_body_mesh_vertices"]==twice.state.metadata[
         "kinematic_body_mesh_vertices"
     ]
+
+
+def test_actual_live_mechanics_frame_consumes_mira_deformed_body_collider():
+    mesh,domain,primary,rig,skin,mechanics=_source(include_mechanics=True)
+    policy=XPBDSurfacePolicyV1(
+        domain_hash=domain.domain_hash,
+        body_mesh_colliders=(XPBDBodyMeshColliderV1(
+            "body",(FACE,),thickness=.01,
+        ),),
+        gravity_xyz=(0.,0.,0.),follow_compliance=1.,
+    )
+    first=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,
+        xpbd_surface_domain=domain,xpbd_surface_policy=policy,
+    )
+    assert first.status=="PASS_MECHANICS_BEHAVIORAL_COURT"
+    assert first.xpbd_surface_state is not None
+    assert first.xpbd_surface_state.metadata[
+        "kinematic_body_mesh_vertices"
+    ]==[[vid,list(primary.positions[i])] for i,vid in enumerate(
+        primary.canonical_mesh_vertex_ids
+    ) if vid in FACE]
+    second=evaluate_mechanics_intervention_frame_v1(
+        mesh,rig,skin,mechanics,
+        xpbd_surface_domain=domain,xpbd_surface_policy=policy,
+        xpbd_surface_previous_state=first.xpbd_surface_state,
+        xpbd_surface_dt_seconds=1./120.,
+    )
+    assert second.status=="PASS_MECHANICS_BEHAVIORAL_COURT"
+    assert second.metadata["xpbd_surface_status"]=="PASS_XPBD_SURFACE_RUNTIME"
+    assert second.xpbd_surface_state.ticks==1
+    assert second.deformation.canonical_mesh_vertex_ids==primary.canonical_mesh_vertex_ids

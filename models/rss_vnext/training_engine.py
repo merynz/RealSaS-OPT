@@ -123,6 +123,8 @@ class RSSvNextStructuralTrainingBatch:
     # closed-solid topology and negative-inside sign convention.
     source_udf_target: Tensor | None = None            # [B,Q] nonnegative
     source_udf_mask: Tensor | None = None              # [B,Q] bool
+    source_signed_sdf_target: Tensor | None = None
+    source_signed_sdf_mask: Tensor | None = None
     source_inside_sign_target: Tensor | None = None    # [B,Q] float 1=inside
     source_inside_sign_mask: Tensor | None = None      # [B,Q] bool
     source_field_admission_key: str = ""
@@ -187,6 +189,7 @@ class RSSvNextTrainingWeights:
     graphics_source_rgb: float = 0.0  # opt-in: qualified original visible rays
     source_udf: float = 0.0           # opt-in: source native unsigned distances
     source_inside_sign: float = 0.0   # opt-in: closed-solid signed occupancy
+    source_signed_sdf: float = 0.0    # opt-in: exact boundary + sign for qualified solid
     axis_rig_skin_codes: float = 0.0  # opt-in: source rig and MIRA-codec-bound FSQ teacher
     axis_posed_surface: float = 0.0  # opt-in: source motion consequence through TESSA+AXIS+MIRA
     anchor_face_correspondence: float = 0.0  # source-native directed face labels
@@ -211,7 +214,7 @@ class RSSvNextTrainingWeights:
             self.semantic_risk,
             self.surface_roles, self.region_pairs, self.typed_relations,
             self.graphics_source_rgb,
-            self.source_udf, self.source_inside_sign,
+            self.source_udf, self.source_inside_sign, self.source_signed_sdf,
             self.axis_rig_skin_codes, self.axis_posed_surface, self.anchor_face_correspondence, self.flexicubes_surface, self.flexicubes_animation,
             self.tessa_iris_surface_alignment,
             self.novel_view, self.realsas_joint_slrm,
@@ -221,6 +224,7 @@ class RSSvNextTrainingWeights:
             self.topology + self.motion_preference
             + self.source_semantics + self.semantic_risk + self.surface_roles + self.region_pairs
             + self.typed_relations + self.graphics_source_rgb + self.source_udf + self.source_inside_sign
+            + self.source_signed_sdf
             + self.axis_rig_skin_codes + self.axis_posed_surface + self.anchor_face_correspondence + self.flexicubes_surface
             + self.flexicubes_animation + self.novel_view
             + self.tessa_iris_surface_alignment
@@ -255,8 +259,10 @@ class RSSvNextTrainingResult:
     eligible_graphics_source_rgb_queries: int = 0
     source_udf_loss: Tensor | None = None
     source_inside_sign_loss: Tensor | None = None
+    source_signed_sdf_loss: Tensor | None = None
     eligible_source_udf_queries: int = 0
     eligible_source_inside_sign_queries: int = 0
+    eligible_source_signed_sdf_queries: int = 0
     axis_rig_skin_loss: Tensor | None = None
     axis_posed_surface_loss: Tensor | None = None
     eligible_axis_pose_count: int = 0
@@ -1248,11 +1254,14 @@ class RSSvNextStructuralTrainer:
         # closed-solid proof. Neither is made authoritative by a float label.
         source_udf_loss = None
         source_inside_sign_loss = None
+        source_signed_sdf_loss = None
         n_source_udf = 0
         n_source_inside_sign = 0
+        n_source_signed_sdf = 0
         field_items = (
             (batch.source_udf_target, batch.source_udf_mask),
             (batch.source_inside_sign_target, batch.source_inside_sign_mask),
+            (batch.source_signed_sdf_target, batch.source_signed_sdf_mask),
         )
         field_requested = bool(batch.source_field_admission_key) or any(
             target is not None or mask is not None
@@ -1291,16 +1300,31 @@ class RSSvNextStructuralTrainer:
                     source_surface_tensor_sha256(batch.source_inside_sign_mask)
                     if batch.source_inside_sign_mask is not None else None
                 )
-                or receipt.get("teacher_semantics") != "SOURCE_UDF_AND_OPTIONAL_NEGATIVE_INSIDE_SIGN"
+                or receipt.get("teacher_semantics") not in (
+                    "SOURCE_UDF_AND_OPTIONAL_NEGATIVE_INSIDE_SIGN",
+                    "SOURCE_EXACT_SIGNED_SOLID_BOUNDARY_DISTANCE_V1",
+                )
                 or receipt.get("signed_domain") not in (
                     "SINGLE_QUALIFIED_CLOSED_COMPONENT",
+                    "EXPLICIT_QUALIFIED_CLOSED_ASSEMBLY",
                     "OPEN_OR_UNKNOWN_UNSIGNED_ONLY",
+                )
+                or receipt.get("sdf_target_sha256") != (
+                    source_surface_tensor_sha256(batch.source_signed_sdf_target)
+                    if batch.source_signed_sdf_target is not None else None
+                )
+                or receipt.get("sdf_mask_sha256") != (
+                    source_surface_tensor_sha256(batch.source_signed_sdf_mask)
+                    if batch.source_signed_sdf_mask is not None else None
                 )
             ):
                 raise ValueError("RSS_VNEXT_SOURCE_FIELD_RECEIPT_DRIFT")
             if (
                 batch.source_inside_sign_target is not None
-                and receipt.get("signed_domain") != "SINGLE_QUALIFIED_CLOSED_COMPONENT"
+                and receipt.get("signed_domain") not in (
+                    "SINGLE_QUALIFIED_CLOSED_COMPONENT",
+                    "EXPLICIT_QUALIFIED_CLOSED_ASSEMBLY",
+                )
             ):
                 raise ValueError("RSS_VNEXT_SOURCE_SIGN_CLOSED_DOMAIN_REQUIRED")
             expected_shape = state.geometry["unsigned_distance"].shape
@@ -1318,6 +1342,34 @@ class RSSvNextStructuralTrainer:
                     raise ValueError("RSS_VNEXT_SOURCE_FIELD_TARGET_SHAPE_OR_MASK_INVALID")
                 if not bool(torch.isfinite(target[mask]).all()):
                     raise ValueError("RSS_VNEXT_SOURCE_FIELD_TARGET_NONFINITE")
+            if batch.source_signed_sdf_target is not None:
+                # A direct SDF teacher is not recoverable from unrelated
+                # component-local UDF + occupancy. Its distance must be to
+                # the *same exact explicit solid/assembly boundary* used
+                # for the global inside/outside sign.
+                if (
+                    self.weights.source_signed_sdf <= 0
+                    or receipt.get("teacher_semantics")
+                        != "SOURCE_EXACT_SIGNED_SOLID_BOUNDARY_DISTANCE_V1"
+                    or receipt.get("signed_domain") not in (
+                        "SINGLE_QUALIFIED_CLOSED_COMPONENT",
+                        "EXPLICIT_QUALIFIED_CLOSED_ASSEMBLY",
+                    )
+                    or receipt.get("sdf_distance_scope")
+                        != "EXACT_BOUNDARY_OF_THE_SAME_QUALIFIED_SOLID"
+                    or receipt.get("sdf_sign_scope")
+                        != "GLOBAL_NEGATIVE_INSIDE_POSITIVE_OUTSIDE"
+                    or receipt.get("assembly_boolean_operations_qualified") is not True
+                ):
+                    raise ValueError("RSS_VNEXT_SOURCE_SDF_EXACT_SOLID_PROOF_REQUIRED")
+                sdf_target, sdf_mask = field_items[2]
+                # Full SDF is predicted by IRIS's *actual* FlexiCubes field;
+                # do not train a shadow UDF/sign head only to leave this field
+                # unconstrained at inference.
+                source_signed_sdf_loss = F.smooth_l1_loss(
+                    state.geometry["field"][sdf_mask], sdf_target[sdf_mask],
+                )
+                n_source_signed_sdf = int(sdf_mask.sum().item())
             if batch.source_udf_target is not None:
                 if self.weights.source_udf <= 0:
                     raise ValueError("RSS_VNEXT_SOURCE_UDF_OBJECTIVE_NOT_ENABLED")
@@ -1705,6 +1757,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.graphics_source_rgb, graphics_rgb_loss),
                 (self.weights.source_udf, source_udf_loss),
                 (self.weights.source_inside_sign, source_inside_sign_loss),
+                (self.weights.source_signed_sdf, source_signed_sdf_loss),
                 (self.weights.axis_rig_skin_codes, axis_loss),
                 (self.weights.axis_posed_surface, axis_pose_loss),
                 (self.weights.anchor_face_correspondence, anchor_face_loss),
@@ -1743,8 +1796,10 @@ class RSSvNextStructuralTrainer:
             eligible_graphics_source_rgb_queries=n_graphics_rgb,
             source_udf_loss=source_udf_loss,
             source_inside_sign_loss=source_inside_sign_loss,
+            source_signed_sdf_loss=source_signed_sdf_loss,
             eligible_source_udf_queries=n_source_udf,
             eligible_source_inside_sign_queries=n_source_inside_sign,
+            eligible_source_signed_sdf_queries=n_source_signed_sdf,
             axis_rig_skin_loss=axis_loss,
             axis_posed_surface_loss=axis_pose_loss,
             eligible_axis_pose_count=axis_pose_count,
@@ -1772,6 +1827,7 @@ class RSSvNextStructuralTrainer:
             ("graphics_source_rgb", result.graphics_source_rgb_loss, self.weights.graphics_source_rgb),
             ("source_udf", result.source_udf_loss, self.weights.source_udf),
             ("source_inside_sign", result.source_inside_sign_loss, self.weights.source_inside_sign),
+            ("source_signed_sdf", result.source_signed_sdf_loss, self.weights.source_signed_sdf),
             ("axis_rig_skin_codes", result.axis_rig_skin_loss, self.weights.axis_rig_skin_codes),
             ("axis_posed_surface", result.axis_posed_surface_loss, self.weights.axis_posed_surface),
             ("anchor_face_correspondence", result.anchor_face_correspondence_loss, self.weights.anchor_face_correspondence),

@@ -26,6 +26,20 @@ def _declared_class_field_names(relative:str,klass:str)->set[str]:
     }
 
 
+def _declared_default_weights(relative: str, klass: str) -> dict[str, float]:
+    tree=ast.parse((ROOT/relative).read_text(encoding="utf8"))
+    node=next(
+        node for node in tree.body
+        if isinstance(node,ast.ClassDef) and node.name==klass
+    )
+    return {
+        child.target.id: float(ast.literal_eval(child.value))
+        for child in node.body
+        if isinstance(child,ast.AnnAssign)
+        and isinstance(child.target,ast.Name) and child.value is not None
+    }
+
+
 def _phase_loss_names()->set[str]:
     tree=ast.parse(
         (ROOT/"models/rss_vnext/training_phase_contract_v1.py").read_text(
@@ -138,3 +152,19 @@ def test_source_nonsigned_geometry_remains_distinct_from_closed_sdf():
     assert x["source_inside_sign"]["source_truth_status"]=="CLOSED_SOLID_PROOF_REQUIRED"
     assert "closed" in x["source_signed_sdf"]["preparation"].lower()
     assert "INTERVENTION"==x["typed_relations"]["preparation_route"]
+
+
+
+def test_inventory_default_weight_values_are_exactly_mainline_values():
+    inventory=_document()
+    for group,source,klass in (
+        ("structural","models/rss_vnext/training_engine.py",
+         "RSSvNextTrainingWeights"),
+        ("slrm","models/rss_vnext/realsas_slrm_training_driver_v1.py",
+         "RealSaSSLRMTrainingLossWeightsV1"),
+    ):
+        actual=_declared_default_weights(source,klass)
+        if group=="structural":
+            actual.pop("clip_gradient_norm")
+        recorded={x["id"]:x["default_weight"] for x in inventory[group]}
+        assert actual==recorded

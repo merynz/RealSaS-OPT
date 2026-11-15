@@ -36,7 +36,8 @@
       "preparation_route": "NATIVE_PLUS_DERIVED",
       "source_truth_status": "NATIVE_GEOMETRY_CANDIDATE",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 1
     },
     {
       "id": "motion_preference",
@@ -50,7 +51,8 @@
       "preparation_route": "INTERVENTION",
       "source_truth_status": "NOT_OBSERVED_AS_SIMPLE_ANIMATION_DECLARATION",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0.2
     },
     {
       "id": "source_semantics",
@@ -64,7 +66,8 @@
       "preparation_route": "RENDER_AND_DERIVE",
       "source_truth_status": "NATIVE_PART_METADATA_PARTIAL",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0.2
     },
     {
       "id": "semantic_risk",
@@ -78,7 +81,8 @@
       "preparation_route": "RENDER_AND_DERIVE",
       "source_truth_status": "NATIVE_PART_METADATA_PARTIAL",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "surface_roles",
@@ -92,7 +96,8 @@
       "preparation_route": "RENDER_AND_DERIVE",
       "source_truth_status": "SOURCE_ROLE_ADDRESS_NOT_YET_VERIFIED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "region_pairs",
@@ -106,7 +111,8 @@
       "preparation_route": "NATIVE_PLUS_DERIVED",
       "source_truth_status": "PART_METADATA_NEEDS_SOURCE_REINDEX",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "typed_relations",
@@ -120,7 +126,8 @@
       "preparation_route": "INTERVENTION",
       "source_truth_status": "NO_GENERAL_TRUTH_FROM_SEGMENTATION",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "graphics_source_rgb",
@@ -134,7 +141,8 @@
       "preparation_route": "RENDER_AND_DERIVE",
       "source_truth_status": "FIRST_HIT_RECEIPT_REQUIRED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "source_udf",
@@ -148,7 +156,8 @@
       "preparation_route": "GEOMETRY_DERIVE",
       "source_truth_status": "NATIVE_SURFACE_CANDIDATE",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "source_inside_sign",
@@ -162,7 +171,8 @@
       "preparation_route": "GEOMETRY_DERIVE",
       "source_truth_status": "CLOSED_SOLID_PROOF_REQUIRED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "source_signed_sdf",
@@ -176,7 +186,8 @@
       "preparation_route": "GEOMETRY_DERIVE",
       "source_truth_status": "CLOSED_SOLID_PROOF_REQUIRED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "axis_rig_skin_codes",
@@ -190,7 +201,8 @@
       "preparation_route": "NATIVE_PLUS_DERIVED",
       "source_truth_status": "RIG_SKIN_NATIVE_FIELDS_CANDIDATE",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "axis_posed_surface",
@@ -204,7 +216,8 @@
       "preparation_route": "NATIVE_PLUS_COMPUTE",
       "source_truth_status": "ANIMATION_DECLARATION_NOT_POSE_TEACHER",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "axis_dynamic_posed_surface",
@@ -218,7 +231,8 @@
       "preparation_route": "NATIVE_PLUS_COMPUTE",
       "source_truth_status": "ANIMATION_DECLARATION_NOT_POSE_TEACHER",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "anchor_face_correspondence",
@@ -232,7 +246,8 @@
       "preparation_route": "INTERVENTION",
       "source_truth_status": "CONTACT_LABELS_UNCONFIRMED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "flexicubes_surface",
@@ -246,7 +261,8 @@
       "preparation_route": "GEOMETRY_DERIVE",
       "source_truth_status": "SOURCE_SIGNED_PROOF_REQUIRED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0.3
     },
     {
       "id": "flexicubes_animation",
@@ -260,7 +276,8 @@
       "preparation_route": "NATIVE_PLUS_COMPUTE",
       "source_truth_status": "POSE_SUITE_NOT_VERIFIED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "tessa_iris_surface_alignment",
@@ -274,7 +291,8 @@
       "preparation_route": "GEOMETRY_DERIVE",
       "source_truth_status": "CROSS_HEAD_SOURCE_BINDING_REQUIRED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "novel_view",
@@ -288,7 +306,8 @@
       "preparation_route": "RENDER",
       "source_truth_status": "EXPERIMENTAL_ALTERNATIVE",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "realsas_joint_slrm",
@@ -302,7 +321,8 @@
       "preparation_route": "SOURCE_RENDER",
       "source_truth_status": "RENDER_TRUTH_NOT_MATERIALIZED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     }
   ],
   "slrm": [
@@ -318,7 +338,8 @@
       "preparation_route": "SOURCE_RENDER",
       "source_truth_status": "RENDER_TRUTH_NOT_MATERIALIZED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 1
     },
     {
       "id": "alpha",
@@ -332,7 +353,8 @@
       "preparation_route": "SOURCE_RENDER",
       "source_truth_status": "RENDER_TRUTH_NOT_MATERIALIZED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 1
     },
     {
       "id": "semantic",
@@ -346,7 +368,8 @@
       "preparation_route": "SOURCE_RENDER",
       "source_truth_status": "RENDER_TRUTH_NOT_MATERIALIZED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 1
     },
     {
       "id": "lpips",
@@ -360,7 +383,8 @@
       "preparation_route": "SOURCE_RENDER",
       "source_truth_status": "RENDER_TRUTH_NOT_MATERIALIZED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 1
     },
     {
       "id": "mesh_normal",
@@ -374,7 +398,8 @@
       "preparation_route": "SOURCE_RENDER",
       "source_truth_status": "RENDER_TRUTH_NOT_MATERIALIZED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 1
     },
     {
       "id": "mesh_depth",
@@ -388,7 +413,8 @@
       "preparation_route": "SOURCE_RENDER",
       "source_truth_status": "RENDER_TRUTH_NOT_MATERIALIZED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 1
     },
     {
       "id": "flexicubes_deformation",
@@ -402,7 +428,8 @@
       "preparation_route": "GEOMETRY_DERIVE",
       "source_truth_status": "SOURCE_SIGNED_PROOF_REQUIRED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 1
     },
     {
       "id": "observed_source_rgb",
@@ -416,7 +443,8 @@
       "preparation_route": "SOURCE_CALIBRATION",
       "source_truth_status": "ORIGINAL_CAMERAS_NOT_CALIBRATED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "observed_source_alpha",
@@ -430,7 +458,8 @@
       "preparation_route": "SOURCE_CALIBRATION",
       "source_truth_status": "ORIGINAL_CAMERAS_NOT_CALIBRATED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     }
   ],
   "mira": [
@@ -446,7 +475,8 @@
       "preparation_route": "NATIVE_PLUS_DERIVED",
       "source_truth_status": "NATIVE_SKIN_FIELDS_CANDIDATE",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 1
     },
     {
       "id": "quantization_loss",
@@ -460,7 +490,8 @@
       "preparation_route": "NATIVE_PLUS_DERIVED",
       "source_truth_status": "CODEC_NOT_TRAINED_ON_CORPUS",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0.05
     },
     {
       "id": "source_pose_deformation_loss",
@@ -474,7 +505,8 @@
       "preparation_route": "NATIVE_PLUS_COMPUTE",
       "source_truth_status": "NATIVE_ANIMATION_DECLARATION_INSUFFICIENT",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "source_area_skin_loss",
@@ -488,7 +520,8 @@
       "preparation_route": "GEOMETRY_DERIVE",
       "source_truth_status": "AREA_QUADRATURE_REQUIRED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     },
     {
       "id": "source_area_skin_simplex_kl_loss",
@@ -502,7 +535,8 @@
       "preparation_route": "GEOMETRY_DERIVE",
       "source_truth_status": "AREA_QUADRATURE_REQUIRED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": 0
     }
   ],
   "diffusion": [
@@ -518,7 +552,8 @@
       "preparation_route": "SOURCE_RENDER",
       "source_truth_status": "RENDER_PAIR_AND_POSE_TRUTH_REQUIRED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": null
     },
     {
       "id": "STAGE_MULTIVIEW",
@@ -532,7 +567,8 @@
       "preparation_route": "SOURCE_RENDER",
       "source_truth_status": "RENDER_SIX_VIEWS_REQUIRED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": null
     },
     {
       "id": "ALPHA_HEAD",
@@ -546,7 +582,8 @@
       "preparation_route": "SOURCE_RENDER",
       "source_truth_status": "ALPHA_COVERAGE_REQUIRED",
       "real_corpus_verified": false,
-      "gpu_verified": false
+      "gpu_verified": false,
+      "default_weight": null
     }
   ],
   "unsupervised_outputs": [
@@ -622,5 +659,14 @@
     }
   ],
   "source_corpus_verified": false,
-  "product_unseen_quality_proven": false
+  "product_unseen_quality_proven": false,
+  "default_weight_semantics": "A positive default weight does NOT imply that the objective is active for a sample, that training targets are qualified, or that GPU/unseen proof exists. Stage-specific S-LRM values are only applied to returned terms.",
+  "status_taxonomy": {
+    "IMPLEMENTED_LOSS": "Code path exists, qualified data still required",
+    "NATIVE_CANDIDATE": "R2.17A declared relevant GLB/glTF fields but not independent truth/admission",
+    "RENDER_REQUIRED": "Source renderer must produce same-asset camera/pose/role-matched labels",
+    "COMPUTED_REQUIRED": "Independent source mesh/rig must be normalized, reindexed and checked",
+    "INTERVENTION_REQUIRED": "Cannot infer edit/drawable/contact/behavior evidence from mesh part labels alone",
+    "UNTRAINED_OUTPUT": "No independently qualified active objective and acceptance proof verified"
+  }
 }

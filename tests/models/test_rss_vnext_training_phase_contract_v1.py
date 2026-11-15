@@ -83,7 +83,11 @@ def test_phase_rejects_unfrozen_owner_and_wrong_objective_before_backward():
             phase_contract=policy(),
         )
     with pytest.raises(ValueError,match="REQUIRED_OBJECTIVE_DISABLED"):
-        policy().validate(weights=replace(weights(),topology=0.,source_semantics=.5))
+        RSSvNextStructuralTrainingPhaseContractV1(
+            name="REQUIRE_GEOMETRY",trainable_parameter_prefixes=("tessa.",),
+            allowed_positive_objectives=("topology","source_semantics"),
+            required_any_qualified_loss_groups=(("topology",),),
+        ).validate(weights=replace(weights(),topology=0.,source_semantics=.5))
 
 
 def test_phase_source_coverage_requires_real_qualified_count():

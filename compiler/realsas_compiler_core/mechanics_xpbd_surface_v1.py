@@ -306,6 +306,15 @@ def requalify_declared_xpbd_surface_domain_v1(
 ) -> None:
     if type(domain) is not XPBDSurfaceDomainV1:
         raise QualificationError("XPBD_SURFACE_DOMAIN_TYPE_INVALID")
+    if (
+        domain.mesh_lineage_hash != mesh.mesh_lineage_hash
+        or domain.rig_lineage_hash != rig.rig_lineage_hash
+        or domain.skin_lineage_hash != skin.skin_lineage_hash
+        or domain.mechanics_lineage_hash != mechanics.mechanics_lineage_hash
+        or domain.deform_structure_hash != rig.deform_structure_hash
+        or domain.control_program_hash != rig.control_program_hash
+    ):
+        raise QualificationError("XPBD_SURFACE_PARENT_LINEAGE_DRIFT")
     expected=prepare_declared_xpbd_surface_domain_v1(
         mesh,rig,skin,mechanics,
         DeclaredXPBDSurfaceRequestV1(

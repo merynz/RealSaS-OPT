@@ -91,7 +91,10 @@ def test_editor_surface_state_can_be_exported_reopened_and_replayed_without_drif
 
 def test_editor_refuses_rehashed_surface_or_double_owned_joint_particles():
     bundle,domain,policy=_editor()
-    forged=replace(domain,bend_edges=())
+    # A one-triangle editor fixture has no bend pairs; forge a real
+    # accepted stretch constraint to test content-addressed requalification.
+    assert domain.stretch_edges
+    forged=replace(domain,stretch_edges=())
     forged=replace(forged,domain_hash=content_sha256({
         k:v for k,v in forged.to_dict().items() if k!="domain_hash"
     }))

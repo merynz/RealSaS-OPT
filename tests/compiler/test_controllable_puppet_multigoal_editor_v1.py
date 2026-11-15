@@ -19,8 +19,16 @@ from tests.compiler.test_controllable_puppet_runtime_v1 import (
 )
 
 
-def _with_mechanics():
+def _with_mechanics(*, keep_pole: bool = False):
     bundle = qualified_synthetic_bundle()
+    if not keep_pole:
+        # The solver supports an explicitly declared single-effector IK
+        # court, but not the two-input FABRIK pole operator.
+        rig = replace(bundle.rig, constraints=(replace(
+            bundle.rig.constraints[0],
+            input_canonical_control_ids=("C_IK",),
+        ),))
+        bundle = replace(bundle, rig=rig)
     rig, skin, mesh = bundle.rig, bundle.skin, bundle.mesh
     mechanics = CanonicalMechanicsIRV1(
         mesh_lineage_hash=mesh.mesh_lineage_hash,
@@ -59,6 +67,14 @@ def test_editor_multi_goal_runs_full_rig_skin_and_keeps_default_path_available()
     # Both consumers must preserve the canonical rest pose.
     assert np.allclose(solved.deformed.positions, baseline.deformed.positions, atol=1e-6)
     session.disable_declared_multi_goal()
+    assert session.frame() == baseline
+
+
+def test_existing_fabrik_pole_is_never_downgraded_or_discarded():
+    session = ControllablePuppetSessionV1(_with_mechanics(keep_pole=True))
+    baseline = session.frame()
+    with pytest.raises(QualificationError, match="POLE_OR_OPERATOR_UNSUPPORTED"):
+        session.enable_declared_multi_goal()
     assert session.frame() == baseline
 
 

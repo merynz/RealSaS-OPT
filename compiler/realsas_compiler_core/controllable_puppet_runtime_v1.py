@@ -267,6 +267,16 @@ class ControllablePuppetSessionV1:
         """
         if self.bundle.mechanics is None:
             raise QualificationError("PUPPET_RUNTIME_MULTI_GOAL_MECHANICS_PARENT_REQUIRED")
+        # The research multi-goal solver currently accepts single-input IK
+        # effectors; a two-input FABRIK pole is NOT silently discarded.
+        # Keep the original FABRIK session active for such rigs.
+        if any(
+            c.operator_id != "IK"
+            or len(c.input_canonical_control_ids) != 1
+            or self._controls[c.input_canonical_control_ids[0]].control_kind != "IK_EFFECTOR"
+            for c in self.bundle.rig.constraints
+        ):
+            raise QualificationError("PUPPET_RUNTIME_MULTI_GOAL_POLE_OR_OPERATOR_UNSUPPORTED")
         pins = pinned_contact_control_ids
         if (type(pins) is not tuple or len(pins) > 32
                 or len(set(pins)) != len(pins)

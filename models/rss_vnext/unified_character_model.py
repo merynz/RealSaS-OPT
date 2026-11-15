@@ -491,7 +491,14 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         # FlexiCubes is a DIFFERENTIABLE SURFACE WITNESS for the structural
         # Transformer, not its final geometry/topology owner. It reuses IRIS H.
         self.fc_surface_bridge = RSSvNextFlexiCubesEvidenceBridge(
-            self.iris, resolution=cfg.iris.extraction_training_resolution,
+            self.iris,
+            resolution=cfg.iris.extraction_training_resolution,
+            inference_resolution=cfg.iris.extraction_inference_resolution,
+            inference_max_cubes=1500000,
+            inference_max_output_vertices=cfg.iris.extraction_inference_max_vertices,
+            field_query_chunk=cfg.iris.extraction_field_query_chunk,
+            cube_query_chunk=cfg.iris.extraction_cube_query_chunk,
+            surface_query_chunk=cfg.iris.extraction_surface_query_chunk,
         )
         self.fc_surface_position = nn.Linear(3, h, bias=False)
         # Predicted FlexiCubes face incidence is part of TESSA conditioning,

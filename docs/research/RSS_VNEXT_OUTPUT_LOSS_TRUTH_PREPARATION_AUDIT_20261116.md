@@ -184,8 +184,9 @@ Training checks: **(1)** source/target/mask coverage counts per objective; **(2)
 1. No GPU/A100 run has validated the source-rendered 20+ loss composite at product-scale 100x100x150 / higher sparse extraction, or established that all phase losses can be simultaneously active. Phase curriculum remains to be chosen from real per-family qualified counts, not an all-weights-sum default.
 2. Default direct IRIS source backbone DINOv2 requires image H/W divisible by 14; the product neural bundle defaults to 512 and requires multiples of eight. **The same preprocessing ABI must be pinned for Stage A, Stage B and real two-image inference before production training.**
 3. StdGEN++ paper favors localized high-frequency branch and coarse-to-fine 256x256x384 sparse FlexiCubes. Existing extractor supports chunked dense grid queries with 1.5M cube cap and axis <=256. Do not confuse config scaling with implementation of sparse active-cell extraction.
-4. Inference Graphics retains unknown/occlusion semantics, but there is no verified independent generative editable hidden-layer texture/Drawable objective. Do not equate source first-hit RGB with full 2D Presentation.
-5. Source-native rest-pose, source-specific face/rig alignment, and motion metadata must be independently verified; do not assume an animation presence flag implies LBS-valid posed consequence.
+4. TESSA production topology token budget and rendered FlexiCubes surface resolution are different capacities. The configured default topology_decode_cap=4096 is not a 32768-face learned control mesh. A mechanically stable coarse control cage, high-res appearance surface and explicit persistent barycentric/weight support need verified bindings; do not silently conflate face counts.
+5. Inference Graphics retains unknown/occlusion semantics, but there is no verified independent generative editable hidden-layer texture/Drawable objective. Do not equate source first-hit RGB with full 2D Presentation.
+6. Source-native rest-pose, source-specific face/rig alignment, and motion metadata must be independently verified; do not assume an animation presence flag implies LBS-valid posed consequence.
 
 ## References (implementation, not paper-only)
 

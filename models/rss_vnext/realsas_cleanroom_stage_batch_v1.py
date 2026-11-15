@@ -36,6 +36,19 @@ def _batch_label(value: Any, label: str) -> str:
     raise ValueError("RSS_VNEXT_STAGE_BATCH_METADATA_INVALID:" + label)
 
 
+def _source_camera_flag_is_false(value: Any) -> bool:
+    if value is False:
+        return True
+    if isinstance(value, Tensor):
+        return (
+            value.dtype == torch.bool and value.ndim <= 1
+            and value.numel() > 0 and not bool(value.any())
+        )
+    if type(value) in (list, tuple) and value:
+        return all(item is False for item in value)
+    return False
+
+
 def _as_batch(value: Any, rank: int, field: str) -> Tensor:
     if not isinstance(value, Tensor):
         raise ValueError("RSS_VNEXT_STAGE_BATCH_TENSOR_MISSING:" + field)
@@ -72,7 +85,7 @@ def prepare_rendered_two_source_diffusion_microstep_v1(
     if (
         _batch_label(sample.get("source_pair_authority"), "source_pair_authority")
         != expected_authority
-        or sample.get("original_source_camera_observed") not in (False, [False], (False,))
+        or not _source_camera_flag_is_false(sample.get("original_source_camera_observed"))
         or not isinstance(source_encoder, nn.Module)
         or not isinstance(conditioner, PairedSourceDiffusionConditionerV1)
     ):

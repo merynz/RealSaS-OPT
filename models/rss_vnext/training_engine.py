@@ -192,6 +192,8 @@ class RSSvNextTrainingWeights:
     anchor_face_correspondence: float = 0.0  # source-native directed face labels
     flexicubes_surface: float = 0.3
     flexicubes_animation: float = 0.0  # explicit opt-in on admitted source motion
+    # Source-bound differentiable surface alignment; not a pseudo-label.
+    tessa_iris_surface_alignment: float = 0.0
     novel_view: float = 0.0             # opt-in: source-qualified 8-way appearance
     realsas_joint_slrm: float = 0.0      # opt-in: jointly rendered 3D scene teacher
     clip_gradient_norm: float = 1.0
@@ -211,6 +213,7 @@ class RSSvNextTrainingWeights:
             self.graphics_source_rgb,
             self.source_udf, self.source_inside_sign,
             self.axis_rig_skin_codes, self.axis_posed_surface, self.anchor_face_correspondence, self.flexicubes_surface, self.flexicubes_animation,
+            self.tessa_iris_surface_alignment,
             self.novel_view, self.realsas_joint_slrm,
         ) < 0:
             raise ValueError("RSS_VNEXT_TRAIN_NEGATIVE_OBJECTIVE_WEIGHT")
@@ -220,6 +223,7 @@ class RSSvNextTrainingWeights:
             + self.typed_relations + self.graphics_source_rgb + self.source_udf + self.source_inside_sign
             + self.axis_rig_skin_codes + self.axis_posed_surface + self.anchor_face_correspondence + self.flexicubes_surface
             + self.flexicubes_animation + self.novel_view
+            + self.tessa_iris_surface_alignment
             + self.realsas_joint_slrm <= 0
             or self.clip_gradient_norm <= 0
         ):
@@ -262,6 +266,7 @@ class RSSvNextTrainingResult:
     eligible_anchor_held_faces: int = 0
     eligible_anchor_holder_faces: int = 0
     eligible_anchor_negative_faces: int = 0
+    tessa_iris_surface_alignment_loss: Tensor | None = None
     realsas_joint_slrm_loss: Tensor | None = None
     eligible_realsas_joint_rays: int = 0
     gradient_norm: Tensor | None = None
@@ -430,7 +435,10 @@ class RSSvNextStructuralTrainer:
             # A disabled new source family retains older v2 checkpoint
             # identities; enabling it creates a distinct objective policy.
             "weights": {k: v for k, v in asdict(weights).items()
-                        if k != "axis_posed_surface" or v != 0.},
+                        if not (
+                            k in ("axis_posed_surface", "tessa_iris_surface_alignment")
+                            and v == 0.
+                        )},
             "preference": asdict(preference),
             "scene_conditioning_policy": self.scene_conditioning_policy,
             "axis_training_policy": self.axis_training_policy,
@@ -861,6 +869,26 @@ class RSSvNextStructuralTrainer:
             )
             novel_loss = novel_objective["total"]
             novel_count = int(batch.novel_view_rgb_mask.sum().item())
+        # The production structural decoder must be conditioned on the
+        # predicted IRIS surface at BOTH training and free-running inference.
+        # Source mesh tokens remain teacher-only; this is not a substitute
+        # for independently qualified closed-solid source provenance.
+        tessa_surface_needed = (
+            self.model.cfg.tessa_surface_requirement == "REQUIRE_SIGNED_IRIS_SURFACE"
+            and (
+                (self.weights.topology > 0 and batch.topology_teacher_tokens is not None)
+                or (self.weights.motion_preference > 0 and batch.motion_candidate_tokens is not None)
+                or (
+                    self.axis_training_policy == "PRODUCT_MESH_MATCHED_REQUIRED"
+                    and batch.axis_teacher_sequence is not None
+                )
+            )
+        )
+        if tessa_surface_needed and (
+            batch.flexicubes_extractor is None
+            or batch.flexicubes_layer is None
+        ):
+            raise ValueError("RSS_VNEXT_TRAIN_TESSA_IRIS_SURFACE_REQUIRED")
         fc_surface = None
         fc_loss = None
         fc_anim_loss = None
@@ -877,6 +905,7 @@ class RSSvNextStructuralTrainer:
                 or (
                     batch.flexicubes_reference_surface_xyz is None
                     and batch.flexicubes_animation_teacher is None
+                    and not tessa_surface_needed
                 )
             ):
                 raise ValueError("RSS_VNEXT_FC_TRAIN_SIGNED_SOURCE_PROOF_REQUIRED")
@@ -922,10 +951,12 @@ class RSSvNextStructuralTrainer:
             ):
                 raise ValueError("RSS_VNEXT_FC_TRAIN_REFERENCE_SURFACE_INVALID")
             if (
-                self.weights.flexicubes_surface > 0 and target is not None
-            ) or (
-                self.weights.flexicubes_animation > 0
-                and batch.flexicubes_animation_teacher is not None
+                tessa_surface_needed
+                or (self.weights.flexicubes_surface > 0 and target is not None)
+                or (
+                    self.weights.flexicubes_animation > 0
+                    and batch.flexicubes_animation_teacher is not None
+                )
             ):
                 fc_surface = self.model.fc_surface_bridge(
                     state.scene_triplanes,
@@ -962,6 +993,53 @@ class RSSvNextStructuralTrainer:
                     fc_anim_count = result.pose_count
         elif batch.flexicubes_signed_source_admission_key:
             raise ValueError("RSS_VNEXT_FC_TRAIN_ORPHAN_QUALIFICATION")
+        if tessa_surface_needed and fc_surface is None:
+            raise RuntimeError("RSS_VNEXT_TRAIN_TESSA_IRIS_SURFACE_NOT_EXTRACTED")
+
+        tessa_iris_alignment = None
+        if self.weights.tessa_iris_surface_alignment > 0:
+            tokens = batch.topology_teacher_tokens
+            mask = batch.topology_valid_mask
+            receipt = self.trusted_signed_source_registry.get(
+                batch.flexicubes_signed_source_admission_key,
+            )
+            # Only a source-matched *teacher topology* and independently
+            # admitted reference surface can supervise a TESSA/IRIS tether.
+            # Predicted FC geometry by itself must never act as source truth.
+            if (
+                fc_surface is None
+                or fc_loss is None
+                or self.weights.flexicubes_surface <= 0
+                or tokens is None or mask is None
+                or tokens.ndim != 2 or tokens.shape[0] != 1
+                or tokens.dtype != torch.long
+                or mask.shape != (1,) or mask.dtype != torch.bool
+                or not bool(mask[0])
+                or receipt is None
+                or receipt.get("tessa_source_topology_sha256")
+                    != source_surface_tensor_sha256(tokens)
+            ):
+                raise ValueError("RSS_VNEXT_TRAIN_TESSA_IRIS_ALIGNMENT_SOURCE_REQUIRED")
+            # Continuous TESSA rest-surface correction receives gradients.
+            # Discrete face decisions remain trained by topology CE and the
+            # qualified posed preference court, never by a fake Chamfer grad.
+            qualified_mesh = self.model.build_mesh_candidate(
+                state, tokens[0],
+                source_authority="TEACHER_FORCED_TRAINING_ONLY",
+            )
+            tessa_xyz = qualified_mesh.rest_vertices_iris
+            iris_xyz = fc_surface.xyz
+            ti = torch.linspace(
+                0, tessa_xyz.shape[1] - 1, min(512, tessa_xyz.shape[1]),
+                device=tessa_xyz.device,
+            ).long()
+            ii = torch.linspace(
+                0, iris_xyz.shape[1] - 1, min(512, iris_xyz.shape[1]),
+                device=iris_xyz.device,
+            ).long()
+            tessa_iris_alignment = symmetric_surface_chamfer_v1(
+                tessa_xyz[:, ti], iris_xyz[:, ii],
+            )
         memory = self.model._structural_memory(
             state, aux, flexicubes=fc_surface,
         )
@@ -1603,6 +1681,7 @@ class RSSvNextStructuralTrainer:
             topology is None and motion is None and semantic is None
             and semantic_risk_loss is None
             and fc_loss is None and fc_anim_loss is None
+            and tessa_iris_alignment is None
             and novel_loss is None and surface_role_loss is None
             and region_pair_loss is None
             and typed_relation_loss is None
@@ -1631,6 +1710,7 @@ class RSSvNextStructuralTrainer:
                 (self.weights.anchor_face_correspondence, anchor_face_loss),
                 (self.weights.flexicubes_surface, fc_loss),
                 (self.weights.flexicubes_animation, fc_anim_loss),
+                (self.weights.tessa_iris_surface_alignment, tessa_iris_alignment),
                 (self.weights.novel_view, novel_loss),
                 (self.weights.realsas_joint_slrm, joint_loss),
             )
@@ -1646,6 +1726,7 @@ class RSSvNextStructuralTrainer:
             semantic_risk_loss=semantic_risk_loss,
             flexicubes_surface_loss=fc_loss,
             flexicubes_animation_loss=fc_anim_loss,
+            tessa_iris_surface_alignment_loss=tessa_iris_alignment,
             eligible_animation_pose_count=fc_anim_count,
             eligible_semantic_patch_labels=n_semantic,
             eligible_topology_examples=n_topo,
@@ -1696,6 +1777,7 @@ class RSSvNextStructuralTrainer:
             ("anchor_face_correspondence", result.anchor_face_correspondence_loss, self.weights.anchor_face_correspondence),
             ("flexicubes_surface", result.flexicubes_surface_loss, self.weights.flexicubes_surface),
             ("flexicubes_animation", result.flexicubes_animation_loss, self.weights.flexicubes_animation),
+            ("tessa_iris_surface_alignment", result.tessa_iris_surface_alignment_loss, self.weights.tessa_iris_surface_alignment),
             ("novel_view", result.novel_view_loss, self.weights.novel_view),
             ("realsas_joint_slrm", result.realsas_joint_slrm_loss, self.weights.realsas_joint_slrm),
         )

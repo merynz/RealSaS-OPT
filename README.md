@@ -2,7 +2,7 @@
 
 **We don't generate. We compile.** The product is an **editable puppet**: source artwork → unified RSS.vNext evidence → qualified geometry, articulation, skin, mechanics, 2D presentation, motion → Proof → durable Studio puppet.
 
-> **Execution status (13 November 2026):** This source tree selects a single nine-role RSS.vNext product DAG (Input, Shape, Mesh, Rig, Skin, Mechanics, Graphics, Motion, Proof). Independent ProductProof remains fail-closed while source appearance, contact, renderer parity and persistent edit/reopen witnesses are missing. A successful source test is not a ProductRevision.
+> **Execution status (15 November 2026):** This source tree selects a single nine-role RSS.vNext product DAG (Input, Shape, Mesh, Rig, Skin, Mechanics, Graphics, Motion, Proof). Its one RSSVNEXT release bundles two diffusion image-construction stages plus one reconstruction model with a single H(x) directly conditioned on the two original source images as well as the six generated views. Independent ProductProof remains fail-closed while source appearance, contact, renderer parity and persistent edit/reopen witnesses are missing. A successful source test is not a ProductRevision.
 
 ## Product architecture — start here
 

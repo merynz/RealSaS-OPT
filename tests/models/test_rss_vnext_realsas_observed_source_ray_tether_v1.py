@@ -145,7 +145,11 @@ def test_independently_bound_source_field_cannot_be_replaced(field):
     else:
         changed.reshape(-1)[0]+=(.1 if changed.is_floating_point() else 1)
     forged=replace(batch,source_observed_rays=replace(original,**{field:changed}))
-    with pytest.raises(ValueError,match="ORIGINAL_SOURCE_RECEIPT_DRIFT"):
+    expected = (
+        "SOURCE_PIXEL_IDENTITY_DRIFT" if field == "original_linear_rgba"
+        else "ORIGINAL_SOURCE_RECEIPT_DRIFT"
+    )
+    with pytest.raises(ValueError,match=expected):
         make_trainer(net,receipt,signed).objective(forged)
 
 

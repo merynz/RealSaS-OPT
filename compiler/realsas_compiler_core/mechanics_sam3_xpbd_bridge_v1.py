@@ -69,7 +69,7 @@ class SAM3XPBDAuthoringRequestV1:
     min_anchor_skin_weight: float = 0.2
     max_joint_distance_edges: float = 4.0
     pins_per_anchor: int = 2
-    max_pinned_fraction: float = 0.45
+    max_pinned_fraction: float = 0.55
 
 
 @dataclass(frozen=True)

@@ -70,6 +70,9 @@ class SAM3XPBDAuthoringRequestV1:
     max_joint_distance_edges: float = 4.0
     pins_per_anchor: int = 2
     max_pinned_fraction: float = 0.55
+    # Optional RigProgram-authored socket/attachment anchors, used instead of
+    # bone-head proximity. All anchors must be parented to declared joints.
+    attachment_anchor_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -216,6 +219,34 @@ def _pin_vertices(
     joint_xyz = {j.canonical_joint_id: np.asarray(j.P, dtype=float) for j in rig.joints}
     if not set(request.anchor_joint_ids) <= joint_xyz.keys():
         _reject("UNKNOWN_ANCHOR_JOINT")
+    anchor_centers = dict(joint_xyz)
+    if request.attachment_anchor_ids:
+        if (not isinstance(request.attachment_anchor_ids, tuple)
+            or len(set(request.attachment_anchor_ids)) != len(request.attachment_anchor_ids)):
+            _reject("ATTACHMENT_ANCHOR_IDS_INVALID")
+        by_id = {a.canonical_anchor_id: a for a in rig.attachment_anchors}
+        if not set(request.attachment_anchor_ids) <= by_id.keys():
+            _reject("ATTACHMENT_ANCHOR_NOT_IN_RIGPROGRAM")
+        frames = {f.canonical_joint_id: np.asarray(f.basis, dtype=float)
+                  for f in rig.local_frames}
+        for anchor_id in request.attachment_anchor_ids:
+            anchor = by_id[anchor_id]
+            parent = anchor.parent_canonical_joint_id
+            if (parent not in request.anchor_joint_ids
+                or anchor.parent_canonical_control_id is not None
+                or parent not in frames):
+                _reject("ATTACHMENT_ANCHOR_PARENT_NOT_DECLARED")
+            local = np.asarray(anchor.local_P, dtype=float)
+            if local.shape != (3,) or not np.isfinite(local).all():
+                _reject("ATTACHMENT_ANCHOR_LOCAL_FRAME_INVALID")
+            center = joint_xyz[parent] + frames[parent].T @ local
+            if not np.isfinite(center).all():
+                _reject("ATTACHMENT_ANCHOR_LOCAL_FRAME_INVALID")
+            # If several authored sockets reference one joint, use the first
+            # only when unique; otherwise require editor to choose one.
+            if parent in anchor_centers and anchor_centers[parent] is not joint_xyz[parent]:
+                _reject("MULTIPLE_ANCHORS_FOR_SAME_JOINT")
+            anchor_centers[parent] = center
     vertices = {v.canonical_mesh_vertex_id: np.asarray(v.P, dtype=float) for v in mesh.vertices}
     weights = {
         row.canonical_mesh_vertex_id: dict(row.influences) for row in skin.rows
@@ -259,7 +290,7 @@ def _pin_vertices(
             weight = float(weights[vertex_id].get(joint_id, 0.0))
             if weight < request.min_anchor_skin_weight:
                 continue
-            distance = float(np.linalg.norm(vertices[vertex_id] - joint_xyz[joint_id]))
+            distance = float(np.linalg.norm(vertices[vertex_id] - anchor_centers[joint_id]))
             if distance <= max_distance:
                 candidates.append((distance, -weight, vertex_id))
         candidates.sort()
@@ -280,6 +311,10 @@ def _pin_vertices(
         "anchor_pin_ids_by_joint": selected_by_anchor,
         "median_rest_edge_length": rest_edge,
         "pinned_fraction": len(chosen) / len(selected_vertices),
+        "pin_anchor_position_authority": (
+            "EXPLICIT_RIGPROGRAM_ATTACHMENT_ANCHOR"
+            if request.attachment_anchor_ids else "EXPLICIT_JOINT_REST_POSITION"
+        ),
     }
 
 

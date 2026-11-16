@@ -308,6 +308,33 @@ class ControllablePuppetSessionV1:
         self._xpbd_surface_policy=policy
         self._xpbd_surface_state=None
 
+    def enable_sam3_assisted_xpbd_surface(
+        self, *, report, source_face_binding, authoring_request,
+    ) -> dict:
+        """Admit observed SAM 3 faces through the normal explicit XPBD court.
+
+        No automatic physics activation from labels: the request must contain
+        user_approved_surface_dynamics=True, an authored anchor-joint list
+        and a selected material policy. Returns auditable source provenance.
+        """
+        from .mechanics_sam3_xpbd_bridge_v1 import (
+            prepare_sam3_assisted_xpbd_surface_v1,
+        )
+        if self.bundle.mechanics is None:
+            raise QualificationError("PUPPET_XPBD_SURFACE_MECHANICS_REQUIRED")
+        proposal = prepare_sam3_assisted_xpbd_surface_v1(
+            self.bundle.mesh, self.bundle.rig, self.bundle.skin,
+            self.bundle.mechanics,
+            report=report, binding=source_face_binding,
+            request=authoring_request,
+        )
+        self.enable_declared_xpbd_surface(proposal.domain, proposal.policy)
+        return {
+            **proposal.audit,
+            "xpbd_activated": True,
+            "activation_authority": "EXPLICIT_USER_APPROVAL",
+        }
+
     def disable_declared_xpbd_surface(self) -> None:
         self._xpbd_surface_domain=None
         self._xpbd_surface_policy=None

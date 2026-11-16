@@ -252,6 +252,28 @@ def qualified_rig_program_grounding_objective_v1(
         or trusted_receipt.get("joint_index_and_mesh_vertex_reindex_proven") is not True
         or trusted_receipt.get("source_semantics") != "NATIVE_RIG_SKIN_NOT_PSEUDOLABEL"):
         raise ValueError("RIG_MATH_SOURCE_RECEIPT_UNQUALIFIED")
+    # Static rig names/positions are never evidence that a joint axis is
+    # locked, or that a user control actually has a behavioral consequence.
+    if source_dof_known_mask is not None and bool(source_dof_known_mask.any()):
+        if (
+            trusted_receipt.get("dof_truth_authority")
+            not in ("SOURCE_AUTHORED_LIMITS", "INDEPENDENT_SOURCE_INTERVENTION")
+            or not isinstance(trusted_receipt.get("dof_truth_witness_sha256"), str)
+            or len(trusted_receipt["dof_truth_witness_sha256"]) != 64
+        ):
+            raise ValueError("RIG_MATH_DOF_WITNESS_REQUIRED")
+    if source_control_rest_xyz is not None and (
+        trusted_receipt.get("control_rest_authority") != "NATIVE_AUTHORED_CONTROL"
+    ):
+        raise ValueError("RIG_MATH_SOURCE_CONTROL_AUTHORING_REQUIRED")
+    if source_anchor_local_xyz is not None and (
+        trusted_receipt.get("anchor_local_authority") != "SOURCE_NATIVE_ANCHOR"
+    ):
+        raise ValueError("RIG_MATH_SOURCE_ANCHOR_AUTHORING_REQUIRED")
+    if source_pose_matrices is not None and (
+        trusted_receipt.get("pose_truth_authority") != "INDEPENDENT_SOURCE_LBS_POSES"
+    ):
+        raise ValueError("RIG_MATH_SOURCE_POSE_WITNESS_REQUIRED")
     chains = maximal_source_bone_chains_v1(source_parent_indices)
     membership = predicted_skin.new_zeros((len(chains), j))
     for ci, chain in enumerate(chains):
@@ -373,6 +395,16 @@ def qualified_rig_program_grounding_objective_v1(
             or not bool(source_pose_mask.any())):
             raise ValueError("RIG_MATH_POSED_DOMAIN_INVALID")
         matrices = source_pose_matrices
+        last_row = matrices[..., 3, :]
+        identity_last = matrices.new_tensor((0., 0., 0., 1.))
+        if not bool(torch.allclose(last_row, identity_last, atol=1e-5, rtol=0)):
+            raise ValueError("RIG_MATH_SOURCE_LBS_MATRIX_INVALID")
+        # A global rigid move alone cannot teach skinning. Require at least
+        # one qualified pose with genuinely different joint transports.
+        delta = matrices - matrices[:, :, :1]
+        excited = delta.abs().amax(dim=(-1, -2, -3)) > 1e-5
+        if not bool((excited & source_pose_mask).any()):
+            raise ValueError("RIG_MATH_UNINFORMATIVE_RIGID_ONLY_POSES")
         hom = torch.cat((source_rest_vertices, source_rest_vertices.new_ones((b, v, 1))), -1)
         transported = torch.einsum("bpjik,bvk->bpvji", matrices, hom)[..., :3]
         posed_pred = (

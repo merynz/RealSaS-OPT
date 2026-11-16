@@ -325,11 +325,11 @@ def qualified_rig_program_grounding_objective_v1(
             if bool(source_dof_known_mask.any()):
                 truth = source_dof_allowed[:, frame_ptr].float()
                 known = source_dof_known_mask[:, frame_ptr]
-                if not bool(((truth == 0) | (truth == 1)).all()):
+                if bool((((truth != 0) & (truth != 1)) & known).any()):
                     raise ValueError("RIG_MATH_DOF_NOT_BINARY")
                 logits = outputs["dof_logits"][:, :-1][:, frame_idx]
                 parts["observed_dof"] = _masked_mean(
-                    F.binary_cross_entropy_with_logits(logits, truth, reduction="none"),
+                    F.binary_cross_entropy_with_logits(logits, truth.clamp(0, 1), reduction="none"),
                     known,
                 )
     elif source_dof_known_mask is not None or source_dof_allowed is not None:

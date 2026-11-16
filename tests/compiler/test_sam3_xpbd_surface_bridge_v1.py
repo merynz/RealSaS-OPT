@@ -22,6 +22,7 @@ from compiler.realsas_compiler_core.mechanics_xpbd_surface_v1 import (
     requalify_declared_xpbd_surface_domain_v1,
     step_declared_xpbd_surface_v1,
 )
+from compiler.realsas_compiler_core.canonical_rig_ir_v2 import CanonicalAttachmentAnchorIRV2
 from compiler.realsas_compiler_core.mechanics_control_solver_v1 import (
     deform_mesh_lbs_v1, solve_control_pose_v1,
 )
@@ -191,3 +192,35 @@ def test_same_source_exact_same_proposal_without_hidden_mutation():
     assert r == before
     assert one == two
     assert one.audit["sam3_report_sha256"] == two.audit["sam3_report_sha256"]
+
+
+def test_existing_rigprogram_socket_locates_pins_better_than_joint_head():
+    parents, _, request = _setup()
+    mesh, rig, skin, _ = parents
+    root_pins, root_audit = _pin_vertices(mesh, rig, skin, (F0, F1), request)
+    assert root_audit["pin_anchor_position_authority"] == "EXPLICIT_JOINT_REST_POSITION"
+
+    # This extra anchor is an editor-authored RigProgram control location, not
+    # an invented source-native shoulder attachment. It is geometrically
+    # distinct from the J0 bone head, even though its parent joint is J0.
+    anchor = CanonicalAttachmentAnchorIRV2(
+        canonical_anchor_id="A_SHOULDER",
+        parent_canonical_joint_id="J0",
+        parent_canonical_control_id=None,
+        local_P=(0.0, 1.0, 0.0),
+        source_proposal_anchor_id="P:A_SHOULDER",
+    )
+    rig_with_anchor = replace(rig, attachment_anchors=(anchor,))
+    anchored, audit = _pin_vertices(
+        mesh, rig_with_anchor, skin, (F0, F1),
+        replace(request, attachment_anchor_ids=("A_SHOULDER",)),
+    )
+    assert "MV:0" in anchored
+    assert anchored != root_pins
+    assert audit["pin_anchor_position_authority"] == "EXPLICIT_RIGPROGRAM_ATTACHMENT_ANCHOR"
+
+    with pytest.raises(QualificationError, match="ATTACHMENT_ANCHOR_NOT_IN_RIGPROGRAM"):
+        _pin_vertices(
+            mesh, rig, skin, (F0, F1),
+            replace(request, attachment_anchor_ids=("A_SHOULDER",)),
+        )

@@ -169,7 +169,7 @@ def test_complete_mathematics_backward_reaches_axis_and_mira():
 
 def test_unknown_dof_is_not_a_negative_label():
     args, _, _, _, dof = _fixture()
-    args["source_dof_known_mask"][:, :, 1:] = False
+    args["source_dof_known_mask"][0, 0, 0] = False
     # A source mutation must invalidate its trusted receipt first.
     with pytest.raises(ValueError, match="RECEIPT_UNQUALIFIED"):
         qualified_rig_program_grounding_objective_v1(**args)

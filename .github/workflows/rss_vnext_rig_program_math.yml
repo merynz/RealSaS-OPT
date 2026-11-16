@@ -6,6 +6,7 @@ on:
     paths:
       - "models/rss_vnext/training_rig_program_grounding_v1.py"
       - "models/rss_vnext/training_engine.py"
+      - "models/rss_vnext/training_phase_contract_v1.py"
       - "tests/models/test_rig_program_source_grounding_v1.py"
       - ".github/workflows/rss_vnext_rig_program_math.yml"
   pull_request:
@@ -38,4 +39,4 @@ jobs:
           PYTHONPATH: .
         run: |
           python -m compileall -q models/rss_vnext/training_rig_program_grounding_v1.py models/rss_vnext/training_engine.py tests/models/test_rig_program_source_grounding_v1.py
-          python -m pytest -q tests/models/test_rig_program_source_grounding_v1.py tests/models/test_rss_vnext_structural_trainer.py
+          python -m pytest -q tests/models/test_rig_program_source_grounding_v1.py tests/models/test_rss_vnext_structural_trainer.py tests/models/test_rss_vnext_training_phase_contract_v1.py tests/models/test_rss_vnext_axis_mesh_matched_product_training_v1.py

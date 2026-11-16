@@ -66,8 +66,6 @@ def maximal_source_bone_chains_v1(parents: Tensor) -> tuple[tuple[int, ...], ...
     for j, parent in enumerate(p):
         if parent >= 0:
             children[parent].append(j)
-    if not any(x == -1 for x in p):
-        raise ValueError("RIG_MATH_NO_ROOT")
     for j in range(n):
         seen = set()
         k = j
@@ -76,6 +74,8 @@ def maximal_source_bone_chains_v1(parents: Tensor) -> tuple[tuple[int, ...], ...
                 raise ValueError("RIG_MATH_PARENT_CYCLE")
             seen.add(k)
             k = p[k]
+    if not any(x == -1 for x in p):
+        raise ValueError("RIG_MATH_NO_ROOT")
 
     chains: list[tuple[int, ...]] = []
     for j in range(n):

@@ -122,6 +122,11 @@ def _fixture(*, include_pose=True, include_frame=True, include_control=True):
         "source_tensors_sha256": source_rig_grounding_digest_v1(**source_hash_fields),
         "joint_index_and_mesh_vertex_reindex_proven": True,
         "source_semantics": "NATIVE_RIG_SKIN_NOT_PSEUDOLABEL",
+        "dof_truth_authority": "INDEPENDENT_SOURCE_INTERVENTION",
+        "dof_truth_witness_sha256": "d" * 64,
+        "control_rest_authority": "NATIVE_AUTHORED_CONTROL",
+        "anchor_local_authority": "SOURCE_NATIVE_ANCHOR",
+        "pose_truth_authority": "INDEPENDENT_SOURCE_LBS_POSES",
     }
     args = {
         "teacher": teacher,

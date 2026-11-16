@@ -39,6 +39,8 @@ def _fixture(*, include_pose=True, include_frame=True, include_control=True):
     # and are not synthetic SOURCE truth for control consequences.
     kinds = [1, 2, 2, 2, 2, 3, 4, 4, 4, 4, 5, 6, 8, 10, 14, 15, 16, 17, 18]
     ptr = [-1] * len(kinds)
+    # Source parent topology must match the exact ordered JOINT teacher tokens.
+    ptr[2:5] = [0, 1, 0]
     for index, value in enumerate((0, 1, 2, 3), start=6):
         ptr[index] = value
     teacher = SimpleNamespace(

@@ -28,6 +28,7 @@ LOSS_FIELDS = {
     "source_inside_sign": ("source_inside_sign_loss", "eligible_source_inside_sign_queries"),
     "source_signed_sdf": ("source_signed_sdf_loss", "eligible_source_signed_sdf_queries"),
     "axis_rig_skin_codes": ("axis_rig_skin_loss", "eligible_axis_sequences"),
+    "axis_rig_grounding": ("axis_rig_grounding_loss", "eligible_axis_sequences"),
     "axis_posed_surface": ("axis_posed_surface_loss", "eligible_axis_pose_count"),
     "axis_dynamic_posed_surface": ("axis_dynamic_posed_surface_loss", "eligible_axis_dynamic_pose_count"),
     "anchor_face_correspondence": ("anchor_face_correspondence_loss", "eligible_anchor_held_faces"),

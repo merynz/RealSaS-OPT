@@ -89,4 +89,4 @@ a weapon-grip source; a 6D frame alone does not establish locked DOF.
 - Trainer: models/rss_vnext/training_engine.py
 - Phase contract: models/rss_vnext/training_phase_contract_v1.py
 - Tests: tests/models/test_rig_program_source_grounding_v1.py
-- CI: .github/workflows/rss_vnext_rig_program_math.yml
+- CI: .github/workflows/rss_vnext_unified_cpu_smoke.yml

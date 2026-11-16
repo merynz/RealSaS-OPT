@@ -309,6 +309,11 @@ def qualified_rig_program_grounding_objective_v1(
     joints = torch.where(events[0] == int(RigTokenKindV6.JOINT))[0]
     if len(joints) != j:
         raise ValueError("RIG_MATH_JOINT_TEACHER_REINDEX_DRIFT")
+    # Reject a source parent tree that is merely similarly shaped but is not
+    # the exact joint-indexed topology taught by the AXIS causal event stream.
+    teacher_parent_ids = teacher.pointer_a[0, 1:][joints]
+    if not bool(torch.equal(teacher_parent_ids, source_parent_indices)):
+        raise ValueError("RIG_MATH_SOURCE_PARENT_TEACHER_MISMATCH")
     predicted_joint_xyz = xyz_pred[:, joints]
     parts["joint_position"] = F.smooth_l1_loss(predicted_joint_xyz, source_joint_xyz)
 

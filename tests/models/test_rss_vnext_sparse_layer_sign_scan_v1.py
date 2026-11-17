@@ -47,6 +47,7 @@ def test_exhaustive_sign_scan_equals_all_dense_cube_crossings_and_global_xyz():
         sphere,resolution=resolution,device=torch.device("cpu"),
         scene_dtype=torch.float32,query_chunk=17,
     )
+    bounded_max_chunk=max_chunk[0]
     dense_inside=sphere(dense_xyz[None])[0]<0
     cube_signs=dense_inside[dense_cubes]
     expected=torch.nonzero(
@@ -56,7 +57,7 @@ def test_exhaustive_sign_scan_equals_all_dense_cube_crossings_and_global_xyz():
         neg,resolution=resolution,x_slab=3,
     )
     torch.testing.assert_close(actual,expected)
-    assert max_chunk[0]<=17
+    assert bounded_max_chunk<=17
 
 
 def test_sign_scanner_rejects_forged_incomplete_or_nonfinite_output():
@@ -81,7 +82,7 @@ def test_sign_scanner_rejects_forged_incomplete_or_nonfinite_output():
 class _IRIS(nn.Module):
     def __init__(self):
         super().__init__()
-        self.cube_extraction=nn.Linear(64,21)
+        self.cube_extraction=nn.Sequential(nn.Flatten(-2),nn.Linear(64,21))
         self.max_query=0
 
     def query(self,planes,points):
@@ -112,15 +113,20 @@ def test_sparse_product_is_explicitly_opt_in_and_never_training_fallback():
         surface_query_chunk=8,max_cubes=512,
     ).eval()
     args=_args()
+    class Unpinned:
+        def construct_iris_grid(self,*args):
+            raise AssertionError("Must reject unpinned source")
+        def extract(self,*args,**kwargs):
+            raise AssertionError("Must reject unpinned source")
     with torch.no_grad(),pytest.raises(
         ValueError,match="SPARSE_INFERENCE_ONLY_PINNED",
     ):
-        bridge(extractor=object(),sparse_product_resolution=(7,8,9),**args)
+        bridge(extractor=Unpinned(),sparse_product_resolution=(7,8,9),**args)
     bridge.train()
     with torch.no_grad(),pytest.raises(
         ValueError,match="SPARSE_INFERENCE_ONLY_PINNED",
     ):
-        bridge(extractor=object(),sparse_product_resolution=(7,8,9),**args)
+        bridge(extractor=Unpinned(),sparse_product_resolution=(7,8,9),**args)
 
 
 def test_pinned_sparse_product_matches_dense_live_iris_field_and_surface():

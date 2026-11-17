@@ -171,6 +171,124 @@ def build_tessa_seeded_surface_v1(
     return result
 
 
+def tessa_adaptive_split_edges_v1(
+    seed: TESSASeededSurfaceV1,
+    *,
+    importance_logits: Tensor,
+    max_added_vertices: int,
+    length_gate_ratio: float = 1.0,
+) -> TESSASeededSurfaceV1:
+    """Conforming per-edge adaptive refinement with EXACT original parent IDs.
+
+    Discrete decisions are NOT differentiated. Once chosen, each new position
+    is a differentiable midpoint of the same source surface. All incident
+    triangles share one split vertex, so no T-junctions are created.
+    Topology operations finish before AXIS/MIRA, UV packing or canonical seal.
+    Neither welding nor collapsing a semantic garment shell is permitted.
+    """
+    seed.validate()
+    n = seed.xyz.shape[1]
+    if (
+        n != seed.original_vertex_count
+        or importance_logits.shape != (1, n)
+        or importance_logits.device != seed.xyz.device
+        or not bool(torch.isfinite(importance_logits).all())
+        or type(max_added_vertices) is not int
+        or not 0 <= max_added_vertices <= 32768
+        or type(length_gate_ratio) not in (int, float)
+        or not 0.5 <= length_gate_ratio <= 4.0
+    ):
+        raise ValueError("TESSA_ADAPTIVE_SOURCE_OR_POLICY")
+    if max_added_vertices == 0:
+        return seed
+    faces = seed.faces.detach().cpu().tolist()
+    edges = sorted({
+        tuple(sorted((a,b)))
+        for a,b,c in faces for a,b in ((a,b),(b,c),(c,a))
+    })
+    pairs = torch.tensor(edges,dtype=torch.long,device=seed.xyz.device)
+    lengths = torch.linalg.vector_norm(
+        seed.xyz[0,pairs[:,0]]-seed.xyz[0,pairs[:,1]],dim=-1,
+    )
+    if not bool((lengths > 1.e-10).all()):
+        raise ValueError("TESSA_ADAPTIVE_DEGENERATE_EDGE")
+    # Global scale is an explicit, source-independent mesh metric, not ground
+    # truth. Trained logits are a bounded local density preference only.
+    baseline = torch.median(lengths.detach())
+    preference = torch.sigmoid(
+        0.5 * (importance_logits[0,pairs[:,0]] +
+               importance_logits[0,pairs[:,1]])
+    ).detach()
+    target = baseline * float(length_gate_ratio) * (
+        1.5 - preference
+    )
+    eligible = torch.nonzero(lengths.detach() > target,as_tuple=False).flatten()
+    if not len(eligible):
+        return seed
+    # Prefer worst relative edge excess. Stable index is a tie break.
+    order = sorted(
+        eligible.detach().cpu().tolist(),
+        key=lambda i:(-float((lengths[i]/target[i]).item()),edges[i]),
+    )[:max_added_vertices]
+    selected = sorted(edges[i] for i in order)
+    index = {edge:n+i for i,edge in enumerate(selected)}
+    picked = torch.tensor(selected,dtype=torch.long,device=seed.xyz.device)
+    midpoint = (seed.xyz[:,picked[:,0]]+seed.xyz[:,picked[:,1]])*0.5
+    xyz = torch.cat((seed.xyz,midpoint),dim=1)
+    comp = torch.cat((
+        seed.vertex_component_ids,
+        seed.vertex_component_ids[picked[:,0]],
+    ))
+    triangles = []
+    for a,b,c in faces:
+        ab = index.get(tuple(sorted((a,b))))
+        bc = index.get(tuple(sorted((b,c))))
+        ca = index.get(tuple(sorted((c,a))))
+        if ab is None and bc is None and ca is None:
+            triangles.append((a,b,c))
+        elif ab is not None and bc is None and ca is None:
+            triangles.extend(((a,ab,c),(ab,b,c)))
+        elif ab is None and bc is not None and ca is None:
+            triangles.extend(((a,b,bc),(a,bc,c)))
+        elif ab is None and bc is None and ca is not None:
+            triangles.extend(((a,b,ca),(b,c,ca)))
+        elif ab is not None and bc is not None and ca is None:
+            triangles.extend(((a,ab,c),(ab,bc,c),(ab,b,bc)))
+        elif ab is None and bc is not None and ca is not None:
+            triangles.extend(((a,b,ca),(b,bc,ca),(bc,c,ca)))
+        elif ab is not None and bc is None and ca is not None:
+            triangles.extend(((a,ab,ca),(ab,b,c),(ab,c,ca)))
+        else:
+            triangles.extend((
+                (a,ab,ca),(ab,b,bc),(ca,bc,c),(ab,bc,ca),
+            ))
+    output_faces = torch.tensor(
+        triangles,dtype=torch.long,device=seed.xyz.device,
+    )
+    normals = torch.cross(
+        xyz[:,output_faces[:,1]]-xyz[:,output_faces[:,0]],
+        xyz[:,output_faces[:,2]]-xyz[:,output_faces[:,0]],
+        dim=-1,
+    )
+    # All triangles share the original winding; numerical degeneracy ABSTAINS.
+    if not bool((torch.linalg.vector_norm(normals,dim=-1) > 1.e-11).all()):
+        raise ValueError("TESSA_ADAPTIVE_TRIANGLE_DEGENERACY")
+    result = TESSASeededSurfaceV1(
+        xyz=xyz,faces=output_faces,
+        vertex_component_ids=comp,
+        face_component_ids=comp[output_faces[:,0]],
+        parent_seed_edges=seed.parent_seed_edges+tuple(selected),
+        parent_seed_weights=seed.parent_seed_weights
+                           +tuple((0.5,0.5) for _ in selected),
+        original_vertex_count=seed.original_vertex_count,
+        original_face_count=seed.original_face_count,
+        scene_sha256=seed.scene_sha256,
+        original_surface_sha256=seed.original_surface_sha256,
+    )
+    result.validate()
+    return result
+
+
 def tessa_seed_from_flexicubes_v1(
     *,
     witness,
@@ -265,4 +383,5 @@ __all__ = [
     "TESSASeededSurfaceV1",
     "build_tessa_seeded_surface_v1",
     "tessa_seed_from_flexicubes_v1",
+    "tessa_adaptive_split_edges_v1",
 ]

@@ -156,6 +156,21 @@ def build_source_native_tessa_dynamic_importance_v1(
         raise ValueError("RSS_VNEXT_NATIVE_DYNAMIC_SOURCE_POLICY")
     witness.replay()
     v,f=witness.vertices,witness.faces
+    # Native face sampling validates sampled triangles; the motion label
+    # operates on ALL original faces. Never let an unobserved degenerate,
+    # duplicate or non-manifold source face silently teach the student.
+    from .native_layer_open_boundary_v1 import exact_open_boundary_edges_v1
+    exact_open_boundary_edges_v1(f)
+    if (
+        torch.unique(f.sort(dim=-1).values,dim=0).shape[0]!=len(f)
+        or bool((
+            torch.linalg.vector_norm(torch.cross(
+                v[f[:,1]]-v[f[:,0]],
+                v[f[:,2]]-v[f[:,0]],dim=-1,
+            ),dim=-1)<=1.e-11
+        ).any())
+    ):
+        raise ValueError("RSS_VNEXT_NATIVE_DYNAMIC_FULL_SOURCE_FACE_INVALID")
     n=len(v)
     j=native_skin.shape[1] if native_skin.ndim==2 else -1
     p=native_pose_matrices.shape[1] if native_pose_matrices.ndim==5 else -1

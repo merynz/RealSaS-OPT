@@ -116,6 +116,11 @@ def test_raw_compiler_rejects_scene_and_parent_forgery():
     changed["tessa_seed_vertex_parent_indices"][0,0]=999
     with pytest.raises(RuntimeError,match="SEEDED_PARENT_OR_CONTEXT_DRIFT"):
         _validate_candidate(changed,receipt)
+    face_change={**a,"tessa_seed_original_faces":
+        a["tessa_seed_original_faces"].copy()}
+    face_change["tessa_seed_original_faces"][0]=[0,1,2]
+    with pytest.raises(RuntimeError,match="SEEDED_SURFACE_HASH_DRIFT"):
+        _validate_candidate(face_change,receipt)
     changed={k:v for k,v in a.items()
              if k!="tessa_candidate_mechanics_local_features"}
     with pytest.raises(RuntimeError,match="SEEDED_CONTEXT_OR_LINEAGE_REQUIRED"):

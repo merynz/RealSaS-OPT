@@ -73,6 +73,7 @@ def run_two_source_neural_construction_v1(
     max_topology_tokens: int | None = None,
     generate_controls: bool = False,
     flexicubes_extractor=None,
+    flexicubes_layers: tuple[RSSvNextSemanticLayerSpec,...] | None = None,
 ) -> RSSvNextTwoSourceConstructionV1:
     """Runs actual pinned stage samplers, never substitutes static test views.
 
@@ -164,11 +165,13 @@ def run_two_source_neural_construction_v1(
         ),
         flexicubes_extractor=flexicubes_extractor,
         flexicubes_layer=(
-            RSSvNextSemanticLayerSpec(
+            (flexicubes_layers[0] if flexicubes_layers is not None
+             else RSSvNextSemanticLayerSpec(
                 "all", model.cfg.semantic_role_schema().roles,
-            )
+             ))
             if flexicubes_extractor is not None else None
         ),
+        flexicubes_layers=flexicubes_layers,
     )
     if (
         prediction["state"].scene_conditioning_authority

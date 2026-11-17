@@ -275,11 +275,8 @@ def source_native_component_udf_objective_v1(
     valid=teacher.source_component_mask[:,None].to(delta.dtype)
     geometric=(delta*valid).sum(-1)/valid.sum(-1).clamp_min(1)
     log_probs=F.log_softmax(predicted_kind_logits[0],dim=-1)
-    classification= -log_probs[
-        None,torch.arange(r,device=log_probs.device)[None,:],
-        teacher.source_component_open_kind[:,None],
-    ]
-    # Broadcasted advanced index -> [C,R]
+    classification= -log_probs[:,teacher.source_component_open_kind].transpose(0,1)
+    # [C,R] from source-known OPEN/CLOSED, not student slot labels.
     pair=geometric+kind_cost_weight*classification
     slots=_hungarian_min_injective_v1(pair)
     ids=torch.tensor(slots,device=pair.device,dtype=torch.long)

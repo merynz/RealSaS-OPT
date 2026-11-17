@@ -75,6 +75,13 @@ from .training_seeded_tessa_v1 import (
     PHASE as SEEDED_TESSA_PHASE,
 )
 from .seeded_surface_sampling_v1 import SeededSurfaceSamplingPolicyV1
+from .layered_iris_seed_v1 import (
+    make_layered_iris_seed_v1, layer_namespace_digest_v1,
+)
+from .seeded_layer_source_court_v1 import (
+    SOURCE_LAYER_AUTHORITY,SOURCE_LAYER_DERIVATION,
+)
+from .training_seeded_tessa_v1 import _digest as seeded_source_tensor_digest_v1
 from .tessa_seeded_surface_v1 import tessa_seed_from_flexicubes_v1
 
 
@@ -189,6 +196,10 @@ class RSSvNextStructuralTrainingBatch:
     # frames + pinned GENERATED six-view conditioning, never the teacher.
     seeded_tessa_source_teacher: SeededTESSASourceTeacherV1 | None = None
     seeded_tessa_source_face_budget: int = 0
+    # Source-qualified signed shells, never infer garment presence merely
+    # from four-way presentation role. No imaginary/open cloth shell.
+    flexicubes_layers: tuple[RSSvNextSemanticLayerSpec,...] | None = None
+    flexicubes_signed_layer_admission_keys: tuple[str,...] = ()
     source_qualification_key: str = ""
     admission_status: str = ""
 
@@ -302,6 +313,7 @@ class RSSvNextTrainingResult:
     seeded_tessa_sampled_source_point_count: int = 0
     seeded_tessa_sampled_student_vertex_count: int = 0
     seeded_tessa_sampled_quality_face_count: int = 0
+    seeded_tessa_qualified_layer_count: int = 0
 
 
 def axis_mesh_teacher_address_digest_v1(mesh) -> str:
@@ -2083,6 +2095,7 @@ class RSSvNextStructuralTrainer:
             "product_generation_checkpoint_sha256",
             "product_conditioning_admission_key",
             "flexicubes_extractor", "flexicubes_layer",
+            "flexicubes_layers", "flexicubes_signed_layer_admission_keys",
             "flexicubes_high_resolution_training",
             "flexicubes_reference_surface_xyz",
             "flexicubes_signed_source_admission_key",
@@ -2127,50 +2140,125 @@ class RSSvNextStructuralTrainer:
             or batch.flexicubes_reference_surface_xyz is None
         ):
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_NO_LEGACY_TEACHER_OR_SURFACE")
-        # A signed FlexiCubes surface can use an open-source mesh as an
-        # *unsigned* target elsewhere, but cannot claim a signed-solid field.
-        signed = self.trusted_signed_source_registry.get(
-            batch.flexicubes_signed_source_admission_key,
-        )
+        # Source 3D geometry is LOSS-ONLY. Named source layers are native
+        # annotations and signed-domain admissions, NOT model predictions.
+        # The student receives only two original images + six generated
+        # conditioning views in exactly one H(x).
         target = batch.flexicubes_reference_surface_xyz
+        layers = (
+            batch.flexicubes_layers
+            if batch.flexicubes_layers is not None
+            else (batch.flexicubes_layer,)
+        )
+        layered = batch.flexicubes_layers is not None
+        schema = self.model.cfg.semantic_role_schema()
         if (
-            signed is None
-            or signed.get("admission_status") != "QUALIFIED_SOURCE_SIGNED_SOLID"
-            or signed.get("source_component_domain") not in (
-                "SINGLE_QUALIFIED_CLOSED_COMPONENT",
-                "EXPLICIT_QUALIFIED_CLOSED_ASSEMBLY",
-            )
-            or signed.get("dataset_manifest_sha256")
-                != self.dataset_manifest_sha256
-            or signed.get("source_qualification_key")
-                != batch.source_qualification_key
-            or signed.get("role_schema_id")
-                != self.model.cfg.semantic_role_schema_id
-            or signed.get("layer_name") != batch.flexicubes_layer.name
-            or signed.get("surface_target_sha256")
-                != source_surface_tensor_sha256(target)
-            or (
-                signed.get("source_component_domain")
-                == "EXPLICIT_QUALIFIED_CLOSED_ASSEMBLY"
-                and (
-                    signed.get("assembly_boolean_operations_qualified") is not True
-                    or signed.get("sdf_distance_scope")
-                        != "EXACT_BOUNDARY_OF_THE_SAME_QUALIFIED_SOLID"
-                    or signed.get("sdf_sign_scope")
-                        != "GLOBAL_NEGATIVE_INSIDE_POSITIVE_OUTSIDE"
-                )
-            )
-        ):
-            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_SIGNED_SOURCE_NOT_ADMITTED")
-        if (
-            target.shape != (1, teacher.source_xyz.shape[0], 3)
+            not isinstance(layers,tuple)
+            or not all(isinstance(v,RSSvNextSemanticLayerSpec) for v in layers)
+            or not len(layers) >= 1
+            or layers[0] != batch.flexicubes_layer
+            or target.shape != (1, teacher.source_xyz.shape[0], 3)
             or not torch.equal(target[0], teacher.source_xyz)
-            or batch.flexicubes_layer.name != "all"
-            or tuple(batch.flexicubes_layer.keep_roles)
-                != tuple(self.model.cfg.semantic_role_schema().roles)
             or state.scene_triplanes.shape[0] != 1
         ):
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_SOURCE_TARGET_OR_LAYER_DRIFT")
+        if layered:
+            if (
+                not 2 <= len(layers) <= schema.count
+                or not isinstance(batch.flexicubes_signed_layer_admission_keys,tuple)
+                or len(batch.flexicubes_signed_layer_admission_keys)!=len(layers)
+                or len(set(batch.flexicubes_signed_layer_admission_keys))!=len(layers)
+                or batch.flexicubes_signed_layer_admission_keys[0]
+                    != batch.flexicubes_signed_source_admission_key
+                or teacher.source_layer_ids is None
+                or teacher.source_component_ids is None
+                or teacher.source_layer_ids.shape!=(teacher.source_xyz.shape[0],)
+                or teacher.source_layer_ids.dtype!=torch.long
+                or bool((teacher.source_layer_ids<0).any())
+                or int(teacher.source_layer_ids.max()) >= len(layers)
+            ):
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_LAYER_SOURCE_ADMISSION_REQUIRED")
+            claimed=set()
+            for spec in layers:
+                spec.validate(schema)
+                if claimed.intersection(spec.keep_roles):
+                    raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_LAYER_ROLE_OVERLAP")
+                claimed.update(spec.keep_roles)
+            namespace=layer_namespace_digest_v1(
+                tuple(layer.name for layer in layers),
+                tuple(layer.keep_roles for layer in layers),
+            )
+            if (
+                tuple(sorted(claimed)) != tuple(sorted(schema.roles))
+                and not bool(claimed)
+            ):
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_LAYER_EMPTY_ROLES")
+            keys=batch.flexicubes_signed_layer_admission_keys
+        else:
+            if (
+                batch.flexicubes_signed_layer_admission_keys
+                or batch.flexicubes_layer.name!="all"
+                or tuple(batch.flexicubes_layer.keep_roles)!=tuple(schema.roles)
+                or teacher.source_layer_ids is not None
+            ):
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_LAYER_SOURCE_TARGET_DRIFT")
+            namespace=""
+            keys=(batch.flexicubes_signed_source_admission_key,)
+        if any(not isinstance(k,str) or not k for k in keys):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_LAYER_SIGNED_KEYS_INVALID")
+        for layer_index,(layer,key) in enumerate(zip(layers,keys)):
+            signed=self.trusted_signed_source_registry.get(key)
+            native_part=(
+                teacher.source_xyz[
+                    teacher.source_layer_ids==layer_index
+                ][None] if layered else target
+            )
+            if (
+                native_part.shape[1] < 3
+                or signed is None
+                or signed.get("admission_status")
+                    != "QUALIFIED_SOURCE_SIGNED_SOLID"
+                or signed.get("source_component_domain") not in (
+                    "SINGLE_QUALIFIED_CLOSED_COMPONENT",
+                    "EXPLICIT_QUALIFIED_CLOSED_ASSEMBLY",
+                )
+                or signed.get("dataset_manifest_sha256")
+                    != self.dataset_manifest_sha256
+                or signed.get("source_qualification_key")
+                    != batch.source_qualification_key
+                or signed.get("role_schema_id")
+                    != self.model.cfg.semantic_role_schema_id
+                or signed.get("layer_name")!=layer.name
+                or signed.get("surface_target_sha256")
+                    != source_surface_tensor_sha256(native_part)
+                or (
+                    signed.get("source_component_domain")
+                        == "EXPLICIT_QUALIFIED_CLOSED_ASSEMBLY"
+                    and (
+                        signed.get("assembly_boolean_operations_qualified") is not True
+                        or signed.get("sdf_distance_scope")
+                            != "EXACT_BOUNDARY_OF_THE_SAME_QUALIFIED_SOLID"
+                        or signed.get("sdf_sign_scope")
+                            != "GLOBAL_NEGATIVE_INSIDE_POSITIVE_OUTSIDE"
+                    )
+                )
+            ):
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_SIGNED_SOURCE_NOT_ADMITTED")
+            if layered and any(
+                signed.get(k)!=v for k,v in {
+                    "source_layer_partition_authority":SOURCE_LAYER_AUTHORITY,
+                    "source_layer_partition_derivation":SOURCE_LAYER_DERIVATION,
+                    "native_source_layer_partition_sha256":
+                        seeded_source_tensor_digest_v1(teacher.source_layer_ids),
+                    "source_layer_namespace_sha256":namespace,
+                    "source_layer_native_asset_sha256":
+                        teacher.source_asset_sha256,
+                    "native_source_layer_index":layer_index,
+                    "source_layer_independently_audited":True,
+                    "source_label_student_checkpoint_dependency":False,
+                }.items()
+            ):
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_NATIVE_SIGNED_LAYER_RECEIPT_DRIFT")
         receipt = driver.trusted_registry.get(
             teacher.source_qualification_key,
         )
@@ -2189,6 +2277,10 @@ class RSSvNextStructuralTrainer:
                 "signed_source_admission_key":
                     batch.flexicubes_signed_source_admission_key,
                 "semantic_layer_name":batch.flexicubes_layer.name,
+                **({
+                    "signed_layer_admission_keys":list(keys),
+                    "source_layer_namespace_sha256":namespace,
+                } if layered else {}),
             }.items()
         ):
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_SOURCE_IMAGE_OR_SCENE_BINDING")
@@ -2201,9 +2293,27 @@ class RSSvNextStructuralTrainer:
             field_policy="SIGNED_HYPOTHESIS_ONLY",
             high_resolution_training=batch.flexicubes_high_resolution_training,
         )
-        seed = tessa_seed_from_flexicubes_v1(
-            witness=surface,scene_triplanes=state.scene_triplanes,
-        )
+        if layered:
+            from .layered_iris_seed_v1 import make_layered_iris_seed_v1
+            evidence=[(layers[0],surface)]
+            for spec in layers[1:]:
+                shell=self.model.fc_surface_bridge(
+                    state.scene_triplanes,
+                    extractor=batch.flexicubes_extractor,
+                    role_head=self.model.presentation_role_head,
+                    schema=schema,
+                    layer=spec,field_policy="SIGNED_HYPOTHESIS_ONLY",
+                    high_resolution_training=batch.flexicubes_high_resolution_training,
+                )
+                evidence.append((spec,shell))
+            seed=make_layered_iris_seed_v1(
+                evidence=tuple(evidence),schema=schema,
+                scene_triplanes=state.scene_triplanes,
+            ).seed
+        else:
+            seed = tessa_seed_from_flexicubes_v1(
+                witness=surface,scene_triplanes=state.scene_triplanes,
+            )
         candidate = self.model.build_seeded_mechanics_candidate_v1(
             state, seed, adaptive_refinement=True,
         )
@@ -2232,7 +2342,7 @@ class RSSvNextStructuralTrainer:
                 if k not in (
                     "total","qualified_source_points","sampled_source_points",
                     "sampled_student_vertices","sampled_quality_faces",
-                    "sampling_step",
+                    "sampling_step","qualified_source_layer_count",
                 )
             },
             seeded_tessa_source_point_count=int(
@@ -2246,6 +2356,9 @@ class RSSvNextStructuralTrainer:
             ),
             seeded_tessa_sampled_quality_face_count=int(
                 losses["sampled_quality_faces"].item()
+            ),
+            seeded_tessa_qualified_layer_count=int(
+                losses["qualified_source_layer_count"].item()
             ),
         )
 

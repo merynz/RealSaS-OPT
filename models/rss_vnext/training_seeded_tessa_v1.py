@@ -35,6 +35,13 @@ from .native_dynamic_tessa_importance_v1 import (
     NativeTESSADynamicImportanceV1,
     verify_dynamic_importance_bound_to_teacher_v1,
 )
+from .native_pose_transport_v1 import (
+    SourceNativeCandidatePoseTransportV1,
+    validate_source_native_pose_candidate_teacher_v1,
+)
+from .seeded_pose_consequence_objective_v1 import (
+    exact_m_qualified_pose_strain_v1,
+)
 from .native_layer_open_boundary_v1 import (
     NativeLayerOpenBoundaryV1, exact_open_boundary_edges_v1,
     validate_native_open_boundary_v1,
@@ -100,6 +107,9 @@ class SeededTESSASourceTeacherV1:
     native_open_boundary: NativeLayerOpenBoundaryV1 | None = None  # independently replayed complete native open hems
     # Optional native-face G3/G3B-style risk label. Never from student M/skin.
     native_dynamic_importance: NativeTESSADynamicImportanceV1 | None = None
+    # Original native source-face->candidate support; only this can
+    # qualify per-vertex transport for deformation and posed face losses.
+    native_pose_transport: SourceNativeCandidatePoseTransportV1 | None = None
     source_boundary_xyz: Tensor | None = None  # [K,3], exact known open seams
     source_boundary_mask: Tensor | None = None # [K] bool
     # Only if a trusted source→candidate barycentric/skin joint reindex exists.
@@ -370,12 +380,13 @@ class RSSvNextSeededTESSATrainerV1:
         )
         # Open hems require independently qualified per-layer seam target.
         # Legacy single-set boundary chamfer could bridge a body/cape edge.
-        if layer_court is not None and (
-            w.deformation>0 or w.pose_strain>0 or w.layer_penetration>0
-        ):
+        if layer_court is not None and w.layer_penetration>0:
             raise ValueError(
-                "RSS_VNEXT_SEEDED_LAYER_POSE_OR_PENETRATION_REINDEX_NOT_QUALIFIED"
+                "RSS_VNEXT_SEEDED_LAYER_PENETRATION_NOT_YET_QUALIFIED"
             )
+        # A layered mesh may train on poses ONLY through independently
+        # replayed per-candidate native face/skin/pose support below.
+        # Never infer cross-layer correspondence by matching XYZ.
         policy=self.sampling_policy
         source_all_indices=torch.nonzero(
             teacher.source_point_mask,as_tuple=False,
@@ -645,6 +656,29 @@ class RSSvNextSeededTESSATrainerV1:
             if (skin.shape[1] != xyz.shape[1]
                     or target.shape[2] != xyz.shape[1]):
                 raise ValueError("RSS_VNEXT_TESSA_TRAIN_POSE_VERTEX_CORRESPONDENCE")
+            # The source face/vertex addresses are independent of the
+            # predicted H(x). Every candidate vertex must have an audited
+            # native source face + barycentric support, replaying skin and
+            # source pose exactly. Bare source_candidate_skin hashes are NOT
+            # a correspondence proof, regardless of matching tensor shape.
+            validate_source_native_pose_candidate_teacher_v1(
+                support=teacher.native_pose_transport,
+                native_face_witness=teacher.native_face_layer_samples,
+                candidate_faces=mesh.faces,
+                candidate_rest=xyz,
+                source_candidate_skin=skin,
+                source_candidate_posed=target,
+                source_pose_mask=mask,
+                source_pose_matrices=matrices,
+                teacher_source_asset_sha256=teacher.source_asset_sha256,
+                teacher_receipt=receipt,
+                trusted_source_registry=self.trusted_registry,
+            )
+            if (
+                teacher.native_dynamic_importance is None
+                or not teacher.native_dynamic_importance.source_absolute_g3_within_limits
+            ):
+                raise ValueError("RSS_VNEXT_TESSA_POSE_SOURCE_G3_NOT_QUALIFIED")
             from .animation_ready_mesh import posed_lbs_from_joint_matrices
             posed=posed_lbs_from_joint_matrices(xyz,skin,matrices)
             if w.deformation>0:
@@ -652,18 +686,12 @@ class RSSvNextSeededTESSATrainerV1:
                     posed[mask]/scale,target[mask]/scale,
                 )
             if w.pose_strain>0:
-                # Preserve local edge-length changes relative to the EXACT
-                # source-qualified target trajectory; do not punish all
-                # non-rigid deformations as if cloth were a rigid body.
-                faces=mesh.faces
-                pred_e=(posed[:,:,faces[:,1]]-posed[:,:,faces[:,0]]).norm(dim=-1)
-                true_e=(target[:,:,faces[:,1]]-target[:,:,faces[:,0]]).norm(dim=-1)
-                valid=mask[:,:,faces[:,0]] & mask[:,:,faces[:,1]]
-                if not bool(valid.any()):
-                    raise ValueError("RSS_VNEXT_TESSA_TRAIN_POSE_EDGE_MASK_EMPTY")
-                vals["pose_strain"]=F.smooth_l1_loss(
-                    pred_e[valid]/scale,true_e[valid]/scale,
-                )
+                vals["pose_strain"]=exact_m_qualified_pose_strain_v1(
+                    rest_xyz=xyz,faces=mesh.faces,
+                    predicted_poses=posed,source_native_posed=target,
+                    source_pose_mask=mask,source_candidate_skin=skin,
+                    scale=scale,
+                )["total"]
         keys={k:v for k,v in asdict(w).items() if (
             k != "clip_gradient_norm" and v>0
         )}

@@ -65,6 +65,20 @@ def _check_topology(faces: Tensor, vertex_count: int):
     boundary=edge_keys[incidence==1]
     if len(boundary)<3:
         raise ValueError("RSS_VNEXT_UDF_NOT_AN_OPEN_SHEET")
+    # A successful DCUDF2 graph cut cannot hide closed double-cover remnants
+    # by returning them alongside one otherwise valid open sheet. ALL
+    # connected face components must independently expose a true open hem.
+    # No orphan vertex may masquerade as a separate (unverified) component.
+    if torch.unique(faces.reshape(-1)).numel()!=vertex_count:
+        raise ValueError("RSS_VNEXT_UDF_ORPHAN_VERTEX")
+    graph_components=_components(vertex_count,faces)
+    face_components=torch.unique(graph_components[faces[:,0]])
+    hem_components=graph_components[boundary[:,0]]
+    hem_count=torch.bincount(
+        hem_components,minlength=int(graph_components.max())+1,
+    )
+    if bool((hem_count[face_components]==0).any()):
+        raise ValueError("RSS_VNEXT_UDF_CLOSED_COMPONENT_LEAK")
     # Every open border belongs to a closed boundary loop, not a dangling
     # crack or branched T-junction at a lone vertex.
     degree=torch.bincount(boundary.reshape(-1),minlength=vertex_count)

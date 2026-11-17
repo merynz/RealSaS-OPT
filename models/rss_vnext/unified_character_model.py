@@ -1193,9 +1193,16 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             code_positions = rig_sequence.kind_ids[0] == int(
                 RigTokenKindV6.SKIN_CODE
             )
-            hard_token_ids = rig_sequence.skin_code_ids[
-                0, code_positions
-            ].reshape(1, n_joints, self.cfg.skin_tokens_per_joint)
+            # Hard replay uses MODEL-PREDICTED causal IDs, never teacher labels
+            # from the incoming training-only AXISSequenceV6.
+            positions = torch.where(code_positions)[0]
+            if bool((positions == 0).any()):
+                raise RuntimeError("RSS_VNEXT_SEEDED_MIRA_INVALID_CODE_POSITION")
+            hard_token_ids = control["skin_code_logits"][
+                0, positions - 1,
+            ].argmax(dim=-1).reshape(
+                1, n_joints, self.cfg.skin_tokens_per_joint,
+            )
             decoded = self.mira.decode_discrete_skin_v1(
                 mechanics_h, mesh.rest_vertices_iris,
                 joints[:, :n_joints], hard_token_ids,

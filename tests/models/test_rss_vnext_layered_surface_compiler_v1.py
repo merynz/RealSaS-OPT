@@ -158,3 +158,85 @@ def test_layer_union_without_overlap_or_source_sign_fabrication():
             )),witnesses[1]),schema=schema,
             scene_triplanes=state.scene_triplanes,
         )
+
+
+def test_teacher_free_model_uses_same_scene_for_two_shells(monkeypatch):
+    model,_,joined,roles,*_=_test_model_and_layers()
+    calls=[]
+    def extract_same_scene(
+        scene_triplanes, *,extractor,role_head,schema,layer,
+        field_policy,high_resolution_training=False,
+    ):
+        assert field_policy=="SIGNED_HYPOTHESIS_ONLY"
+        calls.append((layer.name,scene_triplanes.detach().clone()))
+        xyz=torch.tensor([[[-.35,.35,0.],[.35,.35,0.],
+                          [-.35,-.35,0.],[.35,-.35,0.]]])
+        faces=torch.tensor([[0,2,1],[1,2,3]],dtype=torch.long)
+        return RSSvNextFlexiCubesSurfaceEvidence(
+            xyz=xyz,faces=faces,
+            local_features=torch.zeros(
+                1,4,model.cfg.iris.local_feature_dim,
+            ),
+            presentation_role_logits=torch.zeros(
+                1,4,model.cfg.semantic_role_schema().count,
+            ),
+            regularizer=torch.zeros(1),
+            sample_grid_xyz=torch.zeros(1,4,3),
+            signed_field_grid=torch.zeros(1,4),
+            cube_parameters=torch.zeros(1,21),
+            source_policy=field_policy,
+            layer_name=layer.name,
+        )
+    monkeypatch.setattr(
+        model.fc_surface_bridge,"forward",extract_same_scene,
+    )
+    rgba=torch.rand(1,2,4,8,8)
+    cam=torch.zeros(1,2,13)
+    cam[...,3]=cam[...,7]=cam[...,11]=cam[...,12]=1
+    out=model.propose_teacher_free(
+        rgba,cam,flexicubes_extractor=object(),
+        flexicubes_layer=roles[0],flexicubes_layers=roles,
+    )
+    assert out["mesh_status"]=="UNQUALIFIED_MESH_CANDIDATE"
+    assert out["semantic_layer_names"]==("body","cloth")
+    assert out["mesh_candidate"].seeded_surface is not None
+    assert out["mesh_candidate"].seeded_surface.layer_names==("body","cloth")
+    assert [name for name,_ in calls]==["body","cloth"]
+    torch.testing.assert_close(calls[0][1],calls[1][1])
+
+
+def test_teacher_free_missing_one_shell_abstains_without_legacy_mesh(monkeypatch):
+    model,_,_,roles,*_=_test_model_and_layers()
+    def fail_shell(
+        scene_triplanes, *,extractor,role_head,schema,layer,
+        field_policy,high_resolution_training=False,
+    ):
+        if layer.name=="cloth":
+            raise ValueError("SOURCE_SIGN_SHELL_EMPTY")
+        return RSSvNextFlexiCubesSurfaceEvidence(
+            xyz=torch.tensor([[[0.,0.,0.],[1.,0.,0.],[0.,1.,0.]]]),
+            faces=torch.tensor([[0,1,2]],dtype=torch.long),
+            local_features=torch.zeros(
+                1,3,model.cfg.iris.local_feature_dim,
+            ),
+            presentation_role_logits=torch.zeros(
+                1,3,model.cfg.semantic_role_schema().count,
+            ),
+            regularizer=torch.zeros(1),
+            sample_grid_xyz=torch.zeros(1,3,3),
+            signed_field_grid=torch.zeros(1,3),
+            cube_parameters=torch.zeros(1,21),
+            source_policy=field_policy,layer_name=layer.name,
+        )
+    monkeypatch.setattr(model.fc_surface_bridge,"forward",fail_shell)
+    rgba=torch.rand(1,2,4,8,8)
+    cam=torch.zeros(1,2,13)
+    cam[...,3]=cam[...,7]=cam[...,11]=cam[...,12]=1
+    out=model.propose_teacher_free(
+        rgba,cam,flexicubes_extractor=object(),
+        flexicubes_layer=roles[0],flexicubes_layers=roles,
+    )
+    assert out["mesh_candidate"] is None
+    assert out["mesh_status"]=="ABSTAIN"
+    assert "SOURCE_SIGN_SHELL_EMPTY" in out["mesh_failure"]
+    assert out["topology_candidate_abi"]=="ONE_IRIS_SEEDED_MESH_V1"

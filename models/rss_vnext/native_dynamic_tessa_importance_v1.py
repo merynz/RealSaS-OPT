@@ -307,6 +307,42 @@ def build_source_native_tessa_dynamic_importance_v1(
         return out
 
 
+def combine_native_structural_importance_v1(
+    *, witness: NativeFaceLayerSamplesV1,
+    native_motion_risk: NativeTESSADynamicImportanceV1,
+    independently_qualified_static_importance: Tensor,
+    independently_qualified_static_mask: Tensor,
+) -> tuple[Tensor,Tensor]:
+    """Union native curvature and motion risks over exact SAME sample face IDs.
+
+    Called when preparing a source-native teacher, never during student
+    inference. The caller must still seal both resulting tensors in the
+    trusted TESSA registry and attach the native motion receipt separately.
+    """
+    native_motion_risk.validate(witness)
+    static=independently_qualified_static_importance
+    mask=independently_qualified_static_mask
+    if (
+        static.shape!=native_motion_risk.sample_importance.shape
+        or mask.shape!=native_motion_risk.sample_mask.shape
+        or mask.dtype!=torch.bool
+        or static.dtype!=native_motion_risk.sample_importance.dtype
+        or static.device!=witness.vertices.device
+        or mask.device!=witness.vertices.device
+        or not bool(torch.isfinite(static).all())
+        or bool((static<0).any() or (static>1).any())
+    ):
+        raise ValueError("RSS_VNEXT_NATIVE_DYNAMIC_STATIC_IMPORTANCE_DOMAIN")
+    combined=torch.where(
+        mask,static,torch.zeros_like(static),
+    )
+    combined=torch.maximum(
+        combined,native_motion_risk.sample_importance,
+    )
+    qualified_mask=mask | native_motion_risk.sample_mask
+    return combined,qualified_mask
+
+
 def verify_dynamic_importance_bound_to_teacher_v1(
     risk: NativeTESSADynamicImportanceV1 | None,
     *,
@@ -338,5 +374,6 @@ __all__=[
     "SCHEMA","SOURCE_RECEIPT_SCHEMA",
     "NativeTESSADynamicImportanceV1",
     "build_source_native_tessa_dynamic_importance_v1",
+    "combine_native_structural_importance_v1",
     "verify_dynamic_importance_bound_to_teacher_v1",
 ]

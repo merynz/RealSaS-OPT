@@ -2188,11 +2188,6 @@ class RSSvNextStructuralTrainer:
                 tuple(layer.name for layer in layers),
                 tuple(layer.keep_roles for layer in layers),
             )
-            if (
-                tuple(sorted(claimed)) != tuple(sorted(schema.roles))
-                and not bool(claimed)
-            ):
-                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_LAYER_EMPTY_ROLES")
             keys=batch.flexicubes_signed_layer_admission_keys
         else:
             if (

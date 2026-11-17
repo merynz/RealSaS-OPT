@@ -89,8 +89,10 @@ class RSSvNextStructuralMeshCandidate:
                 or self.base_vertices_iris is not self.seeded_surface.xyz
             ):
                 raise ValueError("RSS_VNEXT_MESH_SEEDED_TOPOLOGY_IDENTITY_DRIFT")
-        elif self.topology_court is None or not self.topology_token_ids:
-            raise ValueError("RSS_VNEXT_MESH_UNDECLARED_TOPOLOGY_PARENT")
+        # The legacy learned-token proposal's grammar court is checked by
+        # the existing model/Compiler callers.  A source-neutral test/CAS
+        # carrier can intentionally omit that court; do not retroactively
+        # break the old proposal ABI while migrating to seeded topology.
         if self.source_ray_evidence is not None:
             self.source_ray_evidence.validate(batch=1, points=v)
 

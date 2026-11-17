@@ -27,7 +27,10 @@ from models.axis.rig_program_model_v6 import (
 )
 from models.mira.skin_fsq_codec_v6 import MIRASkinFSQCodecV6, MIRASkinFSQCodecConfig
 from models.tessa.v2.generation_v2 import TESSAGrammarStateV2
-from .animation_ready_mesh import RSSvNextAnimationReadyMesh, RSSvNextStructuralMeshCandidate
+from .animation_ready_mesh import (
+    RSSvNextAnimationReadyMesh, RSSvNextStructuralMeshCandidate,
+    _normals_indexed,
+)
 from .tessa_incremental_decode_v1 import decode_next_token_v1
 from .attachment_face_correspondence_v1 import RSSvNextSocketFaceCorrespondenceHeadV1
 from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefinementConfig
@@ -43,7 +46,10 @@ from .semantic_geometry_prior import (
 )
 from .surface_topology_context_v1 import iris_surface_incidence_v1
 from .surface_mechanics_context_v1 import RSSvNextSurfaceMechanicsContextV1
-from .tessa_seeded_surface_v1 import TESSASeededSurfaceV1, tessa_seed_from_flexicubes_v1
+from .tessa_seeded_surface_v1 import (
+    TESSASeededSurfaceV1, tessa_seed_from_flexicubes_v1,
+    tessa_adaptive_split_edges_v1,
+)
 from .flexicubes_surface_evidence import (
     RSSvNextFlexiCubesEvidenceBridge,
     RSSvNextFlexiCubesSurfaceEvidence,
@@ -491,6 +497,14 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         )
         self.mira = RSSvNextSkinCoupler(cfg)
         self.mesh_bridge = RSSvNextAnimationReadyMesh(self.iris, cfg.tessa)
+        # TESSA learns per-vertex local density and a bounded continuous
+        # correction, not an unrelated independent full-mesh token stream.
+        self.tessa_seeded_head = nn.Sequential(
+            nn.LayerNorm(h + 3),
+            nn.Linear(h + 3, h), nn.GELU(), nn.Linear(h, 4),
+        )
+        nn.init.zeros_(self.tessa_seeded_head[-1].weight)
+        nn.init.zeros_(self.tessa_seeded_head[-1].bias)
         # Preserve original full-width H for AXIS and add SAME-face/component
         # contextual H for MIRA. Zero-residual initialized => no silent change
         # to old codec at boot; new weights require new checkpoint identity.
@@ -1135,6 +1149,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         self, state: RSSvNextSceneState, seeded: TESSASeededSurfaceV1,
         *, rig_sequence: AXISSequenceV6 | None = None,
         structural_memory: Tensor | None = None,
+        adaptive_refinement: bool = False,
     ) -> dict:
         """Differentiable *single-geometry* learner path for AXIS+MIRA.
 
@@ -1146,6 +1161,24 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         if not isinstance(seeded, TESSASeededSurfaceV1):
             raise ValueError("RSS_VNEXT_SEEDED_SURFACE_REQUIRED")
         seeded.validate()
+        if type(adaptive_refinement) is not bool:
+            raise ValueError("RSS_VNEXT_SEEDED_ADAPTIVE_POLICY_TYPE")
+
+        def _metric(surface):
+            h = self.iris.query(state.scene_triplanes, surface.xyz)["H"]
+            normals = _normals_indexed(surface.xyz, surface.faces)
+            return self.tessa_seeded_head(torch.cat((h, normals), dim=-1))
+
+        if adaptive_refinement:
+            initial_metric = _metric(seeded)
+            seeded = tessa_adaptive_split_edges_v1(
+                seeded, importance_logits=initial_metric[..., 0],
+                max_added_vertices=min(
+                    16384, max(1, seeded.original_vertex_count // 12),
+                ),
+                length_gate_ratio=1.2,
+            )
+        tessa_metric = _metric(seeded)
         mesh = self.mesh_bridge.forward_seeded(
             state.scene_triplanes, seeded,
             refine=self.surface_refine, semantics=self.semantic,
@@ -1153,6 +1186,8 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             quality=self.deformation_quality, udf=self.udf,
             sign_logit=self.sign_logit, role_head=self.presentation_role_head,
             role_schema_id=self.cfg.semantic_role_schema_id,
+            tessa_refinement=tessa_metric[..., 1:4],
+            tessa_metric_logits=tessa_metric[..., 0],
         )
         # Original mesh.local_features remains FULL H(x), no collapse into a
         # Compiler mesh array. The extension sees exact indexed faces,
@@ -1302,6 +1337,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 )
                 candidate = self.build_seeded_mechanics_candidate_v1(
                     out.state, seed, structural_memory=out.structural_memory,
+                    adaptive_refinement=True,
                 )
                 mesh = candidate["mesh_candidate"]
             except (ValueError, RuntimeError) as exc:

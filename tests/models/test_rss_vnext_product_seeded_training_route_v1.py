@@ -183,6 +183,10 @@ def _scenario(monkeypatch):
 def test_v1_seeded_product_training_step_and_optimizer_owner(monkeypatch):
     net,batch,make_trainer,*_=_scenario(monkeypatch)
     trainer=make_trainer()
+    assert all(
+        value == 0 for key,value in vars(trainer.weights).items()
+        if key != "clip_gradient_norm"
+    )
     before=net.tessa_seeded_head[-1].weight.detach().clone()
     result=trainer.train_step(batch)
     assert result.seeded_tessa_loss is not None

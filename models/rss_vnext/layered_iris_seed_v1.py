@@ -82,9 +82,9 @@ class LayeredIRISSeedV1:
             or self.layer_namespace_sha256!=layer_namespace_digest_v1(
                 self.layer_names,self.layer_roles,
             )
-            or self.seed.original_vertex_layer_ids is None
+            or self.seed.vertex_layer_ids is None
             or not torch.equal(
-                self.seed.original_vertex_layer_ids,ids,
+                self.seed.vertex_layer_ids,ids,
             )
             or self.seed.layer_namespace_sha256!=self.layer_namespace_sha256
             or self.seed.layer_names!=self.layer_names
@@ -185,6 +185,7 @@ def make_layered_iris_seed_v1(
         original_surface_sha256=surface_hash,
         original_vertex_layer_ids=ids,
         layer_names=tuple(names),
+        layer_roles=tuple(roles),
         layer_namespace_sha256=namespace,
     )
     result=LayeredIRISSeedV1(

@@ -460,6 +460,15 @@ class RSSvNextStructuralTrainer:
         elif seeded_tessa_weights is not None or trusted_seeded_tessa_registry:
             raise ValueError("RSS_VNEXT_LEGACY_MAY_NOT_ACCEPT_SEEDED_TEACHER")
         weights.validate()
+        if seeded_mode:
+            # Legacy topology/CE/motion coefficients must be zero in the
+            # *effective policy and checkpoint*, not just skipped at runtime.
+            # The seeded loss family has its OWN strictly positive weights.
+            weights = RSSvNextTrainingWeights(**{
+                k: (seeded_tessa_weights.clip_gradient_norm
+                    if k == "clip_gradient_norm" else 0.0)
+                for k in asdict(weights)
+            })
         preference.validate()
         gradient_court_policy.validate()
         axis_skin_code_warmup.validate()

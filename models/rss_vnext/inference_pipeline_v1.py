@@ -127,6 +127,7 @@ def run_two_view_to_compiler_proposal_v1(
     product_mode: bool = True,
     source_observation: RSSvNextTwoViewSourceObservationV1 | None = None,
     flexicubes_extractor=None,
+    semantic_layer_specs: tuple[RSSvNextSemanticLayerSpec,...] | None = None,
 ) -> dict:
     """Execute pinned checkpoint and commit the proposal with two source frames.
 
@@ -214,6 +215,7 @@ def run_two_view_to_compiler_proposal_v1(
             max_topology_tokens=max_topology_tokens,
             generate_controls=generate_controls,
             flexicubes_extractor=flexicubes_extractor,
+            flexicubes_layers=semantic_layer_specs,
         )
         prediction = generation.proposal
     else:
@@ -230,9 +232,13 @@ def run_two_view_to_compiler_proposal_v1(
             # pinned surface, so no silent topology downgrade is possible.
             **({
                 "flexicubes_extractor": flexicubes_extractor,
-                "flexicubes_layer": RSSvNextSemanticLayerSpec(
-                    "all", model.cfg.semantic_role_schema().roles,
+                "flexicubes_layer": (
+                    semantic_layer_specs[0] if semantic_layer_specs is not None
+                    else RSSvNextSemanticLayerSpec(
+                        "all", model.cfg.semantic_role_schema().roles,
+                    )
                 ),
+                "flexicubes_layers": semantic_layer_specs,
             } if flexicubes_extractor is not None else {}),
         )
     evidence = export_inference_evidence_v1(

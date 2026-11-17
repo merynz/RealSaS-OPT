@@ -1,7 +1,7 @@
 {
   "schema": "RealSaS.RSSvNext.OutputLossTruthPreparationInventory.v1",
   "as_of": "2026-11-17",
-  "audit_basis": "main research inventory (2026-11-16) + StdGEN++-led single-surface seeded v1 code, NO corpus qualification and NO GPU acceptance",
+  "audit_basis": "main+source-qualified component-UDF product six-view trainer candidate (2026-11-17); no real corpus or GPU admission",
   "source_paths": [
     "models/rss_vnext/unified_character_model.py",
     "models/rss_vnext/training_engine.py",
@@ -871,9 +871,9 @@
     {
       "module": "component_udf",
       "output": "Per learned exchangeable H(x) region slot: component-specific nonnegative UDF [B,Q,R] and CLOSED/OPEN/UNKNOWN topology-kind logits [B,R,3]",
-      "losses": "source_native_component_udf_objective_v1: source-qualified component UDF masked SmoothL1 + independently native open/closed CE, Hungarian source-to-slot matching and conditional unmatched UNKNOWN (source inventory must be complete); opt-in independent trainer, NOT in legacy 20 weighted RSSvNextTrainingEngine objective slots",
-      "state": "DIRECT_SOURCE_QUALIFIED_CANDIDATE_OBJECTIVE_NOT_MAINLINE_WEIGHTED_TRAINER",
-      "connection": "UnifiedCharacterModel component_udf queries iris.query(scene_triplanes,xyz)['H'] and semantic_structure.region_slot_features of the SAME IRIS state, no independent encoder or second mesh. Inference slot routing and live GPU DCUDF2 are NOT yet qualified."
+      "losses": "SourceNativeComponentUDFFitV1 + source_native_component_udf_objective_v1, weighted under versioned component_udf_weight (>0) in dedicated product UDF or joint seeded+UDF optimizer, SHA-bound to true source and generator",
+      "state": "DIRECT_PRODUCT_COMPONENT_UDF_PHASE_SOURCE_QUALIFIED_CORPUS_UNVERIFIED",
+      "connection": "RSSvNextUnifiedCharacterModel.component_udf queries SAME IRIS H(x) + exchanged region slots; RSSvNextStructuralTrainer PRODUCT_COMPONENT_UDF_V1 trains source-native per-component distance/kind without signed shell; PRODUCT_SEEDED_IRIS_TESSA_V1 may jointly add it with signed TESSA gradients. No source teacher forwarded to neural scene; unknown slots only target when independently complete native inventory. No open extraction or unseen GPU proof."
     },
     {
       "module": "sign_logit",
@@ -1354,11 +1354,44 @@
     "trusted_receipt_schema": "RealSaS.RSSvNext.SourceNativeComponentUDFAssignment.v1",
     "source_component_matching": "detached Hungarian assignment to exchangeable predicted slots; gradients through matched original predicted fields/kind logits",
     "default_mainline_weight": 0,
-    "unified_training_engine_wired": false,
+    "unified_training_engine_wired": true,
     "product_inference_open_routing_qualified": false,
     "corpus_coverage_verified": false,
     "gpu_quality_verified": false,
     "dcudf2_live_model_verified": false,
-    "source_geometry_from_generated_views_forbidden": true
+    "source_geometry_from_generated_views_forbidden": true,
+    "product_phase": "PRODUCT_COMPONENT_UDF_V1",
+    "product_joint_signed_phase": "PRODUCT_SEEDED_IRIS_TESSA_V1 (only opt-in with independent component teacher)",
+    "main_training_path": "models/rss_vnext/training_engine.py",
+    "standalone_open_source_product_gradient_wired": true,
+    "joint_signed_tessa_component_udf_gradient_wired": true,
+    "component_udf_weight_default": 0,
+    "required_teacher_fields": [
+      "original_query_xyz [Q,3] exact native query addresses",
+      "source_component_udf [C,Q] independently source-derived",
+      "source_component_mask [C,Q]",
+      "source_component_open_kind [C] closed/open exact native face topology",
+      "source_asset_sha256",
+      "native_component_inventory_sha256",
+      "independently_complete_inventory"
+    ],
+    "trusted_phase_receipt_fields": [
+      "dataset_manifest_sha256",
+      "source_qualification_key",
+      "observed_rgba_sha256",
+      "observed_camera_sha256",
+      "source_binding_sha256",
+      "combined_generation_checkpoint_sha256",
+      "source_model_observation_count=2",
+      "source_native_component_asset_sha256",
+      "all original component UDF teacher tensor sha256"
+    ],
+    "checkpoint_resume_bound_fields": [
+      "training_profile",
+      "component_udf_weight",
+      "component_udf_registry_sha256",
+      "source/6-view/optimizer identity"
+    ],
+    "optimizer_gradient_owner_verified_synthetic": true
   }
 }

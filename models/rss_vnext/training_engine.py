@@ -2061,6 +2061,42 @@ class RSSvNextStructuralTrainer:
         side of loss computation, never inside the learned scene decoder.
         Signed-domain proof and native-label hashes are launcher-bound.
         """
+        # Reject unconsumed teacher fields: no silently ignored source loss,
+        # alternate topology, contact pseudo-label, or auxiliary eight-way
+        # target may be smuggled into a nominally final seeded v1 batch.
+        allowed = {
+            "rgba", "camera_features",
+            "product_generated_rgba", "product_generated_normals",
+            "product_generated_cameras",
+            "product_source_binding_sha256",
+            "product_canonical_checkpoint_sha256",
+            "product_multiview_checkpoint_sha256",
+            "product_generation_checkpoint_sha256",
+            "product_conditioning_admission_key",
+            "flexicubes_extractor", "flexicubes_layer",
+            "flexicubes_high_resolution_training",
+            "flexicubes_reference_surface_xyz",
+            "flexicubes_signed_source_admission_key",
+            "seeded_tessa_source_teacher", "seeded_tessa_source_face_budget",
+            "source_qualification_key", "admission_status",
+        }
+        unexpected = []
+        for name, value in vars(batch).items():
+            if name in allowed or value is None:
+                continue
+            if (
+                (type(value) is str and not value)
+                or (type(value) is bool and value is False)
+                or (type(value) is int and value == 0)
+                or (type(value) is tuple and not value)
+            ):
+                continue
+            unexpected.append(name)
+        if unexpected:
+            raise ValueError(
+                "RSS_VNEXT_PRODUCT_SEEDED_UNCONSUMED_SOURCE_TEACHER:"
+                + ",".join(sorted(unexpected))
+            )
         teacher = batch.seeded_tessa_source_teacher
         driver = self.seeded_tessa_driver
         if driver is None or teacher is None:

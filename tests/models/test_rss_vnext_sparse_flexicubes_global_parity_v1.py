@@ -107,7 +107,13 @@ def test_actual_pinned_mesh_and_gradients_match_sparse_without_welding():
     )
     assert len(full[0])==len(little[0])
     assert len(full[1])==len(little[1])
-    dist=torch.cdist(full[0],little[0])
+    # cdist's default float32 MM shortcut yields a spurious ~3e-4
+    # nonzero diagonal even for equal coordinates. Use exact difference
+    # distances, not cancellation of dot products.
+    dist=torch.cdist(
+        full[0],little[0],
+        compute_mode="donot_use_mm_for_euclid_dist",
+    )
     assert float(dist.min(dim=-1).values.max())<1.e-5
     assert float(dist.min(dim=0).values.max())<1.e-5
 
@@ -152,6 +158,11 @@ def test_sparse_extraction_rejects_missing_cube_coverage():
             raw_parameters=torch.zeros(len(ids),21),
             global_cube_ids=ids,
             global_vertex_ids=unique,
-            exhaustive_negative_grid=torch.zeros_like(neg),
+            exhaustive_negative_grid=(
+                neg.clone().index_put_(
+                    (torch.tensor([0]),torch.tensor([0]),torch.tensor([0])),
+                    ~neg[0,0,0].reshape(1),
+                )
+            ),
             resolution=res,training=False,
         )

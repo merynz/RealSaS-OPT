@@ -52,6 +52,7 @@ MESH_KEYS = {
     "tessa_candidate_static_quality_logits",
     "tessa_candidate_unsigned_distance", "tessa_candidate_sign_logits",
 }
+LAYER_EXTRA_KEYS = {"tessa_seed_vertex_layer_ids"}
 SEEDED_EXTRA_KEYS = {
     "tessa_candidate_mechanics_local_features",
     "tessa_seed_original_faces",
@@ -172,7 +173,7 @@ def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[st
     ):
         raise RuntimeError("RSS_VNEXT_RAW_MESH_PREMATURE_CANONICAL_AUTHORITY")
     if not has_mesh:
-        if set(arrays) & SEEDED_EXTRA_KEYS:
+        if set(arrays) & (SEEDED_EXTRA_KEYS | LAYER_EXTRA_KEYS):
             raise RuntimeError("RSS_VNEXT_RAW_MESH_ABSTAIN_FAKE_SEEDED_ATTRIBUTES")
         if (
             receipt.get("tessa_mesh_candidate_vertex_count") != 0
@@ -273,6 +274,50 @@ def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[st
             )
         ):
             raise RuntimeError("RSS_VNEXT_RAW_MESH_ORIGINAL_VERTEX_ADDRESS_DRIFT")
+        # Semantic layer partitions are model evidence, not attachment or
+        # signed-source truth. Require byte-sealed face and parent addresses.
+        fields=(
+            "tessa_seed_layer_names","tessa_seed_layer_roles",
+            "tessa_seed_layer_namespace_sha256",
+            "tessa_seed_vertex_layer_sha256",
+        )
+        has_layer="tessa_seed_vertex_layer_ids" in arrays
+        if has_layer != any(key in receipt for key in fields):
+            raise RuntimeError("RSS_VNEXT_RAW_MESH_LAYER_NAMESPACE_INCOMPLETE")
+        if has_layer:
+            names=receipt.get("tessa_seed_layer_names")
+            roles=receipt.get("tessa_seed_layer_roles")
+            layers=arrays["tessa_seed_vertex_layer_ids"]
+            if (
+                type(names) is not list or type(roles) is not list
+                or not 2 <= len(names) <= 16 or len(names)!=len(roles)
+                or any(type(name) is not str or not name for name in names)
+                or len(set(names)) != len(names)
+                or any(type(row) is not list or not row for row in roles)
+                or any(type(role) is not str or not role
+                       for row in roles for role in row)
+                or len(set(role for row in roles for role in row)) != sum(
+                    len(row) for row in roles
+                )
+                or layers.shape!=(n,) or layers.dtype.kind not in "iu"
+                or np.any(layers<0) or np.any(layers>=len(names))
+                or any(not np.any(layers[:original_n]==k)
+                       for k in range(len(names)))
+                or not np.all(layers[faces]==layers[faces[:,0:1]])
+                or receipt.get("tessa_seed_vertex_layer_sha256")
+                    != _tensor_hash(layers)
+            ):
+                raise RuntimeError("RSS_VNEXT_RAW_MESH_LAYER_ADDRESS_DRIFT")
+            import json as _json
+            expected_namespace=_sha(_json.dumps({
+                "schema":"RealSaS.RSSvNext.SemanticLayerIndexedSurface.v1",
+                "layers":[{"name":name,"keep_roles":role}
+                          for name,role in zip(names,roles)],
+            },separators=(",",":"),sort_keys=True).encode()).hexdigest()
+            if expected_namespace != receipt.get(
+                "tessa_seed_layer_namespace_sha256"
+            ):
+                raise RuntimeError("RSS_VNEXT_RAW_MESH_LAYER_NAMESPACE_HASH_DRIFT")
         for idx in range(original_n,n):
             a,b=map(int,p[idx])
             expected=0.5*(base[0,a]+base[0,b])
@@ -280,7 +325,11 @@ def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[st
                 base[0,idx],expected,atol=1e-6,rtol=0,
             ):
                 raise RuntimeError("RSS_VNEXT_RAW_MESH_PARENT_POSITION_DRIFT")
-    elif set(arrays) & SEEDED_EXTRA_KEYS:
+            if has_layer and (
+                layers[idx]!=layers[a] or layers[a]!=layers[b]
+            ):
+                raise RuntimeError("RSS_VNEXT_RAW_MESH_LAYER_PARENT_DRIFT")
+    elif set(arrays) & (SEEDED_EXTRA_KEYS | LAYER_EXTRA_KEYS):
         raise RuntimeError("RSS_VNEXT_RAW_MESH_LEGACY_HAS_SEEDED_ATTRIBUTES")
     for key in MESH_KEYS - {
         "tessa_candidate_base_vertices", "tessa_candidate_rest_vertices",
@@ -525,7 +574,7 @@ def execute_rss_vnext_mesh_capability_v3(
         raise RuntimeError("RSS_VNEXT_RAW_MESH_SOURCE_OR_CHECKPOINT_PARENT_DRIFT")
     scene = _archive(
         _cas(scene_ref, read_object),
-        required=SCENE_REQUIRED, allowed=SCENE_REQUIRED | MESH_KEYS | SEEDED_EXTRA_KEYS | AXIS_MIRA_KEYS | RAW_GRAPHICS_KEYS,
+        required=SCENE_REQUIRED, allowed=SCENE_REQUIRED | MESH_KEYS | SEEDED_EXTRA_KEYS | LAYER_EXTRA_KEYS | AXIS_MIRA_KEYS | RAW_GRAPHICS_KEYS,
     )
     views = _archive(
         _cas(views_ref, read_object),

@@ -46,6 +46,7 @@ from .semantic_geometry_prior import (
 )
 from .surface_topology_context_v1 import iris_surface_incidence_v1
 from .surface_mechanics_context_v1 import RSSvNextSurfaceMechanicsContextV1
+from .layered_iris_seed_v1 import make_layered_iris_seed_v1
 from .tessa_seeded_surface_v1 import (
     TESSASeededSurfaceV1, tessa_seed_from_flexicubes_v1,
     tessa_adaptive_split_edges_v1,
@@ -1264,6 +1265,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         source_binding_sha256: str | None = None,
         flexicubes_extractor=None,
         flexicubes_layer: RSSvNextSemanticLayerSpec | None = None,
+        flexicubes_layers: tuple[RSSvNextSemanticLayerSpec,...] | None = None,
     ) -> dict:
         """Free-running constrained topology and mechanical proposal.
 
@@ -1285,6 +1287,14 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             raise ValueError("RSS_VNEXT_UNUSED_COMPILER_CAPABILITIES")
         if rgba.shape[0] != 1:
             raise ValueError("RSS_VNEXT_MESH_GENERATION_BATCH_ONE_ONLY")
+        if flexicubes_layers is not None and (
+            not isinstance(flexicubes_layers,tuple)
+            or len(flexicubes_layers)<2
+            or flexicubes_layer is None
+            or flexicubes_layers[0]!=flexicubes_layer
+            or flexicubes_extractor is None
+        ):
+            raise ValueError("RSS_VNEXT_LAYERED_SOURCE_DECLARATION_REQUIRED")
         if (
             self.cfg.tessa_surface_requirement == "REQUIRE_SIGNED_IRIS_SURFACE"
             and (flexicubes_extractor is None or flexicubes_layer is None)
@@ -1329,14 +1339,48 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         ids = torch.tensor([[self.cfg.tessa.BOS]], device=rgba.device, dtype=torch.long)
         mesh = None
         failure = None
+        layered = None
         if seeded_geometry:
             try:
-                seed = tessa_seed_from_flexicubes_v1(
-                    witness=out.flexicubes_surface_evidence,
-                    scene_triplanes=out.state.scene_triplanes,
+                if flexicubes_layers is not None:
+                    witnesses = [(
+                        flexicubes_layers[0],
+                        out.flexicubes_surface_evidence,
+                    )]
+                    # Same already-encoded scene H(x), not new observations
+                    # or separately learned geometry heads. Every claimed
+                    # layer must independently extract or entire product
+                    # correctly ABSTAINS rather than making placeholder cloth.
+                    for spec in flexicubes_layers[1:]:
+                        witness = self.fc_surface_bridge(
+                            out.state.scene_triplanes,
+                            extractor=flexicubes_extractor,
+                            role_head=self.presentation_role_head,
+                            schema=self.cfg.semantic_role_schema(),
+                            layer=spec,field_policy="SIGNED_HYPOTHESIS_ONLY",
+                        )
+                        witnesses.append((spec,witness))
+                    layered=make_layered_iris_seed_v1(
+                        evidence=tuple(witnesses),
+                        schema=self.cfg.semantic_role_schema(),
+                        scene_triplanes=out.state.scene_triplanes,
+                    )
+                    seed=layered.seed
+                else:
+                    seed = tessa_seed_from_flexicubes_v1(
+                        witness=out.flexicubes_surface_evidence,
+                        scene_triplanes=out.state.scene_triplanes,
+                    )
+                # A layered candidate cannot inherit global structural
+                # memory from ONLY its first shell. Use the full shared
+                # scene as the global memory and the final indexed mesh as
+                # the per-face AXIS/MIRA context.
+                structural_memory = (
+                    self._structural_memory(out.state, None)
+                    if layered is not None else out.structural_memory
                 )
                 candidate = self.build_seeded_mechanics_candidate_v1(
-                    out.state, seed, structural_memory=out.structural_memory,
+                    out.state, seed, structural_memory=structural_memory,
                     adaptive_refinement=True,
                 )
                 mesh = candidate["mesh_candidate"]
@@ -1396,6 +1440,14 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
             "observed_view_count": 2,
             "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
+            "semantic_layer_identity_schema": (
+                "RealSaS.RSSvNext.SemanticLayerIndexedSurface.v1"
+                if layered is not None and mesh is not None else None
+            ),
+            "semantic_layer_names": (
+                layered.layer_names
+                if layered is not None and mesh is not None else ()
+            ),
         }
         if generate_controls:
             if mesh is None:
@@ -1404,7 +1456,12 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 # Never fabricate a placeholder mesh just to decode controls.
                 result["control_status"] = "ABSTAIN_NO_VALID_PREDICTED_MESH"
                 return result
-            memory = self._control_memory(out.state, out.structural_memory, mesh)
+            memory = self._control_memory(
+                out.state,
+                self._structural_memory(out.state, None)
+                if layered is not None else out.structural_memory,
+                mesh,
+            )
             events = self.axis.generate_events(
                 memory, tokens_per_joint=self.cfg.skin_tokens_per_joint,
                 max_steps=self.cfg.control_max_seq,

@@ -33,6 +33,12 @@ class TESSASeededSurfaceV1:
     original_faces: Tensor      # original M0 indexed triangles, before TESSA edits
     scene_sha256: str
     original_surface_sha256: str
+    # Optional, source-independent semantic disjoint-layer namespace. IDs
+    # follow each appended TESSA split; no cross-layer edge is permitted.
+    vertex_layer_ids: Tensor | None = None
+    layer_names: tuple[str, ...] = ()
+    layer_roles: tuple[tuple[str, ...], ...] = ()
+    layer_namespace_sha256: str = ""
     source_authority: str = "ONE_IRIS_SURFACE_TESSA_REFINEMENT_CANDIDATE"
     canonical_mesh_authority: bool = False
 
@@ -57,6 +63,25 @@ class TESSASeededSurfaceV1:
                 or bool((self.original_faces < 0).any())
                 or int(self.original_faces.max()) >= self.original_vertex_count):
             raise ValueError("TESSA_SEEDED_SURFACE_DOMAIN_INVALID")
+        if self.vertex_layer_ids is not None:
+            ids=self.vertex_layer_ids
+            if (
+                ids.shape!=(n,) or ids.dtype!=torch.long
+                or ids.device!=self.faces.device
+                or not 2<=len(self.layer_names)<=16
+                or len(self.layer_names)!=len(self.layer_roles)
+                or len(set(self.layer_names))!=len(self.layer_names)
+                or bool((ids<0).any())
+                or int(ids.max())>=len(self.layer_names)
+                or not bool((
+                    ids[self.faces]==ids[self.faces[:,0:1]]
+                ).all())
+                or type(self.layer_namespace_sha256) is not str
+                or len(self.layer_namespace_sha256)!=64
+            ):
+                raise ValueError("TESSA_SEEDED_LAYER_NAMESPACE_INVALID")
+        elif self.layer_names or self.layer_roles or self.layer_namespace_sha256:
+            raise ValueError("TESSA_SEEDED_LAYER_NAMESPACE_INCOMPLETE")
         for (a, b), (wa, wb) in zip(
             self.parent_seed_edges, self.parent_seed_weights
         ):
@@ -80,6 +105,10 @@ def build_tessa_seeded_surface_v1(
     scene_sha256: str,
     original_surface_sha256: str,
     one_to_four_refine: bool = False,
+    original_vertex_layer_ids: Tensor | None = None,
+    layer_names: tuple[str,...] = (),
+    layer_roles: tuple[tuple[str,...],...] = (),
+    layer_namespace_sha256: str = "",
 ) -> TESSASeededSurfaceV1:
     """Return an exact indexed surface, without *any* independent TESSA mesh.
 
@@ -103,6 +132,17 @@ def build_tessa_seeded_surface_v1(
             or component_ids_by_vertex.device != faces.device
             or type(one_to_four_refine) is not bool):
         raise ValueError("TESSA_SEEDED_INPUT_DOMAIN_INVALID")
+    if original_vertex_layer_ids is not None and (
+        original_vertex_layer_ids.shape!=(v,)
+        or original_vertex_layer_ids.dtype!=torch.long
+        or original_vertex_layer_ids.device!=faces.device
+        or bool((original_vertex_layer_ids<0).any())
+        or not bool((
+            original_vertex_layer_ids[faces]
+            ==original_vertex_layer_ids[faces[:,0:1]]
+        ).all())
+    ):
+        raise ValueError("TESSA_SEEDED_ORIGINAL_LAYER_FACE_DRIFT")
     if not bool((
         component_ids_by_vertex[faces]
         == component_ids_by_vertex[faces[:, 0:1]]
@@ -131,6 +171,9 @@ def build_tessa_seeded_surface_v1(
             parent_seed_edges=tuple(parents), parent_seed_weights=tuple(weights),
             original_vertex_count=v, original_face_count=len(faces),
             original_faces=faces,
+            vertex_layer_ids=original_vertex_layer_ids,
+            layer_names=layer_names,layer_roles=layer_roles,
+            layer_namespace_sha256=layer_namespace_sha256,
             scene_sha256=scene_sha256,
             original_surface_sha256=original_surface_sha256,
         )
@@ -172,6 +215,14 @@ def build_tessa_seeded_surface_v1(
         parent_seed_edges=tuple(parents), parent_seed_weights=tuple(weights),
         original_vertex_count=v, original_face_count=len(faces),
         original_faces=faces,
+        vertex_layer_ids=(
+            torch.cat((
+                original_vertex_layer_ids,
+                original_vertex_layer_ids[pairs[:,0]],
+            )) if original_vertex_layer_ids is not None else None
+        ),
+        layer_names=layer_names,layer_roles=layer_roles,
+        layer_namespace_sha256=layer_namespace_sha256,
         scene_sha256=scene_sha256,
         original_surface_sha256=original_surface_sha256,
     )
@@ -291,6 +342,14 @@ def tessa_adaptive_split_edges_v1(
         original_vertex_count=seed.original_vertex_count,
         original_face_count=seed.original_face_count,
         original_faces=seed.original_faces,
+        vertex_layer_ids=(
+            torch.cat((
+                seed.vertex_layer_ids,
+                seed.vertex_layer_ids[picked[:,0]],
+            )) if seed.vertex_layer_ids is not None else None
+        ),
+        layer_names=seed.layer_names,layer_roles=seed.layer_roles,
+        layer_namespace_sha256=seed.layer_namespace_sha256,
         scene_sha256=seed.scene_sha256,
         original_surface_sha256=seed.original_surface_sha256,
     )

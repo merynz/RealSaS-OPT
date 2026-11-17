@@ -52,6 +52,10 @@ MESH_KEYS = {
     "tessa_candidate_static_quality_logits",
     "tessa_candidate_unsigned_distance", "tessa_candidate_sign_logits",
 }
+SEEDED_EXTRA_KEYS = {
+    "tessa_candidate_mechanics_local_features",
+    "tessa_seed_vertex_parent_indices", "tessa_seed_vertex_parent_weights",
+}
 RAW_GRAPHICS_KEYS = {
     "region_relation_valid_mask", "presentation_role_probabilities",
     "source_semantic_patch_logits", "source_semantic_log_uncertainty",
@@ -154,11 +158,21 @@ def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[st
         (set(arrays) & MESH_KEYS) and not has_mesh
     ):
         raise RuntimeError("RSS_VNEXT_RAW_MESH_UNEXPECTED_OR_MISSING_SURFACE")
-    if receipt.get("tessa_mesh_candidate_authority") != (
-        "UNQUALIFIED_LEARNED_PROPOSAL_ONLY"
+    seeded_abi = receipt.get("topology_candidate_abi") == "ONE_IRIS_SEEDED_MESH_V1"
+    if (
+        receipt.get("topology_candidate_abi") not in (
+            None, "LEGACY_INDEPENDENT_TESSA_GRAMMAR",
+            "ONE_IRIS_SEEDED_MESH_V1",
+        )
+        or receipt.get("tessa_mesh_candidate_authority") != (
+            "UNQUALIFIED_IRIS_SEEDED_SURFACE_ONLY" if seeded_abi
+            else "UNQUALIFIED_LEARNED_PROPOSAL_ONLY"
+        )
     ):
         raise RuntimeError("RSS_VNEXT_RAW_MESH_PREMATURE_CANONICAL_AUTHORITY")
     if not has_mesh:
+        if set(arrays) & SEEDED_EXTRA_KEYS:
+            raise RuntimeError("RSS_VNEXT_RAW_MESH_ABSTAIN_FAKE_SEEDED_ATTRIBUTES")
         if (
             receipt.get("tessa_mesh_candidate_vertex_count") != 0
             or receipt.get("tessa_mesh_candidate_face_count") != 0
@@ -197,6 +211,39 @@ def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[st
     ):
         raise RuntimeError("RSS_VNEXT_RAW_MESH_INDEXED_TOPOLOGY_DOMAIN_DRIFT")
     n = xyz.shape[1]
+    if seeded_abi:
+        from hashlib import sha256 as _sha
+        if not SEEDED_EXTRA_KEYS <= set(arrays):
+            raise RuntimeError("RSS_VNEXT_RAW_MESH_SEEDED_CONTEXT_OR_LINEAGE_REQUIRED")
+        mh = arrays["tessa_candidate_mechanics_local_features"]
+        p = arrays["tessa_seed_vertex_parent_indices"]
+        w = arrays["tessa_seed_vertex_parent_weights"]
+        if (
+            mh.shape != arrays["tessa_candidate_local_features"].shape
+            or p.shape != (n, 2) or w.shape != (n, 2)
+            or p.dtype.kind not in "iu"
+            or np.any(p < 0) or np.any(p >= receipt.get(
+                "tessa_seed_original_vertex_count", -1
+            ))
+            or not np.allclose(w.sum(axis=-1), 1.0, atol=1e-7, rtol=0)
+            or not np.all(
+                (np.isclose(w[:, 0], 1.) & np.isclose(w[:, 1], 0.))
+                | (np.isclose(w[:, 0], 0.5) & np.isclose(w[:, 1], 0.5))
+            )
+            or type(receipt.get("tessa_seed_surface_sha256")) is not str
+            or not _digest(receipt.get("tessa_seed_surface_sha256"))
+            or not _digest(receipt.get("tessa_seed_scene_sha256"))
+            or receipt.get("tessa_seed_original_face_count", 0) < 1
+        ):
+            raise RuntimeError("RSS_VNEXT_RAW_MESH_SEEDED_PARENT_OR_CONTEXT_DRIFT")
+        scene = arrays["scene_triplanes"]
+        h = _sha()
+        h.update(str((str(scene.dtype), scene.shape)).encode())
+        h.update(scene.tobytes())
+        if h.hexdigest() != receipt["tessa_seed_scene_sha256"]:
+            raise RuntimeError("RSS_VNEXT_RAW_MESH_SEEDED_SCENE_HASH_DRIFT")
+    elif set(arrays) & SEEDED_EXTRA_KEYS:
+        raise RuntimeError("RSS_VNEXT_RAW_MESH_LEGACY_HAS_SEEDED_ATTRIBUTES")
     for key in MESH_KEYS - {
         "tessa_candidate_base_vertices", "tessa_candidate_rest_vertices",
         "tessa_candidate_faces", "tessa_candidate_vertex_components",
@@ -230,6 +277,10 @@ def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[st
     return {
         "mesh_state": state,
         "topology_token_count": int(tokens.shape[1]),
+        "topology_candidate_abi": (
+            "ONE_IRIS_SEEDED_MESH_V1" if seeded_abi
+            else "LEGACY_INDEPENDENT_TESSA_GRAMMAR"
+        ),
         "candidate_vertices": int(n),
         "candidate_faces": int(faces.shape[0]),
         "nondegenerate_faces": int(np.count_nonzero(area2 > 1e-12)),
@@ -436,7 +487,7 @@ def execute_rss_vnext_mesh_capability_v3(
         raise RuntimeError("RSS_VNEXT_RAW_MESH_SOURCE_OR_CHECKPOINT_PARENT_DRIFT")
     scene = _archive(
         _cas(scene_ref, read_object),
-        required=SCENE_REQUIRED, allowed=SCENE_REQUIRED | MESH_KEYS | AXIS_MIRA_KEYS | RAW_GRAPHICS_KEYS,
+        required=SCENE_REQUIRED, allowed=SCENE_REQUIRED | MESH_KEYS | SEEDED_EXTRA_KEYS | AXIS_MIRA_KEYS | RAW_GRAPHICS_KEYS,
     )
     views = _archive(
         _cas(views_ref, read_object),

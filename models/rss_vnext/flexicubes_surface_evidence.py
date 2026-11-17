@@ -43,6 +43,10 @@ class RSSvNextFlexiCubesSurfaceEvidence:
     source_policy: str
     layer_name: str
     evidence_authority: str = "UNQUALIFIED_FLEXICUBES_SURFACE_WITNESS"
+    sparse_product_resolution: tuple[int,int,int] | None = None
+    sparse_global_vertex_ids: Tensor | None = None
+    sparse_global_cube_ids: Tensor | None = None
+    sparse_sign_sha256: str | None = None
 
     def validate(self, *, carrier_dim: int, role_count: int) -> None:
         if self.xyz.ndim != 3 or self.xyz.shape[0] != 1 or self.xyz.shape[-1] != 3:
@@ -65,6 +69,44 @@ class RSSvNextFlexiCubesSurfaceEvidence:
             self.regularizer, self.signed_field_grid, self.cube_parameters,
         )):
             raise ValueError("RSS_VNEXT_FC_WITNESS_NONFINITE")
+        if self.sparse_product_resolution is None:
+            if any(x is not None for x in (
+                self.sparse_global_vertex_ids, self.sparse_global_cube_ids,
+                self.sparse_sign_sha256,
+            )):
+                raise ValueError("RSS_VNEXT_FC_UNQUALIFIED_SPARSE_METADATA")
+        else:
+            from .sparse_layer_sign_scan_v1 import qualify_sparse_resolution_v1
+            resolution = qualify_sparse_resolution_v1(self.sparse_product_resolution)
+            vertex_ids = self.sparse_global_vertex_ids
+            cube_ids = self.sparse_global_cube_ids
+            if (
+                not isinstance(vertex_ids, Tensor)
+                or not isinstance(cube_ids, Tensor)
+                or vertex_ids.ndim != 1 or cube_ids.ndim != 1
+                or vertex_ids.dtype != torch.long
+                or cube_ids.dtype != torch.long
+                or vertex_ids.device != self.xyz.device
+                or cube_ids.device != self.xyz.device
+                or len(vertex_ids) != self.sample_grid_xyz.shape[1]
+                or len(cube_ids) != self.cube_parameters.shape[0]
+                or not len(vertex_ids) or not len(cube_ids)
+                or bool((vertex_ids[1:] <= vertex_ids[:-1]).any())
+                or bool((cube_ids[1:] <= cube_ids[:-1]).any())
+                or int(vertex_ids.min()) < 0
+                or int(vertex_ids.max()) >= (
+                    (resolution[0]+1)*(resolution[1]+1)*(resolution[2]+1)
+                )
+                or int(cube_ids.min()) < 0
+                or int(cube_ids.max()) >= (
+                    resolution[0]*resolution[1]*resolution[2]
+                )
+                or not isinstance(self.sparse_sign_sha256,str)
+                or len(self.sparse_sign_sha256) != 64
+                or any(ch not in "0123456789abcdef"
+                       for ch in self.sparse_sign_sha256)
+            ):
+                raise ValueError("RSS_VNEXT_FC_SPARSE_GLOBAL_ADDRESS_DRIFT")
         if self.evidence_authority != "UNQUALIFIED_FLEXICUBES_SURFACE_WITNESS":
             raise ValueError("RSS_VNEXT_FC_WITNESS_AUTHORITY_ESCALATION")
 
@@ -122,6 +164,134 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
         self.cube_query_chunk = cube_query_chunk
         self.surface_query_chunk = surface_query_chunk
 
+    @torch.no_grad()
+    def _forward_sparse_product_v1(
+        self, scene_triplanes: Tensor, *, extractor, role_head: nn.Module,
+        schema: RSSvNextSemanticRoleSchema,
+        layer: RSSvNextSemanticLayerSpec,
+        field_policy: str, resolution: tuple[int,int,int],
+    ) -> RSSvNextFlexiCubesSurfaceEvidence:
+        """Exhaustive sparse inference using SAME IRIS H(x) and pinned FC.
+
+        The complete fine sign lattice lives as CPU bool, not a dense GPU
+        cube table or a 25-million-point autograd tape. All active corners
+        are re-queried and compared against the exhaustive certificate.
+        This path is explicitly opt-in until a real GPU/character acceptance.
+        """
+        from hashlib import sha256
+        from models.iris.vnext.flexicubes_v1 import PinnedFlexiCubesV1
+        from models.rss_vnext.experts.iris.vnext.flexicubes_sparse_v1 import (
+            PinnedSparseFlexiCubesV1, exhaustive_surface_cube_ids_v1,
+            compact_active_grid_v1,
+        )
+        from .sparse_layer_sign_scan_v1 import (
+            qualify_sparse_resolution_v1, scan_exhaustive_signed_grid_v1,
+            global_grid_xyz_v1,
+        )
+        if (
+            self.training or torch.is_grad_enabled()
+            or not isinstance(extractor,PinnedFlexiCubesV1)
+            or extractor.device != scene_triplanes.device
+            or field_policy != "SIGNED_HYPOTHESIS_ONLY"
+        ):
+            raise ValueError("RSS_VNEXT_FC_SPARSE_INFERENCE_ONLY_PINNED")
+        resolution = qualify_sparse_resolution_v1(resolution)
+        def signed_query(xyz: Tensor) -> Tensor:
+            out = self.iris.query(scene_triplanes, xyz)
+            return semantic_equivalent_signed_field(
+                out["field"], role_head(out["H"]),
+                schema=schema, layer=layer, qualified_signed_domain=True,
+            )
+        negative_grid = scan_exhaustive_signed_grid_v1(
+            signed_query, resolution=resolution,
+            device=scene_triplanes.device,scene_dtype=scene_triplanes.dtype,
+            query_chunk=self.field_query_chunk,
+        )
+        global_cube_ids=exhaustive_surface_cube_ids_v1(
+            negative_grid,resolution=resolution,
+        ).to(scene_triplanes.device)
+        if global_cube_ids.numel() > 2_000_000:
+            raise ValueError("RSS_VNEXT_FC_SPARSE_ACTIVE_CUBE_BUDGET")
+        global_vertex_ids,cubes,grid=compact_active_grid_v1(
+            global_cube_ids,resolution,
+        )
+        if grid.device != scene_triplanes.device:
+            raise ValueError("RSS_VNEXT_FC_SPARSE_DEVICE_DRIFT")
+        # Re-query the *same* carrier on compact surface-adjacent points.
+        # Merely counting coarse voxels as complete fine-grid coverage is
+        # forbidden; the pinned adapter checks all re-queried signs.
+        fields,deltas=[],[]
+        for first in range(0,len(grid),self.field_query_chunk):
+            xyz=global_grid_xyz_v1(
+                global_vertex_ids[first:first+self.field_query_chunk],
+                resolution=resolution,dtype=scene_triplanes.dtype,
+            )[None]
+            observations=self.iris.query(scene_triplanes,xyz)
+            field=semantic_equivalent_signed_field(
+                observations["field"],role_head(observations["H"]),
+                schema=schema,layer=layer,qualified_signed_domain=True,
+            )
+            fields.append(field[0].float())
+            deltas.append(observations["extraction_delta"][0].float())
+        field=torch.cat(fields)
+        delta=torch.cat(deltas)
+        free_room=(1-grid.abs()).clamp_min(0)
+        deformed_grid=grid+free_room*delta
+
+        # Existing IRIS 21-parameter cube head, NEVER detached or replaced
+        # by an untrained sparse topology network.
+        raw_parts=[]
+        for first in range(0,len(cubes),self.cube_query_chunk):
+            selected=cubes[first:first+self.cube_query_chunk]
+            corner_xyz=grid[selected.reshape(-1)].to(
+                dtype=scene_triplanes.dtype,
+            )[None]
+            h=self.iris.query(scene_triplanes,corner_xyz)["H"]
+            params=self.iris.cube_extraction(
+                h.reshape(1,len(selected),8,-1),
+            )
+            if params.shape != (1,len(selected),21):
+                raise ValueError("RSS_VNEXT_FC_SPARSE_CUBE_HEAD_WIDTH")
+            raw_parts.append(params[0].float())
+        raw=torch.cat(raw_parts)
+        xyz,faces,regularizer=PinnedSparseFlexiCubesV1(
+            extractor,
+        ).extract(
+            vertices_iris=deformed_grid,field=field,
+            cubes=cubes,raw_parameters=raw,
+            global_cube_ids=global_cube_ids,
+            global_vertex_ids=global_vertex_ids,
+            exhaustive_negative_grid=negative_grid,
+            resolution=resolution,training=False,
+        )
+        if len(xyz)>self.inference_max_output_vertices:
+            raise ValueError("RSS_VNEXT_FC_SPARSE_OUTPUT_VERTEX_BUDGET")
+        local_chunks=[]
+        for first in range(0,len(xyz),self.surface_query_chunk):
+            part=self.iris.query(
+                scene_triplanes,xyz[None,first:first+self.surface_query_chunk],
+            )["H"]
+            local_chunks.append(part)
+        local=torch.cat(local_chunks,dim=1)
+        sign_hash=sha256(
+            negative_grid.contiguous().numpy().tobytes(),
+        ).hexdigest()
+        result=RSSvNextFlexiCubesSurfaceEvidence(
+            xyz=xyz[None],faces=faces,local_features=local,
+            presentation_role_logits=role_head(local),
+            regularizer=regularizer,sample_grid_xyz=grid[None],
+            signed_field_grid=field[None],cube_parameters=raw,
+            source_policy=field_policy,layer_name=layer.name,
+            sparse_product_resolution=resolution,
+            sparse_global_vertex_ids=global_vertex_ids,
+            sparse_global_cube_ids=global_cube_ids,
+            sparse_sign_sha256=sign_hash,
+        )
+        result.validate(
+            carrier_dim=local.shape[-1],role_count=schema.count,
+        )
+        return result
+
     def forward(
         self,
         scene_triplanes: Tensor,
@@ -132,6 +302,7 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
         layer: RSSvNextSemanticLayerSpec,
         field_policy: str,
         high_resolution_training: bool = False,
+        sparse_product_resolution: tuple[int,int,int] | None = None,
     ) -> RSSvNextFlexiCubesSurfaceEvidence:
         """Surface evidence from existing Z/H, with no teacher geometry inputs.
 
@@ -151,6 +322,14 @@ class RSSvNextFlexiCubesEvidenceBridge(nn.Module):
             raise ValueError("RSS_VNEXT_FC_SHARED_SCENE_INVALID")
         if not hasattr(extractor, "construct_iris_grid") or not hasattr(extractor, "extract"):
             raise ValueError("RSS_VNEXT_FC_PINNED_ADAPTER_INTERFACE_REQUIRED")
+        if sparse_product_resolution is not None:
+            if high_resolution_training:
+                raise ValueError("RSS_VNEXT_FC_SPARSE_TRAIN_NOT_QUALIFIED")
+            return self._forward_sparse_product_v1(
+                scene_triplanes,extractor=extractor,role_head=role_head,
+                schema=schema,layer=layer,field_policy=field_policy,
+                resolution=sparse_product_resolution,
+            )
         if type(high_resolution_training) is not bool:
             raise ValueError("RSS_VNEXT_FC_HIGHRES_TRAIN_PROFILE_TYPE")
         if high_resolution_training and (

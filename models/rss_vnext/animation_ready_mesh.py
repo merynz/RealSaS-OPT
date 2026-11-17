@@ -53,6 +53,10 @@ class RSSvNextStructuralMeshCandidate:
     # but have no depth/visibility or point-texture ownership authority.
     source_ray_evidence: RSSvNextSourceRayEvidence | None = None
     seeded_surface: TESSASeededSurfaceV1 | None = None
+    # Full-width H plus optional learned topological/semantic surface evidence.
+    # Raw local_features stays unchanged; all MIRA replay consumers must use
+    # this exact input tensor when present, never silently fall back.
+    mechanics_local_features: Tensor | None = None
 
     def validate(self) -> None:
         xyz = self.rest_vertices_iris
@@ -93,6 +97,13 @@ class RSSvNextStructuralMeshCandidate:
         # the existing model/Compiler callers.  A source-neutral test/CAS
         # carrier can intentionally omit that court; do not retroactively
         # break the old proposal ABI while migrating to seeded topology.
+        if self.mechanics_local_features is not None:
+            m = self.mechanics_local_features
+            if (m.shape != self.local_features.shape
+                    or m.dtype != self.local_features.dtype
+                    or m.device != self.local_features.device
+                    or not bool(torch.isfinite(m).all())):
+                raise ValueError("RSS_VNEXT_MESH_MECHANICS_FEATURE_ADDRESS_DRIFT")
         if self.source_ray_evidence is not None:
             self.source_ray_evidence.validate(batch=1, points=v)
 

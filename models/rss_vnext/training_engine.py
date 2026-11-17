@@ -83,6 +83,11 @@ from .seeded_layer_source_court_v1 import (
 )
 from .training_seeded_tessa_v1 import _digest as seeded_source_tensor_digest_v1
 from .tessa_seeded_surface_v1 import tessa_seed_from_flexicubes_v1
+from .component_conditioned_udf_v1 import (
+    SourceNativeComponentUDFFitV1,
+    source_native_component_udf_objective_v1,
+)
+from .native_face_layer_truth_v1 import tensor_sha256_v1 as native_tensor_sha256_v1
 
 
 @dataclass
@@ -196,6 +201,9 @@ class RSSvNextStructuralTrainingBatch:
     # frames + pinned GENERATED six-view conditioning, never the teacher.
     seeded_tessa_source_teacher: SeededTESSASourceTeacherV1 | None = None
     seeded_tessa_source_face_budget: int = 0
+    # Source-native component-specific unsigned fields, never the global
+    # nearest-surface distance or a semantic "cape" pseudo-label.
+    component_udf_source_teacher: SourceNativeComponentUDFFitV1 | None = None
     # Source-qualified signed shells, never infer garment presence merely
     # from four-way presentation role. No imaginary/open cloth shell.
     flexicubes_layers: tuple[RSSvNextSemanticLayerSpec,...] | None = None
@@ -314,6 +322,9 @@ class RSSvNextTrainingResult:
     seeded_tessa_sampled_student_vertex_count: int = 0
     seeded_tessa_sampled_quality_face_count: int = 0
     seeded_tessa_qualified_layer_count: int = 0
+    component_udf_loss: Tensor | None = None
+    component_udf_loss_parts: dict[str, Tensor] | None = None
+    eligible_component_udf_source_components: int = 0
 
 
 def axis_mesh_teacher_address_digest_v1(mesh) -> str:
@@ -441,6 +452,11 @@ class RSSvNextStructuralTrainer:
         seeded_tessa_weights: SeededTESSALossWeightsV1 | None = None,
         seeded_tessa_sampling_policy: SeededSurfaceSamplingPolicyV1 = SeededSurfaceSamplingPolicyV1(),
         trusted_seeded_tessa_registry: Mapping[str, Mapping[str, object]] | None = None,
+        # Open-source-native-only stage may train the same H without assuming
+        # the asset is a closed signed solid. For signed solids, joint UDF
+        # evidence can also accompany the existing seeded TESSA stage.
+        component_udf_weight: float = 0.0,
+        trusted_component_udf_registry: Mapping[str, Mapping[str, object]] | None = None,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -451,9 +467,28 @@ class RSSvNextStructuralTrainer:
         if training_profile not in (
             "LEGACY_STRUCTURAL_RESEARCH",
             "PRODUCT_SEEDED_IRIS_TESSA_V1",
+            "PRODUCT_COMPONENT_UDF_V1",
         ):
             raise ValueError("RSS_VNEXT_TRAIN_UNKNOWN_GEOMETRY_PROFILE")
         seeded_mode = training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1"
+        component_mode = training_profile == "PRODUCT_COMPONENT_UDF_V1"
+        component_enabled = component_mode or (
+            seeded_mode and component_udf_weight > 0.
+        )
+        if (
+            type(component_udf_weight) not in (float,int)
+            or not math.isfinite(component_udf_weight)
+            or component_udf_weight < 0
+            or (
+                component_mode and component_udf_weight <= 0
+            )
+            or (component_enabled and not trusted_component_udf_registry)
+            or (
+                not component_enabled
+                and (component_udf_weight != 0 or trusted_component_udf_registry)
+            )
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_COMPONENT_UDF_PHASE_POLICY")
         seeded_tessa_sampling_policy.validate()
         if not seeded_mode and seeded_tessa_sampling_policy != SeededSurfaceSamplingPolicyV1():
             raise ValueError("RSS_VNEXT_LEGACY_SEEDED_SAMPLING_POLICY_FORBIDDEN")
@@ -478,15 +513,23 @@ class RSSvNextStructuralTrainer:
             ):
                 raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_GRADIENT_OWNERS_FROZEN")
         elif seeded_tessa_weights is not None or trusted_seeded_tessa_registry:
-            raise ValueError("RSS_VNEXT_LEGACY_MAY_NOT_ACCEPT_SEEDED_TEACHER")
+            raise ValueError("RSS_VNEXT_NON_SEEDED_MAY_NOT_ACCEPT_SEEDED_TEACHER")
+        if component_mode and (
+            scene_conditioning_policy != "PRODUCT_GENERATED_SIX_VIEW"
+            or phase_contract is not None
+            or gradient_court_policy.every_n_steps != 0
+            or weights != RSSvNextTrainingWeights()
+        ):
+            raise ValueError("RSS_VNEXT_COMPONENT_UDF_SOURCE_ONLY_PHASE_REQUIRED")
         weights.validate()
-        if seeded_mode:
+        if seeded_mode or component_mode:
             # Legacy topology/CE/motion coefficients must be zero in the
             # *effective policy and checkpoint*, not just skipped at runtime.
             # The seeded loss family has its OWN strictly positive weights.
             weights = RSSvNextTrainingWeights(**{
                 k: (seeded_tessa_weights.clip_gradient_norm
-                    if k == "clip_gradient_norm" else 0.0)
+                    if seeded_mode and k == "clip_gradient_norm"
+                    else (1.0 if k == "clip_gradient_norm" else 0.0))
                 for k in asdict(weights)
             })
         preference.validate()
@@ -529,6 +572,21 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_PRODUCT_AXIS_MESH_MATCHED_POLICY_REQUIRED")
         self.training_profile = training_profile
         self.seeded_tessa_weights = seeded_tessa_weights
+        self.component_udf_weight = float(component_udf_weight)
+        self.component_udf_enabled = component_enabled
+        component_snapshot = {
+            str(k): dict(v)
+            for k,v in (trusted_component_udf_registry or {}).items()
+        }
+        self.trusted_component_udf_registry = MappingProxyType({
+            k:MappingProxyType(v) for k,v in component_snapshot.items()
+        })
+        self.component_udf_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                component_snapshot,sort_keys=True,
+                separators=(",",":"),allow_nan=False,
+            ).encode()).hexdigest() if component_enabled else ""
+        )
         self.scene_conditioning_policy = scene_conditioning_policy
         self.axis_training_policy = axis_training_policy
         self.model = model
@@ -574,6 +632,13 @@ class RSSvNextStructuralTrainer:
                 "seeded_tessa_source_schema": SEEDED_TESSA_SCHEMA,
                 "seeded_tessa_phase": SEEDED_TESSA_PHASE,
             } if seeded_mode else {}),
+            **({
+                "component_udf_weight":self.component_udf_weight,
+                "component_udf_registry_sha256":
+                    self.component_udf_registry_sha256,
+                "component_udf_teacher_schema":
+                    "RealSaS.RSSvNext.SourceNativeComponentUDFAssignment.v1",
+            } if component_enabled else {}),
             "weights": {k: v for k, v in asdict(weights).items()
                         if not (
                             k in ("axis_posed_surface", "axis_dynamic_posed_surface", "tessa_iris_surface_alignment")
@@ -921,6 +986,26 @@ class RSSvNextStructuralTrainer:
             )
         if self.training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1":
             return self._objective_seeded_product_v1(batch, state)
+        if self.training_profile == "PRODUCT_COMPONENT_UDF_V1":
+            self._reject_extra_component_udf_source_fields_v1(batch)
+            out=self._component_udf_objective_v1(batch,state)
+            return RSSvNextTrainingResult(
+                total_loss=self.component_udf_weight*out["total"],
+                topology_loss=None,motion_preference_loss=None,
+                source_semantic_loss=None,semantic_risk_loss=None,
+                flexicubes_surface_loss=None,flexicubes_animation_loss=None,
+                eligible_animation_pose_count=0,
+                eligible_semantic_patch_labels=0,
+                eligible_topology_examples=0,qualified_preference_pairs=0,
+                component_udf_loss=out["total"],
+                component_udf_loss_parts={
+                    k:v for k,v in out.items() if k in
+                    ("field","kind","unmatched_unknown")
+                },
+                eligible_component_udf_source_components=int(
+                    out["qualified_source_component_count"].item()
+                ),
+            )
         if batch.seeded_tessa_source_teacher is not None or (
             batch.seeded_tessa_source_face_budget != 0
         ):
@@ -2072,6 +2157,98 @@ class RSSvNextStructuralTrainer:
         )
 
 
+    def _reject_extra_component_udf_source_fields_v1(
+        self,batch:RSSvNextStructuralTrainingBatch,
+    ) -> None:
+        allowed={
+            "rgba","camera_features",
+            "product_generated_rgba","product_generated_normals",
+            "product_generated_cameras",
+            "product_source_binding_sha256",
+            "product_canonical_checkpoint_sha256",
+            "product_multiview_checkpoint_sha256",
+            "product_generation_checkpoint_sha256",
+            "product_conditioning_admission_key",
+            "component_udf_source_teacher",
+            "source_qualification_key","admission_status",
+        }
+        unexpected=[]
+        for key,value in vars(batch).items():
+            if key in allowed or value is None:
+                continue
+            if ((type(value) is str and not value)
+                or (type(value) is bool and value is False)
+                or (type(value) is int and value == 0)
+                or (type(value) is tuple and not value)):
+                continue
+            unexpected.append(key)
+        if unexpected:
+            raise ValueError(
+                "RSS_VNEXT_PRODUCT_COMPONENT_UDF_UNCONSUMED_TEACHER:"
+                +",".join(sorted(unexpected))
+            )
+
+    def _component_udf_objective_v1(
+        self,batch:RSSvNextStructuralTrainingBatch,state,
+    ) -> dict:
+        """One generated-six scene H(x), native component UDF loss only.
+
+        Never use the source component class, source mesh or source rig
+        as a student neural input. Hungarian matches the *predicted* slots
+        to the independently qualified native component set at loss time.
+        """
+        teacher=batch.component_udf_source_teacher
+        if not self.component_udf_enabled or not isinstance(
+            teacher,SourceNativeComponentUDFFitV1
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_COMPONENT_UDF_TEACHER_REQUIRED")
+        teacher.validate()
+        receipt=self.trusted_component_udf_registry.get(
+            teacher.source_qualification_key,
+        )
+        expected={
+            "dataset_manifest_sha256":self.dataset_manifest_sha256,
+            "source_qualification_key":batch.source_qualification_key,
+            "observed_rgba_sha256":
+                source_surface_tensor_sha256(batch.rgba),
+            "observed_camera_sha256":
+                source_surface_tensor_sha256(batch.camera_features),
+            "source_binding_sha256":
+                batch.product_source_binding_sha256,
+            "combined_generation_checkpoint_sha256":
+                batch.product_generation_checkpoint_sha256,
+            "source_model_observation_count":2,
+            "source_native_component_asset_sha256":
+                teacher.source_asset_sha256,
+        }
+        if (
+            state.scene_conditioning_authority
+                != "GENERATED_SIX_VIEW_SHARED_SCENE"
+            or state.camera_features is not None
+            or not isinstance(receipt,Mapping)
+            or any(receipt.get(k)!=v for k,v in expected.items())
+            or teacher.original_query_xyz.device != state.scene_triplanes.device
+            or teacher.original_query_xyz.dtype != state.scene_triplanes.dtype
+            or len(teacher.original_query_xyz)>8192
+            or state.scene_triplanes.shape[0]!=1
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_COMPONENT_UDF_SCENE_RECEIPT_DRIFT")
+        xyz=teacher.original_query_xyz[None]
+        h=self.model.iris.query(state.scene_triplanes,xyz)["H"]
+        distances=self.model.component_udf.query_all(
+            h,state.region_slot_features,
+        )
+        topology_kind=self.model.component_udf.topology_kind_logits(
+            state.region_slot_features,
+        )
+        return source_native_component_udf_objective_v1(
+            predicted_distances=distances,
+            predicted_kind_logits=topology_kind,
+            teacher=teacher,
+            trusted_source_registry=self.trusted_component_udf_registry,
+            source_query_xyz=xyz[0],
+        )
+
     def _objective_seeded_product_v1(
         self, batch: RSSvNextStructuralTrainingBatch, state,
     ) -> RSSvNextTrainingResult:
@@ -2101,6 +2278,8 @@ class RSSvNextStructuralTrainer:
             "flexicubes_signed_source_admission_key",
             "seeded_tessa_source_teacher", "seeded_tessa_source_face_budget",
             "source_qualification_key", "admission_status",
+            **({"component_udf_source_teacher"}
+               if self.component_udf_enabled else set()),
         }
         unexpected = []
         for name, value in vars(batch).items():
@@ -2323,8 +2502,16 @@ class RSSvNextStructuralTrainer:
             source_face_budget=batch.seeded_tessa_source_face_budget,
             sampler_step=self.global_step,
         )
+        component = (
+            self._component_udf_objective_v1(batch,state)
+            if self.component_udf_enabled else None
+        )
+        joint_total = losses["total"] + (
+            self.component_udf_weight * component["total"]
+            if component is not None else losses["total"].new_zeros(())
+        )
         return RSSvNextTrainingResult(
-            total_loss=losses["total"],
+            total_loss=joint_total,
             topology_loss=None,motion_preference_loss=None,
             source_semantic_loss=None,semantic_risk_loss=None,
             flexicubes_surface_loss=None,flexicubes_animation_loss=None,
@@ -2332,6 +2519,17 @@ class RSSvNextStructuralTrainer:
             eligible_semantic_patch_labels=0,eligible_topology_examples=0,
             qualified_preference_pairs=0,
             seeded_tessa_loss=losses["total"],
+            component_udf_loss=(
+                component["total"] if component is not None else None
+            ),
+            component_udf_loss_parts=({
+                k:v for k,v in component.items() if
+                k in ("field","kind","unmatched_unknown")
+            } if component is not None else None),
+            eligible_component_udf_source_components=(
+                int(component["qualified_source_component_count"].item())
+                if component is not None else 0
+            ),
             seeded_tessa_loss_parts={
                 k:v for k,v in losses.items()
                 if k not in (
@@ -2422,11 +2620,20 @@ class RSSvNextStructuralTrainer:
         ):
             result.gradient_interference_report = self._measure_gradient_conflicts(result)
         result.total_loss.backward()
-        if self.training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1":
-            for label,module in (
+        if self.training_profile in (
+            "PRODUCT_SEEDED_IRIS_TESSA_V1","PRODUCT_COMPONENT_UDF_V1",
+        ):
+            required=[
                 ("IRIS",self.model.iris),
-                ("TESSA",self.model.tessa_seeded_head),
-            ):
+            ]
+            if self.training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1":
+                required.append(("TESSA",self.model.tessa_seeded_head))
+            if self.component_udf_enabled:
+                required.extend((
+                    ("COMPONENT_UDF",self.model.component_udf),
+                    ("REGION_STRUCTURE",self.model.semantic_structure),
+                ))
+            for label,module in required:
                 trained = [p for p in module.parameters() if p.requires_grad]
                 if not trained or not any(p.grad is not None for p in trained):
                     raise RuntimeError(
@@ -2511,6 +2718,12 @@ class RSSvNextStructuralTrainer:
                     self.seeded_tessa_driver.policy_sha256,
             } if self.training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1"
               else {}),
+            **({
+                "component_udf_registry_sha256":
+                    self.component_udf_registry_sha256,
+                "component_udf_weight":self.component_udf_weight,
+                "component_udf_training_profile":self.training_profile,
+            } if self.component_udf_enabled else {}),
             "optimizer_ownership_binding_sha256": self.optimizer_ownership.binding_sha256,
             "phase_handoff_source_model_sha256": self.phase_handoff_source_model_sha256,
             "render_registry_sha256": self.render_registry_sha256,
@@ -2565,6 +2778,15 @@ class RSSvNextStructuralTrainer:
                 != self.seeded_tessa_driver.policy_sha256
         ):
             raise ValueError("RSS_VNEXT_TRAIN_SEEDED_CHECKPOINT_REGISTRY_OR_PHASE_DRIFT")
+        if self.component_udf_enabled and (
+            data.get("component_udf_registry_sha256")
+                != self.component_udf_registry_sha256
+            or data.get("component_udf_weight")
+                != self.component_udf_weight
+            or data.get("component_udf_training_profile")
+                != self.training_profile
+        ):
+            raise ValueError("RSS_VNEXT_COMPONENT_UDF_CHECKPOINT_PHASE_OR_REGISTRY_DRIFT")
         if data.get("phase_handoff_source_model_sha256", "") != self.phase_handoff_source_model_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_PHASE_ORIGIN_DRIFT")
         self._assert_optimizer_ownership()

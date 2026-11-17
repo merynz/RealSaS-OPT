@@ -53,4 +53,4 @@ jobs:
         run: |
           export REALSAS_FLEXICUBES_ROOT="${RUNNER_TEMP}/rss-pinned-flexicubes"
           python -m compileall -q models/rss_vnext
-          python -m pytest -q tests/models/test_rss_vnext_flexicubes_bridge.py tests/models/test_rss_vnext_flexicubes_animation.py
+          python -m pytest -q tests/models/test_rss_vnext_flexicubes_bridge.py tests/models/test_rss_vnext_flexicubes_animation.py tests/models/test_rss_vnext_sparse_flexicubes_global_parity_v1.py

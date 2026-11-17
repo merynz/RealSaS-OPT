@@ -132,3 +132,22 @@ def test_cannot_train_fabricated_pose_or_treat_legacy_mesh_as_new_tessa():
             rep(mesh,seeded_surface=None),
             teacher,source_face_budget=2,
         )
+
+
+def test_bounded_source_nearest_indices_equal_dense_without_losing_ambiguous_ties():
+    from models.rss_vnext.training_seeded_tessa_v1 import (
+        _bounded_nearest_source_indices_v1,
+    )
+    torch.manual_seed(111)
+    pred=torch.randn(522,3)
+    source=torch.randn(1055,3)
+    dense=torch.cdist(pred,source)
+    expected_dist,expected_ids=dense.min(dim=1)
+    ids,dist=_bounded_nearest_source_indices_v1(pred,source)
+    torch.testing.assert_close(ids,expected_ids)
+    torch.testing.assert_close(dist,expected_dist,atol=1e-5,rtol=1e-5)
+    # Exact tie split over different source tiles chooses smaller ID.
+    source[1050]=source[2]
+    pred[0]=source[2]
+    ids,_=_bounded_nearest_source_indices_v1(pred,source)
+    assert int(ids[0])==2

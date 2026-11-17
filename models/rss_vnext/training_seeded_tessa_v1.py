@@ -31,6 +31,10 @@ from .seeded_surface_sampling_v1 import (
 from .tessa_seeded_surface_v1 import TESSASeededSurfaceV1
 from .seeded_layer_source_court_v1 import qualify_layer_source_court_v1
 from .native_face_layer_truth_v1 import NativeFaceLayerSamplesV1
+from .native_layer_open_boundary_v1 import (
+    NativeLayerOpenBoundaryV1, exact_open_boundary_edges_v1,
+    validate_native_open_boundary_v1,
+)
 
 SCHEMA = "RealSaS.RSSvNext.SeededTESSA.SourceSupervision.v1"
 PHASE = "RSSVNEXT_V1_SEEDED_CONTINUOUS_TOPOLOGY"
@@ -89,6 +93,7 @@ class SeededTESSASourceTeacherV1:
     source_component_ids: Tensor | None = None  # [M], native connectivity; no student ID claim
     source_layer_ids: Tensor | None = None  # [M], audited native face/material partition
     native_face_layer_samples: NativeFaceLayerSamplesV1 | None = None  # source-only indexed triangle + barycentric witness
+    native_open_boundary: NativeLayerOpenBoundaryV1 | None = None  # independently replayed complete native open hems
     source_boundary_xyz: Tensor | None = None  # [K,3], exact known open seams
     source_boundary_mask: Tensor | None = None # [K] bool
     # Only if a trusted source→candidate barycentric/skin joint reindex exists.
@@ -344,11 +349,10 @@ class RSSvNextSeededTESSATrainerV1:
         # Open hems require independently qualified per-layer seam target.
         # Legacy single-set boundary chamfer could bridge a body/cape edge.
         if layer_court is not None and (
-            w.boundary>0 or w.deformation>0 or w.pose_strain>0
-            or w.layer_penetration>0
+            w.deformation>0 or w.pose_strain>0 or w.layer_penetration>0
         ):
             raise ValueError(
-                "RSS_VNEXT_SEEDED_LAYER_POSE_OR_HEM_REINDEX_NOT_QUALIFIED"
+                "RSS_VNEXT_SEEDED_LAYER_POSE_OR_PENETRATION_REINDEX_NOT_QUALIFIED"
             )
         policy=self.sampling_policy
         source_all_indices=torch.nonzero(
@@ -517,15 +521,60 @@ class RSSvNextSeededTESSATrainerV1:
         if w.boundary>0:
             if mesh.faces.shape[0]>200000:
                 raise ValueError("RSS_VNEXT_TESSA_BOUNDARY_HIGHRES_RESOURCE_GATE")
-            if teacher.source_boundary_xyz is None:
-                raise ValueError("RSS_VNEXT_TESSA_TRAIN_BOUNDARY_TRUTH_REQUIRED")
-            predicted=_boundary_vertices(mesh.faces,xyz)
-            if not len(predicted):
-                raise ValueError("RSS_VNEXT_TESSA_TRAIN_BOUNDARY_LOST")
-            vals["boundary"]=_bounded_bidirectional_dist(
-                predicted,teacher.source_boundary_xyz[
-                    teacher.source_boundary_mask],scale=scale,
-            )
+            if layer_court is None:
+                if teacher.source_boundary_xyz is None:
+                    raise ValueError("RSS_VNEXT_TESSA_TRAIN_BOUNDARY_TRUTH_REQUIRED")
+                predicted=_boundary_vertices(mesh.faces,xyz)
+                if not len(predicted):
+                    raise ValueError("RSS_VNEXT_TESSA_TRAIN_BOUNDARY_LOST")
+                vals["boundary"]=_bounded_bidirectional_dist(
+                    predicted,teacher.source_boundary_xyz[
+                        teacher.source_boundary_mask],scale=scale,
+                )
+            else:
+                # OPEN cloth is not a signed-solid hole. Reconstruct the
+                # full independent SOURCE hem from its native face graph;
+                # a model-predicted mask or nearest XYZ cannot serve truth.
+                native_boundary,source_boundary_roles,open_layers=(
+                    validate_native_open_boundary_v1(
+                        teacher.native_open_boundary,
+                        teacher.native_face_layer_samples,
+                        source_boundary_xyz=teacher.source_boundary_xyz,
+                        source_boundary_mask=teacher.source_boundary_mask,
+                        source_asset_sha256=teacher.source_asset_sha256,
+                        layer_namespace_sha256=layer_court.namespace_sha256,
+                        receipt=receipt,
+                    )
+                )
+                # EXACT predicted face edges, not a semantic/visibility
+                # pseudo-boundary. Reject a hole in a declared closed layer
+                # even when an adjacent open cloth layer overlaps in XYZ.
+                predicted_edges=exact_open_boundary_edges_v1(mesh.faces)
+                predicted_ids=torch.unique(
+                    predicted_edges.reshape(-1),sorted=True,
+                ) if len(predicted_edges) else mesh.faces.new_empty((0,))
+                predicted_roles=layer_court.student_layer_ids[predicted_ids]
+                allowed=set(int(v) for v in open_layers.detach().cpu().tolist())
+                parts=[]
+                for layer_id in range(layer_court.layer_count):
+                    pred=xyz[0,predicted_ids[predicted_roles==layer_id]]
+                    src=native_boundary[source_boundary_roles==layer_id]
+                    if layer_id not in allowed:
+                        if len(pred):
+                            raise ValueError(
+                                "RSS_VNEXT_TESSA_UNQUALIFIED_CLOSED_LAYER_HOLE"
+                            )
+                        continue
+                    if len(src)<3 or len(pred)<3:
+                        raise ValueError(
+                            "RSS_VNEXT_TESSA_OPEN_LAYER_HEM_MISSING"
+                        )
+                    parts.append(_bounded_bidirectional_dist(
+                        pred,src,scale=scale,
+                    ))
+                if not parts:
+                    raise ValueError("RSS_VNEXT_TESSA_OPEN_HEM_TRUTH_EMPTY")
+                vals["boundary"]=torch.stack(parts).mean()
         quality_faces=mesh.faces
         if w.quality>0:
             if mesh.faces.shape[0]>policy.max_quality_faces:

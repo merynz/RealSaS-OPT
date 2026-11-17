@@ -153,6 +153,10 @@ def _tessa_candidate_tensors_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
             "tessa_candidate_mechanics_local_features":
                 mesh.mechanics_local_features,
             "tessa_seed_original_faces": mesh.seeded_surface.original_faces,
+            **({
+                "tessa_seed_vertex_layer_ids":
+                    mesh.seeded_surface.vertex_layer_ids,
+            } if mesh.seeded_surface.vertex_layer_ids is not None else {}),
             "tessa_seed_vertex_parent_indices": torch.tensor(
                 mesh.seeded_surface.parent_seed_edges,
                 device=mesh.faces.device, dtype=torch.long,
@@ -181,6 +185,24 @@ def _tessa_candidate_tensors_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
                 mesh.seeded_surface.original_vertex_count,
             "tessa_seed_original_face_count":
                 mesh.seeded_surface.original_face_count,
+            **({
+                "tessa_seed_layer_names":
+                    list(mesh.seeded_surface.layer_names),
+                "tessa_seed_layer_roles": [
+                    list(v) for v in mesh.seeded_surface.layer_roles
+                ],
+                "tessa_seed_layer_namespace_sha256":
+                    mesh.seeded_surface.layer_namespace_sha256,
+                "tessa_seed_vertex_layer_sha256": (
+                    sha256((
+                        str((str(
+                            mesh.seeded_surface.vertex_layer_ids.detach()
+                            .contiguous().cpu().numpy().dtype
+                        ),tuple(mesh.seeded_surface.vertex_layer_ids.shape)))
+                    ).encode() + mesh.seeded_surface.vertex_layer_ids.detach()
+                    .contiguous().cpu().numpy().tobytes()).hexdigest()
+                ),
+            } if mesh.seeded_surface.vertex_layer_ids is not None else {}),
         } if seeded_abi else {}),
         "tessa_mesh_candidate_vertex_count": int(mesh.rest_vertices_iris.shape[1]),
         "tessa_mesh_candidate_face_count": int(mesh.faces.shape[0]),

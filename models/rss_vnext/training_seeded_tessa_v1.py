@@ -29,6 +29,7 @@ from .seeded_surface_sampling_v1 import (
     component_spatial_sample_indices_v1,
 )
 from .tessa_seeded_surface_v1 import TESSASeededSurfaceV1
+from .seeded_layer_source_court_v1 import qualify_layer_source_court_v1
 
 SCHEMA = "RealSaS.RSSvNext.SeededTESSA.SourceSupervision.v1"
 PHASE = "RSSVNEXT_V1_SEEDED_CONTINUOUS_TOPOLOGY"
@@ -85,6 +86,7 @@ class SeededTESSASourceTeacherV1:
     source_importance: Tensor             # [M] curvature/pose-derived [0,1]
     source_importance_mask: Tensor        # [M] native valid
     source_component_ids: Tensor | None = None  # [M], native connectivity; no student ID claim
+    source_layer_ids: Tensor | None = None  # [M], audited native face/material partition
     source_boundary_xyz: Tensor | None = None  # [K,3], exact known open seams
     source_boundary_mask: Tensor | None = None # [K] bool
     # Only if a trusted source→candidate barycentric/skin joint reindex exists.
@@ -136,6 +138,13 @@ def _validate_source_teacher(t: SeededTESSASourceTeacherV1) -> None:
         or bool((t.source_component_ids < 0).any())
     ):
         raise ValueError("RSS_VNEXT_TESSA_SOURCE_COMPONENT_DOMAIN")
+    if t.source_layer_ids is not None and (
+        t.source_layer_ids.shape != (m,)
+        or t.source_layer_ids.dtype != torch.long
+        or t.source_layer_ids.device != xyz.device
+        or bool((t.source_layer_ids<0).any())
+    ):
+        raise ValueError("RSS_VNEXT_TESSA_SOURCE_LAYER_ID_DOMAIN")
     if (t.source_boundary_xyz is None) != (t.source_boundary_mask is None):
         raise ValueError("RSS_VNEXT_TESSA_SOURCE_BOUNDARY_INCOMPLETE")
     if t.source_boundary_xyz is not None:
@@ -323,6 +332,21 @@ class RSSvNextSeededTESSATrainerV1:
         source=teacher.source_xyz
         if source.device != xyz.device or source.dtype != xyz.dtype:
             raise ValueError("RSS_VNEXT_TESSA_TRAIN_DEVICE_OR_DTYPE")
+        layer_court=qualify_layer_source_court_v1(
+            mesh,source_layer_ids=teacher.source_layer_ids,
+            source_xyz=source,source_component_ids=teacher.source_component_ids,
+            receipt=receipt,source_asset_sha256=teacher.source_asset_sha256,
+            tensor_digest=_digest,
+        )
+        # Open hems require independently qualified per-layer seam target.
+        # Legacy single-set boundary chamfer could bridge a body/cape edge.
+        if layer_court is not None and (
+            w.boundary>0 or w.deformation>0 or w.pose_strain>0
+            or w.layer_penetration>0
+        ):
+            raise ValueError(
+                "RSS_VNEXT_SEEDED_LAYER_POSE_OR_HEM_REINDEX_NOT_QUALIFIED"
+            )
         policy=self.sampling_policy
         source_all_indices=torch.nonzero(
             teacher.source_point_mask,as_tuple=False,
@@ -379,35 +403,114 @@ class RSSvNextSeededTESSATrainerV1:
             )
         gt=source[source_idx]
         vals={}
+        layer_groups=(
+            layer_court.grouped(student_idx,source_idx)
+            if layer_court is not None else None
+        )
         if w.rest_surface>0:
-            vals["rest_surface"]=_bounded_bidirectional_dist(
-                sampled_xyz,gt,scale=scale,
-            )
+            if layer_groups is None:
+                vals["rest_surface"]=_bounded_bidirectional_dist(
+                    sampled_xyz,gt,scale=scale,
+                )
+            else:
+                # Equal shell weight: a small cape cannot vanish inside
+                # a large body's source-native point cloud.
+                vals["rest_surface"]=torch.stack([
+                    _bounded_bidirectional_dist(
+                        xyz[0,student],source[native],scale=scale,
+                    )
+                    for student,native in layer_groups
+                ]).mean()
         if w.normal>0 or w.structural_importance>0:
-            # Source association is teacher-only, bounded and phase-shifted.
-            local_nearest, minimum_distance = _bounded_nearest_source_indices_v1(
-                sampled_xyz, gt,
-            )
-            nearest=source_idx[local_nearest]
-            eligible=(
-                minimum_distance <= self.max_match_ratio*scale
-            ) & teacher.source_point_mask[nearest]
+            # Teacher-only nearest labels are restricted to the SAME SOURCE
+            # layer. The student source XYZ may coincide exactly with another
+            # shell; coordinates never confer semantic membership.
+            if layer_groups is None:
+                local_nearest, minimum_distance = (
+                    _bounded_nearest_source_indices_v1(sampled_xyz,gt)
+                )
+                nearest=source_idx[local_nearest]
+                eligible=(
+                    minimum_distance <= self.max_match_ratio*scale
+                ) & teacher.source_point_mask[nearest]
+            else:
+                nearest=torch.empty(
+                    len(student_idx),device=xyz.device,dtype=torch.long,
+                )
+                eligible=torch.zeros(
+                    len(student_idx),device=xyz.device,dtype=torch.bool,
+                )
+                for layer_id,(student,native) in enumerate(layer_groups):
+                    sample_positions=torch.nonzero(
+                        layer_court.student_layer_ids[student_idx]==layer_id,
+                        as_tuple=False,
+                    ).flatten()
+                    local_nearest, distances=(
+                        _bounded_nearest_source_indices_v1(
+                            xyz[0,student],source[native],
+                        )
+                    )
+                    nearest[sample_positions]=native[local_nearest]
+                    eligible[sample_positions]=(
+                        distances <= self.max_match_ratio*scale
+                    ) & teacher.source_point_mask[native[local_nearest]]
+                    if not bool(eligible[sample_positions].any()):
+                        raise ValueError(
+                            "RSS_VNEXT_SEEDED_LAYER_SOURCE_PROJECTION_ABSTAIN"
+                        )
             if not bool(eligible.any()):
                 raise ValueError("RSS_VNEXT_TESSA_TRAIN_NO_MATCHED_SOURCE_NORMAL")
             if w.normal>0:
-                expected=F.normalize(
-                    teacher.source_normals[nearest[eligible]],dim=-1,
-                )
-                actual=F.normalize(mesh.normals[0,student_idx[eligible]],dim=-1)
-                vals["normal"]=(1-(expected*actual).sum(-1)).mean()
+                if layer_groups is None:
+                    expected=F.normalize(
+                        teacher.source_normals[nearest[eligible]],dim=-1,
+                    )
+                    actual=F.normalize(
+                        mesh.normals[0,student_idx[eligible]],dim=-1,
+                    )
+                    vals["normal"]=(1-(expected*actual).sum(-1)).mean()
+                else:
+                    normal_parts=[]
+                    for layer_id in range(layer_court.layer_count):
+                        valid=eligible & (
+                            layer_court.student_layer_ids[student_idx]==layer_id
+                        )
+                        expected=F.normalize(
+                            teacher.source_normals[nearest[valid]],dim=-1,
+                        )
+                        actual=F.normalize(
+                            mesh.normals[0,student_idx[valid]],dim=-1,
+                        )
+                        normal_parts.append(
+                            (1-(expected*actual).sum(-1)).mean()
+                        )
+                    vals["normal"]=torch.stack(normal_parts).mean()
             if w.structural_importance>0:
                 metric_mask=eligible & teacher.source_importance_mask[nearest]
                 if not bool(metric_mask.any()) or mesh.tessa_metric_logits is None:
                     raise ValueError("RSS_VNEXT_TESSA_TRAIN_METRIC_TRUTH_MISSING")
-                vals["structural_importance"]=F.binary_cross_entropy_with_logits(
-                    mesh.tessa_metric_logits[0,student_idx[metric_mask]],
-                    teacher.source_importance[nearest[metric_mask]],
-                )
+                if layer_groups is None:
+                    vals["structural_importance"]=(
+                        F.binary_cross_entropy_with_logits(
+                            mesh.tessa_metric_logits[0,student_idx[metric_mask]],
+                            teacher.source_importance[nearest[metric_mask]],
+                        )
+                    )
+                else:
+                    metric_parts=[]
+                    for layer_id in range(layer_court.layer_count):
+                        valid=metric_mask & (
+                            layer_court.student_layer_ids[student_idx]==layer_id
+                        )
+                        if not bool(valid.any()):
+                            raise ValueError(
+                                "RSS_VNEXT_SEEDED_LAYER_METRIC_TRUTH_ABSTAIN"
+                            )
+                        metric_parts.append(F.binary_cross_entropy_with_logits(
+                            mesh.tessa_metric_logits[0,student_idx[valid]],
+                            teacher.source_importance[nearest[valid]],
+                        ))
+                    vals["structural_importance"]=torch.stack(metric_parts).mean()
         if w.boundary>0:
             if mesh.faces.shape[0]>200000:
                 raise ValueError("RSS_VNEXT_TESSA_BOUNDARY_HIGHRES_RESOURCE_GATE")
@@ -503,6 +606,9 @@ class RSSvNextSeededTESSATrainerV1:
                 len(quality_faces) if w.quality>0 else 0
             ),
             "sampling_step":gt.new_tensor(sampler_step),
+            "qualified_source_layer_count":gt.new_tensor(
+                layer_court.layer_count if layer_court is not None else 0
+            ),
         }
 
     def train_step(

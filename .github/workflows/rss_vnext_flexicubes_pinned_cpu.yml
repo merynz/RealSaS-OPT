@@ -1,7 +1,8 @@
 name: RSS vNext pinned FlexiCubes-to-structural CPU court
 on:
   pull_request:
-    # Full court runs on opening/ready state, not every intermediate commit.
+    # Full pinned court runs only on opening, reopening, or review readiness.
+    # The repository's CI authority policy prohibits per-commit heavy courts.
     types: [opened, reopened, ready_for_review]
     paths:
       - "models/rss_vnext/**"
@@ -53,4 +54,4 @@ jobs:
         run: |
           export REALSAS_FLEXICUBES_ROOT="${RUNNER_TEMP}/rss-pinned-flexicubes"
           python -m compileall -q models/rss_vnext
-          python -m pytest -q tests/models/test_rss_vnext_flexicubes_bridge.py tests/models/test_rss_vnext_flexicubes_animation.py
+          python -m pytest -q tests/models/test_rss_vnext_flexicubes_bridge.py tests/models/test_rss_vnext_flexicubes_animation.py tests/models/test_rss_vnext_sparse_flexicubes_global_parity_v1.py

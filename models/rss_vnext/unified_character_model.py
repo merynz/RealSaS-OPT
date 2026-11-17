@@ -1371,8 +1371,16 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                         witness=out.flexicubes_surface_evidence,
                         scene_triplanes=out.state.scene_triplanes,
                     )
+                # A layered candidate cannot inherit global structural
+                # memory from ONLY its first shell. Use the full shared
+                # scene as the global memory and the final indexed mesh as
+                # the per-face AXIS/MIRA context.
+                structural_memory = (
+                    self._structural_memory(out.state, None)
+                    if layered is not None else out.structural_memory
+                )
                 candidate = self.build_seeded_mechanics_candidate_v1(
-                    out.state, seed, structural_memory=out.structural_memory,
+                    out.state, seed, structural_memory=structural_memory,
                     adaptive_refinement=True,
                 )
                 mesh = candidate["mesh_candidate"]
@@ -1448,7 +1456,12 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 # Never fabricate a placeholder mesh just to decode controls.
                 result["control_status"] = "ABSTAIN_NO_VALID_PREDICTED_MESH"
                 return result
-            memory = self._control_memory(out.state, out.structural_memory, mesh)
+            memory = self._control_memory(
+                out.state,
+                self._structural_memory(out.state, None)
+                if layered is not None else out.structural_memory,
+                mesh,
+            )
             events = self.axis.generate_events(
                 memory, tokens_per_joint=self.cfg.skin_tokens_per_joint,
                 max_steps=self.cfg.control_max_seq,

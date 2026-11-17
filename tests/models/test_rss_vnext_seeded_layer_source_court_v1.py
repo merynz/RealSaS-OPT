@@ -164,9 +164,14 @@ def test_spoofed_namespace_and_reassigned_ids_are_rejected():
     )
     with pytest.raises(ValueError,match="SOURCE_RECEIPT_DRIFT"):
         driver.objective(mesh,swapped,source_face_budget=4)
-    receipt["source_layer_independently_audited"]=False
+    changed=dict(receipt)
+    changed["source_layer_independently_audited"]=False
+    adversarial=RSSvNextSeededTESSATrainerV1(
+        driver.model,driver.optimizer,weights=driver.weights,
+        trusted_source_registry={teacher.source_qualification_key:changed},
+    )
     with pytest.raises(ValueError,match="SOURCE_RECEIPT_REQUIRED"):
-        driver.objective(mesh,teacher,source_face_budget=4)
+        adversarial.objective(mesh,teacher,source_face_budget=4)
 
 
 def test_layered_open_boundary_and_pose_losses_require_distinct_reindex_proof():

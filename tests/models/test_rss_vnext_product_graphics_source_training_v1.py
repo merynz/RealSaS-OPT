@@ -7,7 +7,7 @@ import pytest
 import torch
 
 from models.rss_vnext.training_engine import (
-    RSSvNextStructuralTrainer,RSSvNextTrainingBatch,
+    RSSvNextStructuralTrainer,RSSvNextStructuralTrainingBatch,
     source_surface_tensor_sha256,
 )
 from models.rss_vnext.training_seeded_tessa_v1 import SeededTESSALossWeightsV1

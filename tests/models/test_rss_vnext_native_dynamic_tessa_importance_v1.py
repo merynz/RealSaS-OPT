@@ -96,7 +96,7 @@ def test_digest_and_trusted_source_skin_pose_receipt_fail_closed():
     w,s,m,mask,key,receipt=_source_fixture()
     risk=_run(w,s,m,mask,key,receipt)
     with pytest.raises(ValueError,match="RECEIPT_DRIFT"):
-        replace(risk,face_importance=torch.zeros_like(risk.face_importance)).validate(w)
+        replace(risk,face_importance=torch.zeros_like(risk.face_importance),\n                sample_importance=torch.zeros_like(risk.sample_importance)).validate(w)
     bad=dict(receipt)
     bad["source_skin_native_vertex_order"]=False
     with pytest.raises(ValueError,match="TRUSTED_RECEIPT_REQUIRED"):

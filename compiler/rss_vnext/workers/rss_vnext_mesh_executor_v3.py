@@ -54,6 +54,7 @@ MESH_KEYS = {
 }
 SEEDED_EXTRA_KEYS = {
     "tessa_candidate_mechanics_local_features",
+    "tessa_seed_original_faces",
     "tessa_seed_vertex_parent_indices", "tessa_seed_vertex_parent_weights",
 }
 RAW_GRAPHICS_KEYS = {
@@ -218,13 +219,20 @@ def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[st
         mh = arrays["tessa_candidate_mechanics_local_features"]
         p = arrays["tessa_seed_vertex_parent_indices"]
         w = arrays["tessa_seed_vertex_parent_weights"]
+        src_faces = arrays["tessa_seed_original_faces"]
+        original_n = receipt.get("tessa_seed_original_vertex_count", -1)
+        original_f = receipt.get("tessa_seed_original_face_count", -1)
         if (
             mh.shape != arrays["tessa_candidate_local_features"].shape
             or p.shape != (n, 2) or w.shape != (n, 2)
             or p.dtype.kind not in "iu"
-            or np.any(p < 0) or np.any(p >= receipt.get(
-                "tessa_seed_original_vertex_count", -1
-            ))
+            or type(original_n) is not int
+            or not 3 <= original_n <= n
+            or type(original_f) is not int or original_f < 1
+            or src_faces.shape != (original_f,3)
+            or src_faces.dtype.kind not in "iu"
+            or np.any(src_faces < 0) or np.any(src_faces >= original_n)
+            or np.any(p < 0) or np.any(p >= original_n)
             or not np.allclose(w.sum(axis=-1), 1.0, atol=1e-7, rtol=0)
             or not np.all(
                 (np.isclose(w[:, 0], 1.) & np.isclose(w[:, 1], 0.))
@@ -242,6 +250,36 @@ def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[st
         h.update(scene.tobytes())
         if h.hexdigest() != receipt["tessa_seed_scene_sha256"]:
             raise RuntimeError("RSS_VNEXT_RAW_MESH_SEEDED_SCENE_HASH_DRIFT")
+        def _tensor_hash(x: np.ndarray) -> str:
+            d=_sha()
+            d.update(str((str(x.dtype),x.shape)).encode())
+            d.update(x.tobytes())
+            return d.hexdigest()
+        original_xyz=base[:, :original_n]
+        original_components=vertex_components[:original_n]
+        expected_surface=_sha((
+            _tensor_hash(original_xyz)
+            +_tensor_hash(src_faces)+_tensor_hash(original_components)
+        ).encode()).hexdigest()
+        if expected_surface != receipt["tessa_seed_surface_sha256"]:
+            raise RuntimeError("RSS_VNEXT_RAW_MESH_SEEDED_SURFACE_HASH_DRIFT")
+        if (
+            not np.array_equal(p[:original_n],np.repeat(
+                np.arange(original_n)[:,None],2,axis=1,
+            ))
+            or not np.allclose(
+                w[:original_n],np.array([1.,0.])[None],
+                rtol=0,atol=1e-7,
+            )
+        ):
+            raise RuntimeError("RSS_VNEXT_RAW_MESH_ORIGINAL_VERTEX_ADDRESS_DRIFT")
+        for idx in range(original_n,n):
+            a,b=map(int,p[idx])
+            expected=0.5*(base[0,a]+base[0,b])
+            if a==b or not np.allclose(
+                base[0,idx],expected,atol=1e-6,rtol=0,
+            ):
+                raise RuntimeError("RSS_VNEXT_RAW_MESH_PARENT_POSITION_DRIFT")
     elif set(arrays) & SEEDED_EXTRA_KEYS:
         raise RuntimeError("RSS_VNEXT_RAW_MESH_LEGACY_HAS_SEEDED_ATTRIBUTES")
     for key in MESH_KEYS - {

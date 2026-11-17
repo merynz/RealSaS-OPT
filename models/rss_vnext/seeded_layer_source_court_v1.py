@@ -16,6 +16,9 @@ import torch
 from torch import Tensor
 
 from .animation_ready_mesh import RSSvNextStructuralMeshCandidate
+from .native_face_layer_truth_v1 import (
+    NativeFaceLayerSamplesV1, validate_native_face_samples_v1,
+)
 
 SOURCE_LAYER_AUTHORITY = "QUALIFIED_SOURCE_NATIVE_FACE_TO_SEMANTIC_LAYER_V1"
 SOURCE_LAYER_DERIVATION = "SOURCE_NATIVE_FACE_OR_MATERIAL_NO_STUDENT_PSEUDOLABEL"
@@ -87,6 +90,7 @@ def qualify_layer_source_court_v1(
     source_asset_sha256: str,
     tensor_digest: Callable[[Tensor],str],
     source_component_ids: Tensor | None = None,
+    native_face_layer_samples: NativeFaceLayerSamplesV1 | None = None,
 ) -> LayerCorrespondenceV1 | None:
     if mesh.seeded_surface is None:
         raise ValueError("RSS_VNEXT_SEEDED_LAYER_MESH_REQUIRED")
@@ -132,6 +136,18 @@ def qualify_layer_source_court_v1(
         )
     ):
         raise ValueError("RSS_VNEXT_SEEDED_LAYER_STUDENT_TOPOLOGY_DRIFT")
+    # Source-native face/barycentric addresses MUST independently replay
+    # the 3D sample and role/component labels. A signed registry row alone
+    # cannot certify that a "cape" label came from a cape source triangle.
+    validate_native_face_samples_v1(
+        native_face_layer_samples,
+        source_xyz=source_xyz,
+        source_layer_ids=source_layer_ids,
+        source_component_ids=source_component_ids,
+        source_asset_sha256=source_asset_sha256,
+        layer_namespace_sha256=seed.layer_namespace_sha256,
+        receipt=receipt,
+    )
     # Source component IDs are native face-connected components, not student
     # components. Components cannot contain mixed layer truth.
     unique, inverse=torch.unique(

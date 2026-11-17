@@ -748,7 +748,7 @@
     {
       "id": "Native material/role layer truth (source <-> generated shell supervision)",
       "output": "source_layer_ids and source_component_ids per independently qualified native face/material evidence",
-      "training_gap": "Code consumes and validates source-native role partition; actual licensed corpus face/material semantic annotation coverage is UNKNOWN; no invented labels allowed",
+      "training_gap": "Source-native face/barycentric replay and per-layer loss admission are implemented; actual source asset face/material labels, rights and corpus-wide provenance have NOT been independently audited or measured",
       "source_truth_status": "UNQUALIFIED_CORPUS_COVERAGE_PENDING",
       "real_corpus_verified": false,
       "gpu_verified": false
@@ -1099,7 +1099,7 @@
       "prediction": "TESSA+IRIS H(x) rest M*",
       "objective": "normalized symmetric chunked surface distance",
       "teacher_target": "Source-native geometry xyz surface points",
-      "qualification_mask": "source_point_mask verified native alignment; for layered v1 require native face/material layer IDs and independent source receipt; prohibit cross-layer correspondence even at coincident XYZ; layer-balanced objective",
+      "qualification_mask": "source_point_mask verified native alignment; for layered v1 require native face/material layer IDs and independent source receipt; prohibit cross-layer correspondence even at coincident XYZ; layer-balanced objective; source-native triangle/barycentric sample must replay XYZ, component ID and layer ID under trusted SHA256",
       "trusted_receipt": "RSSvNextSeededTESSATrainerV1 trusted_source_registry; SHA256 every source tensor, phase binding, independently qualified native mesh/rights; never student prediction as 3D truth",
       "preparation": "Derive independently from source-native 3D: rest mesh, normal/open boundaries, metric/pose curvature on exact face/skin domain; qualify source rights and masks; do not process corpus until requested; derive source_layer_ids via native authoring material or semantic part evidence, NOT predicted H/visibility/SAM3 as standalone truth",
       "preparation_route": "NATIVE_AND_DERIVED",
@@ -1115,7 +1115,7 @@
       "prediction": "TESSA+IRIS H(x) rest normals",
       "objective": "1 - cosine of source and emitted M* normals",
       "teacher_target": "Source-native rest normals at source points",
-      "qualification_mask": "source_point_mask AND distance-qualified match; for layered v1 require native face/material layer IDs and independent source receipt; prohibit cross-layer correspondence even at coincident XYZ; layer-balanced objective",
+      "qualification_mask": "source_point_mask AND distance-qualified match; for layered v1 require native face/material layer IDs and independent source receipt; prohibit cross-layer correspondence even at coincident XYZ; layer-balanced objective; source-native triangle/barycentric sample must replay XYZ, component ID and layer ID under trusted SHA256",
       "trusted_receipt": "RSSvNextSeededTESSATrainerV1 trusted_source_registry; SHA256 every source tensor, phase binding, independently qualified native mesh/rights; never student prediction as 3D truth",
       "preparation": "Derive independently from source-native 3D: rest mesh, normal/open boundaries, metric/pose curvature on exact face/skin domain; qualify source rights and masks; do not process corpus until requested; derive source_layer_ids via native authoring material or semantic part evidence, NOT predicted H/visibility/SAM3 as standalone truth",
       "preparation_route": "NATIVE_AND_DERIVED",
@@ -1227,7 +1227,7 @@
       "prediction": "tessa_seeded_head metric logits at M*",
       "objective": "masked BCE with source importance",
       "teacher_target": "Qualified source rest curvature / multi-pose deformation-derived importance [0,1]",
-      "qualification_mask": "source_importance_mask plus distance-qualified source match; for layered v1 require native face/material layer IDs and independent source receipt; prohibit cross-layer correspondence even at coincident XYZ; layer-balanced objective",
+      "qualification_mask": "source_importance_mask plus distance-qualified source match; for layered v1 require native face/material layer IDs and independent source receipt; prohibit cross-layer correspondence even at coincident XYZ; layer-balanced objective; source-native triangle/barycentric sample must replay XYZ, component ID and layer ID under trusted SHA256",
       "trusted_receipt": "RSSvNextSeededTESSATrainerV1 trusted_source_registry; SHA256 every source tensor, phase binding, independently qualified native mesh/rights; never student prediction as 3D truth",
       "preparation": "Derive independently from source-native 3D: rest mesh, normal/open boundaries, metric/pose curvature on exact face/skin domain; qualify source rights and masks; do not process corpus until requested; derive source_layer_ids via native authoring material or semantic part evidence, NOT predicted H/visibility/SAM3 as standalone truth",
       "preparation_route": "NATIVE_AND_DERIVED",
@@ -1263,7 +1263,7 @@
     "component_aware_sampling_gpu_verified": false,
     "layered_source_supervision_contract": {
       "student_mesh": "one H(x) predicted, TESSA-indexed M*; source layers NEVER enter model forward",
-      "native_truth": "source-face or material to semantic role group; audited before data preparation, no student pseudo-labels",
+      "native_truth": "independently audited source-native face/material role group and ORIGINAL indexed face/barycentric address, replayed in trainer without student-derived nearest 3D truth",
       "native_tensors": [
         "source_xyz",
         "source_normals",
@@ -1271,7 +1271,13 @@
         "source_layer_ids",
         "source_point_mask",
         "source_importance",
-        "source_importance_mask"
+        "source_importance_mask",
+        "native_face_layer_samples.vertices",
+        "native_face_layer_samples.faces",
+        "native_face_layer_samples.face_layer_ids",
+        "native_face_layer_samples.face_component_ids",
+        "native_face_layer_samples.sample_face_ids",
+        "native_face_layer_samples.sample_barycentric"
       ],
       "native_receipt_fields": [
         "source_layer_partition_authority",
@@ -1280,7 +1286,10 @@
         "native_source_layer_partition_sha256",
         "source_layer_native_asset_sha256",
         "source_layer_independently_audited",
-        "source_label_student_checkpoint_dependency"
+        "source_label_student_checkpoint_dependency",
+        "source_native_face_witness_schema",
+        "source_native_face_witness_sha256",
+        "source_native_face_witness_derivation"
       ],
       "signed_proof": "one independently qualified closed signed-source receipt for each claimed source shell, exact per-layer native source-target SHA256",
       "source_independent_layer_namespace": "same named role groups for native label and model prediction; not equal vertex indices or student connected-component IDs",
@@ -1299,7 +1308,12 @@
       "missing_native_annotation": "ABSTAIN_DO_NOT_ASSUME_ANY_XYZ_NEAREST_ROLE",
       "dataset_preparation_started": false,
       "corpus_layer_coverage_verified": false,
-      "gpu_quality_verified": false
+      "gpu_quality_verified": false,
+      "triangle_witness_schema": "RealSaS.RSSvNext.NativeFaceBarycentricLayerTruth.v1",
+      "triangle_witness_file": "models/rss_vnext/native_face_layer_truth_v1.py",
+      "native_face_truth_replay_implemented": true,
+      "source_asset_face_annotation_audit_verified": false,
+      "corpus_face_barycentric_coverage_verified": false
     }
   }
 }

@@ -259,6 +259,9 @@ def test_layered_source_truth_executes_one_student_h_with_two_signed_receipts(
     from models.rss_vnext.layered_iris_seed_v1 import (
         layer_namespace_digest_v1,
     )
+    from models.rss_vnext.native_face_layer_truth_v1 import (
+        SCHEMA as NATIVE_FACE_SCHEMA, NativeFaceLayerSamplesV1,
+    )
     from models.rss_vnext.seeded_layer_source_court_v1 import (
         SOURCE_LAYER_AUTHORITY,SOURCE_LAYER_DERIVATION,
     )
@@ -275,8 +278,25 @@ def test_layered_source_truth_executes_one_student_h_with_two_signed_receipts(
         tuple(s.name for s in layers),
         tuple(s.keep_roles for s in layers),
     )
+    native_triangles=torch.tensor([
+        [0,2,1],[0,3,2],[0,1,3],[1,2,3],
+        [4,6,5],[4,7,6],[4,5,7],[5,6,7],
+    ],dtype=torch.long)
+    native_face_witness=NativeFaceLayerSamplesV1(
+        vertices=source.clone(),faces=native_triangles,
+        face_layer_ids=torch.tensor([0]*4+[1]*4,dtype=torch.long),
+        face_component_ids=torch.tensor([0]*4+[1]*4,dtype=torch.long),
+        sample_face_ids=torch.tensor([0,0,0,1,4,4,4,5],dtype=torch.long),
+        sample_barycentric=torch.tensor([
+            [1.,0.,0.],[0.,0.,1.],[0.,1.,0.],[0.,1.,0.],
+            [1.,0.,0.],[0.,0.,1.],[0.,1.,0.],[0.,1.,0.],
+        ]),
+        source_asset_sha256=a.source_asset_sha256,
+        layer_namespace_sha256=namespace,
+    )
     teacher=replace(
-        a,source_xyz=source,
+        a,native_face_layer_samples=native_face_witness,
+        source_xyz=source,
         source_normals=torch.cat((a.source_normals,a.source_normals),dim=0),
         source_point_mask=torch.ones(8,dtype=torch.bool),
         source_importance=torch.tensor([0.1]*4+[0.9]*4),
@@ -295,6 +315,11 @@ def test_layered_source_truth_executes_one_student_h_with_two_signed_receipts(
         "native_source_layer_partition_sha256":_digest(teacher.source_layer_ids),
         "source_layer_independently_audited":True,
         "source_label_student_checkpoint_dependency":False,
+        "source_native_face_witness_schema":NATIVE_FACE_SCHEMA,
+        "source_native_face_witness_sha256":
+            native_face_witness.receipt_sha256(),
+        "source_native_face_witness_derivation":
+            "SOURCE_NATIVE_INDEXED_TRIANGLE_BARYCENTRIC_NOT_STUDENT",
         "signed_layer_admission_keys":list(layer_keys),
         **{k+"_sha256":_digest(v) for k,v in teacher.tensor_fields().items()},
     })

@@ -15,6 +15,9 @@ from models.rss_vnext import (
     RSSvNextUnifiedCharacterModel,
 )
 from models.rss_vnext.layered_iris_seed_v1 import layer_namespace_digest_v1
+from models.rss_vnext.native_face_layer_truth_v1 import (
+    SCHEMA as NATIVE_FACE_SCHEMA, NativeFaceLayerSamplesV1,
+)
 from models.rss_vnext.seeded_layer_source_court_v1 import (
     SOURCE_LAYER_AUTHORITY, SOURCE_LAYER_DERIVATION,
 )
@@ -72,7 +75,29 @@ def _setup(*, source_component_ids=None, weights=None):
         [[-7.]*4+[7.]*4],requires_grad=True,
     )
     mesh=replace(mesh,tessa_metric_logits=learned_logits)
+    native_face_samples=NativeFaceLayerSamplesV1(
+        vertices=xyz[0].clone(),faces=faces.clone(),
+        face_layer_ids=torch.tensor([0,0,1,1],dtype=torch.long),
+        face_component_ids=torch.tensor([
+            int((source_component_ids if source_component_ids is not None
+                else layer_ids)[0]),
+            int((source_component_ids if source_component_ids is not None
+                else layer_ids)[0]),
+            int((source_component_ids if source_component_ids is not None
+                else layer_ids)[4]),
+            int((source_component_ids if source_component_ids is not None
+                else layer_ids)[4]),
+        ],dtype=torch.long),
+        sample_face_ids=torch.tensor([0,0,0,1,2,2,2,3],dtype=torch.long),
+        sample_barycentric=torch.tensor([
+            [1.,0.,0.],[0.,0.,1.],[0.,1.,0.],[0.,0.,1.],
+            [1.,0.,0.],[0.,1.,0.],[0.,0.,1.],[0.,1.,0.],
+        ]),
+        source_asset_sha256="c"*64,
+        layer_namespace_sha256=namespace,
+    )
     teacher=SeededTESSASourceTeacherV1(
+        native_face_layer_samples=native_face_samples,
         source_asset_sha256="c"*64,
         source_qualification_key="qualified-native-layer-test",
         source_xyz=xyz[0].clone(),
@@ -101,6 +126,11 @@ def _setup(*, source_component_ids=None, weights=None):
         "native_source_layer_partition_sha256":_digest(teacher.source_layer_ids),
         "source_layer_independently_audited":True,
         "source_label_student_checkpoint_dependency":False,
+        "source_native_face_witness_schema":NATIVE_FACE_SCHEMA,
+        "source_native_face_witness_sha256":
+            native_face_samples.receipt_sha256(),
+        "source_native_face_witness_derivation":
+            "SOURCE_NATIVE_INDEXED_TRIANGLE_BARYCENTRIC_NOT_STUDENT",
         **{k+"_sha256":_digest(v) for k,v in teacher.tensor_fields().items()},
     }
     driver=RSSvNextSeededTESSATrainerV1(

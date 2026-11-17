@@ -6,7 +6,7 @@ import pytest
 import torch
 
 from models.rss_vnext.tessa_seeded_surface_v1 import (
-    build_tessa_seeded_surface_v1,
+    build_tessa_seeded_surface_v1, tessa_adaptive_split_edges_v1,
 )
 
 
@@ -109,4 +109,62 @@ def test_cannot_invent_canonical_authority_or_silent_mesh_rebind():
             iris_surface_faces=torch.tensor([[0, 0, 1]], dtype=torch.long),
             component_ids_by_vertex=c,
             scene_sha256="a" * 64, original_surface_sha256="b" * 64,
+        )
+
+
+def test_adaptive_refinement_keeps_parent_support_areas_gradients_and_no_t_junction():
+    x, f, c = _surface()
+    seed = build_tessa_seeded_surface_v1(
+        iris_surface_xyz=x, iris_surface_faces=f,
+        component_ids_by_vertex=c,
+        scene_sha256="a"*64, original_surface_sha256="b"*64,
+    )
+    metric = torch.tensor([[0., 2., 2., 0.]],requires_grad=True)
+    m = tessa_adaptive_split_edges_v1(
+        seed,importance_logits=metric,max_added_vertices=2,
+        length_gate_ratio=0.7,
+    )
+    assert m.original_vertex_count == 4
+    assert m.original_face_count == 2
+    assert m.xyz.shape[1] in (5,6)
+    assert len(m.parent_seed_edges) == m.xyz.shape[1]
+    faces = m.faces.detach().cpu().numpy()
+    pairs = m.parent_seed_edges[4:]
+    for i, (a,b) in enumerate(pairs,start=4):
+        torch.testing.assert_close(
+            m.xyz[0,i],0.5*(x[0,a]+x[0,b]),
+        )
+    orig_tri=x[0,f]
+    actual_tri=m.xyz[0,m.faces]
+    area=lambda t:0.5*torch.linalg.vector_norm(
+        torch.cross(t[:,1]-t[:,0],t[:,2]-t[:,0],dim=-1),
+        dim=-1,
+    ).sum()
+    torch.testing.assert_close(
+        area(orig_tri),area(actual_tri),atol=1e-6,rtol=1e-6,
+    )
+    # No original edge is split on one incident triangle but not another.
+    from collections import Counter
+    sides=Counter()
+    for a,b,c0 in m.faces.detach().cpu().tolist():
+        for pair in ((a,b),(b,c0),(c0,a)):
+            sides[tuple(sorted(pair))]+=1
+    assert all(count <= 2 for count in sides.values())
+    assert not any(count == 0 for count in sides.values())
+    area(actual_tri).backward()
+    assert x.grad is not None and x.grad.abs().sum() > 0
+
+
+def test_adaptive_refinement_rejects_repeated_parent_reconstruction():
+    x,f,c=_surface()
+    seed=build_tessa_seeded_surface_v1(
+        iris_surface_xyz=x,iris_surface_faces=f,
+        component_ids_by_vertex=c,
+        scene_sha256="a"*64,original_surface_sha256="b"*64,
+        one_to_four_refine=True,
+    )
+    with pytest.raises(ValueError,match="ADAPTIVE_SOURCE_OR_POLICY"):
+        tessa_adaptive_split_edges_v1(
+            seed,importance_logits=torch.zeros(1,seed.xyz.shape[1]),
+            max_added_vertices=1,
         )

@@ -69,6 +69,12 @@ from models.axis.rig_program_model_v6 import (
     qualified_axis_rig_skin_sequence_loss_v6, RigTokenKindV6,
 )
 from compiler.realsas_compiler_core.rig_constraint_schema_v1 import RIG_CONSTRAINT_OPERATOR_IDS_V1
+from .training_seeded_tessa_v1 import (
+    RSSvNextSeededTESSATrainerV1, SeededTESSALossWeightsV1,
+    SeededTESSASourceTeacherV1, SCHEMA as SEEDED_TESSA_SCHEMA,
+    PHASE as SEEDED_TESSA_PHASE,
+)
+from .tessa_seeded_surface_v1 import tessa_seed_from_flexicubes_v1
 
 
 @dataclass
@@ -177,6 +183,11 @@ class RSSvNextStructuralTrainingBatch:
     flexicubes_reference_surface_xyz: Tensor | None = None  # [1,M,3]
     flexicubes_animation_teacher: RSSvNextFCAnimationTeacher | None = None
     flexicubes_signed_source_admission_key: str = ""
+    # Production TRAINING seed is independent native-source 3D teacher only.
+    # The EXACT student H(x) is still computed from the observed two RGBA
+    # frames + pinned GENERATED six-view conditioning, never the teacher.
+    seeded_tessa_source_teacher: SeededTESSASourceTeacherV1 | None = None
+    seeded_tessa_source_face_budget: int = 0
     source_qualification_key: str = ""
     admission_status: str = ""
 
@@ -284,6 +295,9 @@ class RSSvNextTrainingResult:
     eligible_realsas_joint_rays: int = 0
     gradient_norm: Tensor | None = None
     gradient_interference_report: dict | None = None
+    seeded_tessa_loss: Tensor | None = None
+    seeded_tessa_loss_parts: dict[str, Tensor] | None = None
+    seeded_tessa_source_point_count: int = 0
 
 
 def axis_mesh_teacher_address_digest_v1(mesh) -> str:
@@ -405,6 +419,11 @@ class RSSvNextStructuralTrainer:
         trusted_graphics_rgb_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_source_field_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_realsas_joint_scene_registry: Mapping[str, Mapping[str, object]] | None = None,
+        # Explicit product-v1 admission: legacy token CE and product seeded
+        # supervision can never be activated within the same optimizer phase.
+        training_profile: str = "LEGACY_STRUCTURAL_RESEARCH",
+        seeded_tessa_weights: SeededTESSALossWeightsV1 | None = None,
+        trusted_seeded_tessa_registry: Mapping[str, Mapping[str, object]] | None = None,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -412,6 +431,34 @@ class RSSvNextStructuralTrainer:
             int(dataset_manifest_sha256, 16)
         except ValueError as exc:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_NOT_HEX") from exc
+        if training_profile not in (
+            "LEGACY_STRUCTURAL_RESEARCH",
+            "PRODUCT_SEEDED_IRIS_TESSA_V1",
+        ):
+            raise ValueError("RSS_VNEXT_TRAIN_UNKNOWN_GEOMETRY_PROFILE")
+        seeded_mode = training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1"
+        if seeded_mode:
+            if (
+                seeded_tessa_weights is None
+                or not trusted_seeded_tessa_registry
+                or scene_conditioning_policy != "PRODUCT_GENERATED_SIX_VIEW"
+                or model.cfg.tessa_surface_requirement
+                    != "REQUIRE_SIGNED_IRIS_SURFACE"
+                or phase_contract is not None
+                or gradient_court_policy.every_n_steps != 0
+                or weights != RSSvNextTrainingWeights()
+            ):
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_PHASE_POLICY_INVALID")
+            seeded_tessa_weights.validate()
+            if (
+                not any(
+                    p.requires_grad for p in model.tessa_seeded_head.parameters()
+                )
+                or not any(p.requires_grad for p in model.iris.parameters())
+            ):
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_GRADIENT_OWNERS_FROZEN")
+        elif seeded_tessa_weights is not None or trusted_seeded_tessa_registry:
+            raise ValueError("RSS_VNEXT_LEGACY_MAY_NOT_ACCEPT_SEEDED_TEACHER")
         weights.validate()
         preference.validate()
         gradient_court_policy.validate()
@@ -451,6 +498,8 @@ class RSSvNextStructuralTrainer:
             and axis_training_policy != "PRODUCT_MESH_MATCHED_REQUIRED"
         ):
             raise ValueError("RSS_VNEXT_PRODUCT_AXIS_MESH_MATCHED_POLICY_REQUIRED")
+        self.training_profile = training_profile
+        self.seeded_tessa_weights = seeded_tessa_weights
         self.scene_conditioning_policy = scene_conditioning_policy
         self.axis_training_policy = axis_training_policy
         self.model = model
@@ -458,17 +507,43 @@ class RSSvNextStructuralTrainer:
         self.optimizer_ownership = qualify_rss_vnext_optimizer_ownership_v1(
             self.model, self.optimizer,
         )
+        self.seeded_tessa_driver = (
+            RSSvNextSeededTESSATrainerV1(
+                model, optimizer, weights=seeded_tessa_weights,
+                trusted_source_registry=trusted_seeded_tessa_registry,
+            )
+            if seeded_mode else None
+        )
+        self.seeded_tessa_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                {str(k):dict(v)
+                 for k,v in trusted_seeded_tessa_registry.items()},
+                sort_keys=True,separators=(",",":"),allow_nan=False,
+            ).encode()).hexdigest()
+            if seeded_mode else ""
+        )
         self.weights = weights
         self.preference = preference
         self.gradient_court_policy = gradient_court_policy
         self.phase_contract = phase_contract
         self.axis_skin_code_warmup = axis_skin_code_warmup
+        # Training/inference mesh ABI is versioned and CHECKPOINT-BOUND.
+        # Legacy token supervision can never resume as seeded geometry.
         # Freeze the full objective / topology-preference policy into the
         # resumption identity. A semantic-risk or motion weight change is a
         # different training run, not a transparent continuation of this one.
         self.objective_policy_sha256 = hashlib.sha256(json.dumps({
             # A disabled new source family retains older v2 checkpoint
             # identities; enabling it creates a distinct objective policy.
+            "training_profile": self.training_profile,
+            **({
+                "seeded_tessa_policy_sha256":
+                    self.seeded_tessa_driver.policy_sha256,
+                "seeded_tessa_registry_sha256":
+                    self.seeded_tessa_registry_sha256,
+                "seeded_tessa_source_schema": SEEDED_TESSA_SCHEMA,
+                "seeded_tessa_phase": SEEDED_TESSA_PHASE,
+            } if seeded_mode else {}),
             "weights": {k: v for k, v in asdict(weights).items()
                         if not (
                             k in ("axis_posed_surface", "axis_dynamic_posed_surface", "tessa_iris_surface_alignment")
@@ -814,6 +889,12 @@ class RSSvNextStructuralTrainer:
             state, aux, _ = self.model.encode_observations(
                 batch.rgba, batch.camera_features,
             )
+        if self.training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1":
+            return self._objective_seeded_product_v1(batch, state)
+        if batch.seeded_tessa_source_teacher is not None or (
+            batch.seeded_tessa_source_face_budget != 0
+        ):
+            raise ValueError("RSS_VNEXT_LEGACY_SEEDED_SOURCE_FORBIDDEN")
         joint_loss = None
         joint_rays = 0
         joint_fields = (
@@ -1960,6 +2041,146 @@ class RSSvNextStructuralTrainer:
             eligible_realsas_joint_rays=joint_rays,
         )
 
+
+    def _objective_seeded_product_v1(
+        self, batch: RSSvNextStructuralTrainingBatch, state,
+    ) -> RSSvNextTrainingResult:
+        """Production gradient route: ORIGINAL two sources -> six generated
+        conditioning views -> ONE IRIS surface -> seeded TESSA M*.
+
+        All source-native teacher tensors stay strictly on the right-hand
+        side of loss computation, never inside the learned scene decoder.
+        Signed-domain proof and native-label hashes are launcher-bound.
+        """
+        teacher = batch.seeded_tessa_source_teacher
+        driver = self.seeded_tessa_driver
+        if driver is None or teacher is None:
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_TEACHER_REQUIRED")
+        if (
+            state.camera_features is not None
+            or state.scene_conditioning_authority
+                != "GENERATED_SIX_VIEW_SHARED_SCENE"
+            or batch.topology_teacher_tokens is not None
+            or batch.topology_valid_mask is not None
+            or batch.motion_candidate_tokens is not None
+            or batch.motion_court is not None
+            or batch.axis_teacher_sequence is not None
+            or batch.source_topology_admission_key
+            or batch.flexicubes_extractor is None
+            or batch.flexicubes_layer is None
+            or batch.flexicubes_animation_teacher is not None
+            or type(batch.flexicubes_high_resolution_training) is not bool
+            or batch.flexicubes_reference_surface_xyz is None
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_NO_LEGACY_TEACHER_OR_SURFACE")
+        # A signed FlexiCubes surface can use an open-source mesh as an
+        # *unsigned* target elsewhere, but cannot claim a signed-solid field.
+        signed = self.trusted_signed_source_registry.get(
+            batch.flexicubes_signed_source_admission_key,
+        )
+        target = batch.flexicubes_reference_surface_xyz
+        if (
+            signed is None
+            or signed.get("admission_status") != "QUALIFIED_SOURCE_SIGNED_SOLID"
+            or signed.get("source_component_domain") not in (
+                "SINGLE_QUALIFIED_CLOSED_COMPONENT",
+                "EXPLICIT_QUALIFIED_CLOSED_ASSEMBLY",
+            )
+            or signed.get("dataset_manifest_sha256")
+                != self.dataset_manifest_sha256
+            or signed.get("source_qualification_key")
+                != batch.source_qualification_key
+            or signed.get("role_schema_id")
+                != self.model.cfg.semantic_role_schema_id
+            or signed.get("layer_name") != batch.flexicubes_layer.name
+            or signed.get("surface_target_sha256")
+                != source_surface_tensor_sha256(target)
+            or (
+                signed.get("source_component_domain")
+                == "EXPLICIT_QUALIFIED_CLOSED_ASSEMBLY"
+                and (
+                    signed.get("assembly_boolean_operations_qualified") is not True
+                    or signed.get("sdf_distance_scope")
+                        != "EXACT_BOUNDARY_OF_THE_SAME_QUALIFIED_SOLID"
+                    or signed.get("sdf_sign_scope")
+                        != "GLOBAL_NEGATIVE_INSIDE_POSITIVE_OUTSIDE"
+                )
+            )
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_SIGNED_SOURCE_NOT_ADMITTED")
+        if (
+            target.shape != (1, teacher.source_xyz.shape[0], 3)
+            or not torch.equal(target[0], teacher.source_xyz)
+            or batch.flexicubes_layer.name != "all"
+            or tuple(batch.flexicubes_layer.keep_roles)
+                != tuple(self.model.cfg.semantic_role_schema().roles)
+            or state.scene_triplanes.shape[0] != 1
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_SOURCE_TARGET_OR_LAYER_DRIFT")
+        receipt = driver.trusted_registry.get(
+            teacher.source_qualification_key,
+        )
+        if receipt is None or any(
+            receipt.get(key) != value for key,value in {
+                "dataset_manifest_sha256":self.dataset_manifest_sha256,
+                "source_qualification_key":batch.source_qualification_key,
+                "observed_rgba_sha256":
+                    source_surface_tensor_sha256(batch.rgba),
+                "observed_camera_sha256":
+                    source_surface_tensor_sha256(batch.camera_features),
+                "source_binding_sha256":
+                    batch.product_source_binding_sha256,
+                "combined_generation_checkpoint_sha256":
+                    batch.product_generation_checkpoint_sha256,
+                "signed_source_admission_key":
+                    batch.flexicubes_signed_source_admission_key,
+                "semantic_layer_name":batch.flexicubes_layer.name,
+            }.items()
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_SOURCE_IMAGE_OR_SCENE_BINDING")
+        surface = self.model.fc_surface_bridge(
+            state.scene_triplanes,
+            extractor=batch.flexicubes_extractor,
+            role_head=self.model.presentation_role_head,
+            schema=self.model.cfg.semantic_role_schema(),
+            layer=batch.flexicubes_layer,
+            field_policy="SIGNED_HYPOTHESIS_ONLY",
+            high_resolution_training=batch.flexicubes_high_resolution_training,
+        )
+        seed = tessa_seed_from_flexicubes_v1(
+            witness=surface,scene_triplanes=state.scene_triplanes,
+        )
+        candidate = self.model.build_seeded_mechanics_candidate_v1(
+            state, seed, adaptive_refinement=True,
+        )
+        mesh = candidate["mesh_candidate"]
+        if (
+            candidate["mesh_status"] != "UNQUALIFIED_SINGLE_SURFACE_CANDIDATE"
+            or mesh.seeded_surface is None
+        ):
+            raise RuntimeError("RSS_VNEXT_PRODUCT_SEEDED_STUDENT_MESH_INVALID")
+        losses = driver.objective(
+            mesh, teacher,
+            source_face_budget=batch.seeded_tessa_source_face_budget,
+        )
+        return RSSvNextTrainingResult(
+            total_loss=losses["total"],
+            topology_loss=None,motion_preference_loss=None,
+            source_semantic_loss=None,semantic_risk_loss=None,
+            flexicubes_surface_loss=None,flexicubes_animation_loss=None,
+            eligible_animation_pose_count=0,
+            eligible_semantic_patch_labels=0,eligible_topology_examples=0,
+            qualified_preference_pairs=0,
+            seeded_tessa_loss=losses["total"],
+            seeded_tessa_loss_parts={
+                k:v for k,v in losses.items()
+                if k not in ("total","qualified_source_points")
+            },
+            seeded_tessa_source_point_count=int(
+                losses["qualified_source_points"].item()
+            ),
+        )
+
     def _measure_gradient_conflicts(self, result: RSSvNextTrainingResult) -> dict:
         # The same independent qualified terms that compose total_loss.
         # A diagnostic never reweights, backpropagates, or rewrites .grad.
@@ -2025,11 +2246,25 @@ class RSSvNextStructuralTrainer:
         ):
             result.gradient_interference_report = self._measure_gradient_conflicts(result)
         result.total_loss.backward()
+        if self.training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1":
+            for label,module in (
+                ("IRIS",self.model.iris),
+                ("TESSA",self.model.tessa_seeded_head),
+            ):
+                trained = [p for p in module.parameters() if p.requires_grad]
+                if not trained or not any(p.grad is not None for p in trained):
+                    raise RuntimeError(
+                        "RSS_VNEXT_PRODUCT_SEEDED_GRADIENT_OWNER_MISSING:"+label
+                    )
         if self.phase_contract is not None:
             self.phase_contract.assert_required_gradients(self.model)
         grad_norm = nn.utils.clip_grad_norm_(
             (p for p in self.model.parameters() if p.requires_grad),
-            self.weights.clip_gradient_norm,
+            (
+                self.seeded_tessa_weights.clip_gradient_norm
+                if self.training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1"
+                else self.weights.clip_gradient_norm
+            ),
             error_if_nonfinite=True,
         )
         self.optimizer.step()
@@ -2092,6 +2327,14 @@ class RSSvNextStructuralTrainer:
             "architecture_digest": architecture_digest(self.model.cfg),
             "dataset_manifest_sha256": self.dataset_manifest_sha256,
             "objective_policy_sha256": self.objective_policy_sha256,
+            **({
+                "training_profile":self.training_profile,
+                "seeded_tessa_registry_sha256":
+                    self.seeded_tessa_registry_sha256,
+                "seeded_tessa_policy_sha256":
+                    self.seeded_tessa_driver.policy_sha256,
+            } if self.training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1"
+              else {}),
             "optimizer_ownership_binding_sha256": self.optimizer_ownership.binding_sha256,
             "phase_handoff_source_model_sha256": self.phase_handoff_source_model_sha256,
             "render_registry_sha256": self.render_registry_sha256,
@@ -2138,6 +2381,14 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_DATASET_MANIFEST_DRIFT")
         if data.get("objective_policy_sha256") != self.objective_policy_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_OBJECTIVE_POLICY_DRIFT")
+        if self.training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1" and (
+            data.get("training_profile") != self.training_profile
+            or data.get("seeded_tessa_registry_sha256")
+                != self.seeded_tessa_registry_sha256
+            or data.get("seeded_tessa_policy_sha256")
+                != self.seeded_tessa_driver.policy_sha256
+        ):
+            raise ValueError("RSS_VNEXT_TRAIN_SEEDED_CHECKPOINT_REGISTRY_OR_PHASE_DRIFT")
         if data.get("phase_handoff_source_model_sha256", "") != self.phase_handoff_source_model_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_PHASE_ORIGIN_DRIFT")
         self._assert_optimizer_ownership()

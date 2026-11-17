@@ -202,8 +202,12 @@ def test_bad_native_teacher_and_old_topology_cannot_train_product(monkeypatch):
     net,batch,make_trainer,*_=_scenario(monkeypatch)
     trainer=make_trainer()
     forged=replace(batch,topology_teacher_tokens=torch.ones(1,3,dtype=torch.long))
-    with pytest.raises(ValueError,match="NO_LEGACY_TEACHER"):
+    with pytest.raises(ValueError,match="UNCONSUMED_SOURCE_TEACHER"):
         trainer.objective(forged)
+    # Other teacher families may not be silently ignored either.
+    unrelated=replace(batch,source_udf_target=torch.zeros(1,4))
+    with pytest.raises(ValueError,match="UNCONSUMED_SOURCE_TEACHER"):
+        trainer.objective(unrelated)
     teacher=replace(
         batch.seeded_tessa_source_teacher,
         source_importance=torch.zeros(4),

@@ -44,6 +44,7 @@ from .multiview_construction import (
 from .semantic_geometry_prior import (
     RSSvNextSemanticLayerSpec, semantic_equivalent_signed_field,
 )
+from .component_conditioned_udf_v1 import RSSvNextComponentConditionedUDFV1
 from .surface_topology_context_v1 import iris_surface_incidence_v1
 from .surface_mechanics_context_v1 import RSSvNextSurfaceMechanicsContextV1
 from .layered_iris_seed_v1 import make_layered_iris_seed_v1
@@ -423,7 +424,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         self.presentation_roles_to_memory = nn.Linear(
             cfg.semantic_role_schema().count, h, bias=False,
         )
-        self.udf = nn.Linear(h, 1)  # always nonnegative, independent of sign authority
+        self.udf = nn.Linear(h, 1)  # global nearest-surface distance; NOT cloth-specific
+        # One H(x), exchangeable native-component hypotheses. Distinct from
+        # semantic role: covering/body can contain OPEN and CLOSED components.
+        self.component_udf = RSSvNextComponentConditionedUDFV1(h)
         self.sign_logit = nn.Linear(h, 1)  # a proposal, not global-sign qualification
         self.semantic = nn.Linear(h, cfg.region_slots + 1)  # final = UNKNOWN
         self.semantic_structure = RSSvNextGenericRegionStructure(
@@ -1071,6 +1075,43 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             flexicubes_extractor=flexicubes_extractor,
             flexicubes_layer=flexicubes_layer,
             flexicubes_sparse_resolution=flexicubes_sparse_resolution,
+        )
+
+    def query_component_unsigned_distance(
+        self,
+        state: RSSvNextSceneState,
+        points_xyz: Tensor,
+        *,
+        slot_index: int,
+    ) -> Tensor:
+        """[B,Q] unsigned distance to ONE predicted component from ONE H(x).
+
+        This is not a certified OPEN component. Its region slot has no
+        persistent source identity until independently qualified matching,
+        and cannot itself activate DCUDF2 product execution.
+        """
+        if (
+            not isinstance(state,RSSvNextSceneState)
+            or points_xyz.ndim!=3 or points_xyz.shape[-1]!=3
+            or points_xyz.shape[0]!=state.scene_triplanes.shape[0]
+            or points_xyz.device!=state.scene_triplanes.device
+            or points_xyz.dtype!=state.scene_triplanes.dtype
+        ):
+            raise ValueError("RSS_VNEXT_COMPONENT_UDF_SAME_H_QUERY_DOMAIN")
+        local=self.iris.query(state.scene_triplanes,points_xyz)
+        return self.component_udf.query_slot(
+            local["H"],state.region_slot_features,
+            slot_index=slot_index,
+        )
+
+    def query_component_topology_kind_logits(
+        self,state:RSSvNextSceneState,
+    ) -> Tensor:
+        """[B,R,{CLOSED,OPEN,UNKNOWN}] proposals, not Compiler admission."""
+        if not isinstance(state,RSSvNextSceneState):
+            raise ValueError("RSS_VNEXT_COMPONENT_UDF_STATE_REQUIRED")
+        return self.component_udf.topology_kind_logits(
+            state.region_slot_features,
         )
 
     def query_semantic_equivalent_field(

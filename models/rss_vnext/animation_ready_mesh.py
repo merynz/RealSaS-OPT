@@ -455,6 +455,7 @@ def deformation_bridge_loss(
     refined_vertices: Tensor | None = None,
     source_reference_jacobian: Tensor | None = None,
     source_reference_normal: Tensor | None = None,
+    run_full_face_dynamic_preflight: bool = False,
 ) -> dict[str, Tensor]:
     """G3-derived differentiable training surrogate over actual mesh faces.
 
@@ -485,12 +486,25 @@ def deformation_bridge_loss(
         terms.append(mechanical_consequence_loss_v1(
             metrics, reference_jacobian=ref_j, reference_normal=ref_n,
         )["total"])
-    return {
+    out = {
         "loss": torch.stack(terms).mean(),
         "posed_vertices": posed,
         "pose_valid_mask": pose_valid_mask,
         "authority": "TRAINING_SURROGATE_ONLY",
     }
+    if run_full_face_dynamic_preflight:
+        # Numerical preflight evaluates ALL M* faces independently from
+        # differentiable mean losses. It does NOT mint G3/G3B/Stage35 PASS.
+        from .seeded_dynamic_full_face_court_v1 import (
+            run_seeded_dynamic_full_face_court_v1,
+        )
+        out["dynamic_preflight"] = run_seeded_dynamic_full_face_court_v1(
+            rest_xyz=rest.detach(), faces=mesh.faces.detach(),
+            skin_weights=weights.detach(),
+            joint_matrices=skin_matrices.detach(),
+            qualified_pose_mask=pose_valid_mask.detach(),
+        )
+    return out
 
 
 __all__ = [

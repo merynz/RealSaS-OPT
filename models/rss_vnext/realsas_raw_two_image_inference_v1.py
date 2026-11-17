@@ -57,6 +57,7 @@ def run_uncalibrated_two_image_neural_scene_v1(
     canonical_seed: int | None = None,
     multiview_seed: int | None = None,
     max_topology_tokens: int | None = None,
+    flexicubes_extractor=None,
 ) -> RSSvNextUncalibratedNeuralSceneCandidateV1:
     """Decode two raw image files and actually run both learned stages.
 
@@ -108,6 +109,26 @@ def run_uncalibrated_two_image_neural_scene_v1(
         or type(multiview_seed) is not int or not 0 <= multiview_seed < 2**63
     ):
         raise ValueError("RSS_VNEXT_RAW_NEURAL_SEED_DOMAIN")
+    if (neural_bundle.model.cfg.tessa_surface_requirement
+            == "REQUIRE_SIGNED_IRIS_SURFACE"
+            and flexicubes_extractor is None):
+        # A production release MUST use the preinstalled, exact SHA-pinned
+        # NVIDIA FlexiCubes. No fallback to old independent TESSA triangles.
+        import os
+        from pathlib import Path
+        from models.iris.vnext.flexicubes_v1 import PinnedFlexiCubesV1
+        source_root = os.environ.get("REALSAS_FLEXICUBES_ROOT", "").strip()
+        deploy = os.environ.get("REALSAS_DEPLOY_ROOT", "").strip()
+        if not source_root and deploy:
+            source_root = str(
+                Path(deploy).expanduser().resolve()
+                / "foundations" / "flexicubes" / "source"
+            )
+        if not source_root:
+            raise RuntimeError("RSS_VNEXT_V1_PINNED_FLEXICUBES_REQUIRED")
+        flexicubes_extractor = PinnedFlexiCubesV1(
+            source_root, device=device,
+        )
     construction = run_two_source_neural_construction_v1(
         model=neural_bundle.model,
         observed_rgba=pixels,
@@ -123,6 +144,7 @@ def run_uncalibrated_two_image_neural_scene_v1(
         multiview_seed=multiview_seed,
         max_topology_tokens=max_topology_tokens,
         generate_controls=True,
+        flexicubes_extractor=flexicubes_extractor,
     )
     state = construction.proposal["state"]
     mesh = construction.proposal.get("mesh_candidate")

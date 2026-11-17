@@ -515,7 +515,7 @@ class RSSvNextStructuralTrainer:
             ):
                 raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_GRADIENT_OWNERS_FROZEN")
         elif seeded_tessa_weights is not None or trusted_seeded_tessa_registry:
-            raise ValueError("RSS_VNEXT_NON_SEEDED_MAY_NOT_ACCEPT_SEEDED_TEACHER")
+            raise ValueError("RSS_VNEXT_LEGACY_MAY_NOT_ACCEPT_SEEDED_TEACHER")
         if component_mode and (
             scene_conditioning_policy != "PRODUCT_GENERATED_SIX_VIEW"
             or phase_contract is not None

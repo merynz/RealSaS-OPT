@@ -123,6 +123,7 @@ def make_layered_iris_seed_v1(
     components=[]
     layer_ids=[]
     vertex_offset=0
+    face_count=0
     component_offset=0
     scene_hash=None
     for layer,witness in evidence:
@@ -154,6 +155,12 @@ def make_layered_iris_seed_v1(
             raise ValueError("RSS_VNEXT_LAYERED_SCENE_HASH_DRIFT")
         scene_hash=per_layer.scene_sha256
         v=per_layer.original_vertex_count
+        if (
+            vertex_offset+v>2_000_000
+            or face_count+per_layer.original_face_count>2_000_000
+        ):
+            raise ValueError("RSS_VNEXT_LAYERED_PRODUCT_VERTEX_FACE_BUDGET")
+        face_count+=per_layer.original_face_count
         xyz.append(per_layer.xyz)
         faces.append(per_layer.faces+vertex_offset)
         components.append(per_layer.vertex_component_ids+component_offset)

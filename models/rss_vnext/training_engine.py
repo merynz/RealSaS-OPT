@@ -83,6 +83,10 @@ from .seeded_layer_source_court_v1 import (
 )
 from .training_seeded_tessa_v1 import _digest as seeded_source_tensor_digest_v1
 from .tessa_seeded_surface_v1 import tessa_seed_from_flexicubes_v1
+from .product_graphics_supervision_v1 import (
+    product_source_graphics_loss_v1,
+    product_source_joint_ray_loss_v1,
+)
 
 
 @dataclass
@@ -314,6 +318,7 @@ class RSSvNextTrainingResult:
     seeded_tessa_sampled_student_vertex_count: int = 0
     seeded_tessa_sampled_quality_face_count: int = 0
     seeded_tessa_qualified_layer_count: int = 0
+    product_graphics_joint_loss_parts: dict[str, Tensor] | None = None
 
 
 def axis_mesh_teacher_address_digest_v1(mesh) -> str:
@@ -441,6 +446,10 @@ class RSSvNextStructuralTrainer:
         seeded_tessa_weights: SeededTESSALossWeightsV1 | None = None,
         seeded_tessa_sampling_policy: SeededSurfaceSamplingPolicyV1 = SeededSurfaceSamplingPolicyV1(),
         trusted_seeded_tessa_registry: Mapping[str, Mapping[str, object]] | None = None,
+        # Source appearance objectives are opt-in *within the same* seeded
+        # product H(x)/optimizer, never a separate Graphics encoder.
+        product_graphics_rgb_weight: float = 0.0,
+        product_joint_ray_weight: float = 0.0,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -454,6 +463,21 @@ class RSSvNextStructuralTrainer:
         ):
             raise ValueError("RSS_VNEXT_TRAIN_UNKNOWN_GEOMETRY_PROFILE")
         seeded_mode = training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1"
+        if (
+            any(
+                type(w) not in (float,int) or not math.isfinite(w) or w<0
+                for w in (product_graphics_rgb_weight,product_joint_ray_weight)
+            )
+            or (
+                not seeded_mode and
+                (product_graphics_rgb_weight!=0 or product_joint_ray_weight!=0)
+            )
+            or (product_graphics_rgb_weight>0 and
+                not trusted_graphics_rgb_registry)
+            or (product_joint_ray_weight>0 and
+                not trusted_realsas_joint_scene_registry)
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_GRAPHICS_PHASE_POLICY_INVALID")
         seeded_tessa_sampling_policy.validate()
         if not seeded_mode and seeded_tessa_sampling_policy != SeededSurfaceSamplingPolicyV1():
             raise ValueError("RSS_VNEXT_LEGACY_SEEDED_SAMPLING_POLICY_FORBIDDEN")
@@ -529,6 +553,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_PRODUCT_AXIS_MESH_MATCHED_POLICY_REQUIRED")
         self.training_profile = training_profile
         self.seeded_tessa_weights = seeded_tessa_weights
+        self.product_graphics_rgb_weight = float(product_graphics_rgb_weight)
+        self.product_joint_ray_weight = float(product_joint_ray_weight)
         self.scene_conditioning_policy = scene_conditioning_policy
         self.axis_training_policy = axis_training_policy
         self.model = model
@@ -574,6 +600,13 @@ class RSSvNextStructuralTrainer:
                 "seeded_tessa_source_schema": SEEDED_TESSA_SCHEMA,
                 "seeded_tessa_phase": SEEDED_TESSA_PHASE,
             } if seeded_mode else {}),
+            **({
+                "product_graphics_rgb_weight": self.product_graphics_rgb_weight,
+                "product_joint_ray_weight": self.product_joint_ray_weight,
+                "source_graphics_qualified_required":True,
+                "joint_ray_qualified_source_not_generated_required":True,
+            } if self.product_graphics_rgb_weight>0
+                or self.product_joint_ray_weight>0 else {}),
             "weights": {k: v for k, v in asdict(weights).items()
                         if not (
                             k in ("axis_posed_surface", "axis_dynamic_posed_surface", "tessa_iris_surface_alignment")
@@ -2101,6 +2134,18 @@ class RSSvNextStructuralTrainer:
             "flexicubes_signed_source_admission_key",
             "seeded_tessa_source_teacher", "seeded_tessa_source_face_budget",
             "source_qualification_key", "admission_status",
+            *({
+                "source_graphics_rgb_target",
+                "source_graphics_view_directions",
+                "source_graphics_rgb_mask",
+                "source_graphics_rgb_admission_key",
+            } if self.product_graphics_rgb_weight>0 else set()),
+            *({
+                "realsas_joint_ray_xyz","realsas_joint_ray_delta",
+                "realsas_joint_ray_depth","realsas_joint_ray_direction",
+                "realsas_joint_keep_roles","realsas_joint_target",
+                "realsas_joint_teacher_admission_key",
+            } if self.product_joint_ray_weight>0 else set()),
         }
         unexpected = []
         for name, value in vars(batch).items():
@@ -2323,8 +2368,51 @@ class RSSvNextStructuralTrainer:
             source_face_budget=batch.seeded_tessa_source_face_budget,
             sampler_step=self.global_step,
         )
+        rgb_loss,n_rgb=product_source_graphics_loss_v1(
+            model=self.model,state=state,
+            source_rgb=batch.source_graphics_rgb_target,
+            source_directions=batch.source_graphics_view_directions,
+            source_mask=batch.source_graphics_rgb_mask,
+            admission_key=batch.source_graphics_rgb_admission_key,
+            receipt_registry=self.trusted_graphics_rgb_registry,
+            dataset_manifest_sha256=self.dataset_manifest_sha256,
+            source_qualification_key=batch.source_qualification_key,
+            source_asset_sha256=teacher.source_asset_sha256,
+            original_rgba=batch.rgba,
+            original_cameras=batch.camera_features,
+            generated_source_binding_sha256=batch.product_source_binding_sha256,
+            generation_checkpoint_sha256=batch.product_generation_checkpoint_sha256,
+            tensor_digest=source_surface_tensor_sha256,
+        )
+        ray_loss,n_rays,ray_parts=product_source_joint_ray_loss_v1(
+            model=self.model,state=state,
+            ray_xyz=batch.realsas_joint_ray_xyz,
+            ray_delta=batch.realsas_joint_ray_delta,
+            ray_depth=batch.realsas_joint_ray_depth,
+            ray_direction=batch.realsas_joint_ray_direction,
+            keep_roles=batch.realsas_joint_keep_roles,
+            target=batch.realsas_joint_target,
+            admission_key=batch.realsas_joint_teacher_admission_key,
+            receipt_registry=self.trusted_realsas_joint_scene_registry,
+            dataset_manifest_sha256=self.dataset_manifest_sha256,
+            source_qualification_key=batch.source_qualification_key,
+            source_asset_sha256=teacher.source_asset_sha256,
+            original_rgba=batch.rgba,
+            original_cameras=batch.camera_features,
+            generated_source_binding_sha256=batch.product_source_binding_sha256,
+            generation_checkpoint_sha256=batch.product_generation_checkpoint_sha256,
+            tensor_digest=source_surface_tensor_sha256,
+        )
+        if (rgb_loss is not None and self.product_graphics_rgb_weight<=0
+            or ray_loss is not None and self.product_joint_ray_weight<=0):
+            raise ValueError("RSS_VNEXT_PRODUCT_GRAPHICS_SUPERVISION_NOT_ENABLED")
+        total=losses["total"]
+        if rgb_loss is not None:
+            total=total+self.product_graphics_rgb_weight*rgb_loss
+        if ray_loss is not None:
+            total=total+self.product_joint_ray_weight*ray_loss
         return RSSvNextTrainingResult(
-            total_loss=losses["total"],
+            total_loss=total,
             topology_loss=None,motion_preference_loss=None,
             source_semantic_loss=None,semantic_risk_loss=None,
             flexicubes_surface_loss=None,flexicubes_animation_loss=None,
@@ -2332,6 +2420,11 @@ class RSSvNextStructuralTrainer:
             eligible_semantic_patch_labels=0,eligible_topology_examples=0,
             qualified_preference_pairs=0,
             seeded_tessa_loss=losses["total"],
+            graphics_source_rgb_loss=rgb_loss,
+            eligible_graphics_source_rgb_queries=n_rgb,
+            realsas_joint_slrm_loss=ray_loss,
+            eligible_realsas_joint_rays=n_rays,
+            product_graphics_joint_loss_parts=ray_parts,
             seeded_tessa_loss_parts={
                 k:v for k,v in losses.items()
                 if k not in (
@@ -2423,10 +2516,23 @@ class RSSvNextStructuralTrainer:
             result.gradient_interference_report = self._measure_gradient_conflicts(result)
         result.total_loss.backward()
         if self.training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1":
-            for label,module in (
+            required=[
                 ("IRIS",self.model.iris),
                 ("TESSA",self.model.tessa_seeded_head),
+            ]
+            if (
+                result.graphics_source_rgb_loss is not None
+                or result.realsas_joint_slrm_loss is not None
             ):
+                required.append(("GRAPHICS",self.model.graphics))
+            if result.graphics_source_rgb_loss is not None:
+                required.extend((
+                    ("SOURCE_RGB_VIEW_CORE",self.model.constructed_view_renderer.core),
+                    ("SOURCE_RGB_VIEW_HEAD",self.model.constructed_view_renderer.rgb),
+                ))
+            if result.realsas_joint_slrm_loss is not None:
+                required.append(("GRAPHICS_SEMANTIC",self.model.presentation_role_head))
+            for label,module in required:
                 trained = [p for p in module.parameters() if p.requires_grad]
                 if not trained or not any(p.grad is not None for p in trained):
                     raise RuntimeError(

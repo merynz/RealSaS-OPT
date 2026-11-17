@@ -30,6 +30,7 @@ from .seeded_surface_sampling_v1 import (
 )
 from .tessa_seeded_surface_v1 import TESSASeededSurfaceV1
 from .seeded_layer_source_court_v1 import qualify_layer_source_court_v1
+from .native_face_layer_truth_v1 import NativeFaceLayerSamplesV1
 
 SCHEMA = "RealSaS.RSSvNext.SeededTESSA.SourceSupervision.v1"
 PHASE = "RSSVNEXT_V1_SEEDED_CONTINUOUS_TOPOLOGY"
@@ -87,6 +88,7 @@ class SeededTESSASourceTeacherV1:
     source_importance_mask: Tensor        # [M] native valid
     source_component_ids: Tensor | None = None  # [M], native connectivity; no student ID claim
     source_layer_ids: Tensor | None = None  # [M], audited native face/material partition
+    native_face_layer_samples: NativeFaceLayerSamplesV1 | None = None  # source-only indexed triangle + barycentric witness
     source_boundary_xyz: Tensor | None = None  # [K,3], exact known open seams
     source_boundary_mask: Tensor | None = None # [K] bool
     # Only if a trusted source→candidate barycentric/skin joint reindex exists.
@@ -337,6 +339,7 @@ class RSSvNextSeededTESSATrainerV1:
             source_xyz=source,source_component_ids=teacher.source_component_ids,
             receipt=receipt,source_asset_sha256=teacher.source_asset_sha256,
             tensor_digest=_digest,
+            native_face_layer_samples=teacher.native_face_layer_samples,
         )
         # Open hems require independently qualified per-layer seam target.
         # Legacy single-set boundary chamfer could bridge a body/cape edge.

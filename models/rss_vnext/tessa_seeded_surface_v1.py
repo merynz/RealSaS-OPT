@@ -30,6 +30,7 @@ class TESSASeededSurfaceV1:
     parent_seed_weights: tuple[tuple[float, float], ...]
     original_vertex_count: int
     original_face_count: int
+    original_faces: Tensor      # original M0 indexed triangles, before TESSA edits
     scene_sha256: str
     original_surface_sha256: str
     source_authority: str = "ONE_IRIS_SURFACE_TESSA_REFINEMENT_CANDIDATE"
@@ -49,7 +50,12 @@ class TESSASeededSurfaceV1:
                 or self.canonical_mesh_authority
                 or self.source_authority != "ONE_IRIS_SURFACE_TESSA_REFINEMENT_CANDIDATE"
                 or len(self.parent_seed_edges) != n
-                or len(self.parent_seed_weights) != n):
+                or len(self.parent_seed_weights) != n
+                or self.original_faces.shape != (self.original_face_count, 3)
+                or self.original_faces.dtype != torch.long
+                or self.original_faces.device != self.faces.device
+                or bool((self.original_faces < 0).any())
+                or int(self.original_faces.max()) >= self.original_vertex_count):
             raise ValueError("TESSA_SEEDED_SURFACE_DOMAIN_INVALID")
         for (a, b), (wa, wb) in zip(
             self.parent_seed_edges, self.parent_seed_weights
@@ -124,6 +130,7 @@ def build_tessa_seeded_surface_v1(
             face_component_ids=component_ids_by_vertex[faces[:, 0]],
             parent_seed_edges=tuple(parents), parent_seed_weights=tuple(weights),
             original_vertex_count=v, original_face_count=len(faces),
+            original_faces=faces,
             scene_sha256=scene_sha256,
             original_surface_sha256=original_surface_sha256,
         )
@@ -164,6 +171,7 @@ def build_tessa_seeded_surface_v1(
         face_component_ids=vertex_components[final_faces[:, 0]],
         parent_seed_edges=tuple(parents), parent_seed_weights=tuple(weights),
         original_vertex_count=v, original_face_count=len(faces),
+        original_faces=faces,
         scene_sha256=scene_sha256,
         original_surface_sha256=original_surface_sha256,
     )
@@ -282,6 +290,7 @@ def tessa_adaptive_split_edges_v1(
                            +tuple((0.5,0.5) for _ in selected),
         original_vertex_count=seed.original_vertex_count,
         original_face_count=seed.original_face_count,
+        original_faces=seed.original_faces,
         scene_sha256=seed.scene_sha256,
         original_surface_sha256=seed.original_surface_sha256,
     )

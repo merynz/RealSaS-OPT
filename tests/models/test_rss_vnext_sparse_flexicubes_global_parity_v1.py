@@ -90,6 +90,42 @@ def test_real_pinned_ambiguous_case_ids_dense_equals_sparse_neighbor_index():
     torch.testing.assert_close(dense,glob)
 
 
+@pytest.mark.parametrize("occupancy_seed",[3,9,17,31,73])
+def test_real_pinned_ambiguous_neighbor_cases_match_exhaustive_random_signs(
+    occupancy_seed,
+):
+    """Sphere-only parity can miss C16/C19 ambiguous face inversions.
+
+    Random sign patterns are not physically qualified signed solids and
+    cannot be used as training labels. They ONLY stress the exact upstream
+    ambiguity lookup with shared regular-grid corner addresses.
+    """
+    pinned=_pinned()
+    res=(7,8,9)
+    adapter=PinnedFlexiCubesV1.__new__(PinnedFlexiCubesV1)
+    adapter.device=torch.device("cpu")
+    xyz,cubes=adapter.construct_iris_grid(res)
+    g=torch.Generator(device="cpu").manual_seed(occupancy_seed)
+    sign=(torch.rand(len(xyz),generator=g)>.5)
+    field=sign.float()*2-1
+    surface,occ=pinned.operator._identify_surf_cubes(field,cubes)
+    assert surface.any()
+    dense_cases=pinned.operator._get_case_id(occ,surface,res)
+    active_ids=exhaustive_surface_cube_ids_v1(
+        (field<0).reshape(res[0]+1,res[1]+1,res[2]+1),
+        resolution=res,
+    )
+    torch.testing.assert_close(
+        active_ids,torch.nonzero(surface).flatten(),
+    )
+    sparse_cases=globally_addressed_case_ids_v1(
+        pinned.operator,occ[active_ids],
+        torch.ones(len(active_ids),dtype=torch.bool),
+        res,active_ids,
+    )
+    torch.testing.assert_close(dense_cases,sparse_cases)
+
+
 def test_actual_pinned_mesh_and_gradients_match_sparse_without_welding():
     pinned=_pinned()
     sparse=PinnedSparseFlexiCubesV1(pinned)

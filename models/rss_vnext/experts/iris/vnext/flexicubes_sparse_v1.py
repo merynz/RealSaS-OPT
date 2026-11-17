@@ -227,6 +227,8 @@ class PinnedSparseFlexiCubesV1:
         cubes: Tensor,
         raw_parameters: Tensor,
         global_cube_ids: Tensor,
+        global_vertex_ids: Tensor,
+        exhaustive_negative_grid: Tensor,
         resolution: tuple[int,int,int],
         training: bool,
     ) -> tuple[Tensor,Tensor,Tensor]:
@@ -241,8 +243,11 @@ class PinnedSparseFlexiCubesV1:
             or not 1<=c<=2_000_000
             or raw_parameters.shape!=(c,21)
             or global_cube_ids.shape!=(c,)
+            or global_vertex_ids.shape!=(n,)
+            or global_vertex_ids.dtype!=torch.long
             or any(x.device!=vertices_iris.device for x in (
                 field,cubes,raw_parameters,global_cube_ids,
+                global_vertex_ids,
             ))
             or vertices_iris.device!=self.pinned.device
             or type(training) is not bool
@@ -252,9 +257,27 @@ class PinnedSparseFlexiCubesV1:
             or not bool(torch.isfinite(raw_parameters).all())
         ):
             raise ValueError("RSS_VNEXT_SPARSE_FC_MESH_INPUT_INVALID")
-        # SAFETY: require actual surface-cube closure. Each supplied cube
-        # MUST change sign, and missing adjacent crossing cells are handled
-        # by the separate exhaustive coverage certification before release.
+        # Fail closed on omitted crossing cells AND on forged local shared
+        # vertex addresses. The exhaustive sign bitfield may remain on CPU;
+        # only the compact selected global IDs need to be transferred.
+        expected_cubes=exhaustive_surface_cube_ids_v1(
+            exhaustive_negative_grid,resolution=resolution,
+        ).to(global_cube_ids.device)
+        vertex_ids,local_cubes,_=compact_active_grid_v1(
+            global_cube_ids,resolution,
+        )
+        if (
+            not torch.equal(expected_cubes,global_cube_ids)
+            or not torch.equal(vertex_ids,global_vertex_ids)
+            or not torch.equal(local_cubes,cubes)
+            or not torch.equal(
+                field.detach()<0,
+                exhaustive_negative_grid.reshape(-1)[
+                    global_vertex_ids.to(exhaustive_negative_grid.device)
+                ].to(field.device)
+            )
+        ):
+            raise ValueError("RSS_VNEXT_SPARSE_FC_SIGN_COVERAGE_OR_INDEX_DRIFT")
         inside=field[cubes]<0
         if not bool((inside.any(-1) & ~inside.all(-1)).all()):
             raise ValueError("RSS_VNEXT_SPARSE_FC_NON_ACTIVE_CUBE_PROHIBITED")

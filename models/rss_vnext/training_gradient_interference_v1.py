@@ -35,6 +35,7 @@ _OWNER_PREFIXES: tuple[tuple[str, tuple[str, ...]], ...] = (
         "region_graph_to_memory.", "articulation_prior.",
         "affordance_to_memory.", "graphics_to_memory.",
         "control_cross.", "control_norm.", "fc_surface_position.",
+        "surface_mechanics_context.",
     )),
     ("SEMANTIC_HEAD", (
         "presentation_role_head.", "semantic.", "semantic_structure.",
@@ -44,7 +45,7 @@ _OWNER_PREFIXES: tuple[tuple[str, tuple[str, ...]], ...] = (
         "graphics.", "presentation.", "surface_refine.",
         "constructed_view_renderer.",
     )),
-    ("TESSA_HEAD", ("tessa.", "mesh_bridge.")),
+    ("TESSA_HEAD", ("tessa.", "mesh_bridge.", "tessa_seeded_head.")),
     ("AXIS_HEAD", ("axis.",)),
     ("MIRA_HEAD", ("mira.",)),
     ("SOCKET_HEAD", ("anchor_face_correspondence.",)),

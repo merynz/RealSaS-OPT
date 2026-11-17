@@ -167,7 +167,8 @@ def _scenario(monkeypatch):
         SeededTESSALossWeightsV1(),boundary=0.0,
     )
     optimizer=torch.optim.AdamW(net.parameters(),lr=1.e-3)
-    def trainer(native_registry=native_registry):
+    def trainer(native_registry=native_registry,
+                signed_registry_override=None):
         return RSSvNextStructuralTrainer(
             net,optimizer,dataset_manifest_sha256=manifest,
             scene_conditioning_policy="PRODUCT_GENERATED_SIX_VIEW",
@@ -175,7 +176,10 @@ def _scenario(monkeypatch):
             seeded_tessa_weights=weights,
             trusted_seeded_tessa_registry=native_registry,
             trusted_generated_conditioning_registry=generated_registry,
-            trusted_signed_source_registry=signed_registry,
+            trusted_signed_source_registry=(
+                signed_registry if signed_registry_override is None
+                else signed_registry_override
+            ),
         )
     return net,batch,trainer,native_registry,generated_registry
 
@@ -247,3 +251,97 @@ def test_product_phase_rejects_legacy_or_frozen_head(monkeypatch):
         p.requires_grad_(False)
     with pytest.raises(ValueError,match="GRADIENT_OWNERS_FROZEN"):
         make_trainer()
+
+
+def test_layered_source_truth_executes_one_student_h_with_two_signed_receipts(
+    monkeypatch,
+):
+    from models.rss_vnext.layered_iris_seed_v1 import (
+        layer_namespace_digest_v1,
+    )
+    from models.rss_vnext.seeded_layer_source_court_v1 import (
+        SOURCE_LAYER_AUTHORITY,SOURCE_LAYER_DERIVATION,
+    )
+    net,batch,make_trainer,registry,_=_scenario(monkeypatch)
+    a=batch.seeded_tessa_source_teacher
+    first=batch.flexicubes_reference_surface_xyz[0]
+    source=torch.cat((first,first),dim=0)
+    layer_ids=torch.tensor([0]*4+[1]*4,dtype=torch.long)
+    layers=(
+        RSSvNextSemanticLayerSpec("body",("primary_form","focal_detail")),
+        RSSvNextSemanticLayerSpec("cape",("outer_covering",)),
+    )
+    namespace=layer_namespace_digest_v1(
+        tuple(s.name for s in layers),
+        tuple(s.keep_roles for s in layers),
+    )
+    teacher=replace(
+        a,source_xyz=source,
+        source_normals=torch.cat((a.source_normals,a.source_normals),dim=0),
+        source_point_mask=torch.ones(8,dtype=torch.bool),
+        source_importance=torch.tensor([0.1]*4+[0.9]*4),
+        source_importance_mask=torch.ones(8,dtype=torch.bool),
+        source_component_ids=layer_ids.clone(),
+        source_layer_ids=layer_ids.clone(),
+    )
+    layer_keys=("signed-closed-source-001","signed-closed-source-002")
+    native_row=dict(registry[a.source_qualification_key])
+    native_row.update({
+        "semantic_layer_name":"body",
+        "source_layer_partition_authority":SOURCE_LAYER_AUTHORITY,
+        "source_layer_partition_derivation":SOURCE_LAYER_DERIVATION,
+        "source_layer_namespace_sha256":namespace,
+        "source_layer_native_asset_sha256":teacher.source_asset_sha256,
+        "native_source_layer_partition_sha256":_digest(teacher.source_layer_ids),
+        "source_layer_independently_audited":True,
+        "source_label_student_checkpoint_dependency":False,
+        "signed_layer_admission_keys":list(layer_keys),
+        **{k+"_sha256":_digest(v) for k,v in teacher.tensor_fields().items()},
+    })
+    registry={teacher.source_qualification_key:native_row}
+    signed={}
+    for layer_id,(name,key) in enumerate(zip(layers,layer_keys)):
+        signed[key]={
+            "admission_status":"QUALIFIED_SOURCE_SIGNED_SOLID",
+            "source_component_domain":"SINGLE_QUALIFIED_CLOSED_COMPONENT",
+            "dataset_manifest_sha256":"f"*64,
+            "source_qualification_key":batch.source_qualification_key,
+            "role_schema_id":net.cfg.semantic_role_schema_id,
+            "layer_name":name.name,
+            "surface_target_sha256":source_surface_tensor_sha256(
+                teacher.source_xyz[teacher.source_layer_ids==layer_id][None],
+            ),
+            "source_layer_partition_authority":SOURCE_LAYER_AUTHORITY,
+            "source_layer_partition_derivation":SOURCE_LAYER_DERIVATION,
+            "native_source_layer_partition_sha256":_digest(
+                teacher.source_layer_ids,
+            ),
+            "source_layer_namespace_sha256":namespace,
+            "source_layer_native_asset_sha256":teacher.source_asset_sha256,
+            "native_source_layer_index":layer_id,
+            "source_layer_independently_audited":True,
+            "source_label_student_checkpoint_dependency":False,
+        }
+    layered_batch=replace(
+        batch,flexicubes_layer=layers[0],
+        flexicubes_layers=layers,
+        flexicubes_reference_surface_xyz=source[None],
+        flexicubes_signed_layer_admission_keys=layer_keys,
+        seeded_tessa_source_teacher=teacher,
+        seeded_tessa_source_face_budget=8,
+    )
+    trainer=make_trainer(
+        native_registry=registry,signed_registry_override=signed,
+    )
+    out=trainer.train_step(layered_batch)
+    assert out.seeded_tessa_qualified_layer_count==2
+    assert out.seeded_tessa_source_point_count==8
+    assert out.seeded_tessa_loss.isfinite()
+    assert trainer.global_step==1
+    bad={k:dict(v) for k,v in signed.items()}
+    bad[layer_keys[1]]["source_layer_namespace_sha256"]="0"*64
+    bad_trainer=make_trainer(
+        native_registry=registry,signed_registry_override=bad,
+    )
+    with pytest.raises(ValueError,match="NATIVE_SIGNED_LAYER_RECEIPT_DRIFT"):
+        bad_trainer.objective(layered_batch)

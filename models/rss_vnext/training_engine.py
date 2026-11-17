@@ -2406,6 +2406,12 @@ class RSSvNextStructuralTrainer:
         if (rgb_loss is not None and self.product_graphics_rgb_weight<=0
             or ray_loss is not None and self.product_joint_ray_weight<=0):
             raise ValueError("RSS_VNEXT_PRODUCT_GRAPHICS_SUPERVISION_NOT_ENABLED")
+        if (
+            (self.product_graphics_rgb_weight>0
+             or self.product_joint_ray_weight>0)
+            and rgb_loss is None and ray_loss is None
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_GRAPHICS_ENABLED_NO_SOURCE_TRUTH")
         total=losses["total"]
         if rgb_loss is not None:
             total=total+self.product_graphics_rgb_weight*rgb_loss
@@ -2530,8 +2536,6 @@ class RSSvNextStructuralTrainer:
                     ("SOURCE_RGB_VIEW_CORE",self.model.constructed_view_renderer.core),
                     ("SOURCE_RGB_VIEW_HEAD",self.model.constructed_view_renderer.rgb),
                 ))
-            if result.realsas_joint_slrm_loss is not None:
-                required.append(("GRAPHICS_SEMANTIC",self.model.presentation_role_head))
             for label,module in required:
                 trained = [p for p in module.parameters() if p.requires_grad]
                 if not trained or not any(p.grad is not None for p in trained):

@@ -96,6 +96,10 @@ from .product_semantic_supervision_v1 import (
     ProductSemanticWeightsV1,
     product_source_semantic_objective_v1,
 )
+from .product_axis_mira_seeded_training_v1 import (
+    ProductSeededAXISMIRAWeightsV1,
+    product_seeded_axis_mira_objective_v1,
+)
 
 
 @dataclass
@@ -336,6 +340,8 @@ class RSSvNextTrainingResult:
     product_graphics_joint_loss_parts: dict[str, Tensor] | None = None
     product_semantic_loss: Tensor | None = None
     product_semantic_loss_parts: dict[str, Tensor] | None = None
+    product_axis_mira_loss: Tensor | None = None
+    product_axis_mira_parts: dict[str, Tensor] | None = None
 
 
 def axis_mesh_teacher_address_digest_v1(mesh) -> str:
@@ -472,6 +478,7 @@ class RSSvNextStructuralTrainer:
         product_graphics_rgb_weight: float = 0.0,
         product_joint_ray_weight: float = 0.0,
         product_semantic_weights: ProductSemanticWeightsV1 = ProductSemanticWeightsV1(),
+        product_axis_mira_weights: ProductSeededAXISMIRAWeightsV1 = ProductSeededAXISMIRAWeightsV1(),
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -541,6 +548,14 @@ class RSSvNextStructuralTrainer:
                 and not trusted_realsas_joint_scene_registry)
         ):
             raise ValueError("RSS_VNEXT_PRODUCT_GRAPHICS_PHASE_POLICY_INVALID")
+        if not isinstance(product_axis_mira_weights,ProductSeededAXISMIRAWeightsV1):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_MIRA_PHASE_POLICY")
+        product_axis_mira_weights.validate()
+        if product_axis_mira_weights.enabled and (
+            not seeded_mode or not trusted_axis_teacher_registry
+            or axis_training_policy!="PRODUCT_MESH_MATCHED_REQUIRED"
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_MIRA_PHASE_POLICY")
         seeded_tessa_sampling_policy.validate()
         if not seeded_mode and seeded_tessa_sampling_policy != SeededSurfaceSamplingPolicyV1():
             raise ValueError("RSS_VNEXT_LEGACY_SEEDED_SAMPLING_POLICY_FORBIDDEN")
@@ -630,6 +645,7 @@ class RSSvNextStructuralTrainer:
         self.product_joint_ray_weight = float(product_joint_ray_weight)
         self.product_semantic_weights = product_semantic_weights
         self.product_semantic_active = semantic_active
+        self.product_axis_mira_weights = product_axis_mira_weights
         component_snapshot = {
             str(k): dict(v)
             for k,v in (trusted_component_udf_registry or {}).items()
@@ -699,6 +715,10 @@ class RSSvNextStructuralTrainer:
                 "product_semantic_weights":asdict(self.product_semantic_weights),
                 "product_semantic_requires_source_native":True,
             } if self.product_semantic_active else {}),
+            **({
+                "product_axis_mira_weights":asdict(self.product_axis_mira_weights),
+                "requires_exact_native_mstar_face_pose_and_pinned_codec":True,
+            } if self.product_axis_mira_weights.enabled else {}),
             **({
                 "product_graphics_rgb_weight":self.product_graphics_rgb_weight,
                 "product_joint_ray_weight":self.product_joint_ray_weight,
@@ -2348,6 +2368,9 @@ class RSSvNextStructuralTrainer:
             *({"component_udf_source_teacher"}
                if self.component_udf_enabled else set()),
             *({
+                "axis_teacher_sequence","axis_teacher_admission_key",
+            } if self.product_axis_mira_weights.enabled else set()),
+            *({
                 "semantic_patch_target","semantic_patch_mask",
                 "semantic_qualification_key",
             } if self.product_semantic_weights.patch_axes>0
@@ -2411,7 +2434,8 @@ class RSSvNextStructuralTrainer:
             or batch.topology_valid_mask is not None
             or batch.motion_candidate_tokens is not None
             or batch.motion_court is not None
-            or batch.axis_teacher_sequence is not None
+            or (batch.axis_teacher_sequence is not None
+                and not self.product_axis_mira_weights.enabled)
             or batch.source_topology_admission_key
             or batch.flexicubes_extractor is None
             or batch.flexicubes_layer is None
@@ -2603,6 +2627,17 @@ class RSSvNextStructuralTrainer:
             source_face_budget=batch.seeded_tessa_source_face_budget,
             sampler_step=self.global_step,
         )
+        axis_mira=product_seeded_axis_mira_objective_v1(
+            model=self.model,state=state,mesh=mesh,
+            teacher=teacher,batch=batch,
+            weights=self.product_axis_mira_weights,
+            dataset_manifest_sha256=self.dataset_manifest_sha256,
+            trusted_axis_teacher_registry=self.trusted_axis_teacher_registry,
+            trusted_native_pose_registry=driver.trusted_registry,
+            tensor_digest=source_surface_tensor_sha256,
+            axis_sequence_digest=axis_teacher_sequence_sha256_v6,
+            frozen_codec_digest=frozen_mira_codec_state_sha256_v6,
+        )
         component = (
             self._component_udf_objective_v1(batch,state)
             if self.component_udf_enabled else None
@@ -2665,6 +2700,8 @@ class RSSvNextStructuralTrainer:
             self.component_udf_weight * component["total"]
             if component is not None else losses["total"].new_zeros(())
         )
+        if axis_mira.total is not None:
+            joint_total=joint_total+axis_mira.total
         if semantic.total is not None:
             joint_total=joint_total+semantic.total
         if rgb_loss is not None:
@@ -2682,6 +2719,22 @@ class RSSvNextStructuralTrainer:
             eligible_topology_examples=0,
             qualified_preference_pairs=0,
             seeded_tessa_loss=losses["total"],
+            product_axis_mira_loss=axis_mira.total,
+            product_axis_mira_parts={
+                k:v for k,v in (
+                    ("axis",axis_mira.axis),("skin",axis_mira.skin),
+                    ("posed",axis_mira.posed),("dynamic",axis_mira.dynamic),
+                    ("hard_skin",axis_mira.hard_skin),
+                ) if v is not None
+            },
+            axis_rig_skin_loss=axis_mira.axis,
+            axis_posed_surface_loss=axis_mira.posed,
+            axis_dynamic_posed_surface_loss=axis_mira.dynamic,
+            eligible_axis_sequences=(1 if axis_mira.axis is not None else 0),
+            eligible_axis_pose_count=axis_mira.eligible_pose_faces,
+            eligible_axis_dynamic_pose_count=(
+                axis_mira.eligible_pose_faces if axis_mira.dynamic is not None else 0
+            ),
             graphics_source_rgb_loss=rgb_loss,
             eligible_graphics_source_rgb_queries=n_rgb,
             realsas_joint_slrm_loss=ray_loss,
@@ -2827,6 +2880,15 @@ class RSSvNextStructuralTrainer:
                     ("SOURCE_RGB_VIEW_CORE",self.model.constructed_view_renderer.core),
                     ("SOURCE_RGB_VIEW_HEAD",self.model.constructed_view_renderer.rgb),
                 ))
+            if result.product_axis_mira_loss is not None:
+                required.append(("AXIS",self.model.axis))
+                required.append(("AXIS_FACE_CONTEXT",self.model.mesh_face_to_control))
+                if (
+                    result.product_axis_mira_parts
+                    and any(v is not None for k,v in result.product_axis_mira_parts.items()
+                            if k!="axis")
+                ):
+                    required.append(("MIRA",self.model.mira))
             if result.product_semantic_loss is not None:
                 parts=result.product_semantic_loss_parts or {}
                 if parts.get("patch") is not None or parts.get("patch_risk") is not None:

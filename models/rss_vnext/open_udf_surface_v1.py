@@ -227,7 +227,7 @@ def extract_open_udf_surface_v1(
                      dim=-1,eps=1.e-8)
     sdf=volume.reshape(-1)
     diag=math.sqrt(sum(s*s for s in steps))
-    sample_limit=float(distance_gate_cells)*diag
+    sample_limit=float(distance_gate_cells)*max(steps)
     edges=[];edge_index={};face_ids=[]
     active=0
     yz=ny*nz

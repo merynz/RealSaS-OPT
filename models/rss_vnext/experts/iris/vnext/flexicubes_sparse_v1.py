@@ -110,6 +110,101 @@ def globally_addressed_case_ids_v1(
     return result
 
 
+@torch.no_grad()
+def exhaustive_surface_cube_ids_v1(
+    negative_grid: Tensor, *,
+    resolution: tuple[int,int,int],
+    x_slab: int = 8,
+) -> Tensor:
+    """Exhaustive active fine-grid voxel certificate from every fine sign.
+
+    Not a coarse-only guess. Negative grid is the fully evaluated boolean
+    result of the trained semantic-equivalent field, not a source teacher.
+    Exactly one crossing cube is returned per x-major regular-grid address.
+    No [C,8] dense cube tensor or [C,5] ambiguity buffer is built.
+    """
+    nx,ny,nz=_resolution_v1(resolution)
+    if (
+        not isinstance(negative_grid,Tensor)
+        or negative_grid.shape!=(nx+1,ny+1,nz+1)
+        or negative_grid.dtype!=torch.bool
+        or type(x_slab) is not int or not 1<=x_slab<=64
+        or not bool(negative_grid.any())
+        or not bool((~negative_grid).any())
+    ):
+        raise ValueError("RSS_VNEXT_SPARSE_FC_EXHAUSTIVE_SIGN_DOMAIN")
+    selected=[]
+    for x0 in range(0,nx,x_slab):
+        x1=min(nx,x0+x_slab)
+        # A slab overlaps one *vertex* slice, so crossing cubes at its
+        # boundary are neither lost nor duplicated.
+        s=negative_grid[x0:x1+1]
+        corners=(
+            s[:-1,:-1,:-1],s[1:,:-1,:-1],
+            s[:-1,1:,:-1],s[1:,1:,:-1],
+            s[:-1,:-1,1:],s[1:,:-1,1:],
+            s[:-1,1:,1:],s[1:,1:,1:],
+        )
+        has_inside=corners[0].clone()
+        has_outside=(~corners[0]).clone()
+        for corner in corners[1:]:
+            has_inside|=corner
+            has_outside|=(~corner)
+        active=has_inside & has_outside
+        ix,iy,iz=torch.nonzero(active,as_tuple=True)
+        if ix.numel():
+            selected.append(((ix+x0)*ny+iy)*nz+iz)
+    if not selected:
+        raise ValueError("RSS_VNEXT_SPARSE_FC_EXHAUSTIVE_NO_SURFACE")
+    ids=torch.cat(selected)
+    if bool((ids[1:]<=ids[:-1]).any()):
+        raise RuntimeError("RSS_VNEXT_SPARSE_FC_EXHAUSTIVE_ADDRESS_ORDER_DRIFT")
+    return ids.long()
+
+
+@torch.no_grad()
+def compact_active_grid_v1(
+    global_cube_ids: Tensor,
+    resolution: tuple[int,int,int],
+) -> tuple[Tensor,Tensor,Tensor]:
+    """One global XYZ/layer-independent mesh index for active fine voxels.
+
+    Returns global vertex IDs, local [C,8] addresses, and [-1,1] coordinates.
+    Shared corners across adjacent active cubes have ONE index; no per-tile
+    welding or guessed position correspondence is allowed.
+    """
+    nx,ny,nz=_resolution_v1(resolution)
+    c=global_cube_ids
+    if (
+        c.ndim!=1 or c.dtype!=torch.long or not len(c)
+        or bool((c<0).any()) or int(c.max())>=nx*ny*nz
+        or bool((c[1:]<=c[:-1]).any())
+    ):
+        raise ValueError("RSS_VNEXT_SPARSE_FC_COMPACT_CUBE_DOMAIN")
+    x=torch.div(c,ny*nz,rounding_mode="floor")
+    y=torch.div(c,nz,rounding_mode="floor")%ny
+    z=c%nz
+    ox=torch.tensor([0,1,0,1,0,1,0,1],dtype=torch.long,device=c.device)
+    oy=torch.tensor([0,0,1,1,0,0,1,1],dtype=torch.long,device=c.device)
+    oz=torch.tensor([0,0,0,0,1,1,1,1],dtype=torch.long,device=c.device)
+    global_corners=(
+        ((x[:,None]+ox)*(ny+1)+y[:,None]+oy)*(nz+1)
+        +z[:,None]+oz
+    )
+    unique,inverse=torch.unique(
+        global_corners.reshape(-1),sorted=True,return_inverse=True,
+    )
+    xx=torch.div(unique,(ny+1)*(nz+1),rounding_mode="floor")
+    yy=torch.div(unique,nz+1,rounding_mode="floor")%(ny+1)
+    zz=unique%(nz+1)
+    coords=torch.stack((
+        xx.float()*(2./nx)-1.,
+        yy.float()*(2./ny)-1.,
+        zz.float()*(2./nz)-1.,
+    ),dim=-1)
+    return unique,inverse.reshape(-1,8),coords
+
+
 class PinnedSparseFlexiCubesV1:
     """Pinned source instance, isolated per-call ambiguity context.
 
@@ -201,4 +296,5 @@ class PinnedSparseFlexiCubesV1:
 __all__=[
     "SPARSE_CASE_SCHEMA","globally_addressed_case_ids_v1",
     "PinnedSparseFlexiCubesV1",
+    "exhaustive_surface_cube_ids_v1","compact_active_grid_v1",
 ]

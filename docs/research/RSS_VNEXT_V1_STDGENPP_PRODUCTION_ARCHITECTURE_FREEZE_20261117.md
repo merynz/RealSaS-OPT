@@ -43,6 +43,65 @@
 
 **Paper facts:** ++ implementation uses fullbody and facial LoRA rank 128, 6 x 320 RGB S-LRM input, 256x256x384 fullbody and 180^3 facial extraction, progressively 512/768/1024 diffusion generation, and face-focused 3-frame video texture decomposition. These settings are *reference-specific*, not evidence that they fit BUSTED's mixed morphology/data/GPU budget. Published holistic improvement vs StdGEN is small (A-pose LPIPS .066 -> .064); the useful gains are geometry detail and decomposition, NOT proof of a learned cloth rig. Source: https://arxiv.org/html/2601.07660
 
+## 3A. The decisive StdGEN++ / TESSA resolution — ONE mesh, no second decoder
+
+**Frozen v1 structural rule:** **IRIS semantic field extraction is the only source of production surface vertex/face geometry; TESSA is a learned, mechanically-aware structural REFINER operating on that very extracted mesh**. The Compiler alone admits its final result as `CanonicalMeshIR`. Stop treating the existing independent TESSA autoregressive triangle sequence as an additional product geometry authority.
+
+This is an intentional CHANGE from the current `models/rss_vnext/unified_character_model.py` architecture: today FlexiCubes witnesses feed TESSA as at most 256 vertex + 256 face tokens, while TESSA's token decoder constructs an entirely independent triangle mesh via `animation_ready_mesh.py`. That does NOT solve the original Knight dual-geometry failure. Merely expanding the token count or forcing correspondence after predicting two meshes also does NOT solve it.
+
+The production intended graph is:
+
+```text
+ONE IRIS scene H(x)
+   |
+   +-> signed / open / semantic-equivalent fields and RGB
+           |
+           +-> StdGEN++ sparse high-resolution *semantic surface extraction*
+                    (body, coverings, optional hair, hard details)
+                    | EACH shell is face-indexed, source role is NOT mechanics
+                    V
+           ONE candidate indexed geometry graph M0
+                    |
+                    +-> TESSA(M0, H(surface), articulation prior)
+                           topology refinements / repairs / structural
+                           component edges, thin cloth boundaries, regions
+                           optional face split/collapse/flip proposal
+                           | EVERY topology edit records parent support
+                           V
+           ONE final animation-ready graph M*
+                    |
+                    +-> Compiler admits CanonicalMeshIR(M*)
+                           +-> AXIS predicts rig ON M*
+                           +-> MIRA predicts skin ON EXACT M*
+                           +-> Mechanics LBS/XPBD ON EXACT M*
+                           +-> Graphics projects UV/pixels ON EXACT M*
+```
+
+**Correctness invariants:**
+
+1. M0 is extracted *once* from shared H, possibly as several disconnected semantic shells in one asset; nothing is welded across unrelated components. A "single mesh" means one canonical INDEXED ASSET and one mechanical vertex ID namespace, NOT a falsely fused closed watertight surface.
+2. TESSA's high-resolution form is SEED-CONDITIONED: it can change M0's topology only through explicit operations with parent vertex/face support and validated geometric/semantic/mechanical quality. It MUST NOT autoregress a separate unrelated mesh and then project skin/UV/anchors onto it.
+3. TESSA refinement, split/collapse/flip and optional inside-out collision-aware geometry optimization finish **BEFORE** canonical compiler admission, AXIS and MIRA. Any final vertex has a provable source parent lineage.
+4. AXIS/MIRA query H at the FINAL post-TESSA vertex positions. They learn joints/weights over M*, never an earlier proxy mesh. MIRA skin is indexed by final vertex IDs; later graphical remeshing is not allowed.
+5. One-to-four edge subdivision and identity refinement are implemented as a differentiable **address-preserving scaffold** in `models/rss_vnext/tessa_seeded_surface_v1.py`. Each new midpoint has an exact 0.5/0.5 parent-edge support. This is a minimal executable correctness court, **NOT** the adaptive high-resolution or learned TESSA topology upgrade. The production model is NOT yet wired to this path. Training on the existing independent topology decoder must NOT be called the final v1 architecture.
+6. Adaptive refinement must prevent partial-edge T-junctions, component cross-welds, UV seam loss, inverted normals, self-intersections, rigid/cloth misclassification and cost explosion. Non-differentiable split/flip decisions need source-qualified discrete supervision or a separate differentiable/ranking surrogate; continuous positions must retain gradient through H(x). Solver/action quality is enforced by an independent Compiler court, not blindly generated labels.
+7. To ship StdGEN++-class extraction, source-pinned FlexiCubes tile/neighbor ambiguity semantics and high-res sparse grid planner must be implemented and native GPU-qualified. The current bounded dense/chunked 100x100x150 product configuration is NOT a 256x256x384 implementation.
+
+**What happens to existing TESSA causal grammar?** Keep it as historical/diagnostic training evidence until its learnable operators are explicitly mapped into the seeded graph structural program (component/face/boundary refinement). Do not silently train/release the old standalone token decoder as the product final mesh head. Reuse its structural memory, geometry-awareness, articulation bias and topology quality tests; replace its *final full-mesh generation contract*, not TESSA's expertise.
+
+### Orthogonal morphology vs surface mechanics
+
+StdGEN++ presentation strata are NOT physical types. A tank's exterior and a Knight cloak may both have high `outer_covering` probability. Model and Compiler distinguish via independent facts:
+
+| Shape/surface | Geometry layering | Mechanical behavior in v1 |
+| --- | --- | --- |
+| Tank exterior / hard armor | solid outer shell, possibly separate component | rigid/weighted; NO cloth XPBD |
+| Fitted garment | garment shell on body | MIRA LBS, not automatically simulated |
+| Cape / skirt / loose clothing | independent thin/free sheet, free hem and explicit support boundary | LBS pinned root + optional XPBD free vertices |
+| Hair (when available) | separated fiber/ribbon/surface group | skinned by default; optional carefully qualified surface XPBD |
+
+No additional humanoid-only clothing ontology is needed to produce the geometry; a learned source-material coefficient is **not** inferred from 2D semantic roles. A bounded product-versioned Compiler policy may activate approved flexible-surface defaults when morphology, sheet topology, pin/skin and collision checks all pass; otherwise ABSTAIN or user edits. A separate human confirmation is not inherently required for every compile, but never activate XPBD solely because a face is `outer_covering`.
+
 ## 4. Exact one-surface ownership and deformation order
 
 ```text
@@ -115,4 +174,4 @@ Do not change the 21k corpus, notebook runs, license screens or process new asse
 - A separate SAM3-free, explicit garment semantic-to-canonical-XPBD candidate compiler, without second geometry or physics authority.
 - CPU regression test for garment failure cases, canonical identity and real surface XPBD stepping, inserted into unified product CI.
 
-**Status is deliberately partial:** this branch does NOT yet implement full published ++ dual-branch training, 256x256x384 sparse extraction, video-diffusion facial texture split, native GPU behavior court, or fully qualified user-input ProductRevision. Publishing or saying 'training-ready' now would conceal open P0 engineering. Use this as the frozen architecture TARGET and close executable gates before training.
+**Status is deliberately partial:** Seed-to-refiner topology contract and gradient regression exist, but the actual inference DAG still uses the independent TESSA face generator and MUST be rewired before v1 release/training.  this branch does NOT yet implement full published ++ dual-branch training, 256x256x384 sparse extraction, video-diffusion facial texture split, native GPU behavior court, or fully qualified user-input ProductRevision. Publishing or saying 'training-ready' now would conceal open P0 engineering. Use this as the frozen architecture TARGET and close executable gates before training.

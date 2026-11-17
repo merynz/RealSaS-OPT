@@ -57,6 +57,9 @@ class RSSvNextStructuralMeshCandidate:
     # Raw local_features stays unchanged; all MIRA replay consumers must use
     # this exact input tensor when present, never silently fall back.
     mechanics_local_features: Tensor | None = None
+    # One TESSA-learned local structural metric on the SAME indexed surface.
+    # This is a continuous student output, not ground-truth edge labels.
+    tessa_metric_logits: Tensor | None = None
 
     def validate(self) -> None:
         xyz = self.rest_vertices_iris
@@ -97,6 +100,12 @@ class RSSvNextStructuralMeshCandidate:
         # the existing model/Compiler callers.  A source-neutral test/CAS
         # carrier can intentionally omit that court; do not retroactively
         # break the old proposal ABI while migrating to seeded topology.
+        if self.tessa_metric_logits is not None and (
+            self.tessa_metric_logits.shape != (1, v)
+            or self.tessa_metric_logits.device != xyz.device
+            or not bool(torch.isfinite(self.tessa_metric_logits).all())
+        ):
+            raise ValueError("RSS_VNEXT_SEEDED_TESSA_METRIC_ADDRESS_DRIFT")
         if self.mechanics_local_features is not None:
             m = self.mechanics_local_features
             if (m.shape != self.local_features.shape
@@ -220,6 +229,8 @@ class RSSvNextAnimationReadyMesh(nn.Module):
         sign_logit: nn.Module,
         role_head: nn.Module,
         role_schema_id: str,
+        tessa_refinement: Tensor | None = None,
+        tessa_metric_logits: Tensor | None = None,
     ) -> RSSvNextStructuralMeshCandidate:
         """One indexed IRIS seed for final TESSA mesh and AXIS/MIRA queries.
 
@@ -240,6 +251,12 @@ class RSSvNextAnimationReadyMesh(nn.Module):
         # The FlexiCubes extractor already consumed extraction_delta.
         # Do not apply it twice to independently produce a "visual mesh".
         residual = 0.03 * torch.tanh(refine(h0))
+        if tessa_refinement is not None:
+            if (tessa_refinement.shape != base.shape
+                    or tessa_refinement.device != base.device
+                    or not bool(torch.isfinite(tessa_refinement).all())):
+                raise ValueError("RSS_VNEXT_TESSA_STRUCTURAL_REFINEMENT_DOMAIN")
+            residual = residual + 0.03 * torch.tanh(tessa_refinement)
         margin = (1.0 - base.abs()).clamp_min(0.0)
         rest = base + margin * residual
         local = self.iris.query(scene_planes, rest)
@@ -268,6 +285,7 @@ class RSSvNextAnimationReadyMesh(nn.Module):
             graphics_logits=graphics(h),
             static_quality_logits=quality(h),
             seeded_surface=seeded,
+            tessa_metric_logits=tessa_metric_logits,
         )
         candidate.validate()
         return candidate

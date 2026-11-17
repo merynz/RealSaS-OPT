@@ -71,15 +71,15 @@ def _scenario(monkeypatch):
             layer_name=layer.name,
         )
     monkeypatch.setattr(net.fc_surface_bridge,"forward",generated_signed_extraction)
-    observed=torch.rand(1,2,4,8,8)
+    observed=torch.rand(1,2,4,16,16)
     # Teacher-only source cameras are never passed to H(x).
     cameras=torch.zeros(1,2,13)
     cameras[...,3]=cameras[...,7]=cameras[...,11]=cameras[...,12]=1
     canonical_cameras,six=target_canonical_and_six_cameras_v1(
         1,device="cpu",dtype=observed.dtype,
     )
-    generated=torch.rand(1,6,4,8,8)
-    generated_normals=torch.zeros(1,6,3,8,8)
+    generated=torch.rand(1,6,4,16,16)
+    generated_normals=torch.zeros(1,6,3,16,16)
     source_binding="c"*64
     canonical_ckpt="a"*64
     multiview_ckpt="b"*64

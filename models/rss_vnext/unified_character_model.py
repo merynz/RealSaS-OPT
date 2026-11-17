@@ -43,7 +43,7 @@ from .semantic_geometry_prior import (
 )
 from .surface_topology_context_v1 import iris_surface_incidence_v1
 from .surface_mechanics_context_v1 import RSSvNextSurfaceMechanicsContextV1
-from .tessa_seeded_surface_v1 import TESSASeededSurfaceV1
+from .tessa_seeded_surface_v1 import TESSASeededSurfaceV1, tessa_seed_from_flexicubes_v1
 from .flexicubes_surface_evidence import (
     RSSvNextFlexiCubesEvidenceBridge,
     RSSvNextFlexiCubesSurfaceEvidence,
@@ -1286,48 +1286,66 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             and out.flexicubes_surface_evidence is None
         ):
             raise RuntimeError("RSS_VNEXT_TESSA_IRIS_SURFACE_NOT_EXTRACTED")
-        limit = min(max_topology_tokens or self.cfg.topology_decode_cap,
-                    self.cfg.topology_decode_cap)
-        if limit < 2:
-            raise ValueError("RSS_VNEXT_DECODE_LIMIT_INVALID")
+        # v1 product: IRIS is the only geometry source. Never run the legacy
+        # independently autoregressive full-mesh TESSA path when the learned
+        # FlexiCubes surface is available. A failed seed is an ABSTAIN,
+        # not a fallback to a new unrelated triangle mesh.
+        seeded_geometry = out.flexicubes_surface_evidence is not None
         ids = torch.tensor([[self.cfg.tessa.BOS]], device=rgba.device, dtype=torch.long)
-        grammar = TESSAGrammarStateV2()
-        failure = None
-        incremental = None
-        try:
-            for _ in range(limit - 1):
-                # V3.1 exact rolling causal KV state shares the teacher-forced
-                # weights and semantics, avoiding O(prefix) full recomputation
-                # at every token. No token enters the cache twice.
-                logits_batch, incremental = decode_next_token_v1(
-                    self.tessa, memory=out.structural_memory,
-                    token=ids[:, -1:],
-                    cache=incremental,
-                )
-                logits = logits_batch[0]
-                allowed = grammar.allowed_token_mask(config=self.cfg.tessa, device=ids.device)
-                # Existing V2 grammar allows adjacent-coordinate start before
-                # the seed triangle; reject that path in this strict runner.
-                if grammar.current_component_face_count == 0:
-                    allowed[:self.cfg.tessa.coordinate_bins] = False
-                if not bool(allowed.any()):
-                    failure = "NO_LEGAL_TOPOLOGY_TOKEN"
-                    break
-                tok = int(logits.float().masked_fill(~allowed, float("-inf")).argmax().item())
-                grammar.advance(tok, config=self.cfg.tessa)
-                ids = torch.cat((ids, ids.new_tensor([[tok]])), dim=1)
-                if grammar.complete:
-                    break
-        except (ValueError, RuntimeError) as exc:
-            failure = f"TOPOLOGY_SEQUENCE_INVALID:{type(exc).__name__}:{exc}"
         mesh = None
-        if grammar.complete and failure is None:
+        failure = None
+        if seeded_geometry:
             try:
-                mesh = self.build_mesh_candidate(out.state, ids[0])
+                seed = tessa_seed_from_flexicubes_v1(
+                    witness=out.flexicubes_surface_evidence,
+                    scene_triplanes=out.state.scene_triplanes,
+                )
+                candidate = self.build_seeded_mechanics_candidate_v1(
+                    out.state, seed, structural_memory=out.structural_memory,
+                )
+                mesh = candidate["mesh_candidate"]
             except (ValueError, RuntimeError) as exc:
-                failure = f"TOPOLOGY_COURT_REJECTED:{type(exc).__name__}:{exc}"
+                failure = f"SEEDED_IRIS_TESSA_ABSTAIN:{type(exc).__name__}:{exc}"
         else:
-            failure = failure or "TOPOLOGY_SEQUENCE_INCOMPLETE"
+            # Legacy calibrated research checkpoints only. The product release
+            # configuration requires an IRIS surface and cannot enter here.
+            limit = min(max_topology_tokens or self.cfg.topology_decode_cap,
+                        self.cfg.topology_decode_cap)
+            if limit < 2:
+                raise ValueError("RSS_VNEXT_DECODE_LIMIT_INVALID")
+            grammar = TESSAGrammarStateV2()
+            incremental = None
+            try:
+                for _ in range(limit - 1):
+                    logits_batch, incremental = decode_next_token_v1(
+                        self.tessa, memory=out.structural_memory,
+                        token=ids[:, -1:], cache=incremental,
+                    )
+                    logits = logits_batch[0]
+                    allowed = grammar.allowed_token_mask(
+                        config=self.cfg.tessa, device=ids.device,
+                    )
+                    if grammar.current_component_face_count == 0:
+                        allowed[:self.cfg.tessa.coordinate_bins] = False
+                    if not bool(allowed.any()):
+                        failure = "NO_LEGAL_TOPOLOGY_TOKEN"
+                        break
+                    tok = int(logits.float().masked_fill(
+                        ~allowed, float("-inf"),
+                    ).argmax().item())
+                    grammar.advance(tok, config=self.cfg.tessa)
+                    ids = torch.cat((ids, ids.new_tensor([[tok]])), dim=1)
+                    if grammar.complete:
+                        break
+            except (ValueError, RuntimeError) as exc:
+                failure = f"TOPOLOGY_SEQUENCE_INVALID:{type(exc).__name__}:{exc}"
+            if grammar.complete and failure is None:
+                try:
+                    mesh = self.build_mesh_candidate(out.state, ids[0])
+                except (ValueError, RuntimeError) as exc:
+                    failure = f"TOPOLOGY_COURT_REJECTED:{type(exc).__name__}:{exc}"
+            else:
+                failure = failure or "TOPOLOGY_SEQUENCE_INCOMPLETE"
 
         result: dict = {
             "state": out.state,
@@ -1335,6 +1353,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             "mesh_candidate": mesh,
             "mesh_status": "UNQUALIFIED_MESH_CANDIDATE" if mesh is not None else "ABSTAIN",
             "mesh_failure": failure,
+            "topology_candidate_abi": (
+                "ONE_IRIS_SEEDED_MESH_V1" if seeded_geometry
+                else "LEGACY_INDEPENDENT_TESSA_GRAMMAR"
+            ),
             "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
             "observed_view_count": 2,
             "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
@@ -1366,8 +1388,13 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 region_relation_logits=out.state.region_relation_logits,
             )
             if bool((seq.kind_ids == int(RigTokenKindV6.SKIN_CODE)).any()):
+                mechanics_h = (
+                    mesh.mechanics_local_features
+                    if mesh.mechanics_local_features is not None
+                    else mesh.local_features
+                )
                 weights, joint_valid, joints = self.mira(
-                    mesh.local_features, mesh.rest_vertices_iris,
+                    mechanics_h, mesh.rest_vertices_iris,
                     control_out["hidden"], control_out["skin_code_logits"], seq,
                     vertex_normals=mesh.normals,
                 )
@@ -1384,7 +1411,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 )
                 hidden_joints = joints[:, :n_joints]
                 hard_weights = self.mira.decode_discrete_skin_v1(
-                    mesh.local_features, mesh.rest_vertices_iris,
+                    mechanics_h, mesh.rest_vertices_iris,
                     hidden_joints, token_ids, vertex_normals=mesh.normals,
                 )
                 if hard_weights.shape != weights.shape:

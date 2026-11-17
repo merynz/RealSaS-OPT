@@ -87,6 +87,9 @@ from .product_graphics_supervision_v1 import (
     product_source_graphics_loss_v1,
     product_source_joint_ray_loss_v1,
 )
+from .product_semantic_supervision_v1 import (
+    ProductSemanticWeightsV1,product_source_semantic_objective_v1,
+)
 
 
 @dataclass
@@ -319,6 +322,8 @@ class RSSvNextTrainingResult:
     seeded_tessa_sampled_quality_face_count: int = 0
     seeded_tessa_qualified_layer_count: int = 0
     product_graphics_joint_loss_parts: dict[str, Tensor] | None = None
+    product_semantic_loss: Tensor | None = None
+    product_semantic_loss_parts: dict[str, Tensor] | None = None
 
 
 def axis_mesh_teacher_address_digest_v1(mesh) -> str:
@@ -450,6 +455,7 @@ class RSSvNextStructuralTrainer:
         # product H(x)/optimizer, never a separate Graphics encoder.
         product_graphics_rgb_weight: float = 0.0,
         product_joint_ray_weight: float = 0.0,
+        product_semantic_weights: ProductSemanticWeightsV1 = ProductSemanticWeightsV1(),
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -463,6 +469,36 @@ class RSSvNextStructuralTrainer:
         ):
             raise ValueError("RSS_VNEXT_TRAIN_UNKNOWN_GEOMETRY_PROFILE")
         seeded_mode = training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1"
+        if not isinstance(product_semantic_weights,ProductSemanticWeightsV1):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEMANTIC_PHASE_POLICY")
+        product_semantic_weights.validate()
+        semantic_active=any(v>0 for v in asdict(product_semantic_weights).values())
+        if (
+            semantic_active and (
+                not seeded_mode
+                or (
+                    product_semantic_weights.patch_axes>0
+                    and not trusted_semantic_patch_registry
+                )
+                or (
+                    product_semantic_weights.patch_risk>0
+                    and not trusted_semantic_patch_registry
+                )
+                or (
+                    product_semantic_weights.surface_roles>0
+                    and not trusted_surface_role_registry
+                )
+                or (
+                    product_semantic_weights.region_pairs>0
+                    and not trusted_region_pair_registry
+                )
+                or (
+                    product_semantic_weights.typed_relations>0
+                    and not trusted_typed_relation_registry
+                )
+            )
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEMANTIC_PHASE_POLICY")
         if (
             any(
                 type(w) not in (float,int) or not math.isfinite(w) or w<0
@@ -555,6 +591,8 @@ class RSSvNextStructuralTrainer:
         self.seeded_tessa_weights = seeded_tessa_weights
         self.product_graphics_rgb_weight = float(product_graphics_rgb_weight)
         self.product_joint_ray_weight = float(product_joint_ray_weight)
+        self.product_semantic_weights = product_semantic_weights
+        self.product_semantic_active = semantic_active
         self.scene_conditioning_policy = scene_conditioning_policy
         self.axis_training_policy = axis_training_policy
         self.model = model
@@ -600,6 +638,10 @@ class RSSvNextStructuralTrainer:
                 "seeded_tessa_source_schema": SEEDED_TESSA_SCHEMA,
                 "seeded_tessa_phase": SEEDED_TESSA_PHASE,
             } if seeded_mode else {}),
+            **({
+                "product_semantic_weights":asdict(self.product_semantic_weights),
+                "product_semantic_requires_source_native":True,
+            } if self.product_semantic_active else {}),
             **({
                 "product_graphics_rgb_weight": self.product_graphics_rgb_weight,
                 "product_joint_ray_weight": self.product_joint_ray_weight,
@@ -2135,6 +2177,28 @@ class RSSvNextStructuralTrainer:
             "seeded_tessa_source_teacher", "seeded_tessa_source_face_budget",
             "source_qualification_key", "admission_status",
             *({
+                "semantic_patch_target","semantic_patch_mask",
+                "semantic_qualification_key",
+            } if self.product_semantic_weights.patch_axes>0
+                or self.product_semantic_weights.patch_risk>0 else set()),
+            *({
+                "source_surface_role_indices",
+                "source_surface_role_mask",
+                "source_surface_role_admission_key",
+            } if self.product_semantic_weights.surface_roles>0 else set()),
+            *({
+                "source_region_pair_indices",
+                "source_region_pair_is_same",
+                "source_region_pair_mask",
+                "source_region_pair_admission_key",
+            } if self.product_semantic_weights.region_pairs>0 else set()),
+            *({
+                "source_typed_relation_pair_indices",
+                "source_typed_relation_target",
+                "source_typed_relation_mask",
+                "source_typed_relation_admission_key",
+            } if self.product_semantic_weights.typed_relations>0 else set()),
+            *({
                 "source_graphics_rgb_target",
                 "source_graphics_view_directions",
                 "source_graphics_rgb_mask",
@@ -2412,7 +2476,19 @@ class RSSvNextStructuralTrainer:
             and rgb_loss is None and ray_loss is None
         ):
             raise ValueError("RSS_VNEXT_PRODUCT_GRAPHICS_ENABLED_NO_SOURCE_TRUTH")
+        semantic=product_source_semantic_objective_v1(
+            model=self.model,state=state,batch=batch,
+            weights=self.product_semantic_weights,
+            manifest_sha256=self.dataset_manifest_sha256,
+            trusted_patch_registry=self.trusted_semantic_patch_registry,
+            trusted_role_registry=self.trusted_surface_role_registry,
+            trusted_region_registry=self.trusted_region_pair_registry,
+            trusted_typed_registry=self.trusted_typed_relation_registry,
+            tensor_digest=source_surface_tensor_sha256,
+        )
         total=losses["total"]
+        if semantic.total is not None:
+            total=total+semantic.total
         if rgb_loss is not None:
             total=total+self.product_graphics_rgb_weight*rgb_loss
         if ray_loss is not None:
@@ -2431,6 +2507,25 @@ class RSSvNextStructuralTrainer:
             realsas_joint_slrm_loss=ray_loss,
             eligible_realsas_joint_rays=n_rays,
             product_graphics_joint_loss_parts=ray_parts,
+            product_semantic_loss=semantic.total,
+            product_semantic_loss_parts={
+                key:value for key,value in (
+                    ("patch",semantic.patch),
+                    ("patch_risk",semantic.patch_risk),
+                    ("roles",semantic.roles),
+                    ("region",semantic.region),
+                    ("typed",semantic.typed),
+                ) if value is not None
+            },
+            source_semantic_loss=semantic.patch,
+            semantic_risk_loss=semantic.patch_risk,
+            surface_role_loss=semantic.roles,
+            region_pair_loss=semantic.region,
+            typed_relation_loss=semantic.typed,
+            eligible_semantic_patch_labels=semantic.patch_axes_count,
+            eligible_surface_role_points=semantic.role_count,
+            eligible_region_pairs=semantic.region_count,
+            eligible_typed_relation_channels=semantic.typed_counts,
             seeded_tessa_loss_parts={
                 k:v for k,v in losses.items()
                 if k not in (
@@ -2536,6 +2631,17 @@ class RSSvNextStructuralTrainer:
                     ("SOURCE_RGB_VIEW_CORE",self.model.constructed_view_renderer.core),
                     ("SOURCE_RGB_VIEW_HEAD",self.model.constructed_view_renderer.rgb),
                 ))
+            if result.product_semantic_loss is not None:
+                parts=result.product_semantic_loss_parts or {}
+                if parts.get("patch") is not None or parts.get("patch_risk") is not None:
+                    required.append(("SEMANTIC_PATCH",self.model.early_semantics))
+                if parts.get("roles") is not None:
+                    required.append(("SEMANTIC_ROLE",self.model.presentation_role_head))
+                if parts.get("region") is not None or parts.get("typed") is not None:
+                    required.extend((
+                        ("SEMANTIC_REGION",self.model.semantic_structure),
+                        ("SEMANTIC_REGION_HEAD",self.model.semantic),
+                    ))
             for label,module in required:
                 trained = [p for p in module.parameters() if p.requires_grad]
                 if not trained or not any(p.grad is not None for p in trained):

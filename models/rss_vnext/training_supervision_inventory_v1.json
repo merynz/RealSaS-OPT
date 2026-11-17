@@ -19,7 +19,8 @@
     "models/rss_vnext/training_seeded_tessa_v1.py",
     "models/rss_vnext/surface_mechanics_context_v1.py",
     "models/rss_vnext/seeded_layer_source_court_v1.py",
-    "models/rss_vnext/layered_iris_seed_v1.py"
+    "models/rss_vnext/layered_iris_seed_v1.py",
+    "models/rss_vnext/native_layer_open_boundary_v1.py"
   ],
   "separation_principles": [
     "One persistent shared IRIS H(x) and source/asset identity.",
@@ -1277,7 +1278,12 @@
         "native_face_layer_samples.face_layer_ids",
         "native_face_layer_samples.face_component_ids",
         "native_face_layer_samples.sample_face_ids",
-        "native_face_layer_samples.sample_barycentric"
+        "native_face_layer_samples.sample_barycentric",
+        "native_open_boundary.boundary_edges",
+        "native_open_boundary.boundary_vertex_ids",
+        "native_open_boundary.open_layer_ids",
+        "source_boundary_xyz",
+        "source_boundary_mask"
       ],
       "native_receipt_fields": [
         "source_layer_partition_authority",
@@ -1289,17 +1295,20 @@
         "source_label_student_checkpoint_dependency",
         "source_native_face_witness_schema",
         "source_native_face_witness_sha256",
-        "source_native_face_witness_derivation"
+        "source_native_face_witness_derivation",
+        "source_native_open_boundary_schema",
+        "source_native_open_boundary_sha256",
+        "source_native_open_boundary_derivation"
       ],
       "signed_proof": "one independently qualified closed signed-source receipt for each claimed source shell, exact per-layer native source-target SHA256",
       "source_independent_layer_namespace": "same named role groups for native label and model prediction; not equal vertex indices or student connected-component IDs",
       "losses_conditioned": [
         "rest_surface",
         "normal",
-        "structural_importance"
+        "structural_importance",
+        "boundary (only independently replayed complete indexed source open hem)"
       ],
       "forbidden_without_extra_truth": [
-        "boundary",
         "deformation",
         "pose_strain",
         "layer_penetration"
@@ -1312,6 +1321,11 @@
       "triangle_witness_schema": "RealSaS.RSSvNext.NativeFaceBarycentricLayerTruth.v1",
       "triangle_witness_file": "models/rss_vnext/native_face_layer_truth_v1.py",
       "native_face_truth_replay_implemented": true,
+      "source_open_boundary_schema": "RealSaS.RSSvNext.NativeLayerOpenBoundary.v1",
+      "source_open_boundary_replay_implemented": true,
+      "source_open_boundary_loss_default_weight": 0.0,
+      "source_open_boundary_corpus_coverage_verified": false,
+      "model_predicted_open_udf_extraction_verified": false,
       "source_asset_face_annotation_audit_verified": false,
       "corpus_face_barycentric_coverage_verified": false
     }

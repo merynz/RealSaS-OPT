@@ -18,6 +18,10 @@ from models.rss_vnext.layered_iris_seed_v1 import layer_namespace_digest_v1
 from models.rss_vnext.native_face_layer_truth_v1 import (
     SCHEMA as NATIVE_FACE_SCHEMA, NativeFaceLayerSamplesV1,
 )
+from models.rss_vnext.native_layer_open_boundary_v1 import (
+    SCHEMA as OPEN_HEM_SCHEMA, DERIVATION as OPEN_HEM_DERIVATION,
+    NativeLayerOpenBoundaryV1,exact_open_boundary_edges_v1,
+)
 from models.rss_vnext.seeded_layer_source_court_v1 import (
     SOURCE_LAYER_AUTHORITY, SOURCE_LAYER_DERIVATION,
 )
@@ -207,5 +211,64 @@ def test_spoofed_namespace_and_reassigned_ids_are_rejected():
 def test_layered_open_boundary_and_pose_losses_require_distinct_reindex_proof():
     weights=replace(SeededTESSALossWeightsV1(),boundary=0.5)
     mesh,teacher,driver,_,_=_setup(weights=weights)
-    with pytest.raises(ValueError,match="LAYER_POSE_OR_HEM_REINDEX_NOT_QUALIFIED"):
+    with pytest.raises(ValueError,match="NATIVE_OPEN_BOUNDARY_WITNESS_REQUIRED"):
         driver.objective(mesh,teacher,source_face_budget=4)
+
+
+def test_layered_open_cape_and_body_hem_supervision_is_source_native():
+    """Open hems can train without a signed-solid hole fill or rig program."""
+    weights=replace(SeededTESSALossWeightsV1(),boundary=0.5)
+    mesh,teacher,driver,_,receipt=_setup(weights=weights)
+    native=teacher.native_face_layer_samples
+    assert native is not None
+    edges=exact_open_boundary_edges_v1(native.faces)
+    ids=torch.unique(edges.reshape(-1),sorted=True)
+    witness=NativeLayerOpenBoundaryV1(
+        boundary_edges=edges,boundary_vertex_ids=ids,
+        open_layer_ids=torch.tensor([0,1],dtype=torch.long),
+        source_asset_sha256=teacher.source_asset_sha256,
+        layer_namespace_sha256=mesh.seeded_surface.layer_namespace_sha256,
+    )
+    boundary_xyz=native.vertices[ids].clone()
+    qualified=replace(
+        teacher,native_open_boundary=witness,
+        source_boundary_xyz=boundary_xyz,
+        source_boundary_mask=torch.ones(len(ids),dtype=torch.bool),
+    )
+    revised_registry={
+        **receipt,
+        "source_native_open_boundary_schema":OPEN_HEM_SCHEMA,
+        "source_native_open_boundary_sha256":witness.receipt_sha256(),
+        "source_native_open_boundary_derivation":OPEN_HEM_DERIVATION,
+        **{k+"_sha256":_digest(v)
+           for k,v in qualified.tensor_fields().items()},
+    }
+    admitted=RSSvNextSeededTESSATrainerV1(
+        driver.model,driver.optimizer,weights=weights,
+        trusted_source_registry={
+            qualified.source_qualification_key:revised_registry,
+        },
+    )
+    loss=admitted.objective(mesh,qualified,source_face_budget=4)
+    assert bool(loss["boundary"].isfinite())
+    # TESSA's currently untrained continuous correction is NOT a native
+    # geometry identity: a nonzero error against source is expected.
+    assert float(loss["boundary"])>=0
+    assert int(loss["qualified_source_layer_count"])==2
+    from models.rss_vnext.training_seeded_tessa_v1 import (
+        _bounded_bidirectional_dist,
+    )
+    exact=_bounded_bidirectional_dist(
+        boundary_xyz,boundary_xyz,scale=torch.tensor(1.),
+        exact_zero=True,
+    )
+    assert float(exact)<1.e-6
+
+    # Hem evidence is source-bound: cannot silently swap the cape and body.
+    forged=replace(
+        qualified,native_open_boundary=replace(
+            witness,open_layer_ids=torch.tensor([1],dtype=torch.long),
+        ),
+    )
+    with pytest.raises(ValueError,match="BOUNDARY_RECEIPT_DRIFT"):
+        admitted.objective(mesh,forged,source_face_budget=4)

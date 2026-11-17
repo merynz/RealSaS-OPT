@@ -34,10 +34,12 @@ from .unified_character_model import RSSvNextUnifiedCharacterModel, RSSvNextFroz
 
 BUNDLE_SCHEMA = "RealSaS.RSSvNext.UnifiedThreeStageNeuralRelease.v1"
 MAX_BUNDLE_BYTES = 15 * 1024 * 1024 * 1024
-# Shared production pixel ABI: SD VAE/diffusion stride 8 and DINOv2 patch 14.
-# LCM(8,14)=56. 512 is invalid for the real frozen DINO encoder.
-PRODUCT_IMAGE_ALIGNMENT = 56
-DEFAULT_PRODUCT_IMAGE_SIZE = 504
+# Shared production pixel ABI: SD VAE stride 8, UNet 8x latent pyramid,
+# and DINOv2 patch 14. LCM(8*8,14)=448; 512 is not a valid DINO grid.
+# Conservatively use a common patch grid for product inference, not an odd
+# latent dimension that relies on backend-specific UNet upsampling behavior.
+PRODUCT_IMAGE_ALIGNMENT = 448
+DEFAULT_PRODUCT_IMAGE_SIZE = 448
 
 
 def qualify_product_image_size_v1(image_size: int) -> int:

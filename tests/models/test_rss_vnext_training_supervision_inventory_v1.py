@@ -1,0 +1,293 @@
+from __future__ import annotations
+
+"""Ensure the source/output/loss inventory cannot silently omit a model loss.
+
+This is a static ownership audit, not an assertion that any training corpus
+or GPU checkpoint passed. It intentionally imports neither torch nor data.
+"""
+
+import ast
+import json
+from pathlib import Path
+
+ROOT=Path(__file__).resolve().parents[2]
+INVENTORY=ROOT/"models/rss_vnext/training_supervision_inventory_v1.json"
+
+
+def _declared_class_field_names(relative:str,klass:str)->set[str]:
+    tree=ast.parse((ROOT/relative).read_text(encoding="utf8"))
+    node=next(
+        node for node in tree.body
+        if isinstance(node,ast.ClassDef) and node.name==klass
+    )
+    return {
+        node.target.id for node in node.body
+        if isinstance(node,ast.AnnAssign) and isinstance(node.target,ast.Name)
+    }
+
+
+def _declared_default_weights(relative: str, klass: str) -> dict[str, float]:
+    tree=ast.parse((ROOT/relative).read_text(encoding="utf8"))
+    node=next(
+        node for node in tree.body
+        if isinstance(node,ast.ClassDef) and node.name==klass
+    )
+    return {
+        child.target.id: float(ast.literal_eval(child.value))
+        for child in node.body
+        if isinstance(child,ast.AnnAssign)
+        and isinstance(child.target,ast.Name) and child.value is not None
+    }
+
+
+def _phase_loss_fields()->dict[str,tuple[str,str|None]]:
+    tree=ast.parse(
+        (ROOT/"models/rss_vnext/training_phase_contract_v1.py").read_text(
+            encoding="utf8"
+        )
+    )
+    field=next(
+        node for node in tree.body
+        if isinstance(node,ast.Assign)
+        and any(isinstance(x,ast.Name) and x.id=="LOSS_FIELDS"
+                for x in node.targets)
+    )
+    return ast.literal_eval(field.value)
+
+
+def _phase_loss_names()->set[str]:
+    return set(_phase_loss_fields())
+
+
+def _document():
+    return json.loads(INVENTORY.read_text(encoding="utf8"))
+
+
+def test_structural_inventory_exhaustively_matches_actual_weight_and_phase_fields():
+    inventory=_document()
+    ids=[x["id"] for x in inventory["structural"]]
+    weights=_declared_class_field_names(
+        "models/rss_vnext/training_engine.py","RSSvNextTrainingWeights"
+    )
+    assert len(ids)==len(set(ids))==20
+    assert set(ids)==weights-{"clip_gradient_norm"}
+    assert set(ids)==_phase_loss_names()
+
+
+def test_rendered_slrm_inventory_matches_the_actual_stage_loss_weights():
+    inventory=_document()
+    ids=[x["id"] for x in inventory["slrm"]]
+    weights=_declared_class_field_names(
+        "models/rss_vnext/realsas_slrm_training_driver_v1.py",
+        "RealSaSSLRMTrainingLossWeightsV1",
+    )
+    assert len(ids)==len(set(ids))==9
+    assert set(ids)==weights
+
+
+def test_mira_codec_inventory_covers_every_source_supervised_result_family():
+    inventory=_document()
+    ids={x["id"] for x in inventory["mira"]}
+    fields=_declared_class_field_names(
+        "models/rss_vnext/mira_embedded_codec_source_training_v1.py",
+        "RSSvNextEmbeddedMIRACodecResultV1",
+    )
+    assert ids=={
+        "reconstruction_loss","quantization_loss",
+        "source_pose_deformation_loss","source_area_skin_loss",
+        "source_area_skin_simplex_kl_loss",
+    }
+    # A newly introduced MIRA loss MUST be documented, even if opt-in.
+    assert ids=={name for name in fields if name.endswith("_loss") and name!="loss"}
+
+
+def test_each_loss_binds_model_output_target_mask_receipt_and_preparation():
+    inventory=_document()
+    assert inventory["schema"]=="RealSaS.RSSvNext.OutputLossTruthPreparationInventory.v1"
+    assert inventory["source_corpus_verified"] is False
+    assert inventory["product_unseen_quality_proven"] is False
+    for group in ("structural","slrm","mira","diffusion"):
+        assert inventory[group]
+        for entry in inventory[group]:
+            for name in (
+                "owner","prediction","objective","teacher_target",
+                "qualification_mask","trusted_receipt","preparation",
+                "preparation_route","source_truth_status",
+            ):
+                assert isinstance(entry[name],str) and entry[name].strip(), (
+                    group,entry["id"],name
+                )
+            assert entry["real_corpus_verified"] is False
+            assert entry["gpu_verified"] is False
+            assert "STUDENT_PREDICTION_IS_TRUTH" not in entry["trusted_receipt"]
+
+
+def test_untrained_outputs_remain_visible_as_gaps_not_counted_as_trained_heads():
+    inventory=_document()
+    uncovered={x["id"] for x in inventory["unsupervised_outputs"]}
+    assert {
+        "dynamic_refine.quality_head","RSSvNext deformation_quality",
+        "Graphics editable hidden drawable texture",
+        "TESSA face topology versus high-res FC surface",
+        "IRIS log_uncertainty",
+    }.issubset(uncovered)
+    assert not any(
+        x["real_corpus_verified"]
+        for x in inventory["unsupervised_outputs"]
+    )
+
+
+def test_stage_a_and_b_have_distinct_paired_source_roles_and_teacher_domains():
+    inventory=_document()
+    stages={x["id"]:x for x in inventory["diffusion"]}
+    assert set(stages)=={
+        "STAGE_CANONICAL","STAGE_MULTIVIEW","ALPHA_HEAD",
+    }
+    a,b=stages["STAGE_CANONICAL"],stages["STAGE_MULTIVIEW"]
+    assert "Two arbitrary" in a["preparation"]
+    assert "Two independently rendered canonical" in b["preparation"]
+    assert "canonical_target_rgb_sha256[2]" in a["teacher_target"]
+    assert "multiview_target_normal_sha256[6]" in b["teacher_target"]
+
+
+def test_source_nonsigned_geometry_remains_distinct_from_closed_sdf():
+    x={row["id"]:row for row in _document()["structural"]}
+    assert x["source_udf"]["source_truth_status"]!="CLOSED_SOLID_PROOF_REQUIRED"
+    assert x["source_signed_sdf"]["source_truth_status"]=="CLOSED_SOLID_PROOF_REQUIRED"
+    assert x["source_inside_sign"]["source_truth_status"]=="CLOSED_SOLID_PROOF_REQUIRED"
+    assert "closed" in x["source_signed_sdf"]["preparation"].lower()
+    assert "INTERVENTION"==x["typed_relations"]["preparation_route"]
+
+
+
+def test_inventory_default_weight_values_are_exactly_mainline_values():
+    inventory=_document()
+    for group,source,klass in (
+        ("structural","models/rss_vnext/training_engine.py",
+         "RSSvNextTrainingWeights"),
+        ("slrm","models/rss_vnext/realsas_slrm_training_driver_v1.py",
+         "RealSaSSLRMTrainingLossWeightsV1"),
+    ):
+        actual=_declared_default_weights(source,klass)
+        if group=="structural":
+            actual.pop("clip_gradient_norm")
+        recorded={x["id"]:x["default_weight"] for x in inventory[group]}
+        assert actual==recorded
+
+
+
+def test_every_structural_objective_is_bound_to_the_actual_result_and_eligibility_field():
+    inventory=_document()
+    actual=_phase_loss_fields()
+    result_fields=_declared_class_field_names(
+        "models/rss_vnext/training_engine.py", "RSSvNextTrainingResult"
+    )
+    for item in inventory["structural"]:
+        expected_result,expected_eligible=actual[item["id"]]
+        assert item["trainer_result_field"]==expected_result
+        assert item["eligibility_counter"]==expected_eligible
+        assert expected_result in result_fields
+        if expected_eligible is not None:
+            assert expected_eligible in result_fields
+
+
+
+def test_every_instantiated_unified_expert_root_is_accounted_for():
+    """All trainable roots require either a learning route or explicit gap."""
+    source=ast.parse(
+        (ROOT/"models/rss_vnext/unified_character_model.py").read_text(
+            encoding="utf8"
+        )
+    )
+    klass=next(
+        node for node in source.body
+        if isinstance(node,ast.ClassDef)
+        and node.name=="RSSvNextUnifiedCharacterModel"
+    )
+    init=next(
+        node for node in klass.body
+        if isinstance(node,ast.FunctionDef) and node.name=="__init__"
+    )
+    roots=set()
+    for node in ast.walk(init):
+        if not isinstance(node,(ast.Assign,ast.AnnAssign)):
+            continue
+        targets=node.targets if isinstance(node,ast.Assign) else (node.target,)
+        for target in targets:
+            if (
+                isinstance(target,ast.Attribute)
+                and isinstance(target.value,ast.Name)
+                and target.value.id=="self"
+            ):
+                roots.add(target.attr)
+    roots.discard("cfg")  # Configuration value, not a learnable output.
+    catalog=_document()["model_head_catalog"]
+    names=[row["module"] for row in catalog]
+    assert len(names)==len(set(names))
+    assert len(names)>=40
+    uncovered={
+        root for root in roots
+        if not any(name==root or name.startswith(root+".") for name in names)
+    }
+    assert not uncovered, f"Uninventoried model heads/bridges: {sorted(uncovered)}"
+    for row in catalog:
+        assert row["module"] and row["output"]
+        assert row["losses"] and row["state"] and row["connection"]
+    states={row["state"] for row in catalog}
+    assert "NO_SOURCE_LOSS_VERIFIED" in states
+    assert "FROZEN_CONDITIONING" in states
+    assert "DIRECT_QUALIFIED_LOSS" in states
+
+
+def test_distinct_relation_and_uncertainty_head_gaps_are_not_hidden_by_other_loss_names():
+    catalog={row["module"]:row for row in _document()["model_head_catalog"]}
+    assert "NO_SOURCE" in catalog["relation"]["state"]
+    assert "NO_SOURCE" in catalog["deformation_quality"]["state"]
+    assert "NO_SOURCE" in catalog["iris.field.uncertainty_head"]["state"]
+    assert catalog["semantic_structure"]["state"]=="DIRECT_AND_INDIRECT"
+    assert catalog["graphics"]["state"]=="PARTIALLY_DIRECT"
+
+
+def test_seeded_tessa_loss_inventory_is_complete_and_exact_to_new_trainer():
+    inv=_document()
+    entries=inv["seeded_tessa"]
+    declared=_declared_default_weights(
+        "models/rss_vnext/training_seeded_tessa_v1.py",
+        "SeededTESSALossWeightsV1",
+    )
+    declared.pop("clip_gradient_norm")
+    recorded={x["id"]:x["default_weight"] for x in entries}
+    assert len(recorded)==len(entries)==9
+    assert recorded==declared
+    assert inv["seeded_tessa_config"]["legacy_topology_ce_in_product"] is False
+    assert inv["seeded_tessa_config"]["trainer_checkpoint_resume_qualified"] is False
+    assert inv["seeded_tessa_config"]["gpu_full_resolution_verified"] is False
+    assert inv["source_corpus_verified"] is False
+    for x in entries:
+        for k in (
+            "prediction","teacher_target","qualification_mask",
+            "trusted_receipt","preparation","objective","source_truth_status",
+        ):
+            assert isinstance(x[k],str) and x[k].strip(),(x["id"],k)
+        assert x["real_corpus_verified"] is False
+        assert x["gpu_verified"] is False
+        if x["default_weight"]>0:
+            assert x["release_disposition"]=="SEEDED_V1_CANDIDATE_SOURCE_QUALIFIED"
+    # Prevent old, second-mesh CE from silently re-entering v1 product train.
+    legacy={x["id"]:x for x in inv["structural"]}
+    for obsolete in ("topology","motion_preference","tessa_iris_surface_alignment"):
+        assert legacy[obsolete]["v1_release_disposition"]==(
+            "LEGACY_INDEPENDENT_MESH_ABLATION_ONLY"
+        )
+    assert all(x["id"]!="edge_action_ce" for x in entries)
+
+
+def test_new_tessa_and_mira_context_learning_owners_cannot_be_uninventoried():
+    head={x["module"]:x for x in _document()["model_head_catalog"]}
+    assert head["tessa_seeded_head"]["state"]==(
+        "DIRECT_AND_INDIRECT_SEEDED_V1_PARTIAL"
+    )
+    assert "INDIRECT_SEEDED_PATH" in head["surface_mechanics_context"]["state"]
+    known={x["id"] for x in _document()["unsupervised_outputs"]}
+    assert "StdGEN++ sparse highres signed/open surface" in known
+    assert "Source-qualified type-conditioned coincident body garment" in known

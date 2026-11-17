@@ -341,41 +341,42 @@ class RSSvNextSeededTESSATrainerV1:
             if teacher.source_component_ids is not None
             else torch.zeros_like(source_all_indices)
         )
+        important=source_all_indices[
+            teacher.source_importance_mask[source_all_indices]
+        ] if w.structural_importance>0 else source_all_indices[:0]
+        reserved=(
+            min(len(important),max(policy.min_samples_per_component,
+                                   policy.max_source_points//4))
+            if len(source_all_indices)>policy.max_source_points else 0
+        )
+        # Reserve source label budget BEFORE component-stratified sampling.
+        # Truncating an already stratified list could erase a whole cape,
+        # tail or small hair strand. Fail closed if the remaining budget
+        # cannot cover every qualified source component.
+        core_budget=policy.max_source_points-reserved
         source_idx=source_all_indices[
             component_spatial_sample_indices_v1(
                 full_gt,native_comps,
-                budget=policy.max_source_points,step=sampler_step,
+                budget=core_budget,step=sampler_step,
                 minimum=policy.min_samples_per_component,
             )
         ]
-        if (
-            w.structural_importance>0
-            and len(source_all_indices)>policy.max_source_points
-        ):
-            # Preserve sparse curvature/pose importance labels even if the
-            # native asset contains large regions with no such supervision.
-            important=source_all_indices[
-                teacher.source_importance_mask[source_all_indices]
-            ]
-            if len(important):
-                imp_count=min(len(important),max(
-                    policy.min_samples_per_component,
-                    policy.max_source_points//4,
-                ))
-                imp_comps=(
-                    teacher.source_component_ids[important]
-                    if teacher.source_component_ids is not None
-                    else torch.zeros_like(important)
-                )
-                imp_idx=important[component_spatial_sample_indices_v1(
-                    source[important],imp_comps,
-                    budget=imp_count,step=sampler_step,
-                    minimum=policy.min_samples_per_component,
-                )]
-                source_idx=torch.unique(
-                    torch.cat((source_idx[:policy.max_source_points-imp_count],
-                               imp_idx)),sorted=True,
-                )
+        if reserved:
+            # Importance labels may cover only a few native patches; keep
+            # those candidates without displacing small source components.
+            imp_comps=(
+                teacher.source_component_ids[important]
+                if teacher.source_component_ids is not None
+                else torch.zeros_like(important)
+            )
+            imp_idx=important[component_spatial_sample_indices_v1(
+                source[important],imp_comps,
+                budget=reserved,step=sampler_step,
+                minimum=policy.min_samples_per_component,
+            )]
+            source_idx=torch.unique(
+                torch.cat((source_idx,imp_idx)),sorted=True,
+            )
         gt=source[source_idx]
         vals={}
         if w.rest_surface>0:

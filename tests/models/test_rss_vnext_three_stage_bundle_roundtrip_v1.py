@@ -176,10 +176,10 @@ def test_single_bundle_roundtrip_restores_three_stage_weights_and_adapter(
 
 
 def test_production_image_patch_grid_is_exactly_common_dino_and_vae_abi():
-    assert PRODUCT_IMAGE_ALIGNMENT == 56
-    assert DEFAULT_PRODUCT_IMAGE_SIZE == 504
-    for side in (112, 448, 504, 560, 1008):
+    assert PRODUCT_IMAGE_ALIGNMENT == 448
+    assert DEFAULT_PRODUCT_IMAGE_SIZE == 448
+    for side in (448, 896):
         assert qualify_product_image_size_v1(side) == side
-    for bad in (0, 64, 512, 513, 1024, True, 504.0):
+    for bad in (0, 64, 112, 504, 512, 513, 1024, True, 448.0):
         with pytest.raises(RuntimeError, match="PRODUCT_VISION_DIFFUSION_PATCH_ABI"):
             qualify_product_image_size_v1(bad)

@@ -943,6 +943,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         mesh_teacher_tokens: Tensor | None = None,
         flexicubes_extractor=None,
         flexicubes_layer: RSSvNextSemanticLayerSpec | None = None,
+        flexicubes_sparse_resolution: tuple[int,int,int] | None = None,
     ) -> RSSvNextOutput:
         # No source 3D mesh, teacher joints, skin, or extra image view is accepted.
         state, auxiliary, aux_unc = self.encode_observations(rgba, camera_features)
@@ -951,6 +952,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             topology_prefix=topology_prefix, rig_sequence=rig_sequence,
             pair_indices=pair_indices, mesh_teacher_tokens=mesh_teacher_tokens,
             flexicubes_extractor=flexicubes_extractor, flexicubes_layer=flexicubes_layer,
+            flexicubes_sparse_resolution=flexicubes_sparse_resolution,
         )
 
     def _forward_from_state(
@@ -958,6 +960,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         *, topology_prefix: Tensor | None = None, rig_sequence: AXISSequenceV6 | None = None,
         pair_indices: Tensor | None = None, mesh_teacher_tokens: Tensor | None = None,
         flexicubes_extractor=None, flexicubes_layer: RSSvNextSemanticLayerSpec | None = None,
+        flexicubes_sparse_resolution: tuple[int,int,int] | None = None,
     ) -> RSSvNextOutput:
         surface_witness = None
         if (flexicubes_extractor is None) != (flexicubes_layer is None):
@@ -970,6 +973,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 schema=self.cfg.semantic_role_schema(),
                 layer=flexicubes_layer,
                 field_policy="SIGNED_HYPOTHESIS_ONLY",
+                **(
+                    {"sparse_product_resolution":flexicubes_sparse_resolution}
+                    if flexicubes_sparse_resolution is not None else {}
+                ),
             )
         if (
             self.cfg.tessa_surface_requirement == "REQUIRE_SIGNED_IRIS_SURFACE"
@@ -1050,6 +1057,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         source_binding_sha256: str,
         flexicubes_extractor=None,
         flexicubes_layer: RSSvNextSemanticLayerSpec | None = None,
+        flexicubes_sparse_resolution: tuple[int,int,int] | None = None,
     ) -> RSSvNextOutput:
         state = self.encode_generated_multiview(
             observed_rgba, original_camera_features,
@@ -1062,6 +1070,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             state, None, None,
             flexicubes_extractor=flexicubes_extractor,
             flexicubes_layer=flexicubes_layer,
+            flexicubes_sparse_resolution=flexicubes_sparse_resolution,
         )
 
     def query_semantic_equivalent_field(
@@ -1266,6 +1275,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         flexicubes_extractor=None,
         flexicubes_layer: RSSvNextSemanticLayerSpec | None = None,
         flexicubes_layers: tuple[RSSvNextSemanticLayerSpec,...] | None = None,
+        flexicubes_sparse_resolution: tuple[int,int,int] | None = None,
     ) -> dict:
         """Free-running constrained topology and mechanical proposal.
 
@@ -1287,6 +1297,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             raise ValueError("RSS_VNEXT_UNUSED_COMPILER_CAPABILITIES")
         if rgba.shape[0] != 1:
             raise ValueError("RSS_VNEXT_MESH_GENERATION_BATCH_ONE_ONLY")
+        if flexicubes_sparse_resolution is not None and (
+            flexicubes_extractor is None or flexicubes_layer is None
+        ):
+            raise ValueError("RSS_VNEXT_SPARSE_FC_REQUIRES_PINNED_LAYER")
         if flexicubes_layers is not None and (
             not isinstance(flexicubes_layers,tuple)
             or len(flexicubes_layers)<2
@@ -1315,6 +1329,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 source_binding_sha256=source_binding_sha256,
                 flexicubes_extractor=flexicubes_extractor,
                 flexicubes_layer=flexicubes_layer,
+                flexicubes_sparse_resolution=flexicubes_sparse_resolution,
             )
         elif camera_features is None:
             raise RuntimeError("RSS_VNEXT_UNCALIBRATED_SOURCE_REQUIRES_GENERATED_MULTIVIEW")
@@ -1325,6 +1340,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 rgba, camera_features,
                 flexicubes_extractor=flexicubes_extractor,
                 flexicubes_layer=flexicubes_layer,
+                flexicubes_sparse_resolution=flexicubes_sparse_resolution,
             )
         if (
             self.cfg.tessa_surface_requirement == "REQUIRE_SIGNED_IRIS_SURFACE"
@@ -1358,6 +1374,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                             role_head=self.presentation_role_head,
                             schema=self.cfg.semantic_role_schema(),
                             layer=spec,field_policy="SIGNED_HYPOTHESIS_ONLY",
+                            **(
+                                {"sparse_product_resolution":flexicubes_sparse_resolution}
+                                if flexicubes_sparse_resolution is not None else {}
+                            ),
                         )
                         witnesses.append((spec,witness))
                     layered=make_layered_iris_seed_v1(

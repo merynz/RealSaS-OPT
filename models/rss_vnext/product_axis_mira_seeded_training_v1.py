@@ -1,0 +1,262 @@
+from __future__ import annotations
+
+"""Qualified AXIS+MIRA consequences on the EXACT product seeded M*.
+
+The student sees one H(x), six generated conditioning hypotheses, and the
+same TESSA indexed mesh as inference; native rig, skin and poses are LOSS ONLY.
+The MIRA codec is source-trained/frozen beforehand, not silently trained from
+student-induced token identities. Actual G3/G3B and clips are Compiler gates,
+not properties conferred by a differentiable deformation loss.
+"""
+
+from dataclasses import asdict, dataclass
+import math
+from typing import Mapping
+
+import torch
+from torch import Tensor
+import torch.nn.functional as F
+
+from models.axis.rig_program_model_v6 import (
+    AXISSequenceV6, AXIS_V6_PRODUCT_ARCHITECTURE_ID,
+    qualified_axis_rig_skin_sequence_loss_v6, RigTokenKindV6,
+)
+from compiler.realsas_compiler_core.rig_constraint_schema_v1 import (
+    RIG_CONSTRAINT_OPERATOR_IDS_V1,
+)
+from .training_seeded_tessa_v1 import SeededTESSASourceTeacherV1
+from .native_pose_transport_v1 import (
+    validate_source_native_pose_candidate_teacher_v1,
+)
+from .seeded_pose_consequence_objective_v1 import (
+    exact_m_qualified_pose_strain_v1,
+)
+from .animation_ready_mesh import posed_lbs_from_joint_matrices
+
+
+@dataclass(frozen=True)
+class ProductSeededAXISMIRAWeightsV1:
+    axis_program: float = 0.
+    source_skin: float = 0.
+    posed_surface: float = 0.
+    dynamic_surface: float = 0.
+    hard_skin: float = 0.
+
+    def validate(self) -> None:
+        if any(type(v) not in (float,int) or not math.isfinite(v) or v<0
+               for v in asdict(self).values()):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_MIRA_WEIGHT_POLICY")
+        if (
+            (self.source_skin>0 or self.posed_surface>0
+             or self.dynamic_surface>0 or self.hard_skin>0)
+            and self.axis_program<=0
+        ) or (self.dynamic_surface>0 and self.posed_surface<=0):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_MIRA_PHASE_ORDER")
+
+    @property
+    def enabled(self) -> bool:
+        return any(v>0 for v in asdict(self).values())
+
+
+@dataclass(frozen=True)
+class ProductSeededAXISMIRAResultV1:
+    total: Tensor | None
+    axis: Tensor | None
+    skin: Tensor | None
+    posed: Tensor | None
+    dynamic: Tensor | None
+    hard_skin: Tensor | None
+    eligible_pose_faces: int
+    authority: str = "SOURCE_NATIVE_RIG_POSE_LOSS_ONLY_NOT_MODEL_RELEASE"
+
+
+def product_seeded_axis_mira_objective_v1(
+    *,model,state,mesh,teacher: SeededTESSASourceTeacherV1,
+    batch,
+    weights: ProductSeededAXISMIRAWeightsV1,
+    dataset_manifest_sha256: str,
+    trusted_axis_teacher_registry: Mapping[str,Mapping[str,object]],
+    trusted_native_pose_registry: Mapping[str,Mapping[str,object]],
+    tensor_digest,
+    axis_sequence_digest,
+    frozen_codec_digest,
+) -> ProductSeededAXISMIRAResultV1:
+    weights.validate()
+    if not weights.enabled:
+        if batch.axis_teacher_sequence is not None or batch.axis_teacher_admission_key:
+            raise ValueError("RSS_VNEXT_SEEDED_AXIS_UNCONSUMED_SOURCE_TRUTH")
+        return ProductSeededAXISMIRAResultV1(None,None,None,None,None,None,0)
+    seq=batch.axis_teacher_sequence
+    key=batch.axis_teacher_admission_key
+    if (
+        not isinstance(seq,AXISSequenceV6) or not key
+        or state.scene_conditioning_authority!="GENERATED_SIX_VIEW_SHARED_SCENE"
+        or mesh.seeded_surface is None
+        or mesh.seeded_surface.original_vertex_count<3
+    ):
+        raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_SOURCE_REQUIRED")
+    row=trusted_axis_teacher_registry.get(key)
+    expected={
+        "admission_status":"QUALIFIED_SOURCE_RIG_SKIN_TOKEN_TEACHER",
+        "dataset_manifest_sha256":dataset_manifest_sha256,
+        "source_qualification_key":batch.source_qualification_key,
+        "architecture_id":AXIS_V6_PRODUCT_ARCHITECTURE_ID,
+        "teacher_sequence_sha256":axis_sequence_digest(seq),
+        "mira_codec_state_sha256":frozen_codec_digest(model),
+        "source_asset_sha256":teacher.source_asset_sha256,
+        "observed_rgba_sha256":tensor_digest(batch.rgba),
+        "observed_camera_sha256":tensor_digest(batch.camera_features),
+        "source_binding_sha256":batch.product_source_binding_sha256,
+        "combined_generation_checkpoint_sha256":
+            batch.product_generation_checkpoint_sha256,
+        "source_model_observation_count":2,
+        "source_teacher_is_loss_only":True,
+        "mesh_context":"SAME_SEEDED_TESSA_MSTAR_NOT_LEGACY_TOKEN_MESH",
+        "teacher_semantics":"SOURCE_RIG_AND_PINNED_FSQ_NOT_INFERRED_CONTROLS",
+    }
+    if not isinstance(row,Mapping) or any(row.get(k)!=v for k,v in expected.items()):
+        raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_RECEIPT_DRIFT")
+    if any(p.requires_grad for p in model.mira.codec.parameters()):
+        raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_MIRA_CODEC_NOT_FROZEN")
+    intervention=(
+        row.get("intervention_qualification_status")
+            =="QUALIFIED_SOURCE_CONTROL_CONSEQUENCE"
+        and isinstance(row.get("source_intervention_sha256"),str)
+        and len(row["source_intervention_sha256"])==64
+    )
+    structural=model._structural_memory(state,None)
+    memory=model._control_memory(state,structural,mesh)
+    axis_loss,axis_parts=qualified_axis_rig_skin_sequence_loss_v6(
+        model.axis,memory,seq,
+        tokens_per_joint=model.cfg.skin_tokens_per_joint,
+        executable_constraint_operators=RIG_CONSTRAINT_OPERATOR_IDS_V1,
+        control_intervention_qualified=intervention,
+    )
+    total=weights.axis_program*axis_loss
+    skin_loss=pose_loss=dynamic_loss=hard_loss=None
+    pose_count=0
+    needs_skin=any(v>0 for v in (
+        weights.source_skin,weights.posed_surface,
+        weights.dynamic_surface,weights.hard_skin,
+    ))
+    if needs_skin:
+        if not bool((seq.kind_ids==int(RigTokenKindV6.SKIN_CODE)).any()):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_SKIN_TOKEN_REQUIRED")
+        if (
+            teacher.native_pose_transport is None
+            or teacher.native_face_layer_samples is None
+            or teacher.native_dynamic_importance is None
+            or not teacher.native_dynamic_importance.source_absolute_g3_within_limits
+            or any(v is None for v in (
+                teacher.source_candidate_skin,teacher.source_candidate_posed,
+                teacher.source_pose_matrices,teacher.source_pose_mask,
+            ))
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_NATIVE_POSE_REQUIRED")
+        # Independent original-source FACE/barycentric truth must replay the
+        # EXACT final student M* address. A same-length skin array is not proof.
+        source_receipt=trusted_native_pose_registry.get(
+            teacher.source_qualification_key,
+        )
+        if not isinstance(source_receipt,Mapping):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_NATIVE_POSE_RECEIPT")
+        validate_source_native_pose_candidate_teacher_v1(
+            support=teacher.native_pose_transport,
+            native_face_witness=teacher.native_face_layer_samples,
+            candidate_faces=mesh.faces,
+            candidate_rest=mesh.rest_vertices_iris,
+            source_candidate_skin=teacher.source_candidate_skin,
+            source_candidate_posed=teacher.source_candidate_posed,
+            source_pose_mask=teacher.source_pose_mask,
+            source_pose_matrices=teacher.source_pose_matrices,
+            teacher_source_asset_sha256=teacher.source_asset_sha256,
+            teacher_receipt=source_receipt,
+            trusted_source_registry=trusted_native_pose_registry,
+        )
+        controls=model.axis(memory,seq)
+        skin,valid,joint_state=model.mira(
+            mesh.mechanics_local_features,mesh.rest_vertices_iris,
+            controls["hidden"],controls["skin_code_logits"],seq,
+            vertex_normals=mesh.normals,
+        )
+        source_skin=teacher.source_candidate_skin
+        if (
+            skin.shape!=source_skin.shape
+            or valid.shape[0]!=1
+            or int(valid[0].sum())!=skin.shape[-1]
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_MIRA_SKIN_ADDRESS_DRIFT")
+        if weights.source_skin>0:
+            skin_loss=F.smooth_l1_loss(skin,source_skin)
+            total=total+weights.source_skin*skin_loss
+        if weights.posed_surface>0:
+            posed=posed_lbs_from_joint_matrices(
+                mesh.rest_vertices_iris,skin,teacher.source_pose_matrices,
+            )
+            source_pose=teacher.source_candidate_posed
+            mask=teacher.source_pose_mask
+            position=F.smooth_l1_loss(
+                posed[mask],source_pose[mask],
+            )
+            strain=exact_m_qualified_pose_strain_v1(
+                rest_xyz=mesh.rest_vertices_iris,
+                faces=mesh.faces,
+                predicted_poses=posed,
+                source_native_posed=source_pose,
+                source_pose_mask=mask,
+                source_candidate_skin=source_skin,
+                scale=mesh.rest_vertices_iris.detach().new_tensor(1.),
+            )
+            pose_loss=position+strain["total"]
+            pose_count=int(strain["qualified_face_pose_count"].item())
+            total=total+weights.posed_surface*pose_loss
+        if weights.dynamic_surface>0:
+            dynamic=model.dynamic_refine(mesh,skin,joint_state)
+            posed=posed_lbs_from_joint_matrices(
+                dynamic.vertices,dynamic.weights,
+                teacher.source_pose_matrices,
+            )
+            strain=exact_m_qualified_pose_strain_v1(
+                rest_xyz=dynamic.vertices,
+                faces=mesh.faces,predicted_poses=posed,
+                source_native_posed=teacher.source_candidate_posed,
+                source_pose_mask=teacher.source_pose_mask,
+                source_candidate_skin=source_skin,
+                scale=mesh.rest_vertices_iris.detach().new_tensor(1.),
+            )
+            dynamic_loss=strain["total"]
+            total=total+weights.dynamic_surface*dynamic_loss
+        if weights.hard_skin>0:
+            # Discrete argument is explicitly the MODEL's argmax, never
+            # the teacher code sequence. Gradients go to spatial decoder;
+            # AXIS learns code logits from qualified causal teacher CE.
+            codes=seq.kind_ids[0]==int(RigTokenKindV6.SKIN_CODE)
+            pos=torch.where(codes)[0]
+            joints=int(valid[0].sum())
+            if bool((pos==0).any()) or len(pos)!=joints*model.cfg.skin_tokens_per_joint:
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_MIRA_HARD_CODE_ADDRESS")
+            ids=controls["skin_code_logits"][0,pos-1].argmax(dim=-1).reshape(
+                1,joints,model.cfg.skin_tokens_per_joint,
+            )
+            hard=model.mira.decode_discrete_skin_v1(
+                mesh.mechanics_local_features,mesh.rest_vertices_iris,
+                joint_state[:,:joints],ids,vertex_normals=mesh.normals,
+            )
+            if hard.shape!=source_skin.shape:
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_MIRA_HARD_SKIN_SHAPE")
+            hard_loss=F.smooth_l1_loss(hard,source_skin)
+            total=total+weights.hard_skin*hard_loss
+    if not bool(torch.isfinite(total).all()):
+        raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_MIRA_LOSS_NONFINITE")
+    return ProductSeededAXISMIRAResultV1(
+        total=total,axis=axis_loss,skin=skin_loss,
+        posed=pose_loss,dynamic=dynamic_loss,hard_skin=hard_loss,
+        eligible_pose_faces=pose_count,
+    )
+
+
+__all__=[
+    "ProductSeededAXISMIRAWeightsV1",
+    "ProductSeededAXISMIRAResultV1",
+    "product_seeded_axis_mira_objective_v1",
+]

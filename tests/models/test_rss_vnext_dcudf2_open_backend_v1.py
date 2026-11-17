@@ -94,3 +94,34 @@ def test_no_unsigned_open_cut_bypass_via_policy():
         DCUDF2OpenPolicyV1(is_cut=False).validate()
     with pytest.raises(ValueError,match="OPEN_QUALITY_POLICY_INVALID"):
         DCUDF2OpenPolicyV1(watertight_separate=True).validate()
+
+
+def test_every_output_component_requires_its_own_true_open_boundary():
+    x,f,volume,scene,udf,policy=_case()
+    # Attach a completely closed double-covered remnant next to a valid open
+    # sheet; a global "there exists a boundary" test would falsely PASS.
+    tetra_x=np.array([
+        [.4,.4,-.5],[.6,.4,-.5],[.4,.6,-.5],[.4,.4,-.3],
+    ],dtype=np.float32)
+    tetra_f=np.array([
+        [0,2,1],[0,1,3],[1,2,3],[2,0,3],
+    ],dtype=np.int64)+len(x)
+    combined=np.concatenate((x,tetra_x),axis=0)
+    combined_f=np.concatenate((f,tetra_f),axis=0)
+    with pytest.raises(ValueError,match="CLOSED_COMPONENT_LEAK"):
+        _materialize(combined,combined_f,volume,scene,udf,policy)
+
+
+def test_two_independent_open_sheets_can_coexist_without_cross_welding():
+    x,f,volume,scene,udf,policy=_case()
+    # The two independent sheets may be exactly coincident in 3D; their
+    # indexed component identity must remain distinct, never welded by XYZ.
+    together_x=np.concatenate((x,x),axis=0)
+    together_f=np.concatenate((f,f+len(x)),axis=0)
+    candidate=_materialize(
+        together_x,together_f,volume,scene,udf,policy,
+    ).surface
+    assert candidate.component_ids[:4].unique().numel()==1
+    assert candidate.component_ids[4:].unique().numel()==1
+    assert candidate.component_ids[0]!=candidate.component_ids[4]
+    assert candidate.boundary_edges.shape==(8,2)

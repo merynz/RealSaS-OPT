@@ -154,7 +154,7 @@ def _appearance(monkeypatch):
 def test_graphics_source_rgb_and_alpha_both_train_same_product_H(monkeypatch,tmp_path):
     net,batch,make,*_=_appearance(monkeypatch)
     trainer=make()
-    before=net.graphics.weight.detach().clone()
+    before=net.graphics[1].weight.detach().clone()
     result=trainer.train_step(batch)
     assert result.seeded_tessa_loss is not None
     assert result.graphics_source_rgb_loss is not None
@@ -162,9 +162,9 @@ def test_graphics_source_rgb_and_alpha_both_train_same_product_H(monkeypatch,tmp
     assert result.product_graphics_joint_loss_parts["mask_mse"]>=0
     assert result.eligible_graphics_source_rgb_queries>0
     assert result.eligible_realsas_joint_rays==4
-    assert not torch.equal(before,net.graphics.weight.detach())
-    assert net.graphics.weight.grad is not None
-    assert net.graphics.weight.grad.abs().sum()>0
+    assert not torch.equal(before,net.graphics[1].weight.detach())
+    assert net.graphics[1].weight.grad is not None
+    assert net.graphics[1].weight.grad.abs().sum()>0
     assert net.tessa_seeded_head[-1].weight.grad is not None
     assert torch.isfinite(result.total_loss)
     path=tmp_path/"graphics.pt"
@@ -222,7 +222,7 @@ def test_graphics_weights_and_missing_teacher_do_not_silently_pass(monkeypatch):
     )
     with pytest.raises(ValueError,match="GRAPHICS_ENABLED_NO_SOURCE_TRUTH"):
         make().objective(no_appearance)
-    with pytest.raises(ValueError,match="GRAPHICS_SUPERVISION_NOT_ENABLED"):
+    with pytest.raises(ValueError,match="UNCONSUMED_SOURCE_TEACHER"):
         make(rgb_weight=0.,ray_weight=.7).objective(batch)
 
 
@@ -234,7 +234,7 @@ def test_checkpoint_source_rgb_registry_and_loss_weights_are_pinned(monkeypatch,
     modified={k:dict(v) for k,v in registry.items()}
     next(iter(modified.values()))["source_binding_sha256"]="0"*64
     changed=make(graphics_registry=modified)
-    with pytest.raises(ValueError,match="OBJECTIVE_POLICY_DRIFT"):
+    with pytest.raises(ValueError,match="GRAPHICS_RGB_REGISTRY_DRIFT"):
         changed.load_checkpoint(path)
     different=make(rgb_weight=.3)
     with pytest.raises(ValueError,match="OBJECTIVE_POLICY_DRIFT"):

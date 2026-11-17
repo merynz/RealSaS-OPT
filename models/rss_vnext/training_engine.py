@@ -472,6 +472,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_UNKNOWN_GEOMETRY_PROFILE")
         seeded_mode = training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1"
         component_mode = training_profile == "PRODUCT_COMPONENT_UDF_V1"
+        if type(component_udf_weight) not in (float,int):
+            raise ValueError("RSS_VNEXT_PRODUCT_COMPONENT_UDF_PHASE_POLICY")
         component_enabled = component_mode or (
             seeded_mode and component_udf_weight > 0.
         )
@@ -2278,7 +2280,7 @@ class RSSvNextStructuralTrainer:
             "flexicubes_signed_source_admission_key",
             "seeded_tessa_source_teacher", "seeded_tessa_source_face_budget",
             "source_qualification_key", "admission_status",
-            **({"component_udf_source_teacher"}
+            *({"component_udf_source_teacher"}
                if self.component_udf_enabled else set()),
         }
         unexpected = []

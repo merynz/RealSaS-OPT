@@ -168,3 +168,39 @@ def test_source_incomplete_inventory_does_not_force_unmatched_slot_unknown():
         },source_query_xyz=teacher.original_query_xyz,
     )
     assert float(out["unmatched_unknown"])==0.
+
+
+def test_unified_model_component_udf_requeries_same_H_and_receives_gradients():
+    from models.rss_vnext import (
+        RSSvNextConfig,RSSvNextPatchEncoderForTests,
+        RSSvNextUnifiedCharacterModel,
+    )
+    torch.manual_seed(17)
+    torch.set_num_threads(1)
+    cfg=RSSvNextConfig.tiny_for_test()
+    net=RSSvNextUnifiedCharacterModel(
+        cfg,vision_encoder=RSSvNextPatchEncoderForTests(
+            cfg.iris.image_token_dim,
+        ),
+    )
+    rgba=torch.rand(1,2,4,8,8)
+    cams=torch.zeros((1,2,13))
+    cams[...,3]=cams[...,7]=cams[...,11]=cams[...,12]=1.
+    state,_,_=net.encode_observations(rgba,cams)
+    pred=net.query_component_unsigned_distance(
+        state,state.query_xyz,slot_index=1,
+    )
+    exact=net.component_udf.query_slot(
+        state.local_features,state.region_slot_features,
+        slot_index=1,
+    )
+    torch.testing.assert_close(pred,exact,atol=1.e-6,rtol=1.e-6)
+    kinds=net.query_component_topology_kind_logits(state)
+    assert kinds.shape==(1,cfg.region_slots,3)
+    (pred.mean()+kinds.mean()).backward()
+    assert net.component_udf.distance[0].weight.grad is not None
+    assert net.component_udf.distance[0].weight.grad.abs().sum()>0
+    assert net.semantic_structure.learned_region_queries.grad is not None
+    assert net.semantic_structure.learned_region_queries.grad.abs().sum()>0
+    assert net.iris.scene.scene_queries.grad is not None
+    assert net.iris.scene.scene_queries.grad.abs().sum()>0

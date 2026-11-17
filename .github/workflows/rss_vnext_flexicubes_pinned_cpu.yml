@@ -1,8 +1,8 @@
 name: RSS vNext pinned FlexiCubes-to-structural CPU court
 on:
   pull_request:
-    # Full pinned court is explicitly triggered on opening/reopen/ready,
-    # per repository CI execution authority (not on every synchronize).
+    # Full pinned court runs only on opening, reopening, or review readiness.
+    # The repository's CI authority policy prohibits per-commit heavy courts.
     types: [opened, reopened, ready_for_review]
     paths:
       - "models/rss_vnext/**"

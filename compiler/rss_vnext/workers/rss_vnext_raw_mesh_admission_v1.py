@@ -58,6 +58,26 @@ _THRESHOLDS = {
 
 
 def _replay_tessa(scene: dict[str, np.ndarray], receipt: dict[str, Any]) -> None:
+    # The seeded v1 candidate's exact IRIS scene hash, parent support,
+    # component incidence and geometry were already measured by Mesh court.
+    # There is NO independent TESSA triangle token sequence to replay.
+    if receipt.get("topology_candidate_abi") == "ONE_IRIS_SEEDED_MESH_V1":
+        fields = (
+            "tessa_candidate_mechanics_local_features",
+            "tessa_seed_vertex_parent_indices",
+            "tessa_seed_vertex_parent_weights",
+        )
+        if (
+            any(k not in scene for k in fields)
+            or receipt.get("tessa_mesh_candidate_authority")
+                != "UNQUALIFIED_IRIS_SEEDED_SURFACE_ONLY"
+            or receipt.get("tessa_seed_original_vertex_count", 0) < 3
+            or receipt.get("tessa_seed_original_face_count", 0) < 1
+            or scene["tessa_seed_vertex_parent_indices"].shape
+                != (scene["tessa_candidate_rest_vertices"].shape[1], 2)
+        ):
+            raise RuntimeError("RSS_VNEXT_RAW_MESH_SEEDED_PARENT_REPLAY_REQUIRED")
+        return
     from dataclasses import fields
     from models.tessa.v3.config_v3 import TESSAStructuralizerConfigV3
     from models.tessa.v2.court_v2 import _codec_config, evaluate_decoded_topology_v2

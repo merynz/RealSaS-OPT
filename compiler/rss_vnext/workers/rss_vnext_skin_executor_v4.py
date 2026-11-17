@@ -263,7 +263,14 @@ def execute_rss_vnext_skin_capability_v4(
         "soft_to_discrete_parity_qualified": False,
     }
     proposal_mesh = {
-        "local_features": scene["tessa_candidate_local_features"][0].tolist(),
+        # The exact surface/component-aware H used by MIRA at neural
+        # inference MUST also be used at embedded FSQ replay. Passing raw
+        # H here after neural MIRA saw enriched H is an information bottleneck.
+        "local_features": (
+            scene["tessa_candidate_mechanics_local_features"][0].tolist()
+            if receipt.get("topology_candidate_abi") == "ONE_IRIS_SEEDED_MESH_V1"
+            else scene["tessa_candidate_local_features"][0].tolist()
+        ),
         "rest_xyz": scene["tessa_candidate_rest_vertices"][0].tolist(),
         "normals_xyz": scene["tessa_candidate_normals"][0].tolist(),
     }

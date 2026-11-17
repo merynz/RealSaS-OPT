@@ -11,6 +11,7 @@ are explicitly predicted and are never appended to the observed image bank.
 """
 
 import math
+from dataclasses import replace
 from typing import Optional
 
 import torch
@@ -26,7 +27,10 @@ from models.axis.rig_program_model_v6 import (
 )
 from models.mira.skin_fsq_codec_v6 import MIRASkinFSQCodecV6, MIRASkinFSQCodecConfig
 from models.tessa.v2.generation_v2 import TESSAGrammarStateV2
-from .animation_ready_mesh import RSSvNextAnimationReadyMesh, RSSvNextStructuralMeshCandidate
+from .animation_ready_mesh import (
+    RSSvNextAnimationReadyMesh, RSSvNextStructuralMeshCandidate,
+    _normals_indexed,
+)
 from .tessa_incremental_decode_v1 import decode_next_token_v1
 from .attachment_face_correspondence_v1 import RSSvNextSocketFaceCorrespondenceHeadV1
 from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefinementConfig
@@ -41,6 +45,11 @@ from .semantic_geometry_prior import (
     RSSvNextSemanticLayerSpec, semantic_equivalent_signed_field,
 )
 from .surface_topology_context_v1 import iris_surface_incidence_v1
+from .surface_mechanics_context_v1 import RSSvNextSurfaceMechanicsContextV1
+from .tessa_seeded_surface_v1 import (
+    TESSASeededSurfaceV1, tessa_seed_from_flexicubes_v1,
+    tessa_adaptive_split_edges_v1,
+)
 from .flexicubes_surface_evidence import (
     RSSvNextFlexiCubesEvidenceBridge,
     RSSvNextFlexiCubesSurfaceEvidence,
@@ -488,6 +497,23 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         )
         self.mira = RSSvNextSkinCoupler(cfg)
         self.mesh_bridge = RSSvNextAnimationReadyMesh(self.iris, cfg.tessa)
+        # TESSA learns per-vertex local density and a bounded continuous
+        # correction, not an unrelated independent full-mesh token stream.
+        self.tessa_seeded_head = nn.Sequential(
+            nn.LayerNorm(h + 3),
+            nn.Linear(h + 3, h), nn.GELU(), nn.Linear(h, 4),
+        )
+        nn.init.zeros_(self.tessa_seeded_head[-1].weight)
+        nn.init.zeros_(self.tessa_seeded_head[-1].bias)
+        # Preserve original full-width H for AXIS and add SAME-face/component
+        # contextual H for MIRA. Zero-residual initialized => no silent change
+        # to old codec at boot; new weights require new checkpoint identity.
+        self.surface_mechanics_context = RSSvNextSurfaceMechanicsContextV1(
+            carrier_dim=h,
+            role_count=cfg.semantic_role_schema().count,
+            region_count=cfg.region_slots + 1,
+            affordance_count=cfg.affordance_classes + 1,
+        )
         # FlexiCubes is a DIFFERENTIABLE SURFACE WITNESS for the structural
         # Transformer, not its final geometry/topology owner. It reuses IRIS H.
         self.fc_surface_bridge = RSSvNextFlexiCubesEvidenceBridge(
@@ -1119,6 +1145,109 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         mesh.validate()
         return mesh
 
+    def build_seeded_mechanics_candidate_v1(
+        self, state: RSSvNextSceneState, seeded: TESSASeededSurfaceV1,
+        *, rig_sequence: AXISSequenceV6 | None = None,
+        structural_memory: Tensor | None = None,
+        adaptive_refinement: bool = False,
+    ) -> dict:
+        """Differentiable *single-geometry* learner path for AXIS+MIRA.
+
+        The explicit input must be an IRIS-FlexiCubes indexed surface.
+        The Compiler only accepts all candidate evidence AFTER neural work.
+        Does not activate legacy full-mesh autoregressive TESSA generation,
+        fabricate original camera proof or mint a canonical mesh.
+        """
+        if not isinstance(seeded, TESSASeededSurfaceV1):
+            raise ValueError("RSS_VNEXT_SEEDED_SURFACE_REQUIRED")
+        seeded.validate()
+        if type(adaptive_refinement) is not bool:
+            raise ValueError("RSS_VNEXT_SEEDED_ADAPTIVE_POLICY_TYPE")
+
+        def _metric(surface):
+            h = self.iris.query(state.scene_triplanes, surface.xyz)["H"]
+            normals = _normals_indexed(surface.xyz, surface.faces)
+            return self.tessa_seeded_head(torch.cat((h, normals), dim=-1))
+
+        if adaptive_refinement:
+            initial_metric = _metric(seeded)
+            seeded = tessa_adaptive_split_edges_v1(
+                seeded, importance_logits=initial_metric[..., 0],
+                max_added_vertices=min(
+                    16384, max(1, seeded.original_vertex_count // 12),
+                ),
+                length_gate_ratio=1.2,
+            )
+        tessa_metric = _metric(seeded)
+        mesh = self.mesh_bridge.forward_seeded(
+            state.scene_triplanes, seeded,
+            refine=self.surface_refine, semantics=self.semantic,
+            affordances=self.affordance, graphics=self.graphics,
+            quality=self.deformation_quality, udf=self.udf,
+            sign_logit=self.sign_logit, role_head=self.presentation_role_head,
+            role_schema_id=self.cfg.semantic_role_schema_id,
+            tessa_refinement=tessa_metric[..., 1:4],
+            tessa_metric_logits=tessa_metric[..., 0],
+        )
+        # Original mesh.local_features remains FULL H(x), no collapse into a
+        # Compiler mesh array. The extension sees exact indexed faces,
+        # source component partition and semantic/affordance distributions.
+        mechanics_h = self.surface_mechanics_context(mesh)
+        mesh = replace(mesh, mechanics_local_features=mechanics_h)
+        mesh.validate()
+        result = {
+            "mesh_candidate": mesh,
+            "mesh_status": "UNQUALIFIED_SINGLE_SURFACE_CANDIDATE",
+            "source_authority": "ONE_IRIS_SURFACE_TESSA_REFINEMENT_CANDIDATE",
+            "compiler_admission": False,
+        }
+        if rig_sequence is None:
+            return result
+        structural = (
+            self._structural_memory(state, None)
+            if structural_memory is None else structural_memory
+        )
+        control = self.axis(
+            self._control_memory(state, structural, mesh), rig_sequence,
+        )
+        result["control_logits"] = control
+        result["axis_control_conditioning"] = "FULL_RAW_H_PLUS_ALL_INDEXED_FACE_CONTEXT"
+        if bool((rig_sequence.kind_ids == int(RigTokenKindV6.SKIN_CODE)).any()):
+            weights, joint_valid, joints = self.mira(
+                mechanics_h, mesh.rest_vertices_iris,
+                control["hidden"], control["skin_code_logits"], rig_sequence,
+                vertex_normals=mesh.normals,
+            )
+            result["skin_weight_proposal"] = weights
+            result["skin_joint_valid_mask"] = joint_valid
+            result["dynamic_mesh_candidate"] = self.dynamic_refine(
+                mesh, weights, joints,
+            )
+            # One identical MIRA input for training forward and hard replay.
+            n_joints = int(joint_valid[0].sum().item())
+            code_positions = rig_sequence.kind_ids[0] == int(
+                RigTokenKindV6.SKIN_CODE
+            )
+            # Hard replay uses MODEL-PREDICTED causal IDs, never teacher labels
+            # from the incoming training-only AXISSequenceV6.
+            positions = torch.where(code_positions)[0]
+            if bool((positions == 0).any()):
+                raise RuntimeError("RSS_VNEXT_SEEDED_MIRA_INVALID_CODE_POSITION")
+            hard_token_ids = control["skin_code_logits"][
+                0, positions - 1,
+            ].argmax(dim=-1).reshape(
+                1, n_joints, self.cfg.skin_tokens_per_joint,
+            )
+            decoded = self.mira.decode_discrete_skin_v1(
+                mechanics_h, mesh.rest_vertices_iris,
+                joints[:, :n_joints], hard_token_ids,
+                vertex_normals=mesh.normals,
+            )
+            result["discrete_skin_weight_proposal"] = decoded
+            if decoded.shape != weights.shape:
+                raise RuntimeError("RSS_VNEXT_SEEDED_MIRA_SOFT_HARD_ADDRESS_DRIFT")
+        return result
+
     @torch.no_grad()
     def propose_teacher_free(
         self,
@@ -1192,48 +1321,67 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             and out.flexicubes_surface_evidence is None
         ):
             raise RuntimeError("RSS_VNEXT_TESSA_IRIS_SURFACE_NOT_EXTRACTED")
-        limit = min(max_topology_tokens or self.cfg.topology_decode_cap,
-                    self.cfg.topology_decode_cap)
-        if limit < 2:
-            raise ValueError("RSS_VNEXT_DECODE_LIMIT_INVALID")
+        # v1 product: IRIS is the only geometry source. Never run the legacy
+        # independently autoregressive full-mesh TESSA path when the learned
+        # FlexiCubes surface is available. A failed seed is an ABSTAIN,
+        # not a fallback to a new unrelated triangle mesh.
+        seeded_geometry = out.flexicubes_surface_evidence is not None
         ids = torch.tensor([[self.cfg.tessa.BOS]], device=rgba.device, dtype=torch.long)
-        grammar = TESSAGrammarStateV2()
-        failure = None
-        incremental = None
-        try:
-            for _ in range(limit - 1):
-                # V3.1 exact rolling causal KV state shares the teacher-forced
-                # weights and semantics, avoiding O(prefix) full recomputation
-                # at every token. No token enters the cache twice.
-                logits_batch, incremental = decode_next_token_v1(
-                    self.tessa, memory=out.structural_memory,
-                    token=ids[:, -1:],
-                    cache=incremental,
-                )
-                logits = logits_batch[0]
-                allowed = grammar.allowed_token_mask(config=self.cfg.tessa, device=ids.device)
-                # Existing V2 grammar allows adjacent-coordinate start before
-                # the seed triangle; reject that path in this strict runner.
-                if grammar.current_component_face_count == 0:
-                    allowed[:self.cfg.tessa.coordinate_bins] = False
-                if not bool(allowed.any()):
-                    failure = "NO_LEGAL_TOPOLOGY_TOKEN"
-                    break
-                tok = int(logits.float().masked_fill(~allowed, float("-inf")).argmax().item())
-                grammar.advance(tok, config=self.cfg.tessa)
-                ids = torch.cat((ids, ids.new_tensor([[tok]])), dim=1)
-                if grammar.complete:
-                    break
-        except (ValueError, RuntimeError) as exc:
-            failure = f"TOPOLOGY_SEQUENCE_INVALID:{type(exc).__name__}:{exc}"
         mesh = None
-        if grammar.complete and failure is None:
+        failure = None
+        if seeded_geometry:
             try:
-                mesh = self.build_mesh_candidate(out.state, ids[0])
+                seed = tessa_seed_from_flexicubes_v1(
+                    witness=out.flexicubes_surface_evidence,
+                    scene_triplanes=out.state.scene_triplanes,
+                )
+                candidate = self.build_seeded_mechanics_candidate_v1(
+                    out.state, seed, structural_memory=out.structural_memory,
+                    adaptive_refinement=True,
+                )
+                mesh = candidate["mesh_candidate"]
             except (ValueError, RuntimeError) as exc:
-                failure = f"TOPOLOGY_COURT_REJECTED:{type(exc).__name__}:{exc}"
+                failure = f"SEEDED_IRIS_TESSA_ABSTAIN:{type(exc).__name__}:{exc}"
         else:
-            failure = failure or "TOPOLOGY_SEQUENCE_INCOMPLETE"
+            # Legacy calibrated research checkpoints only. The product release
+            # configuration requires an IRIS surface and cannot enter here.
+            limit = min(max_topology_tokens or self.cfg.topology_decode_cap,
+                        self.cfg.topology_decode_cap)
+            if limit < 2:
+                raise ValueError("RSS_VNEXT_DECODE_LIMIT_INVALID")
+            grammar = TESSAGrammarStateV2()
+            incremental = None
+            try:
+                for _ in range(limit - 1):
+                    logits_batch, incremental = decode_next_token_v1(
+                        self.tessa, memory=out.structural_memory,
+                        token=ids[:, -1:], cache=incremental,
+                    )
+                    logits = logits_batch[0]
+                    allowed = grammar.allowed_token_mask(
+                        config=self.cfg.tessa, device=ids.device,
+                    )
+                    if grammar.current_component_face_count == 0:
+                        allowed[:self.cfg.tessa.coordinate_bins] = False
+                    if not bool(allowed.any()):
+                        failure = "NO_LEGAL_TOPOLOGY_TOKEN"
+                        break
+                    tok = int(logits.float().masked_fill(
+                        ~allowed, float("-inf"),
+                    ).argmax().item())
+                    grammar.advance(tok, config=self.cfg.tessa)
+                    ids = torch.cat((ids, ids.new_tensor([[tok]])), dim=1)
+                    if grammar.complete:
+                        break
+            except (ValueError, RuntimeError) as exc:
+                failure = f"TOPOLOGY_SEQUENCE_INVALID:{type(exc).__name__}:{exc}"
+            if grammar.complete and failure is None:
+                try:
+                    mesh = self.build_mesh_candidate(out.state, ids[0])
+                except (ValueError, RuntimeError) as exc:
+                    failure = f"TOPOLOGY_COURT_REJECTED:{type(exc).__name__}:{exc}"
+            else:
+                failure = failure or "TOPOLOGY_SEQUENCE_INCOMPLETE"
 
         result: dict = {
             "state": out.state,
@@ -1241,6 +1389,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             "mesh_candidate": mesh,
             "mesh_status": "UNQUALIFIED_MESH_CANDIDATE" if mesh is not None else "ABSTAIN",
             "mesh_failure": failure,
+            "topology_candidate_abi": (
+                "ONE_IRIS_SEEDED_MESH_V1" if seeded_geometry
+                else "LEGACY_INDEPENDENT_TESSA_GRAMMAR"
+            ),
             "qualification_status": "UNQUALIFIED_NEURAL_PROPOSAL",
             "observed_view_count": 2,
             "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
@@ -1272,8 +1424,13 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 region_relation_logits=out.state.region_relation_logits,
             )
             if bool((seq.kind_ids == int(RigTokenKindV6.SKIN_CODE)).any()):
+                mechanics_h = (
+                    mesh.mechanics_local_features
+                    if mesh.mechanics_local_features is not None
+                    else mesh.local_features
+                )
                 weights, joint_valid, joints = self.mira(
-                    mesh.local_features, mesh.rest_vertices_iris,
+                    mechanics_h, mesh.rest_vertices_iris,
                     control_out["hidden"], control_out["skin_code_logits"], seq,
                     vertex_normals=mesh.normals,
                 )
@@ -1290,7 +1447,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 )
                 hidden_joints = joints[:, :n_joints]
                 hard_weights = self.mira.decode_discrete_skin_v1(
-                    mesh.local_features, mesh.rest_vertices_iris,
+                    mechanics_h, mesh.rest_vertices_iris,
                     hidden_joints, token_ids, vertex_normals=mesh.normals,
                 )
                 if hard_weights.shape != weights.shape:

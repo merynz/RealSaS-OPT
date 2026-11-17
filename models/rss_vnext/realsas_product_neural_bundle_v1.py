@@ -30,10 +30,25 @@ from .realsas_two_stage_sampler_v1 import RSSvNextPinnedDiffusionStageV1
 from .inference_checkpoint_v1 import (
     checkpoint_payload_v2, load_inference_checkpoint_v1,
 )
-from .unified_character_model import RSSvNextUnifiedCharacterModel
+from .unified_character_model import RSSvNextUnifiedCharacterModel, RSSvNextFrozenDINOv2
 
 BUNDLE_SCHEMA = "RealSaS.RSSvNext.UnifiedThreeStageNeuralRelease.v1"
 MAX_BUNDLE_BYTES = 15 * 1024 * 1024 * 1024
+# Shared production pixel ABI: SD VAE stride 8, UNet 8x latent pyramid,
+# and DINOv2 patch 14. LCM(8*8,14)=448; 512 is not a valid DINO grid.
+# Conservatively use a common patch grid for product inference, not an odd
+# latent dimension that relies on backend-specific UNet upsampling behavior.
+PRODUCT_IMAGE_ALIGNMENT = 448
+DEFAULT_PRODUCT_IMAGE_SIZE = 448
+
+
+def qualify_product_image_size_v1(image_size: int) -> int:
+    """Fail closed before running a product model with mismatched patch grids."""
+    if (type(image_size) is not int or not 64 <= image_size <= 1024
+            or image_size % PRODUCT_IMAGE_ALIGNMENT):
+        raise RuntimeError("RSS_VNEXT_PRODUCT_VISION_DIFFUSION_PATCH_ABI")
+    return image_size
+
 
 
 def _digest(path: Path) -> str:
@@ -241,7 +256,7 @@ def save_product_neural_bundle_v1(
     model: RSSvNextUnifiedCharacterModel,
     canonical: RSSvNextPinnedDiffusionStageV1,
     multiview: RSSvNextPinnedDiffusionStageV1,
-    image_size: int = 512,
+    image_size: int = DEFAULT_PRODUCT_IMAGE_SIZE,
     denoise_steps: int = 30,
 ) -> str:
     if (
@@ -249,7 +264,10 @@ def save_product_neural_bundle_v1(
         or canonical.stage != STAGE_CANONICAL or multiview.stage != STAGE_MULTIVIEW
         or model.cfg.constructed_total_views != 0
         or type(image_size) is not int or not 64 <= image_size <= 1024
-        or image_size % 8 or type(denoise_steps) is not int
+        or image_size % 8
+        or (type(model.vision) is RSSvNextFrozenDINOv2
+            and image_size % PRODUCT_IMAGE_ALIGNMENT)
+        or type(denoise_steps) is not int
         or not 4 <= denoise_steps <= 80
         or canonical.conditioner.source_projection.in_features != model.cfg.iris.image_token_dim
         or multiview.conditioner.source_projection.in_features != model.cfg.iris.image_token_dim
@@ -364,6 +382,7 @@ def load_product_neural_bundle_v1(
             from .unified_character_model import RSSvNextFrozenDINOv2
             if type(vision_encoder) is not RSSvNextFrozenDINOv2:
                 raise RuntimeError("RSS_VNEXT_BUNDLE_PRODUCTION_VISION_REQUIRED")
+            qualify_product_image_size_v1(package["image_size"])
         # The enclosing model release is the authority. The reconstruction V2
         # is not a standalone product checkpoint.
         model = load_inference_checkpoint_v1(
@@ -402,4 +421,5 @@ def load_product_neural_bundle_v1(
 __all__ = [
     "BUNDLE_SCHEMA", "RSSvNextPinnedNeuralBundleV1",
     "save_product_neural_bundle_v1", "load_product_neural_bundle_v1",
+    "qualify_product_image_size_v1", "PRODUCT_IMAGE_ALIGNMENT", "DEFAULT_PRODUCT_IMAGE_SIZE",
 ]

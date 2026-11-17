@@ -74,6 +74,7 @@ jobs:
             tests/models/test_rss_vnext_*.py \
             tests/compiler/test_controllable_puppet_runtime_v1.py \
             tests/compiler/test_mechanics_control_solver_v1.py \
+            tests/compiler/test_mechanics_semantic_garment_v1.py \
             tests/compiler/test_mechanics_intervention_court_v1.py \
             tests/compiler/test_canonical_socket_runtime_v1.py \
             tests/compiler/test_pose_depth_raster_v1.py \

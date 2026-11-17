@@ -21,6 +21,7 @@ from models.tessa.v1.sequence_codec_v1 import decode_tessa_asset_sequence_v1
 from models.tessa.v2.court_v2 import _codec_config, evaluate_decoded_topology_v2, TESSADecodedTopologyCourtV2
 from models.tessa.v3.config_v3 import TESSAStructuralizerConfigV3
 from .source_ray_evidence import RSSvNextSourceRayEvidence
+from .tessa_seeded_surface_v1 import TESSASeededSurfaceV1
 from models.tessa.v1.mechanical_objective_v1 import (
     triangle_deformation_metrics_v1, mechanical_consequence_loss_v1,
 )
@@ -30,7 +31,7 @@ from models.tessa.v1.mechanical_objective_v1 import (
 class RSSvNextStructuralMeshCandidate:
     topology_token_ids: tuple[int, ...]
     source_authority: str
-    topology_court: TESSADecodedTopologyCourtV2
+    topology_court: TESSADecodedTopologyCourtV2 | None
     base_vertices_iris: Tensor            # [1,V,3], source-independent decoded proposal
     rest_vertices_iris: Tensor            # [1,V,3], differentiably refined
     faces: Tensor                         # [F,3], exact same index domain as skin
@@ -51,6 +52,14 @@ class RSSvNextStructuralMeshCandidate:
     # Original view rays can be queried at these exact candidate vertices,
     # but have no depth/visibility or point-texture ownership authority.
     source_ray_evidence: RSSvNextSourceRayEvidence | None = None
+    seeded_surface: TESSASeededSurfaceV1 | None = None
+    # Full-width H plus optional learned topological/semantic surface evidence.
+    # Raw local_features stays unchanged; all MIRA replay consumers must use
+    # this exact input tensor when present, never silently fall back.
+    mechanics_local_features: Tensor | None = None
+    # One TESSA-learned local structural metric on the SAME indexed surface.
+    # This is a continuous student output, not ground-truth edge labels.
+    tessa_metric_logits: Tensor | None = None
 
     def validate(self) -> None:
         xyz = self.rest_vertices_iris
@@ -76,6 +85,34 @@ class RSSvNextStructuralMeshCandidate:
             raise ValueError("RSS_VNEXT_MESH_NONFINITE")
         if self.canonical_mesh_authority:
             raise ValueError("RSS_VNEXT_MESH_CANONICAL_PREMATURE")
+        if self.seeded_surface is not None:
+            self.seeded_surface.validate()
+            if (
+                self.source_authority != "ONE_IRIS_SURFACE_TESSA_REFINEMENT_CANDIDATE"
+                or self.topology_token_ids or self.topology_court is not None
+                or not torch.equal(self.faces, self.seeded_surface.faces)
+                or not torch.equal(self.vertex_component_ids, self.seeded_surface.vertex_component_ids)
+                or not torch.equal(self.face_component_ids, self.seeded_surface.face_component_ids)
+                or self.base_vertices_iris is not self.seeded_surface.xyz
+            ):
+                raise ValueError("RSS_VNEXT_MESH_SEEDED_TOPOLOGY_IDENTITY_DRIFT")
+        # The legacy learned-token proposal's grammar court is checked by
+        # the existing model/Compiler callers.  A source-neutral test/CAS
+        # carrier can intentionally omit that court; do not retroactively
+        # break the old proposal ABI while migrating to seeded topology.
+        if self.tessa_metric_logits is not None and (
+            self.tessa_metric_logits.shape != (1, v)
+            or self.tessa_metric_logits.device != xyz.device
+            or not bool(torch.isfinite(self.tessa_metric_logits).all())
+        ):
+            raise ValueError("RSS_VNEXT_SEEDED_TESSA_METRIC_ADDRESS_DRIFT")
+        if self.mechanics_local_features is not None:
+            m = self.mechanics_local_features
+            if (m.shape != self.local_features.shape
+                    or m.dtype != self.local_features.dtype
+                    or m.device != self.local_features.device
+                    or not bool(torch.isfinite(m).all())):
+                raise ValueError("RSS_VNEXT_MESH_MECHANICS_FEATURE_ADDRESS_DRIFT")
         if self.source_ray_evidence is not None:
             self.source_ray_evidence.validate(batch=1, points=v)
 
@@ -176,6 +213,82 @@ class RSSvNextAnimationReadyMesh(nn.Module):
         )
         proposal.validate()
         return proposal
+
+
+    def forward_seeded(
+        self,
+        scene_planes: Tensor,
+        seeded: TESSASeededSurfaceV1,
+        *,
+        refine: nn.Module,
+        semantics: nn.Module,
+        affordances: nn.Module,
+        graphics: nn.Module,
+        quality: nn.Module,
+        udf: nn.Module,
+        sign_logit: nn.Module,
+        role_head: nn.Module,
+        role_schema_id: str,
+        tessa_refinement: Tensor | None = None,
+        tessa_metric_logits: Tensor | None = None,
+    ) -> RSSvNextStructuralMeshCandidate:
+        """One indexed IRIS seed for final TESSA mesh and AXIS/MIRA queries.
+
+        This is an executable correspondence-preserving candidate, NOT a
+        full learned adaptive StdGEN++ high-resolution product.
+        """
+        if (
+            not isinstance(seeded, TESSASeededSurfaceV1)
+            or scene_planes.ndim != 5 or scene_planes.shape[0] != 1
+            or seeded.xyz.device != scene_planes.device
+            or seeded.xyz.dtype != scene_planes.dtype
+            or not role_schema_id
+        ):
+            raise ValueError("RSS_VNEXT_SEEDED_MESH_PARENT_DOMAIN")
+        seeded.validate()
+        base = seeded.xyz
+        h0 = self.iris.query(scene_planes, base)["H"]
+        # The FlexiCubes extractor already consumed extraction_delta.
+        # Do not apply it twice to independently produce a "visual mesh".
+        residual = 0.03 * torch.tanh(refine(h0))
+        if tessa_refinement is not None:
+            if (tessa_refinement.shape != base.shape
+                    or tessa_refinement.device != base.device
+                    or not bool(torch.isfinite(tessa_refinement).all())):
+                raise ValueError("RSS_VNEXT_TESSA_STRUCTURAL_REFINEMENT_DOMAIN")
+            residual = residual + 0.03 * torch.tanh(tessa_refinement)
+        margin = (1.0 - base.abs()).clamp_min(0.0)
+        rest = base + margin * residual
+        local = self.iris.query(scene_planes, rest)
+        h = local["H"]
+        geometry = {
+            **local,
+            "unsigned_distance": F.softplus(udf(h)).squeeze(-1),
+            "sign_logit": sign_logit(h).squeeze(-1),
+        }
+        candidate = RSSvNextStructuralMeshCandidate(
+            topology_token_ids=(),
+            source_authority="ONE_IRIS_SURFACE_TESSA_REFINEMENT_CANDIDATE",
+            topology_court=None,
+            base_vertices_iris=base,
+            rest_vertices_iris=rest,
+            faces=seeded.faces,
+            vertex_component_ids=seeded.vertex_component_ids,
+            face_component_ids=seeded.face_component_ids,
+            local_features=h,
+            normals=_normals_indexed(rest, seeded.faces),
+            geometry=geometry,
+            semantic_logits=semantics(h),
+            presentation_role_logits=role_head(h),
+            presentation_role_schema_id=role_schema_id,
+            affordance_logits=affordances(h),
+            graphics_logits=graphics(h),
+            static_quality_logits=quality(h),
+            seeded_surface=seeded,
+            tessa_metric_logits=tessa_metric_logits,
+        )
+        candidate.validate()
+        return candidate
 
 
 def posed_lbs_from_joint_matrices(

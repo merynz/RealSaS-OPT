@@ -28,6 +28,7 @@ from models.rss_vnext.realsas_two_stage_sampler_v1 import RSSvNextPinnedDiffusio
 from models.rss_vnext.realsas_slrm_stage1_lora_v1 import install_rss_realsas_stage1_attention_lora_v1
 from models.rss_vnext.realsas_product_neural_bundle_v1 import (
     save_product_neural_bundle_v1, load_product_neural_bundle_v1,
+    qualify_product_image_size_v1, PRODUCT_IMAGE_ALIGNMENT, DEFAULT_PRODUCT_IMAGE_SIZE,
 )
 from models.rss_vnext.inference_checkpoint_v1 import load_inference_checkpoint_v1
 
@@ -172,3 +173,13 @@ def test_single_bundle_roundtrip_restores_three_stage_weights_and_adapter(
             vision_encoder=RSSvNextPatchEncoderForTests(32),
             product_mode=True,
         )
+
+
+def test_production_image_patch_grid_is_exactly_common_dino_and_vae_abi():
+    assert PRODUCT_IMAGE_ALIGNMENT == 448
+    assert DEFAULT_PRODUCT_IMAGE_SIZE == 448
+    for side in (448, 896):
+        assert qualify_product_image_size_v1(side) == side
+    for bad in (0, 64, 112, 504, 512, 513, 1024, True, 448.0):
+        with pytest.raises(RuntimeError, match="PRODUCT_VISION_DIFFUSION_PATCH_ABI"):
+            qualify_product_image_size_v1(bad)

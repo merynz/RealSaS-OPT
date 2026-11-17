@@ -237,7 +237,7 @@ def _bounded_nearest_source_indices_v1(
 
 def _bounded_bidirectional_dist(
     prediction: Tensor, target: Tensor, *,
-    scale: Tensor,
+    scale: Tensor, exact_zero: bool = False,
 ) -> Tensor:
     if (prediction.ndim != 2 or target.ndim != 2
             or prediction.shape[-1] != 3 or target.shape[-1] != 3
@@ -253,6 +253,10 @@ def _bounded_bidirectional_dist(
                 tile=torch.cdist(
                     a[start:start+512].float(),
                     b[other:other+1024].float(),
+                    compute_mode=(
+                        "donot_use_mm_for_euclid_dist" if exact_zero
+                        else "use_mm_for_euclid_dist_if_necessary"
+                    ),
                 )
                 best=tile.min(dim=1).values
                 mins=best if mins is None else torch.minimum(mins,best)
@@ -530,6 +534,7 @@ class RSSvNextSeededTESSATrainerV1:
                 vals["boundary"]=_bounded_bidirectional_dist(
                     predicted,teacher.source_boundary_xyz[
                         teacher.source_boundary_mask],scale=scale,
+                    exact_zero=True,
                 )
             else:
                 # OPEN cloth is not a signed-solid hole. Reconstruct the
@@ -570,7 +575,7 @@ class RSSvNextSeededTESSATrainerV1:
                             "RSS_VNEXT_TESSA_OPEN_LAYER_HEM_MISSING"
                         )
                     parts.append(_bounded_bidirectional_dist(
-                        pred,src,scale=scale,
+                        pred,src,scale=scale,exact_zero=True,
                     ))
                 if not parts:
                     raise ValueError("RSS_VNEXT_TESSA_OPEN_HEM_TRUTH_EMPTY")

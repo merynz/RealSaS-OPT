@@ -100,6 +100,7 @@ def _tessa_candidate_tensors_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
         raise RuntimeError("RSS_VNEXT_SHAPE_V4_TESSA_TOKEN_DOMAIN")
     mesh = proposal.get("mesh_candidate")
     status = proposal.get("mesh_status")
+    seeded_abi = proposal.get("topology_candidate_abi") == "ONE_IRIS_SEEDED_MESH_V1"
     if status not in ("ABSTAIN", "UNQUALIFIED_MESH_CANDIDATE") or (
         (status == "ABSTAIN") != (mesh is None)
     ):
@@ -111,7 +112,14 @@ def _tessa_candidate_tensors_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
         "tessa_mesh_candidate_vertex_count": 0,
         "tessa_mesh_candidate_face_count": 0,
         "tessa_mesh_candidate_role_schema_id": None,
-        "tessa_mesh_candidate_authority": "UNQUALIFIED_LEARNED_PROPOSAL_ONLY",
+        "tessa_mesh_candidate_authority": (
+            "UNQUALIFIED_IRIS_SEEDED_SURFACE_ONLY" if seeded_abi
+            else "UNQUALIFIED_LEARNED_PROPOSAL_ONLY"
+        ),
+        "topology_candidate_abi": (
+            "ONE_IRIS_SEEDED_MESH_V1" if seeded_abi
+            else "LEGACY_INDEPENDENT_TESSA_GRAMMAR"
+        ),
     }
     if mesh is None:
         return tensors, receipt
@@ -119,9 +127,18 @@ def _tessa_candidate_tensors_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
         type(mesh) is not RSSvNextStructuralMeshCandidate
         or mesh.canonical_mesh_authority
         or mesh.source_ray_evidence is not None
-        or mesh.source_authority != "LEARNED_PREDICTED_TOPOLOGY"
+        or mesh.source_authority != (
+            "ONE_IRIS_SURFACE_TESSA_REFINEMENT_CANDIDATE" if seeded_abi
+            else "LEARNED_PREDICTED_TOPOLOGY"
+        )
         or mesh.signed_solid_authority != "UNQUALIFIED"
-        or tuple(int(v) for v in tokens[0].tolist()) != mesh.topology_token_ids
+        or (not seeded_abi and
+            tuple(int(v) for v in tokens[0].tolist()) != mesh.topology_token_ids)
+        or (seeded_abi and (
+            mesh.seeded_surface is None
+            or mesh.mechanics_local_features is None
+            or tokens.shape != (1, 1)
+        ))
     ):
         raise RuntimeError("RSS_VNEXT_SHAPE_V4_TESSA_PREMATURE_SOURCE_AUTHORITY")
     mesh.validate()
@@ -132,6 +149,19 @@ def _tessa_candidate_tensors_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
         "tessa_candidate_vertex_components": mesh.vertex_component_ids,
         "tessa_candidate_face_components": mesh.face_component_ids,
         "tessa_candidate_local_features": mesh.local_features,
+        **({
+            "tessa_candidate_mechanics_local_features":
+                mesh.mechanics_local_features,
+            "tessa_seed_vertex_parent_indices": torch.tensor(
+                mesh.seeded_surface.parent_seed_edges,
+                device=mesh.faces.device, dtype=torch.long,
+            ),
+            "tessa_seed_vertex_parent_weights": torch.tensor(
+                mesh.seeded_surface.parent_seed_weights,
+                device=mesh.rest_vertices_iris.device,
+                dtype=mesh.rest_vertices_iris.dtype,
+            ),
+        } if seeded_abi else {}),
         "tessa_candidate_normals": mesh.normals,
         "tessa_candidate_semantic_logits": mesh.semantic_logits,
         "tessa_candidate_presentation_role_logits": mesh.presentation_role_logits,
@@ -142,6 +172,15 @@ def _tessa_candidate_tensors_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
         "tessa_candidate_sign_logits": mesh.geometry["sign_logit"],
     })
     receipt.update({
+        **({
+            "tessa_seed_scene_sha256": mesh.seeded_surface.scene_sha256,
+            "tessa_seed_surface_sha256":
+                mesh.seeded_surface.original_surface_sha256,
+            "tessa_seed_original_vertex_count":
+                mesh.seeded_surface.original_vertex_count,
+            "tessa_seed_original_face_count":
+                mesh.seeded_surface.original_face_count,
+        } if seeded_abi else {}),
         "tessa_mesh_candidate_vertex_count": int(mesh.rest_vertices_iris.shape[1]),
         "tessa_mesh_candidate_face_count": int(mesh.faces.shape[0]),
         "tessa_mesh_candidate_role_schema_id": mesh.presentation_role_schema_id,

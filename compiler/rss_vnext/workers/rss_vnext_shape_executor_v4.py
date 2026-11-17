@@ -152,6 +152,7 @@ def _tessa_candidate_tensors_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
         **({
             "tessa_candidate_mechanics_local_features":
                 mesh.mechanics_local_features,
+            "tessa_seed_original_faces": mesh.seeded_surface.original_faces,
             "tessa_seed_vertex_parent_indices": torch.tensor(
                 mesh.seeded_surface.parent_seed_edges,
                 device=mesh.faces.device, dtype=torch.long,

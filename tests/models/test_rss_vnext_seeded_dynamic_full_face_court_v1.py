@@ -51,7 +51,7 @@ def test_same_indexed_mesh_safe_rigid_skin_and_pose_court_is_deterministic():
 def test_one_collapsed_triangle_fails_even_if_other_faces_remain_good():
     x,f,s,m,mask=_fixture()
     s[0,3]=torch.tensor([0.,1.])
-    m[0,1,1,0,3]=-1.
+    m[0,1,1,0,3]=.4-1.  # same posed x as vertex 2 (other joint +0.4)
     outcome=_run(x,f,s,m,mask)
     assert not outcome.passed_numerical_preflight
     assert "G3_COLLAPSED_FACE_AREA" in outcome.failures
@@ -64,7 +64,7 @@ def test_one_collapsed_triangle_fails_even_if_other_faces_remain_good():
 def test_only_qualified_pose_is_stressed_and_completely_unqualified_mask_fails():
     x,f,s,m,mask=_fixture()
     s[0,3]=torch.tensor([0.,1.])
-    m[0,1,1,0,3]=-1.
+    m[0,1,1,0,3]=.4-1.  # same posed x as vertex 2 (other joint +0.4)
     mask[:]=torch.tensor([[1,0,1]],dtype=torch.bool)
     a=_run(x,f,s,m,mask)
     assert a.passed_numerical_preflight

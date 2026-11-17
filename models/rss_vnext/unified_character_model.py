@@ -973,7 +973,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 schema=self.cfg.semantic_role_schema(),
                 layer=flexicubes_layer,
                 field_policy="SIGNED_HYPOTHESIS_ONLY",
-                sparse_product_resolution=flexicubes_sparse_resolution,
+                **(
+                    {"sparse_product_resolution":flexicubes_sparse_resolution}
+                    if flexicubes_sparse_resolution is not None else {}
+                ),
             )
         if (
             self.cfg.tessa_surface_requirement == "REQUIRE_SIGNED_IRIS_SURFACE"
@@ -1371,7 +1374,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                             role_head=self.presentation_role_head,
                             schema=self.cfg.semantic_role_schema(),
                             layer=spec,field_policy="SIGNED_HYPOTHESIS_ONLY",
-                            sparse_product_resolution=flexicubes_sparse_resolution,
+                            **(
+                                {"sparse_product_resolution":flexicubes_sparse_resolution}
+                                if flexicubes_sparse_resolution is not None else {}
+                            ),
                         )
                         witnesses.append((spec,witness))
                     layered=make_layered_iris_seed_v1(

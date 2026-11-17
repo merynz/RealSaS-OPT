@@ -64,7 +64,7 @@ def _fixture():
         "generated_view_as_3d_teacher":False,
         **{k+"_sha256":_digest(v) for k,v in teacher.tensor_fields().items()},
     }}
-    weights=SeededTESSALossWeightsV1()
+    weights=replace(SeededTESSALossWeightsV1(),boundary=0.5)
     opt=torch.optim.AdamW(net.parameters(),lr=1e-3)
     trainer=RSSvNextSeededTESSATrainerV1(
         net,opt,weights=weights,trusted_source_registry=registry,

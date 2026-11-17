@@ -1123,13 +1123,13 @@
       "teacher_target": "Source-native true component open boundary points",
       "qualification_mask": "source_boundary_mask; true hems only",
       "trusted_receipt": "RSSvNextSeededTESSATrainerV1 trusted_source_registry; SHA256 every source tensor, phase binding, independently qualified native mesh/rights; never student prediction as 3D truth",
-      "preparation": "Derive independently from source-native 3D: rest mesh, normal/open boundaries, metric/pose curvature on exact face/skin domain; qualify source rights and masks; do not process corpus until requested",
+      "preparation": "Derive independently from source-native 3D: rest mesh, normal/open boundaries, metric/pose curvature on exact face/skin domain; qualify source rights and masks; do not process corpus until requested; zero by default for closed signed-v1",
       "preparation_route": "NATIVE_AND_DERIVED",
       "source_truth_status": "NATIVE_TOPOLOGY_OR_OPEN_SEAM",
-      "default_weight": 0.5,
+      "default_weight": 0,
       "real_corpus_verified": false,
       "gpu_verified": false,
-      "release_disposition": "SEEDED_V1_CANDIDATE_SOURCE_QUALIFIED"
+      "release_disposition": "EXPLICIT_OPEN_SOURCE_SUPERVISION_ONLY"
     },
     {
       "id": "quality",
@@ -1246,6 +1246,10 @@
     "trainer_checkpoint_resume_qualified": false,
     "license_qualified_corpus_coverage": false,
     "gpu_full_resolution_verified": false,
-    "requires_unseen_pose_and_graphics_product_proof": true
+    "requires_unseen_pose_and_graphics_product_proof": true,
+    "sampling_policy_schema": "RealSaS.RSSvNext.SeededSurfaceSampling.v1",
+    "sampling_policy": "Component-preserving Morton spatial coverage, checkpoint-step rotation; source importance labels reserved within source budget; exact rest mesh/face ID stays full",
+    "full_resolution_loss_gradient_coverage_proven": false,
+    "component_aware_sampling_gpu_verified": false
   }
 }

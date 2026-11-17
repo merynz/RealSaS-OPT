@@ -24,6 +24,10 @@ from torch import Tensor, nn
 import torch.nn.functional as F
 
 from .animation_ready_mesh import RSSvNextStructuralMeshCandidate
+from .seeded_surface_sampling_v1 import (
+    SeededSurfaceSamplingPolicyV1,
+    component_spatial_sample_indices_v1,
+)
 from .tessa_seeded_surface_v1 import TESSASeededSurfaceV1
 
 SCHEMA = "RealSaS.RSSvNext.SeededTESSA.SourceSupervision.v1"
@@ -52,7 +56,7 @@ def _sha(x: object) -> bool:
 class SeededTESSALossWeightsV1:
     rest_surface: float = 1.0
     normal: float = 0.2
-    boundary: float = 0.5
+    boundary: float = 0.0  # signed-solid v1 has no open hem; explicitly enable for native open sources
     quality: float = 0.1
     layer_penetration: float = 0.0
     face_budget: float = 0.01
@@ -80,6 +84,7 @@ class SeededTESSASourceTeacherV1:
     source_point_mask: Tensor             # [M] verified point + normal
     source_importance: Tensor             # [M] curvature/pose-derived [0,1]
     source_importance_mask: Tensor        # [M] native valid
+    source_component_ids: Tensor | None = None  # [M], native connectivity; no student ID claim
     source_boundary_xyz: Tensor | None = None  # [K,3], exact known open seams
     source_boundary_mask: Tensor | None = None # [K] bool
     # Only if a trusted source→candidate barycentric/skin joint reindex exists.
@@ -125,6 +130,12 @@ def _validate_source_teacher(t: SeededTESSASourceTeacherV1) -> None:
         or bool((importance < 0).any() or (importance > 1).any())
     ):
         raise ValueError("RSS_VNEXT_TESSA_SOURCE_SURFACE_DOMAIN")
+    if t.source_component_ids is not None and (
+        t.source_component_ids.shape != (m,)
+        or t.source_component_ids.dtype != torch.long
+        or bool((t.source_component_ids < 0).any())
+    ):
+        raise ValueError("RSS_VNEXT_TESSA_SOURCE_COMPONENT_DOMAIN")
     if (t.source_boundary_xyz is None) != (t.source_boundary_mask is None):
         raise ValueError("RSS_VNEXT_TESSA_SOURCE_BOUNDARY_INCOMPLETE")
     if t.source_boundary_xyz is not None:
@@ -246,8 +257,10 @@ class RSSvNextSeededTESSATrainerV1:
         weights: SeededTESSALossWeightsV1,
         trusted_source_registry: Mapping[str, Mapping[str, object]],
         max_source_projection_distance_ratio: float = 0.07,
+        sampling_policy: SeededSurfaceSamplingPolicyV1 = SeededSurfaceSamplingPolicyV1(),
     ):
         weights.validate()
+        sampling_policy.validate()
         if (not 0 < max_source_projection_distance_ratio <= 0.2
                 or not trusted_source_registry):
             raise ValueError("RSS_VNEXT_TESSA_TRAIN_SOURCE_REGISTRY_REQUIRED")
@@ -257,6 +270,7 @@ class RSSvNextSeededTESSATrainerV1:
         self.model=model
         self.optimizer=optimizer
         self.weights=weights
+        self.sampling_policy=sampling_policy
         self.trusted_registry=MappingProxyType({
             str(k): MappingProxyType(dict(v))
             for k,v in trusted_source_registry.items()
@@ -267,7 +281,8 @@ class RSSvNextSeededTESSATrainerV1:
         )
         self.policy_sha256=sha256(json.dumps(
             {"schema":SCHEMA,"phase":PHASE,"weights":asdict(weights),
-             "max_match_ratio":self.max_match_ratio},
+             "max_match_ratio":self.max_match_ratio,
+             "sampling_policy_sha256":self.sampling_policy.digest()},
             sort_keys=True,separators=(",",":"),allow_nan=False,
         ).encode()).hexdigest()
 
@@ -276,6 +291,7 @@ class RSSvNextSeededTESSATrainerV1:
         teacher: SeededTESSASourceTeacherV1,
         *,
         source_face_budget: int,
+        sampler_step: int = 0,
     ) -> dict[str,Tensor]:
         if (not isinstance(mesh,RSSvNextStructuralMeshCandidate)
                 or mesh.seeded_surface is None
@@ -284,6 +300,8 @@ class RSSvNextSeededTESSATrainerV1:
                 or type(source_face_budget) is not int
                 or not 1 <= source_face_budget <= 2_000_000):
             raise ValueError("RSS_VNEXT_TESSA_TRAIN_SEEDED_MESH_REQUIRED")
+        if type(sampler_step) is not int or sampler_step < 0:
+            raise ValueError("RSS_VNEXT_SEEDED_SAMPLER_STEP_INVALID")
         mesh.validate()
         _validate_source_teacher(teacher)
         receipt=self.trusted_registry.get(teacher.source_qualification_key)
@@ -305,20 +323,72 @@ class RSSvNextSeededTESSATrainerV1:
         source=teacher.source_xyz
         if source.device != xyz.device or source.dtype != xyz.dtype:
             raise ValueError("RSS_VNEXT_TESSA_TRAIN_DEVICE_OR_DTYPE")
-        gt=source[teacher.source_point_mask]
-        span=gt.max(dim=0).values-gt.min(dim=0).values
+        policy=self.sampling_policy
+        source_all_indices=torch.nonzero(
+            teacher.source_point_mask,as_tuple=False,
+        ).flatten()
+        full_gt=source[source_all_indices]
+        span=full_gt.max(dim=0).values-full_gt.min(dim=0).values
         scale=torch.linalg.vector_norm(span).clamp_min(1.e-5).detach()
+        student_idx=component_spatial_sample_indices_v1(
+            xyz[0],mesh.vertex_component_ids.long(),
+            budget=policy.max_student_vertices,step=sampler_step,
+            minimum=policy.min_samples_per_component,
+        )
+        sampled_xyz=xyz[0,student_idx]
+        native_comps=(
+            teacher.source_component_ids[source_all_indices]
+            if teacher.source_component_ids is not None
+            else torch.zeros_like(source_all_indices)
+        )
+        important=source_all_indices[
+            teacher.source_importance_mask[source_all_indices]
+        ] if w.structural_importance>0 else source_all_indices[:0]
+        reserved=(
+            min(len(important),max(policy.min_samples_per_component,
+                                   policy.max_source_points//4))
+            if len(source_all_indices)>policy.max_source_points else 0
+        )
+        # Reserve source label budget BEFORE component-stratified sampling.
+        # Truncating an already stratified list could erase a whole cape,
+        # tail or small hair strand. Fail closed if the remaining budget
+        # cannot cover every qualified source component.
+        core_budget=policy.max_source_points-reserved
+        source_idx=source_all_indices[
+            component_spatial_sample_indices_v1(
+                full_gt,native_comps,
+                budget=core_budget,step=sampler_step,
+                minimum=policy.min_samples_per_component,
+            )
+        ]
+        if reserved:
+            # Importance labels may cover only a few native patches; keep
+            # those candidates without displacing small source components.
+            imp_comps=(
+                teacher.source_component_ids[important]
+                if teacher.source_component_ids is not None
+                else torch.zeros_like(important)
+            )
+            imp_idx=important[component_spatial_sample_indices_v1(
+                source[important],imp_comps,
+                budget=reserved,step=sampler_step,
+                minimum=policy.min_samples_per_component,
+            )]
+            source_idx=torch.unique(
+                torch.cat((source_idx,imp_idx)),sorted=True,
+            )
+        gt=source[source_idx]
         vals={}
         if w.rest_surface>0:
             vals["rest_surface"]=_bounded_bidirectional_dist(
-                xyz[0],gt,scale=scale,
+                sampled_xyz,gt,scale=scale,
             )
         if w.normal>0 or w.structural_importance>0:
-            # Independent teacher positions are queried at STUDENT output
-            # solely to compute a target/loss; never fed into model H(x).
-            nearest, minimum_distance = _bounded_nearest_source_indices_v1(
-                xyz[0], source,
+            # Source association is teacher-only, bounded and phase-shifted.
+            local_nearest, minimum_distance = _bounded_nearest_source_indices_v1(
+                sampled_xyz, gt,
             )
+            nearest=source_idx[local_nearest]
             eligible=(
                 minimum_distance <= self.max_match_ratio*scale
             ) & teacher.source_point_mask[nearest]
@@ -328,17 +398,19 @@ class RSSvNextSeededTESSATrainerV1:
                 expected=F.normalize(
                     teacher.source_normals[nearest[eligible]],dim=-1,
                 )
-                actual=F.normalize(mesh.normals[0,eligible],dim=-1)
+                actual=F.normalize(mesh.normals[0,student_idx[eligible]],dim=-1)
                 vals["normal"]=(1-(expected*actual).sum(-1)).mean()
             if w.structural_importance>0:
                 metric_mask=eligible & teacher.source_importance_mask[nearest]
                 if not bool(metric_mask.any()) or mesh.tessa_metric_logits is None:
                     raise ValueError("RSS_VNEXT_TESSA_TRAIN_METRIC_TRUTH_MISSING")
                 vals["structural_importance"]=F.binary_cross_entropy_with_logits(
-                    mesh.tessa_metric_logits[0,metric_mask],
+                    mesh.tessa_metric_logits[0,student_idx[metric_mask]],
                     teacher.source_importance[nearest[metric_mask]],
                 )
         if w.boundary>0:
+            if mesh.faces.shape[0]>200000:
+                raise ValueError("RSS_VNEXT_TESSA_BOUNDARY_HIGHRES_RESOURCE_GATE")
             if teacher.source_boundary_xyz is None:
                 raise ValueError("RSS_VNEXT_TESSA_TRAIN_BOUNDARY_TRUTH_REQUIRED")
             predicted=_boundary_vertices(mesh.faces,xyz)
@@ -348,8 +420,19 @@ class RSSvNextSeededTESSATrainerV1:
                 predicted,teacher.source_boundary_xyz[
                     teacher.source_boundary_mask],scale=scale,
             )
+        quality_faces=mesh.faces
         if w.quality>0:
-            triangle=xyz[0,mesh.faces]
+            if mesh.faces.shape[0]>policy.max_quality_faces:
+                # Face centroids are a detached LOCATION for spatial sampling
+                # only; computed face quality keeps live vertex gradients.
+                all_centers=xyz[0,mesh.faces].detach().mean(dim=1)
+                face_idx=component_spatial_sample_indices_v1(
+                    all_centers,mesh.face_component_ids.long(),
+                    budget=policy.max_quality_faces,step=sampler_step,
+                    minimum=policy.min_samples_per_component,
+                )
+                quality_faces=mesh.faces[face_idx]
+            triangle=xyz[0,quality_faces]
             sides=torch.stack((
                 (triangle[:,1]-triangle[:,0]).norm(dim=-1),
                 (triangle[:,2]-triangle[:,1]).norm(dim=-1),
@@ -372,6 +455,8 @@ class RSSvNextSeededTESSATrainerV1:
         if w.layer_penetration>0:
             raise ValueError("RSS_VNEXT_TESSA_LAYER_PENETRATION_NOT_YET_QUALIFIED")
         if w.deformation>0 or w.pose_strain>0:
+            if len(xyz[0])>policy.max_student_vertices:
+                raise ValueError("RSS_VNEXT_TESSA_POSE_HIGHRES_RESOURCE_GATE")
             fields=(
                 teacher.source_pose_matrices,teacher.source_candidate_skin,
                 teacher.source_candidate_posed,teacher.source_pose_mask,
@@ -409,12 +494,22 @@ class RSSvNextSeededTESSATrainerV1:
         total=sum(vals[k]*keys[k] for k in keys)
         if not bool(torch.isfinite(total).all()):
             raise ValueError("RSS_VNEXT_TESSA_TRAIN_NONFINITE_TOTAL")
-        return {**vals,"total":total,"qualified_source_points":gt.new_tensor(len(gt))}
+        return {
+            **vals,"total":total,
+            "qualified_source_points":gt.new_tensor(len(full_gt)),
+            "sampled_source_points":gt.new_tensor(len(gt)),
+            "sampled_student_vertices":gt.new_tensor(len(student_idx)),
+            "sampled_quality_faces":gt.new_tensor(
+                len(quality_faces) if w.quality>0 else 0
+            ),
+            "sampling_step":gt.new_tensor(sampler_step),
+        }
 
     def train_step(
         self, mesh: RSSvNextStructuralMeshCandidate,
         teacher: SeededTESSASourceTeacherV1,
         *, source_face_budget: int,
+        sampler_step: int = 0,
     ) -> dict[str,Tensor]:
         from .training_optimizer_ownership_v1 import (
             qualify_rss_vnext_optimizer_ownership_v1,
@@ -425,7 +520,10 @@ class RSSvNextSeededTESSATrainerV1:
         if actual.binding_sha256 != self.ownership.binding_sha256:
             raise RuntimeError("RSS_VNEXT_TESSA_TRAIN_OPTIMIZER_OWNERSHIP_DRIFT")
         self.optimizer.zero_grad(set_to_none=True)
-        parts=self.objective(mesh,teacher,source_face_budget=source_face_budget)
+        parts=self.objective(
+            mesh,teacher,source_face_budget=source_face_budget,
+            sampler_step=sampler_step,
+        )
         parts["total"].backward()
         torch.nn.utils.clip_grad_norm_(
             (p for p in self.model.parameters() if p.requires_grad),

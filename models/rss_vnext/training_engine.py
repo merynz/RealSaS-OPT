@@ -74,6 +74,7 @@ from .training_seeded_tessa_v1 import (
     SeededTESSASourceTeacherV1, SCHEMA as SEEDED_TESSA_SCHEMA,
     PHASE as SEEDED_TESSA_PHASE,
 )
+from .seeded_surface_sampling_v1 import SeededSurfaceSamplingPolicyV1
 from .tessa_seeded_surface_v1 import tessa_seed_from_flexicubes_v1
 
 
@@ -298,6 +299,9 @@ class RSSvNextTrainingResult:
     seeded_tessa_loss: Tensor | None = None
     seeded_tessa_loss_parts: dict[str, Tensor] | None = None
     seeded_tessa_source_point_count: int = 0
+    seeded_tessa_sampled_source_point_count: int = 0
+    seeded_tessa_sampled_student_vertex_count: int = 0
+    seeded_tessa_sampled_quality_face_count: int = 0
 
 
 def axis_mesh_teacher_address_digest_v1(mesh) -> str:
@@ -423,6 +427,7 @@ class RSSvNextStructuralTrainer:
         # supervision can never be activated within the same optimizer phase.
         training_profile: str = "LEGACY_STRUCTURAL_RESEARCH",
         seeded_tessa_weights: SeededTESSALossWeightsV1 | None = None,
+        seeded_tessa_sampling_policy: SeededSurfaceSamplingPolicyV1 = SeededSurfaceSamplingPolicyV1(),
         trusted_seeded_tessa_registry: Mapping[str, Mapping[str, object]] | None = None,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
@@ -437,6 +442,9 @@ class RSSvNextStructuralTrainer:
         ):
             raise ValueError("RSS_VNEXT_TRAIN_UNKNOWN_GEOMETRY_PROFILE")
         seeded_mode = training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1"
+        seeded_tessa_sampling_policy.validate()
+        if not seeded_mode and seeded_tessa_sampling_policy != SeededSurfaceSamplingPolicyV1():
+            raise ValueError("RSS_VNEXT_LEGACY_SEEDED_SAMPLING_POLICY_FORBIDDEN")
         if seeded_mode:
             if (
                 seeded_tessa_weights is None
@@ -520,6 +528,7 @@ class RSSvNextStructuralTrainer:
             RSSvNextSeededTESSATrainerV1(
                 model, optimizer, weights=seeded_tessa_weights,
                 trusted_source_registry=trusted_seeded_tessa_registry,
+                sampling_policy=seeded_tessa_sampling_policy,
             )
             if seeded_mode else None
         )
@@ -2207,6 +2216,7 @@ class RSSvNextStructuralTrainer:
         losses = driver.objective(
             mesh, teacher,
             source_face_budget=batch.seeded_tessa_source_face_budget,
+            sampler_step=self.global_step,
         )
         return RSSvNextTrainingResult(
             total_loss=losses["total"],
@@ -2219,10 +2229,23 @@ class RSSvNextStructuralTrainer:
             seeded_tessa_loss=losses["total"],
             seeded_tessa_loss_parts={
                 k:v for k,v in losses.items()
-                if k not in ("total","qualified_source_points")
+                if k not in (
+                    "total","qualified_source_points","sampled_source_points",
+                    "sampled_student_vertices","sampled_quality_faces",
+                    "sampling_step",
+                )
             },
             seeded_tessa_source_point_count=int(
                 losses["qualified_source_points"].item()
+            ),
+            seeded_tessa_sampled_source_point_count=int(
+                losses["sampled_source_points"].item()
+            ),
+            seeded_tessa_sampled_student_vertex_count=int(
+                losses["sampled_student_vertices"].item()
+            ),
+            seeded_tessa_sampled_quality_face_count=int(
+                losses["sampled_quality_faces"].item()
             ),
         )
 

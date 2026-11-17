@@ -31,6 +31,10 @@ from .seeded_surface_sampling_v1 import (
 from .tessa_seeded_surface_v1 import TESSASeededSurfaceV1
 from .seeded_layer_source_court_v1 import qualify_layer_source_court_v1
 from .native_face_layer_truth_v1 import NativeFaceLayerSamplesV1
+from .native_dynamic_tessa_importance_v1 import (
+    NativeTESSADynamicImportanceV1,
+    verify_dynamic_importance_bound_to_teacher_v1,
+)
 from .native_layer_open_boundary_v1 import (
     NativeLayerOpenBoundaryV1, exact_open_boundary_edges_v1,
     validate_native_open_boundary_v1,
@@ -94,6 +98,8 @@ class SeededTESSASourceTeacherV1:
     source_layer_ids: Tensor | None = None  # [M], audited native face/material partition
     native_face_layer_samples: NativeFaceLayerSamplesV1 | None = None  # source-only indexed triangle + barycentric witness
     native_open_boundary: NativeLayerOpenBoundaryV1 | None = None  # independently replayed complete native open hems
+    # Optional native-face G3/G3B-style risk label. Never from student M/skin.
+    native_dynamic_importance: NativeTESSADynamicImportanceV1 | None = None
     source_boundary_xyz: Tensor | None = None  # [K,3], exact known open seams
     source_boundary_mask: Tensor | None = None # [K] bool
     # Only if a trusted source→candidate barycentric/skin joint reindex exists.
@@ -338,6 +344,18 @@ class RSSvNextSeededTESSATrainerV1:
             }.items()
         ):
             raise ValueError("RSS_VNEXT_TESSA_TRAIN_SOURCE_RECEIPT_DRIFT")
+        # Dynamic importance must originate in ORIGINAL native faces/skin/poses.
+        # The teacher's curvature+motion importance may be a max-combination,
+        # but it cannot downweight any independently sealed pose-risk target.
+        if teacher.native_dynamic_importance is not None:
+            verify_dynamic_importance_bound_to_teacher_v1(
+                teacher.native_dynamic_importance,
+                witness=teacher.native_face_layer_samples,
+                source_asset_sha256=teacher.source_asset_sha256,
+                source_importance=teacher.source_importance,
+                source_importance_mask=teacher.source_importance_mask,
+                receipt=receipt,
+            )
         w=self.weights
         xyz=mesh.rest_vertices_iris
         source=teacher.source_xyz

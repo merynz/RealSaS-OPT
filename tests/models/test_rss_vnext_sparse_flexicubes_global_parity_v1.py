@@ -107,6 +107,9 @@ def test_actual_pinned_mesh_and_gradients_match_sparse_without_welding():
     )
     assert len(full[0])==len(little[0])
     assert len(full[1])==len(little[1])
+    # Shared global corner indexing must preserve the EXACT output
+    # triangle incidence and winding, not merely a similar point cloud.
+    torch.testing.assert_close(full[1],little[1])
     # cdist's default float32 MM shortcut yields a spurious ~3e-4
     # nonzero diagonal even for equal coordinates. Use exact difference
     # distances, not cancellation of dot products.

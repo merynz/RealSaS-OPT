@@ -21,7 +21,9 @@
     "models/rss_vnext/seeded_layer_source_court_v1.py",
     "models/rss_vnext/layered_iris_seed_v1.py",
     "models/rss_vnext/native_layer_open_boundary_v1.py",
-    "models/rss_vnext/component_conditioned_udf_v1.py"
+    "models/rss_vnext/component_conditioned_udf_v1.py",
+    "models/rss_vnext/product_semantic_supervision_v1.py",
+    "models/rss_vnext/product_graphics_supervision_v1.py"
   ],
   "separation_principles": [
     "One persistent shared IRIS H(x) and source/asset identity.",
@@ -789,7 +791,7 @@
       "output": "source_patch_logits, source_evidence_uncertainty and early conditioned image tokens",
       "losses": "source_semantics, semantic_risk; downstream H(x)",
       "state": "DIRECT_AND_INDIRECT",
-      "connection": "Two original patch anchors; independently qualified per-axis patch masks; does not create 3D drawable labels"
+      "connection": "Two original patch anchors; independently qualified per-axis patch masks; does not create 3D drawable labels Product seeded training now has opt-in SOURCE-QUALIFIED direct objective via training_engine + product_semantic_supervision_v1 / product_graphics_supervision_v1; independent source receipt and same H(x), not an inference or real-corpus certificate."
     },
     {
       "module": "iris.view_bank",
@@ -852,7 +854,7 @@
       "output": "3D semantic presentation roles and per-voxel probabilities",
       "losses": "surface_roles; S-LRM semantic_ce; realsas_joint_slrm",
       "state": "DIRECT_AND_INDIRECT",
-      "connection": "Source qualified 3D semantic layer render; unknown/occluded separately masked"
+      "connection": "Source qualified 3D semantic layer render; unknown/occluded separately masked Product seeded training now has opt-in SOURCE-QUALIFIED direct objective via training_engine + product_semantic_supervision_v1 / product_graphics_supervision_v1; independent source receipt and same H(x), not an inference or real-corpus certificate."
     },
     {
       "module": "presentation_roles_to_memory",
@@ -887,14 +889,14 @@
       "output": "Region-slot logits plus UNKNOWN",
       "losses": "region_pairs; typed_relations",
       "state": "DIRECT_QUALIFIED_LOSS",
-      "connection": "Region co-membership distinct from edit drawable and directed attachment"
+      "connection": "Region co-membership distinct from edit drawable and directed attachment Product seeded training now has opt-in SOURCE-QUALIFIED direct objective via training_engine + product_semantic_supervision_v1 / product_graphics_supervision_v1; independent source receipt and same H(x), not an inference or real-corpus certificate."
     },
     {
       "module": "semantic_structure",
       "output": "Region memberships, relation logit graph, relation valid masks and tokens",
       "losses": "region_pairs; typed_relations; downstream topology/AXIS",
       "state": "DIRECT_AND_INDIRECT",
-      "connection": "Typed channel proofs from independent edit/cut/motion/source"
+      "connection": "Typed channel proofs from independent edit/cut/motion/source Product seeded training now has opt-in SOURCE-QUALIFIED direct objective via training_engine + product_semantic_supervision_v1 / product_graphics_supervision_v1; independent source receipt and same H(x), not an inference or real-corpus certificate."
     },
     {
       "module": "semantic_to_memory",
@@ -929,7 +931,7 @@
       "output": "At H(x): RGB additive logits, density logit, appearance uncertainty channel",
       "losses": "graphics_source_rgb; S-LRM rgb/alpha/lpips; realsas_joint_slrm",
       "state": "PARTIALLY_DIRECT",
-      "connection": "Source RGB alone does not supervise density/alpha/hidden appearance; ray renderer couples density and semantic"
+      "connection": "Source RGB alone does not supervise density/alpha/hidden appearance; ray renderer couples density and semantic Product seeded training now has opt-in SOURCE-QUALIFIED direct objective via training_engine + product_semantic_supervision_v1 / product_graphics_supervision_v1; independent source receipt and same H(x), not an inference or real-corpus certificate."
     },
     {
       "module": "presentation",
@@ -1393,5 +1395,48 @@
       "source/6-view/optimizer identity"
     ],
     "optimizer_gradient_owner_verified_synthetic": true
+  },
+  "product_semantic_graphics_training_contract": {
+    "module_owner": "models/rss_vnext/training_engine.py",
+    "semantic_objective": "models/rss_vnext/product_semantic_supervision_v1.py",
+    "graphics_objective": "models/rss_vnext/product_graphics_supervision_v1.py",
+    "training_profile": "PRODUCT_SEEDED_IRIS_TESSA_V1",
+    "semantic_source_losses": [
+      "original_two_view_masked_patch_axes",
+      "source_patch_expected_brier_risk",
+      "exact_3d_role_on_h_query_xyz",
+      "permutation_invariant_source_region_pairs",
+      "independently_qualified_typed_drawable_cut_directed_attachment"
+    ],
+    "graphics_source_losses": [
+      "original_source_opaque_first_hit_rgb_at_exact_H_query_xyz",
+      "independently_source_3d_ray_rendered_rgb_and_alpha_stage1_and_stage2"
+    ],
+    "evidence_not_automatically_qualified": [
+      "3d_drawable_from_patches",
+      "attachment_from_region_parts",
+      "unobserved_texture_from_first_hit_rgb",
+      "real_mesh_raster_from_volume_ray_rgb"
+    ],
+    "trusted_registries_independent": true,
+    "trainer_optimizer_one_H": true,
+    "semantic_default_weights": {
+      "patch_axes": 0,
+      "patch_risk": 0,
+      "surface_roles": 0,
+      "region_pairs": 0,
+      "typed_relations": 0
+    },
+    "graphics_default_weights": {
+      "visible_rgb": 0,
+      "source_joint_ray": 0
+    },
+    "checkpoint_weighted_objective_policy_bound": true,
+    "synthetic_correctness_regressions_added": true,
+    "source_corpus_verified": false,
+    "full_resolution_gpu_verified": false,
+    "stage3_native_Mstar_raster_training_wired": false,
+    "target_asset_manifest_missing": true,
+    "product_unseen_quality_proven": false
   }
 }

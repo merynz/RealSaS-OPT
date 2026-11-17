@@ -18,7 +18,10 @@ import math
 import torch
 from torch import Tensor
 
-from .flexicubes_v1 import (
+# Use the canonical public IRIS import identity. The RSS.vNext expert
+# namespace may expose the SAME file under a second module alias; Python
+# isinstance must not mistake this for an unpinned foreign adapter.
+from models.iris.vnext.flexicubes_v1 import (
     PinnedFlexiCubesV1, split_flexicubes_parameters_v1,
     FLEXICUBES_COMMIT,
 )

@@ -23,7 +23,8 @@
     "models/rss_vnext/native_layer_open_boundary_v1.py",
     "models/rss_vnext/component_conditioned_udf_v1.py",
     "models/rss_vnext/product_semantic_supervision_v1.py",
-    "models/rss_vnext/product_graphics_supervision_v1.py"
+    "models/rss_vnext/product_graphics_supervision_v1.py",
+    "models/rss_vnext/product_axis_mira_seeded_training_v1.py"
   ],
   "separation_principles": [
     "One persistent shared IRIS H(x) and source/asset identity.",
@@ -1001,7 +1002,7 @@
       "output": "Causal rig token kinds, joint frame/position, constraints, FSQ skin-code logits",
       "losses": "axis_rig_skin_codes, axis_posed_surface, anchor_face_correspondence",
       "state": "DIRECT_AND_INDIRECT",
-      "connection": "Real source hierarchy, interventions, AXIS causal token grammar, frozen MIRA codec"
+      "connection": "Real source hierarchy, interventions, AXIS causal token grammar, frozen MIRA codec Optional product-seeded same-Mstar source-qualified AXIS/MIRA direct loss path exists, distinct from legacy topology-token AXIS; native pose transport and codec freeze required; not a real-corpus release proof."
     },
     {
       "module": "anchor_face_correspondence",
@@ -1071,7 +1072,7 @@
       "output": "Source-qualified corrected rest vertices, skin weights and a quality head",
       "losses": "axis_dynamic_posed_surface; quality head NO source label",
       "state": "PARTIALLY_DIRECT",
-      "connection": "Continuous geometry and skin share TESSA/AXIS/MIRA identity, no new topology; do not mark quality head trained"
+      "connection": "Continuous geometry and skin share TESSA/AXIS/MIRA identity, no new topology; do not mark quality head trained Optional product-seeded same-Mstar source-qualified AXIS/MIRA direct loss path exists, distinct from legacy topology-token AXIS; native pose transport and codec freeze required; not a real-corpus release proof."
     },
     {
       "module": "affordance_to_memory",
@@ -1438,5 +1439,35 @@
     "stage3_native_Mstar_raster_training_wired": false,
     "target_asset_manifest_missing": true,
     "product_unseen_quality_proven": false
+  },
+  "product_axis_mira_training_contract": {
+    "schema": "RealSaS.RSSvNext.ProductSeededAXISMIRALoss.v1",
+    "owner": "models/rss_vnext/product_axis_mira_seeded_training_v1.py",
+    "profile": "PRODUCT_SEEDED_IRIS_TESSA_V1",
+    "source_requirements": [
+      "native_source_axis_v6_rig_token_sequence",
+      "source_rig_skin_codec_frozen_hash",
+      "exact_source_2D_observed_images_and_generated_six_h_conditioning_provenance",
+      "same_final_Mstar_mesh_context_not_legacy_topology_tokens",
+      "for_skin_or_pose: native_face_barycentric_candidate_support_with_source_native_skin",
+      "for_pose: verified_source_joint_skin_matrices_in_same_axis_joint_order",
+      "for_pose: source_all_faces_G3_preflight_pass_from_native_dynamic_importance"
+    ],
+    "optional_loss_weights": {
+      "axis_program": 0,
+      "source_skin": 0,
+      "posed_surface": 0,
+      "dynamic_surface": 0,
+      "hard_skin": 0
+    },
+    "native_source_pose_truth_never_student_generated": true,
+    "source_asset_coverage_verified": false,
+    "unseen_animation_ready_proven": false,
+    "production_gpu_validation": false,
+    "mira_embedded_source_codec_requires_separate_training_and_freezing": true,
+    "compiler_G3_G3B_stage35_independent": true,
+    "shared_H": true,
+    "teacher_forcing_does_not_qualify_free_running": true,
+    "checkpoint_policy_sealed": true
   }
 }

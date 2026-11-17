@@ -171,7 +171,98 @@ def build_tessa_seeded_surface_v1(
     return result
 
 
+def tessa_seed_from_flexicubes_v1(
+    *,
+    witness,
+    scene_triplanes: Tensor,
+) -> TESSASeededSurfaceV1:
+    """One actual IRIS FlexiCubes extraction as the ONLY topology seed.
+
+    Stable connected components are computed by face incidence, NOT XYZ
+    proximity: identical body/garment positions never weld. This is a
+    source-INDEPENDENT student prediction, not canonical/source authority.
+    The two SHA256 bind the exact scene and extracted candidate bytes.
+    """
+    from hashlib import sha256
+    import numpy as np
+    from .flexicubes_surface_evidence import RSSvNextFlexiCubesSurfaceEvidence
+
+    if (not isinstance(witness, RSSvNextFlexiCubesSurfaceEvidence)
+            or witness.evidence_authority
+                != "UNQUALIFIED_FLEXICUBES_SURFACE_WITNESS"
+            or scene_triplanes.ndim != 5 or scene_triplanes.shape[0] != 1
+            or witness.xyz.device != scene_triplanes.device
+            or witness.faces.device != scene_triplanes.device
+            or witness.xyz.dtype != scene_triplanes.dtype):
+        raise ValueError("TESSA_SEED_IRIS_WITNESS_OR_SCENE_REQUIRED")
+    if (witness.xyz.shape[1] < 3
+            or witness.faces.ndim != 2 or not witness.faces.numel()
+            or witness.faces.dtype != torch.long):
+        raise ValueError("TESSA_SEED_INDEXED_FACE_DOMAIN")
+
+    def _hash_tensor(t: Tensor) -> str:
+        t0 = t.detach().contiguous().cpu()
+        v = t0.numpy()
+        digest = sha256()
+        digest.update(str((str(v.dtype), v.shape)).encode())
+        digest.update(v.tobytes())
+        return digest.hexdigest()
+
+    # Union-find on EXACT integer connectivity, no geometric nearest search.
+    v = witness.xyz.shape[1]
+    parent = list(range(v))
+    rank = [0] * v
+
+    def root(a: int) -> int:
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+
+    def join(a: int, b: int) -> None:
+        a, b = root(a), root(b)
+        if a == b:
+            return
+        if rank[a] < rank[b]:
+            a, b = b, a
+        parent[b] = a
+        if rank[a] == rank[b]:
+            rank[a] += 1
+
+    faces = witness.faces.detach().cpu().numpy().astype(np.int64, copy=False)
+    if faces.size == 0 or int(faces.min()) < 0 or int(faces.max()) >= v:
+        raise ValueError("TESSA_SEED_FACE_VERTEX_RANGE")
+    for a, b, c in faces:
+        if a == b or b == c or a == c:
+            raise ValueError("TESSA_SEED_DEGENERATE_INDEXED_FACE")
+        join(int(a), int(b))
+        join(int(b), int(c))
+    groups = {}
+    component_ids = []
+    # Isolated vertices are components too; admission can reject them later.
+    for i in range(v):
+        k = root(i)
+        if k not in groups:
+            groups[k] = len(groups)
+        component_ids.append(groups[k])
+    comps = torch.as_tensor(
+        component_ids, dtype=torch.long, device=witness.faces.device,
+    )
+    result = build_tessa_seeded_surface_v1(
+        iris_surface_xyz=witness.xyz,
+        iris_surface_faces=witness.faces,
+        component_ids_by_vertex=comps,
+        scene_sha256=_hash_tensor(scene_triplanes),
+        original_surface_sha256=sha256((
+            _hash_tensor(witness.xyz) + _hash_tensor(witness.faces)
+            + _hash_tensor(comps)
+        ).encode()).hexdigest(),
+    )
+    return result
+
+
 __all__ = [
     "TESSASeededSurfaceV1",
     "build_tessa_seeded_surface_v1",
+    "tessa_seed_from_flexicubes_v1",
 ]

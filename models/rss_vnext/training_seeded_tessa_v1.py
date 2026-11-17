@@ -174,6 +174,40 @@ def _boundary_vertices(faces: Tensor, verts: Tensor) -> Tensor:
     return verts[0,vi]
 
 
+@torch.no_grad()
+def _bounded_nearest_source_indices_v1(
+    predicted_xyz: Tensor, source_xyz: Tensor,
+) -> tuple[Tensor, Tensor]:
+    """Source-label association has no gradient; match without NxM storage.
+
+    Nearest-neighbor indices are not teacher-forced geometry. Ties choose
+    the lowest source index independent of source batch chunking.
+    """
+    if (predicted_xyz.ndim != 2 or predicted_xyz.shape[-1] != 3
+            or source_xyz.ndim != 2 or source_xyz.shape[-1] != 3
+            or not 1 <= predicted_xyz.shape[0] <= 2_000_000
+            or not 1 <= source_xyz.shape[0] <= 2_000_000):
+        raise ValueError("RSS_VNEXT_TESSA_NEAREST_SOURCE_DOMAIN")
+    output_indices, output_distances = [], []
+    for start in range(0, predicted_xyz.shape[0], 256):
+        p = predicted_xyz[start:start + 256].detach().float()
+        best = torch.full(
+            (len(p),), float("inf"), device=p.device, dtype=p.dtype,
+        )
+        best_id = torch.zeros(len(p), device=p.device, dtype=torch.long)
+        for source_start in range(0, source_xyz.shape[0], 1024):
+            tile = torch.cdist(
+                p, source_xyz[source_start:source_start+1024].detach().float(),
+            )
+            distance, local_id = tile.min(dim=-1)
+            choose = distance < best
+            best = torch.where(choose, distance, best)
+            best_id = torch.where(choose, local_id + source_start, best_id)
+        output_indices.append(best_id)
+        output_distances.append(best)
+    return torch.cat(output_indices), torch.cat(output_distances)
+
+
 def _bounded_bidirectional_dist(
     prediction: Tensor, target: Tensor, *,
     scale: Tensor,
@@ -282,10 +316,11 @@ class RSSvNextSeededTESSATrainerV1:
         if w.normal>0 or w.structural_importance>0:
             # Independent teacher positions are queried at STUDENT output
             # solely to compute a target/loss; never fed into model H(x).
-            distance=torch.cdist(xyz[0].float(),source.float())
-            nearest=distance.argmin(dim=-1)
+            nearest, minimum_distance = _bounded_nearest_source_indices_v1(
+                xyz[0], source,
+            )
             eligible=(
-                distance.min(-1).values <= self.max_match_ratio*scale
+                minimum_distance <= self.max_match_ratio*scale
             ) & teacher.source_point_mask[nearest]
             if not bool(eligible.any()):
                 raise ValueError("RSS_VNEXT_TESSA_TRAIN_NO_MATCHED_SOURCE_NORMAL")

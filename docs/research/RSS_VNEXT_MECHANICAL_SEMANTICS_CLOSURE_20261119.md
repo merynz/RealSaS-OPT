@@ -80,6 +80,29 @@ teacher data must fail closed. Checkpoint/resume binds the registry hash.
 Default weight is zero until real permitted teachers are materialized and
 the benefit is measured on held-out real morphologies.
 
+## Source-native auxiliary chains are structural, not authored controls
+
+The AXIS V6 `CHAIN` event addresses an ancestral start/end path in the
+emitted deform joint parent graph. The new decoder `axis_mechanical_chain_partition_v1.py`
+verifies ancestry, unique owner vs shared-root UNKNOWN, and equivalence of
+source-native teacher partitions independent of arbitrary chain labels. A
+source-native chain teacher must match the *same* causal AXIS event program;
+it cannot be an unrelated metadata label.
+
+Native structural `CHAIN` events may now be taught from a sealed chain
+receipt without claiming a source-authored IK or constraint intervention.
+Actual `CONTROL`, `CONSTRAINT` and `ANCHOR` teaching continues to require
+separate source intervention qualification. This is an intentional fix to
+the previously over-broad intervention gate.
+
+AXIS V6 product free-running had a 1,024-token cap. A 190-joint reference
+with 190 frames and four FSQ tokens per joint needs 1,148 events before
+auxiliary chains and controllers. The product proposal cap is raised to
+2,048; the Transformer architecture itself supports up to 4,096.
+**This only removes a hard capacity impossibility:** the current un-cached
+causal prefix recomputation is still a critical long-sequence runtime
+performance/VRAM qualification gate. No throughput has been claimed.
+
 ## Open product gates, explicitly NOT satisfied by this PR
 
 - StdGEN++ sparse high-res layer extraction and independently qualified hidden

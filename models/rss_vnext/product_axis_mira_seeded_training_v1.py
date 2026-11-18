@@ -82,6 +82,7 @@ def product_seeded_axis_mira_objective_v1(
     dataset_manifest_sha256: str,
     trusted_axis_teacher_registry: Mapping[str,Mapping[str,object]],
     trusted_native_pose_registry: Mapping[str,Mapping[str,object]],
+    trusted_native_skin_registry: Mapping[str,Mapping[str,object]],
     trusted_chain_teacher_registry: Mapping[str,Mapping[str,object]],
     tensor_digest,
     axis_sequence_digest,
@@ -160,44 +161,64 @@ def product_seeded_axis_mira_objective_v1(
     if needs_skin:
         if not bool((seq.kind_ids==int(RigTokenKindV6.SKIN_CODE)).any()):
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_SKIN_TOKEN_REQUIRED")
-        if (
-            teacher.native_pose_transport is None
-            or teacher.native_face_layer_samples is None
-            or teacher.native_dynamic_importance is None
-            or not teacher.native_dynamic_importance.source_absolute_g3_within_limits
-            or any(v is None for v in (
+        if teacher.native_face_layer_samples is None:
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_SOURCE_FACE_REQUIRED")
+        requires_pose=weights.posed_surface>0 or weights.dynamic_surface>0
+        pose_support=(
+            teacher.native_pose_transport is not None
+            and teacher.native_dynamic_importance is not None
+            and teacher.native_dynamic_importance.source_absolute_g3_within_limits
+            and all(v is not None for v in (
                 teacher.source_candidate_skin,teacher.source_candidate_posed,
                 teacher.source_pose_matrices,teacher.source_pose_mask,
             ))
-        ):
+        )
+        if requires_pose and not pose_support:
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_NATIVE_POSE_REQUIRED")
-        # Independent original-source FACE/barycentric truth must replay the
-        # EXACT final student M* address. A same-length skin array is not proof.
-        source_receipt=trusted_native_pose_registry.get(
-            teacher.source_qualification_key,
-        )
-        if not isinstance(source_receipt,Mapping):
-            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_NATIVE_POSE_RECEIPT")
-        validate_source_native_pose_candidate_teacher_v1(
-            support=teacher.native_pose_transport,
-            native_face_witness=teacher.native_face_layer_samples,
-            candidate_faces=mesh.faces,
-            candidate_rest=mesh.rest_vertices_iris,
-            source_candidate_skin=teacher.source_candidate_skin,
-            source_candidate_posed=teacher.source_candidate_posed,
-            source_pose_mask=teacher.source_pose_mask,
-            source_pose_matrices=teacher.source_pose_matrices,
-            teacher_source_asset_sha256=teacher.source_asset_sha256,
-            teacher_receipt=source_receipt,
-            trusted_source_registry=trusted_native_pose_registry,
-        )
+        if teacher.native_skin_transport is not None and teacher.native_pose_transport is not None:
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_COMPETING_NATIVE_SKIN_TEACHERS")
+        if teacher.native_skin_transport is not None:
+            if requires_pose:
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_SKIN_CANNOT_SUBSTITUTE_FOR_POSE")
+            # This independent exact source-native face->candidate M* transport
+            # needs no clip or fabricated rest-motion matrices. The qualifier
+            # authenticates rights, native vertex skin and barycentric support.
+            source_skin=teacher.native_skin_transport.replay(
+                witness=teacher.native_face_layer_samples,
+                candidate_faces=mesh.faces,
+                candidate_rest=mesh.rest_vertices_iris,
+                trusted_source_registry=trusted_native_skin_registry,
+            )
+        elif pose_support:
+            # Pose-qualified legacy path remains unchanged for source-animated
+            # assets and is mandatory for posed/dynamic deformation objectives.
+            source_receipt=trusted_native_pose_registry.get(
+                teacher.source_qualification_key,
+            )
+            if not isinstance(source_receipt,Mapping):
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_NATIVE_POSE_RECEIPT")
+            validate_source_native_pose_candidate_teacher_v1(
+                support=teacher.native_pose_transport,
+                native_face_witness=teacher.native_face_layer_samples,
+                candidate_faces=mesh.faces,
+                candidate_rest=mesh.rest_vertices_iris,
+                source_candidate_skin=teacher.source_candidate_skin,
+                source_candidate_posed=teacher.source_candidate_posed,
+                source_pose_mask=teacher.source_pose_mask,
+                source_pose_matrices=teacher.source_pose_matrices,
+                teacher_source_asset_sha256=teacher.source_asset_sha256,
+                teacher_receipt=source_receipt,
+                trusted_source_registry=trusted_native_pose_registry,
+            )
+            source_skin=teacher.source_candidate_skin
+        else:
+            raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_NATIVE_SKIN_SUPPORT_REQUIRED")
         controls=model.axis(memory,seq)
         skin,valid,joint_state=model.mira(
             mesh.mechanics_local_features,mesh.rest_vertices_iris,
             controls["hidden"],controls["skin_code_logits"],seq,
             vertex_normals=mesh.normals,
         )
-        source_skin=teacher.source_candidate_skin
         if (
             skin.shape!=source_skin.shape
             or valid.shape[0]!=1

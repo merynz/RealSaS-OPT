@@ -39,6 +39,7 @@ from .native_pose_transport_v1 import (
     SourceNativeCandidatePoseTransportV1,
     validate_source_native_pose_candidate_teacher_v1,
 )
+from .native_skin_transport_v1 import SourceNativeCandidateSkinTransportV1
 from .seeded_pose_consequence_objective_v1 import (
     exact_m_qualified_pose_strain_v1,
 )
@@ -110,6 +111,7 @@ class SeededTESSASourceTeacherV1:
     # Original native source-face->candidate support; only this can
     # qualify per-vertex transport for deformation and posed face losses.
     native_pose_transport: SourceNativeCandidatePoseTransportV1 | None = None
+    native_skin_transport: SourceNativeCandidateSkinTransportV1 | None = None  # independent rig+skin, NO pose claim
     source_boundary_xyz: Tensor | None = None  # [K,3], exact known open seams
     source_boundary_mask: Tensor | None = None # [K] bool
     # Only if a trusted source→candidate barycentric/skin joint reindex exists.

@@ -33,6 +33,7 @@ from .seeded_pose_consequence_objective_v1 import (
 )
 from .animation_ready_mesh import posed_lbs_from_joint_matrices
 from .qualified_chain_skin_v1 import qualified_source_chain_skin_loss_v1
+from .native_skin_transport_v1 import SourceNativeCandidateSkinTransportV1
 from .axis_mechanical_chain_partition_v1 import assert_qualified_chain_partition_matches_axis_v1
 
 
@@ -178,6 +179,8 @@ def product_seeded_axis_mira_objective_v1(
         if teacher.native_skin_transport is not None and teacher.native_pose_transport is not None:
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_COMPETING_NATIVE_SKIN_TEACHERS")
         if teacher.native_skin_transport is not None:
+            if not isinstance(teacher.native_skin_transport,SourceNativeCandidateSkinTransportV1):
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_NATIVE_SKIN_TYPE_INVALID")
             if requires_pose:
                 raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_SKIN_CANNOT_SUBSTITUTE_FOR_POSE")
             # This independent exact source-native face->candidate M* transport
@@ -188,6 +191,7 @@ def product_seeded_axis_mira_objective_v1(
                 candidate_faces=mesh.faces,
                 candidate_rest=mesh.rest_vertices_iris,
                 trusted_source_registry=trusted_native_skin_registry,
+                dataset_manifest_sha256=dataset_manifest_sha256,
             )
         elif pose_support:
             # Pose-qualified legacy path remains unchanged for source-animated

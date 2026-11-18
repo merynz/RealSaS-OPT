@@ -31,6 +31,8 @@ def _fixture():
         source_qualification_key="native-rig-skin-only",
         native_face_witness_sha256=witness.receipt_sha256(),
         source_candidate_mesh_face_sha256=tensor_sha256_v1(faces),
+        axis_teacher_sequence_sha256="9"*64,
+        native_skin_joint_order_sha256="a"*64,
         native_skin=torch.tensor([[1.,0.],[.5,.5],[0.,1.]]),
         candidate_native_face_ids=torch.tensor([0,0,0],dtype=torch.long),
         candidate_barycentric=torch.eye(3),
@@ -42,6 +44,9 @@ def _fixture():
         "source_asset_sha256":witness.source_asset_sha256,
         "native_face_witness_sha256":witness.receipt_sha256(),
         "skin_transport_receipt_sha256":transport.receipt_sha256(),
+        "axis_teacher_sequence_sha256":"9"*64,
+        "native_skin_joint_order_sha256":"a"*64,
+        "native_skin_columns_match_axis_joint_order":True,
         "candidate_faces_sha256":tensor_sha256_v1(faces),
         "candidate_source_support_not_student_nearest":True,
         "source_rights_independently_verified":True,
@@ -56,6 +61,7 @@ def _replay(w,t,f,xyz,receipt):
         witness=w,candidate_faces=f,candidate_rest=xyz,
         trusted_source_registry={t.source_qualification_key:receipt},
         dataset_manifest_sha256="3"*64,
+        expected_axis_teacher_sequence_sha256="9"*64,
         chunk_size=2,
     )
 
@@ -100,3 +106,22 @@ def test_skin_receipt_must_bind_exact_dataset_manifest():
     w,t,f,xyz,r=_fixture()
     with pytest.raises(ValueError,match="SOURCE_RECEIPT_REQUIRED"):
         _replay(w,t,f,xyz,{**r,"dataset_manifest_sha256":"4"*64})
+
+
+def test_native_skin_rejects_axial_joint_order_forgery():
+    w,t,f,xyz,receipt=_fixture()
+    with pytest.raises(ValueError,match="SOURCE_RECEIPT_REQUIRED"):
+        _replay(w,t,f,xyz,{
+            **receipt,"native_skin_columns_match_axis_joint_order":False,
+        })
+    with pytest.raises(ValueError,match="SOURCE_RECEIPT_REQUIRED"):
+        _replay(w,t,f,xyz,{
+            **receipt,"native_skin_joint_order_sha256":"b"*64,
+        })
+    with pytest.raises(ValueError,match="SOURCE_IDENTITY"):
+        t.replay(
+            witness=w,candidate_faces=f,candidate_rest=xyz,
+            dataset_manifest_sha256="3"*64,
+            expected_axis_teacher_sequence_sha256="0"*64,
+            trusted_source_registry={t.source_qualification_key:receipt},
+        )

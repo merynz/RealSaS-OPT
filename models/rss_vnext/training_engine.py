@@ -523,6 +523,11 @@ class RSSvNextStructuralTrainer:
         if not isinstance(product_semantic_weights,ProductSemanticWeightsV1):
             raise ValueError("RSS_VNEXT_PRODUCT_SEMANTIC_PHASE_POLICY")
         product_semantic_weights.validate()
+        if (
+            product_semantic_weights.typed_relations>0
+            and model.cfg.typed_region_relation_policy!="RESEARCH_SOURCE_QUALIFIED"
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_TYPED_RELATION_SUPERVISION_RETIRED")
         semantic_active=any(v>0 for v in asdict(product_semantic_weights).values())
         if (
             semantic_active and (

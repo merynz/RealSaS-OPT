@@ -20,6 +20,9 @@ registered ORIGINAL face IDs and barycentric coordinates. It rejects:
 - absent/mismatched rights and provenance receipt;
 - incorrect asset, source witness, final mesh face index or tensor hashes;
 - incorrect native source skin simplex and missing/malformed triangle support;
+- source-native skin joint-column order not independently matched to the
+  exact causal AXIS teacher sequence, including a separate native joint-order
+  digest and signed joint-order match receipt;
 - source-rest reprojection drift beyond the independently bounded tolerance;
 - attempts to construct correspondence from student nearest neighbours.
 

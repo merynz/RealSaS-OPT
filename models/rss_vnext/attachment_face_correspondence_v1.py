@@ -41,7 +41,7 @@ class RSSvNextSocketFaceNeuralOutputV1:
     holder_face_logits: Tensor   # [A,F+1]
     face_component_ids: Tensor   # [F], exact TESSA candidates, not truth
     face_region_probabilities: Tensor  # [F,R+1], UNKNOWN last
-    region_relation_logits: Tensor     # [R,R,3], last directed
+    region_relation_logits: Tensor | None  # research-only; none in product
     mesh_topology_digest: str
     axis_sequence_digest: str
     authority: str = _AUTHORITY
@@ -170,7 +170,7 @@ class RSSvNextSocketFaceCorrespondenceHeadV1(nn.Module):
     def forward(
         self, *, mesh:RSSvNextStructuralMeshCandidate,
         axis_hidden:Tensor, axis_sequence:AXISSequenceV6,
-        region_relation_logits:Tensor,
+        region_relation_logits:Tensor | None,
     )->RSSvNextSocketFaceNeuralOutputV1:
         if type(mesh) is not RSSvNextStructuralMeshCandidate:
             raise ValueError("RSS_VNEXT_SOCKET_FACE_INDEXED_TESSA_MESH_REQUIRED")
@@ -183,15 +183,16 @@ class RSSvNextSocketFaceCorrespondenceHeadV1(nn.Module):
             or mesh.semantic_logits.shape!=(1,mesh.rest_vertices_iris.shape[1],self.region_slots+1)
             or axis_hidden.ndim!=3
             or axis_hidden.shape!=(1,axis_sequence.kind_ids.shape[1],self.axis_width)
-            or region_relation_logits.shape!=(1,self.region_slots,self.region_slots,3)
+            or (region_relation_logits is not None
+                and region_relation_logits.shape!=(1,self.region_slots,self.region_slots,3))
             or len({t.device for t in (mesh.local_features,mesh.rest_vertices_iris,
-                     mesh.normals,faces,axis_hidden,region_relation_logits)})!=1
+                     mesh.normals,faces,axis_hidden,region_relation_logits) if t is not None})!=1
             or len({t.dtype for t in (mesh.local_features,mesh.rest_vertices_iris,
-                     mesh.normals,axis_hidden,region_relation_logits)})!=1
+                     mesh.normals,axis_hidden,region_relation_logits) if t is not None})!=1
             or not all(bool(torch.isfinite(t).all()) for t in (
                 mesh.local_features,mesh.rest_vertices_iris,mesh.normals,
                 axis_hidden,region_relation_logits,mesh.semantic_logits
-            ))
+            ) if t is not None)
         ):
             raise ValueError("RSS_VNEXT_SOCKET_FACE_HEAD_ADDRESS_OR_FIELD_DRIFT")
         indices,parents,controls=self._socket_anchor_positions(axis_sequence)
@@ -225,7 +226,9 @@ class RSSvNextSocketFaceCorrespondenceHeadV1(nn.Module):
             holder_face_logits=holder,
             face_component_ids=mesh.face_component_ids,
             face_region_probabilities=regional,
-            region_relation_logits=region_relation_logits[0],
+            region_relation_logits=(
+                region_relation_logits[0] if region_relation_logits is not None else None
+            ),
             mesh_topology_digest=mesh_topology_digest_v1(mesh),
             axis_sequence_digest=axis_sequence_digest_v1(axis_sequence),
         )
@@ -257,9 +260,16 @@ def propose_socket_face_pairs_v1(
     ):
         raise ValueError("RSS_VNEXT_SOCKET_FACE_PROPOSAL_SHAPE_DRIFT")
     predictions=[]
-    region=torch.sigmoid(output.region_relation_logits[:,:,2])
-    diagonal=torch.eye(region.shape[0],device=region.device,dtype=torch.bool)
-    region=region.masked_fill(diagonal,0.)
+    # Product has no trained typed relation and MUST NOT interpret zero logits
+    # as 0.5 probability of attachment. Face/skeletal evidence is independent.
+    if output.region_relation_logits is None:
+        region=None
+        n=output.face_region_probabilities.shape[-1]-1
+        diagonal=torch.eye(n,device=output.held_face_logits.device,dtype=torch.bool)
+    else:
+        region=torch.sigmoid(output.region_relation_logits[:,:,2])
+        diagonal=torch.eye(region.shape[0],device=region.device,dtype=torch.bool)
+        region=region.masked_fill(diagonal,0.)
     for i in range(a):
         h=F.log_softmax(output.held_face_logits[i].float(),dim=-1)
         p=F.log_softmax(output.holder_face_logits[i].float(),dim=-1)
@@ -277,7 +287,7 @@ def propose_socket_face_pairs_v1(
                     b_probs=output.face_region_probabilities[holder,:-1]
                     joint=torch.outer(a_probs,b_probs).masked_fill(diagonal,0.)
                     support=float(joint.sum().item())
-                    aff=None if support<1e-6 else float((joint*region).sum().item()/support)
+                    aff=None if support<1e-6 or region is None else float((joint*region).sum().item()/support)
                     rank=float((h[held]+p[holder]).item())
                     if aff is not None:
                         rank+=math.log(max(aff,1e-12))
@@ -311,6 +321,8 @@ def propose_socket_face_pairs_v1(
             state=(
                 "UNQUALIFIED_PREDICTED_DIRECTIONAL_FACE_PAIR"
                 if aff is not None else
+                "UNQUALIFIED_PREDICTED_PAIR_NO_TYPED_RELATION"
+                if region is None else
                 "UNQUALIFIED_PREDICTED_PAIR_UNKNOWN_REGION"
             ),
         ))

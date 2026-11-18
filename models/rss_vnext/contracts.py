@@ -52,7 +52,11 @@ class RSSvNextConfig:
     control_hidden_dim: int = 384
     control_layers: int = 8
     control_heads: int = 8
-    control_max_seq: int = 1024
+    # 190 deform joints + 190 source frames + 4*190 FSQ codes already
+    # require 1148 typed events before auxiliary chains/controls. The prior
+    # 1024 product cap could not even express this reference morphology.
+    # 2048 is capacity, NOT throughput proof; cache-aware decoding remains P0.
+    control_max_seq: int = 2048
     max_pair_queries: int = 2048
     skin_tokens_per_joint: int = 4
     skin_fsq_levels: tuple[int, ...] = (5, 5, 5, 5)

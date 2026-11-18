@@ -529,6 +529,7 @@ def qualified_axis_rig_skin_sequence_loss_v6(
     tokens_per_joint: int,
     executable_constraint_operators: Sequence[str],
     control_intervention_qualified: bool,
+    structural_chains_qualified: bool = False,
 ) -> tuple[Tensor, dict[str, Tensor]]:
     """Source-admitted teacher-forced AXIS V6 autoregressive objective.
 
@@ -558,9 +559,16 @@ def qualified_axis_rig_skin_sequence_loss_v6(
                 )
             except (ValueError, TypeError):
                 raise ValueError("AXIS_V6_TRAIN_TEACHER_GRAMMAR_INVALID") from None
+            # A causal CHAIN is mechanically observable from a source-native
+            # joint-parent graph. It needs its own admitted structural receipt,
+            # but not an invented IK/control intervention or animation clip.
+            if kind == RigTokenKindV6.CHAIN and not (
+                control_intervention_qualified or structural_chains_qualified
+            ):
+                raise ValueError("AXIS_V6_TRAIN_STRUCTURAL_CHAIN_PROOF_REQUIRED")
             if kind in (
                 RigTokenKindV6.CONTROL, RigTokenKindV6.CONTROL_TARGET,
-                RigTokenKindV6.CHAIN, RigTokenKindV6.CONSTRAINT,
+                RigTokenKindV6.CONSTRAINT,
                 RigTokenKindV6.CONSTRAINT_INPUT, RigTokenKindV6.CONSTRAINT_OUTPUT,
                 RigTokenKindV6.ANCHOR,
             ) and not control_intervention_qualified:

@@ -2390,6 +2390,10 @@ class RSSvNextStructuralTrainer:
                 "axis_teacher_sequence","axis_teacher_admission_key",
             } if self.product_axis_mira_weights.enabled else set()),
             *({
+                "axis_chain_joint_ids","axis_chain_vertex_mask",
+                "axis_chain_teacher_admission_key",
+            } if self.product_axis_mira_weights.chain_skin>0 else set()),
+            *({
                 "semantic_patch_target","semantic_patch_mask",
                 "semantic_qualification_key",
             } if self.product_semantic_weights.patch_axes>0

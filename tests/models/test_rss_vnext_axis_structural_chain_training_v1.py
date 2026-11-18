@@ -69,3 +69,15 @@ def test_structural_chain_receipt_cannot_license_ik_control():
         model,seq,structural_chains_qualified=True,
         control_intervention_qualified=True,
     ))
+
+
+def test_product_token_budget_can_hold_real_auxiliary_rigs():
+    from models.rss_vnext.contracts import RSSvNextConfig
+    cfg=RSSvNextConfig()
+    # 190 joints, 190 rest frames, four hard skin code tokens per joint,
+    # plus section sentinels, twenty auxiliary chains, and thirty controller
+    # events. This only proves syntactic capacity, NOT training or latency.
+    source_scale_minimum=190+190+190*cfg.skin_tokens_per_joint+8+20+30
+    assert source_scale_minimum == 1198
+    assert cfg.control_max_seq >= source_scale_minimum
+    assert cfg.axis_config().max_sequence_length >= cfg.control_max_seq

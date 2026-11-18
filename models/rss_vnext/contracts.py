@@ -46,6 +46,9 @@ class RSSvNextConfig:
     affordance_classes: int = 9
     graphics_channels: int = 5  # explicit RGB logits (3) + density + uncertainty
     relation_width: int = 256
+    # Product never consumes drawable/cut/attachment affinities without
+    # separately admitted intervention teachers. Research retains the head.
+    typed_region_relation_policy: str = "PRODUCT_NO_TYPED_RELATIONS"
     control_hidden_dim: int = 384
     control_layers: int = 8
     control_heads: int = 8
@@ -68,6 +71,10 @@ class RSSvNextConfig:
     def validate(self) -> None:
         self.iris.validate()
         self.tessa.validate()
+        if self.typed_region_relation_policy not in (
+            "PRODUCT_NO_TYPED_RELATIONS", "RESEARCH_SOURCE_QUALIFIED",
+        ):
+            raise ValueError("RSS_VNEXT_TYPED_RELATION_POLICY_INVALID")
         if self.tessa_surface_requirement not in (
             "REQUIRE_SIGNED_IRIS_SURFACE", "OPTIONAL_RESEARCH",
         ):
@@ -134,6 +141,7 @@ class RSSvNextConfig:
     def tiny_for_test(cls) -> "RSSvNextConfig":
         return cls(
             tessa_surface_requirement="OPTIONAL_RESEARCH",
+            typed_region_relation_policy="RESEARCH_SOURCE_QUALIFIED",
             iris=IRISVNextConfigV1(
                 image_token_dim=32, scene_dim=32, camera_embed_dim=16,
                 plane_size=2, plane_channels=8, field_hidden_dim=32,

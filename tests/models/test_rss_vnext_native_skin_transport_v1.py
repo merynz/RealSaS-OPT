@@ -38,6 +38,7 @@ def _fixture():
     receipt={
         "schema":RECEIPT_SCHEMA,
         "admission_status":"QUALIFIED_INDEPENDENT_SOURCE_FACE_TO_CANDIDATE_SKIN",
+        "dataset_manifest_sha256":"3"*64,
         "source_asset_sha256":witness.source_asset_sha256,
         "native_face_witness_sha256":witness.receipt_sha256(),
         "skin_transport_receipt_sha256":transport.receipt_sha256(),
@@ -54,6 +55,7 @@ def _replay(w,t,f,xyz,receipt):
     return t.replay(
         witness=w,candidate_faces=f,candidate_rest=xyz,
         trusted_source_registry={t.source_qualification_key:receipt},
+        dataset_manifest_sha256="3"*64,
         chunk_size=2,
     )
 
@@ -92,3 +94,9 @@ def test_skin_transport_refuses_invalid_native_weights_or_face_admission():
     changed=faces[:,[0,2,1]]
     with pytest.raises(ValueError,match="SOURCE_IDENTITY"):
         _replay(witness,transport,changed,xyz,receipt)
+
+
+def test_skin_receipt_must_bind_exact_dataset_manifest():
+    w,t,f,xyz,r=_fixture()
+    with pytest.raises(ValueError,match="SOURCE_RECEIPT_REQUIRED"):
+        _replay(w,t,f,xyz,{**r,"dataset_manifest_sha256":"4"*64})

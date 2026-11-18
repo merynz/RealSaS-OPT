@@ -233,7 +233,7 @@ class RSSvNextExpertEvidenceFanoutV1:
             relational_mechanics=(
                 "REGION_SLOTS_ONLY_MECHANICS_FROM_AXIS"
                 if self.model_config.typed_region_relation_policy=="PRODUCT_NO_TYPED_RELATIONS"
-                else "RESEARCH_TYPED_REGION_RELATIONS"
+                else "TYPED_AFFORDANCE_AND_DIRECTED_SLOT_RELATIONS"
             ),
             decoded_mesh_candidate=(
                 "UNQUALIFIED" if self.evidence.mesh_status != "ABSTAIN"

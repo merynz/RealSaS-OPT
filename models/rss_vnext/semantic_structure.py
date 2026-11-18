@@ -87,7 +87,10 @@ class RSSvNextGenericRegionStructure(nn.Module):
         ) / math.sqrt(point_h.shape[-1])
         return torch.cat((membership, self.unknown(point_h)), dim=-1)
 
-    def forward(self, point_h: Tensor, *, valid_mask: Tensor | None = None) -> RSSvNextRegionStructureOutput:
+    def forward(
+        self, point_h: Tensor, *, valid_mask: Tensor | None = None,
+        compute_typed_relations: bool = True,
+    ) -> RSSvNextRegionStructureOutput:
         if point_h.ndim != 3 or not point_h.shape[1] or not torch.isfinite(point_h).all():
             raise ValueError("RSS_VNEXT_REGION_SOURCE_FIELD_INVALID")
         b, n, d = point_h.shape
@@ -105,13 +108,18 @@ class RSSvNextGenericRegionStructure(nn.Module):
         slots = self.norm(q + context)
         for layer in self.layers:
             slots = slots + layer(slots)
-        a = slots[:, :, None, :].expand(-1, -1, self.region_slots_count, -1)
-        bslot = slots[:, None, :, :].expand(-1, self.region_slots_count, -1, -1)
-        pair = self.pair(torch.cat((a, bslot, a - bslot, a * bslot), dim=-1))
-        # A continuous assignment graph can represent symmetric affinities
-        # and a directed attachment likelihood without inventing parentage.
-        symmetric = .5 * (pair[..., :2] + pair.transpose(1, 2)[..., :2])
-        pair = torch.cat((symmetric, pair[..., 2:3]), dim=-1)
+        if compute_typed_relations:
+            a = slots[:, :, None, :].expand(-1, -1, self.region_slots_count, -1)
+            bslot = slots[:, None, :, :].expand(-1, self.region_slots_count, -1, -1)
+            pair = self.pair(torch.cat((a, bslot, a - bslot, a * bslot), dim=-1))
+            # Only research with qualified edit/cut/intervention source teachers.
+            symmetric = .5 * (pair[..., :2] + pair.transpose(1, 2)[..., :2])
+            pair = torch.cat((symmetric, pair[..., 2:3]), dim=-1)
+        else:
+            # ABI-preserving sentinel, NOT three zero-probability labels.
+            # Fanout must reject queries rather than sigmoid(0) => fake 0.5.
+            pair = slots.new_zeros((slots.shape[0], self.region_slots_count,
+                                    self.region_slots_count, 3))
         diagonal = torch.eye(
             self.region_slots_count, device=point_h.device, dtype=torch.bool,
         )[None].expand(point_h.shape[0], -1, -1)

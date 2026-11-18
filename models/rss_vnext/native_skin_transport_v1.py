@@ -32,6 +32,10 @@ class SourceNativeCandidateSkinTransportV1:
     source_qualification_key: str
     native_face_witness_sha256: str
     source_candidate_mesh_face_sha256: str
+    # Source foundry proves that native skin columns are the SAME ordered
+    # JOINT events as AXIS's source teacher; a matching tensor J is not proof.
+    axis_teacher_sequence_sha256: str
+    native_skin_joint_order_sha256: str
     native_skin: Tensor                 # [N,J], indexed on original vertices
     candidate_native_face_ids: Tensor  # [V], exact source face address
     candidate_barycentric: Tensor      # [V,3], independently admitted
@@ -44,6 +48,8 @@ class SourceNativeCandidateSkinTransportV1:
             "source_qualification_key":self.source_qualification_key,
             "native_face_witness_sha256":self.native_face_witness_sha256,
             "source_candidate_mesh_face_sha256":self.source_candidate_mesh_face_sha256,
+            "axis_teacher_sequence_sha256":self.axis_teacher_sequence_sha256,
+            "native_skin_joint_order_sha256":self.native_skin_joint_order_sha256,
             "source_candidate_support_derivation":self.source_candidate_support_derivation,
             "native_skin_sha256":tensor_sha256_v1(self.native_skin),
             "candidate_native_face_ids_sha256":tensor_sha256_v1(self.candidate_native_face_ids),
@@ -56,6 +62,7 @@ class SourceNativeCandidateSkinTransportV1:
         candidate_faces:Tensor, candidate_rest:Tensor,
         trusted_source_registry:Mapping[str,Mapping[str,object]],
         dataset_manifest_sha256:str,
+        expected_axis_teacher_sequence_sha256:str,
         projection_tolerance_ratio:float=.07,
         chunk_size:int=4096,
     ) -> Tensor:
@@ -81,6 +88,13 @@ class SourceNativeCandidateSkinTransportV1:
             or type(dataset_manifest_sha256) is not str
             or len(dataset_manifest_sha256) != 64
             or any(c not in "0123456789abcdef" for c in dataset_manifest_sha256)
+            or type(expected_axis_teacher_sequence_sha256) is not str
+            or len(expected_axis_teacher_sequence_sha256) != 64
+            or any(c not in "0123456789abcdef" for c in expected_axis_teacher_sequence_sha256)
+            or self.axis_teacher_sequence_sha256 != expected_axis_teacher_sequence_sha256
+            or type(self.native_skin_joint_order_sha256) is not str
+            or len(self.native_skin_joint_order_sha256) != 64
+            or any(c not in "0123456789abcdef" for c in self.native_skin_joint_order_sha256)
             or self.source_asset_sha256 != witness.source_asset_sha256
             or self.native_face_witness_sha256 != witness.receipt_sha256()
             or self.source_candidate_support_derivation != DERIVATION
@@ -126,6 +140,9 @@ class SourceNativeCandidateSkinTransportV1:
             "source_asset_sha256":witness.source_asset_sha256,
             "native_face_witness_sha256":witness.receipt_sha256(),
             "skin_transport_receipt_sha256":self.receipt_sha256(),
+            "axis_teacher_sequence_sha256":expected_axis_teacher_sequence_sha256,
+            "native_skin_joint_order_sha256":self.native_skin_joint_order_sha256,
+            "native_skin_columns_match_axis_joint_order":True,
             "candidate_faces_sha256":tensor_sha256_v1(candidate_faces),
             "candidate_source_support_not_student_nearest":True,
             "source_rights_independently_verified":True,

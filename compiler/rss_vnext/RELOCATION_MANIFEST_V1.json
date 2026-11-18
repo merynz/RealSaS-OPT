@@ -26,7 +26,8 @@
     {
       "old_path": "compiler/realsas_compiler_core/rss_vnext_expert_fanout_v1.py",
       "new_path": "compiler/rss_vnext/core/rss_vnext_expert_fanout_v1.py",
-      "git_blob_sha1": "18e14adc74aeb417cbe9905fd7d3fe8a14ad050c"
+      "git_blob_sha1": "c9cfc8e2073ac1100206c3c5020b22e985edd801",
+      "original_git_blob_sha1": "18e14adc74aeb417cbe9905fd7d3fe8a14ad050c"
     },
     {
       "old_path": "compiler/realsas_compiler_core/rss_vnext_face_relation_schedule_v1.py",

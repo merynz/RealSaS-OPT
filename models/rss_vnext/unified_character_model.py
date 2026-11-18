@@ -607,7 +607,12 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             "unsigned_distance": F.softplus(self.udf(h)).squeeze(-1),
             "sign_logit": self.sign_logit(h).squeeze(-1),
         }
-        regions = self.semantic_structure(h)
+        use_typed_relations=(
+            self.cfg.typed_region_relation_policy=="RESEARCH_SOURCE_QUALIFIED"
+        )
+        regions = self.semantic_structure(
+            h, compute_typed_relations=use_typed_relations,
+        )
         presentation_logits = self.presentation_role_head(h)
         relation_valid = regions.relation_valid_mask.unsqueeze(-1)
         relation_values = regions.relation_logits.masked_fill(~relation_valid, 0.0)
@@ -615,9 +620,12 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         incoming_count = relation_valid.sum(dim=1).clamp_min(1)
         outgoing = relation_values.sum(dim=2) / outgoing_count
         incoming = relation_values.sum(dim=1) / incoming_count
+        # Anonymous source regions still inform topology and AXIS, but
+        # untrained drawable/cut/contact affinities never condition Mechanics.
         relation_tokens = (
             regions.region_slots
             + self.region_graph_to_memory(torch.cat((outgoing, incoming), dim=-1))
+            if use_typed_relations else regions.region_slots
         )
         return RSSvNextSceneState(
             observed_rgba=rgba,
@@ -826,6 +834,8 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         )
 
     def _relation_logits(self, state: RSSvNextSceneState, pair_indices: Tensor | None) -> Tensor | None:
+        if pair_indices is not None and self.cfg.typed_region_relation_policy != "RESEARCH_SOURCE_QUALIFIED":
+            raise ValueError("RSS_VNEXT_PRODUCT_TYPED_QUERY_RELATIONS_DISABLED")
         if pair_indices is None:
             return None
         b, n, d = state.local_features.shape
@@ -1018,7 +1028,11 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 anchor_face_candidate = self.anchor_face_correspondence(
                     mesh=mesh, axis_hidden=controls["hidden"],
                     axis_sequence=rig_sequence,
-                    region_relation_logits=state.region_relation_logits,
+                    region_relation_logits=(
+                        state.region_relation_logits
+                        if self.cfg.typed_region_relation_policy=="RESEARCH_SOURCE_QUALIFIED"
+                        else None
+                    ),
                 )
             kinds = rig_sequence.kind_ids
             if bool((kinds == int(RigTokenKindV6.SKIN_CODE)).any()):
@@ -1539,7 +1553,11 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             result["anchor_face_candidate"] = self.anchor_face_correspondence(
                 mesh=mesh, axis_hidden=control_out["hidden"],
                 axis_sequence=seq,
-                region_relation_logits=out.state.region_relation_logits,
+                region_relation_logits=(
+                    out.state.region_relation_logits
+                    if self.cfg.typed_region_relation_policy=="RESEARCH_SOURCE_QUALIFIED"
+                    else None
+                ),
             )
             if bool((seq.kind_ids == int(RigTokenKindV6.SKIN_CODE)).any()):
                 mechanics_h = (

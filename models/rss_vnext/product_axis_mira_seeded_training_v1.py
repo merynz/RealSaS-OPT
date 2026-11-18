@@ -32,6 +32,8 @@ from .seeded_pose_consequence_objective_v1 import (
     exact_m_qualified_pose_strain_v1,
 )
 from .animation_ready_mesh import posed_lbs_from_joint_matrices
+from .qualified_chain_skin_v1 import qualified_source_chain_skin_loss_v1
+from .axis_mechanical_chain_partition_v1 import assert_qualified_chain_partition_matches_axis_v1
 
 
 @dataclass(frozen=True)
@@ -41,6 +43,7 @@ class ProductSeededAXISMIRAWeightsV1:
     posed_surface: float = 0.
     dynamic_surface: float = 0.
     hard_skin: float = 0.
+    chain_skin: float = 0.  # source-qualified joint->chain partition; no named ontology
 
     def validate(self) -> None:
         if any(type(v) not in (float,int) or not math.isfinite(v) or v<0
@@ -48,7 +51,7 @@ class ProductSeededAXISMIRAWeightsV1:
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_MIRA_WEIGHT_POLICY")
         if (
             (self.source_skin>0 or self.posed_surface>0
-             or self.dynamic_surface>0 or self.hard_skin>0)
+             or self.dynamic_surface>0 or self.hard_skin>0 or self.chain_skin>0)
             and self.axis_program<=0
         ) or (self.dynamic_surface>0 and self.posed_surface<=0):
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_MIRA_PHASE_ORDER")
@@ -67,6 +70,8 @@ class ProductSeededAXISMIRAResultV1:
     dynamic: Tensor | None
     hard_skin: Tensor | None
     eligible_pose_faces: int
+    chain_skin: Tensor | None = None
+    eligible_chain_vertices: int = 0
     authority: str = "SOURCE_NATIVE_RIG_POSE_LOSS_ONLY_NOT_MODEL_RELEASE"
 
 
@@ -77,11 +82,18 @@ def product_seeded_axis_mira_objective_v1(
     dataset_manifest_sha256: str,
     trusted_axis_teacher_registry: Mapping[str,Mapping[str,object]],
     trusted_native_pose_registry: Mapping[str,Mapping[str,object]],
+    trusted_chain_teacher_registry: Mapping[str,Mapping[str,object]],
     tensor_digest,
     axis_sequence_digest,
     frozen_codec_digest,
 ) -> ProductSeededAXISMIRAResultV1:
     weights.validate()
+    chain_fields=(
+        batch.axis_chain_joint_ids,batch.axis_chain_vertex_mask,
+        batch.axis_chain_teacher_admission_key,
+    )
+    if weights.chain_skin<=0 and any(x is not None and x!='' if isinstance(x,str) else x is not None for x in chain_fields):
+        raise ValueError("RSS_VNEXT_CHAIN_TEACHER_DISABLED_BUT_PRESENT")
     if not weights.enabled:
         if batch.axis_teacher_sequence is not None or batch.axis_teacher_admission_key:
             raise ValueError("RSS_VNEXT_SEEDED_AXIS_UNCONSUMED_SOURCE_TRUTH")
@@ -131,13 +143,19 @@ def product_seeded_axis_mira_objective_v1(
         tokens_per_joint=model.cfg.skin_tokens_per_joint,
         executable_constraint_operators=RIG_CONSTRAINT_OPERATOR_IDS_V1,
         control_intervention_qualified=intervention,
+        # Non-control CHAIN events are teachable from independently admitted
+        # source joint-parent and skin partitions, not from control motion.
+        # Exact registry, M* and causal chain replay are checked below before
+        # this objective may return to the optimizer.
+        structural_chains_qualified=weights.chain_skin>0,
     )
     total=weights.axis_program*axis_loss
-    skin_loss=pose_loss=dynamic_loss=hard_loss=None
+    skin_loss=pose_loss=dynamic_loss=hard_loss=chain_loss=None
     pose_count=0
+    chain_count=0
     needs_skin=any(v>0 for v in (
         weights.source_skin,weights.posed_surface,
-        weights.dynamic_surface,weights.hard_skin,
+        weights.dynamic_surface,weights.hard_skin,weights.chain_skin,
     ))
     if needs_skin:
         if not bool((seq.kind_ids==int(RigTokenKindV6.SKIN_CODE)).any()):
@@ -186,6 +204,40 @@ def product_seeded_axis_mira_objective_v1(
             or int(valid[0].sum())!=skin.shape[-1]
         ):
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_MIRA_SKIN_ADDRESS_DRIFT")
+        if weights.chain_skin>0:
+            cids=batch.axis_chain_joint_ids
+            vmask=batch.axis_chain_vertex_mask
+            receipt=trusted_chain_teacher_registry.get(
+                batch.axis_chain_teacher_admission_key,
+            )
+            if (
+                not isinstance(cids,Tensor) or not isinstance(vmask,Tensor)
+                or not isinstance(receipt,Mapping)
+                or any(receipt.get(k)!=v for k,v in {
+                    "admission_status":"QUALIFIED_SOURCE_NATIVE_JOINT_CHAIN_OWNERSHIP",
+                    "dataset_manifest_sha256":dataset_manifest_sha256,
+                    "source_qualification_key":batch.source_qualification_key,
+                    "source_asset_sha256":teacher.source_asset_sha256,
+                    "axis_teacher_sequence_sha256":axis_sequence_digest(seq),
+                    "source_candidate_skin_sha256":tensor_digest(source_skin),
+                    "joint_chain_ids_sha256":tensor_digest(cids),
+                    "qualified_vertex_mask_sha256":tensor_digest(vmask),
+                    "chain_supervision":"SOURCE_NATIVE_PARTITION_NOT_NAMED_BONE_HEURISTIC",
+                }.items())
+            ):
+                raise ValueError("RSS_VNEXT_CHAIN_TEACHER_UNQUALIFIED_OR_DRIFT")
+            # Native source ownership must agree with the *same* causal
+            # AXIS chain path program the student learns. Source bone names,
+            # part segments or teacher-only labels cannot substitute for a
+            # valid inference-time CHAIN event graph.
+            assert_qualified_chain_partition_matches_axis_v1(seq,cids)
+            chain=qualified_source_chain_skin_loss_v1(
+                predicted_skin=skin,source_skin=source_skin,
+                joint_chain_ids=cids,qualified_vertex_mask=vmask,
+            )
+            chain_loss=chain.total
+            chain_count=chain.eligible_vertex_count
+            total=total+weights.chain_skin*chain_loss
         if weights.source_skin>0:
             skin_loss=F.smooth_l1_loss(skin,source_skin)
             total=total+weights.source_skin*skin_loss
@@ -252,6 +304,7 @@ def product_seeded_axis_mira_objective_v1(
         total=total,axis=axis_loss,skin=skin_loss,
         posed=pose_loss,dynamic=dynamic_loss,hard_skin=hard_loss,
         eligible_pose_faces=pose_count,
+        chain_skin=chain_loss,eligible_chain_vertices=chain_count,
     )
 
 

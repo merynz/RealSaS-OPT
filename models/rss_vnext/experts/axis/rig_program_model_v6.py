@@ -289,6 +289,31 @@ class AXISSequenceV6:
         )
 
 
+def causal_chain_descendants_v6(
+    parents: tuple[int, ...], start_joint_index: int,
+) -> tuple[int, ...]:
+    """All joints which form a legal parent-contiguous chain from start.
+
+    This is deterministic constrained decoding of an *already predicted*
+    joint-parent graph, never a learned semantic role or repaired Compiler
+    topology. Every parent must precede its child.
+    """
+    count=len(parents)
+    if not 0 <= start_joint_index < count:
+        raise ValueError("AXIS_V6_CHAIN_START_OUT_OF_RANGE")
+    for i,p in enumerate(parents):
+        if type(p) is not int or not -1 <= p < i:
+            raise ValueError("AXIS_V6_CHAIN_PARENT_GRAPH_INVALID")
+    eligible=[]
+    for i in range(start_joint_index,count):
+        current=i
+        while current >= 0 and current != start_joint_index:
+            current=parents[current]
+        if current==start_joint_index:
+            eligible.append(i)
+    return tuple(eligible)
+
+
 class AXISRigProgramModelV6(nn.Module):
     architecture_id = AXIS_V6_PRODUCT_ARCHITECTURE_ID
 
@@ -484,8 +509,22 @@ class AXISRigProgramModelV6(nn.Module):
             elif kind == RigTokenKindV6.CONTROL_TARGET:
                 pa = self._pointer(last["pointer_a_logits"], state.joint_count, allow_null=False)
             elif kind == RigTokenKindV6.CHAIN:
-                pa = self._pointer(last["pointer_a_logits"], state.joint_count, allow_null=False)
-                pb = self._pointer(last["pointer_b_logits"], state.joint_count, allow_null=False)
+                pa = self._pointer(
+                    last["pointer_a_logits"], state.joint_count, allow_null=False,
+                )
+                parents=tuple(
+                    int(e.pointer_a) for e in events if e.kind==RigTokenKindV6.JOINT
+                )
+                if len(parents)!=state.joint_count:
+                    raise RuntimeError("AXIS_V6_CHAIN_CAUSAL_PARENT_COUNT_DRIFT")
+                eligible=causal_chain_descendants_v6(parents,pa)
+                allowed=torch.full_like(last["pointer_b_logits"],float("-inf"))
+                for joint_id in eligible:
+                    allowed[joint_id+1]=0.
+                pb = self._pointer(
+                    last["pointer_b_logits"]+allowed,
+                    state.joint_count,allow_null=False,
+                )
             elif kind == RigTokenKindV6.CONSTRAINT:
                 proposal_logits = last["constraint_operator_logits"]
                 if allowed_constraint_operators is not None:
@@ -529,6 +568,7 @@ def qualified_axis_rig_skin_sequence_loss_v6(
     tokens_per_joint: int,
     executable_constraint_operators: Sequence[str],
     control_intervention_qualified: bool,
+    structural_chains_qualified: bool = False,
 ) -> tuple[Tensor, dict[str, Tensor]]:
     """Source-admitted teacher-forced AXIS V6 autoregressive objective.
 
@@ -550,6 +590,7 @@ def qualified_axis_rig_skin_sequence_loss_v6(
     b, steps = teacher.kind_ids.shape
     for bi in range(b):
         state = RigGrammarStateV6()
+        parents: list[int] = []
         for step in range(steps):
             try:
                 kind = RigTokenKindV6(int(teacher.kind_ids[bi, step]))
@@ -558,9 +599,27 @@ def qualified_axis_rig_skin_sequence_loss_v6(
                 )
             except (ValueError, TypeError):
                 raise ValueError("AXIS_V6_TRAIN_TEACHER_GRAMMAR_INVALID") from None
+            # A causal CHAIN is mechanically observable from a source-native
+            # joint-parent graph. It needs its own admitted structural receipt,
+            # but not an invented IK/control intervention or animation clip.
+            if kind == RigTokenKindV6.JOINT:
+                parent=int(teacher.pointer_a[bi,step])
+                if parent < -1 or parent >= len(parents):
+                    raise ValueError("AXIS_V6_TRAIN_NONCAUSAL_JOINT_PARENT")
+                parents.append(parent)
+            if kind == RigTokenKindV6.CHAIN:
+                start=int(teacher.pointer_a[bi,step])
+                end=int(teacher.pointer_b[bi,step])
+                if (
+                    not 0 <= start < len(parents)
+                    or end not in causal_chain_descendants_v6(tuple(parents),start)
+                ):
+                    raise ValueError("AXIS_V6_TRAIN_NONANCESTRAL_CHAIN")
+                if not (control_intervention_qualified or structural_chains_qualified):
+                    raise ValueError("AXIS_V6_TRAIN_STRUCTURAL_CHAIN_PROOF_REQUIRED")
             if kind in (
                 RigTokenKindV6.CONTROL, RigTokenKindV6.CONTROL_TARGET,
-                RigTokenKindV6.CHAIN, RigTokenKindV6.CONSTRAINT,
+                RigTokenKindV6.CONSTRAINT,
                 RigTokenKindV6.CONSTRAINT_INPUT, RigTokenKindV6.CONSTRAINT_OUTPUT,
                 RigTokenKindV6.ANCHOR,
             ) and not control_intervention_qualified:
@@ -688,4 +747,5 @@ __all__ = [
     "CONSTRAINT_OPERATORS_V6", "DOF_LABELS_V6", "RigGrammarStateV6", "RigProgramEventV6",
     "RigSectionV6", "RigTokenKindV6", "rotation_6d_to_basis_v6",
     "qualified_axis_rig_skin_sequence_loss_v6",
+    "causal_chain_descendants_v6",
 ]

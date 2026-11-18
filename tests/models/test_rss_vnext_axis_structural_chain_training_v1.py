@@ -81,3 +81,24 @@ def test_product_token_budget_can_hold_real_auxiliary_rigs():
     assert source_scale_minimum == 1198
     assert cfg.control_max_seq >= source_scale_minimum
     assert cfg.axis_config().max_sequence_length >= cfg.control_max_seq
+
+
+def test_causal_generation_has_only_descendant_chain_targets():
+    from models.axis.rig_program_model_v6 import causal_chain_descendants_v6
+    parents=(-1,0,1,0,3)
+    assert causal_chain_descendants_v6(parents,0)==(0,1,2,3,4)
+    assert causal_chain_descendants_v6(parents,1)==(1,2)
+    assert causal_chain_descendants_v6(parents,3)==(3,4)
+    with pytest.raises(ValueError,match="CHAIN_START_OUT_OF_RANGE"):
+        causal_chain_descendants_v6(parents,5)
+    with pytest.raises(ValueError,match="CHAIN_PARENT_GRAPH_INVALID"):
+        causal_chain_descendants_v6((-1,2,0),0)
+
+
+def test_invalid_chain_teacher_rejected_even_when_source_claims_proof():
+    model,seq=_setup()
+    chain_token=int(torch.where(seq.kind_ids[0]==int(K.CHAIN))[0][0])
+    seq.pointer_a[0,chain_token]=1
+    seq.pointer_b[0,chain_token]=0
+    with pytest.raises(ValueError,match="NONANCESTRAL_CHAIN"):
+        _loss(model,seq,structural_chains_qualified=True)

@@ -33,6 +33,7 @@ from .seeded_pose_consequence_objective_v1 import (
 )
 from .animation_ready_mesh import posed_lbs_from_joint_matrices
 from .qualified_chain_skin_v1 import qualified_source_chain_skin_loss_v1
+from .axis_mechanical_chain_partition_v1 import assert_qualified_chain_partition_matches_axis_v1
 
 
 @dataclass(frozen=True)
@@ -220,6 +221,11 @@ def product_seeded_axis_mira_objective_v1(
                 }.items())
             ):
                 raise ValueError("RSS_VNEXT_CHAIN_TEACHER_UNQUALIFIED_OR_DRIFT")
+            # Native source ownership must agree with the *same* causal
+            # AXIS chain path program the student learns. Source bone names,
+            # part segments or teacher-only labels cannot substitute for a
+            # valid inference-time CHAIN event graph.
+            assert_qualified_chain_partition_matches_axis_v1(seq,cids)
             chain=qualified_source_chain_skin_loss_v1(
                 predicted_skin=skin,source_skin=source_skin,
                 joint_chain_ids=cids,qualified_vertex_mask=vmask,

@@ -184,6 +184,8 @@ def test_seeded_product_mira_source_skin_without_native_motion_clip(monkeypatch)
         source_qualification_key=teacher.source_qualification_key,
         native_face_witness_sha256=witness.receipt_sha256(),
         source_candidate_mesh_face_sha256=tensor_sha256_v1(faces),
+        axis_teacher_sequence_sha256=axis_teacher_sequence_sha256_v6(batch.axis_teacher_sequence),
+        native_skin_joint_order_sha256="9"*64,
         native_skin=xyz.new_ones((4,1)),
         candidate_native_face_ids=torch.tensor([0,0,0,1],dtype=torch.long),
         candidate_barycentric=torch.tensor([
@@ -197,6 +199,9 @@ def test_seeded_product_mira_source_skin_without_native_motion_clip(monkeypatch)
         "source_asset_sha256":teacher.source_asset_sha256,
         "native_face_witness_sha256":witness.receipt_sha256(),
         "skin_transport_receipt_sha256":support.receipt_sha256(),
+        "axis_teacher_sequence_sha256":axis_teacher_sequence_sha256_v6(batch.axis_teacher_sequence),
+        "native_skin_joint_order_sha256":"9"*64,
+        "native_skin_columns_match_axis_joint_order":True,
         "candidate_faces_sha256":tensor_sha256_v1(faces),
         "candidate_source_support_not_student_nearest":True,
         "source_rights_independently_verified":True,

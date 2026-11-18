@@ -192,6 +192,7 @@ def product_seeded_axis_mira_objective_v1(
                 candidate_rest=mesh.rest_vertices_iris,
                 trusted_source_registry=trusted_native_skin_registry,
                 dataset_manifest_sha256=dataset_manifest_sha256,
+                expected_axis_teacher_sequence_sha256=axis_sequence_digest(seq),
             )
         elif pose_support:
             # Pose-qualified legacy path remains unchanged for source-animated

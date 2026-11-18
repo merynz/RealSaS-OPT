@@ -55,6 +55,7 @@ class SourceNativeCandidateSkinTransportV1:
         self, *, witness:NativeFaceLayerSamplesV1,
         candidate_faces:Tensor, candidate_rest:Tensor,
         trusted_source_registry:Mapping[str,Mapping[str,object]],
+        dataset_manifest_sha256:str,
         projection_tolerance_ratio:float=.07,
         chunk_size:int=4096,
     ) -> Tensor:
@@ -77,6 +78,9 @@ class SourceNativeCandidateSkinTransportV1:
             or candidate_faces.ndim!=2 or candidate_faces.shape[-1]!=3
             or candidate_faces.dtype!=torch.long
             or len(candidate_faces)<1
+            or type(dataset_manifest_sha256) is not str
+            or len(dataset_manifest_sha256) != 64
+            or any(c not in "0123456789abcdef" for c in dataset_manifest_sha256)
             or self.source_asset_sha256 != witness.source_asset_sha256
             or self.native_face_witness_sha256 != witness.receipt_sha256()
             or self.source_candidate_support_derivation != DERIVATION
@@ -118,6 +122,7 @@ class SourceNativeCandidateSkinTransportV1:
         expected={
             "schema":RECEIPT_SCHEMA,
             "admission_status":"QUALIFIED_INDEPENDENT_SOURCE_FACE_TO_CANDIDATE_SKIN",
+            "dataset_manifest_sha256":dataset_manifest_sha256,
             "source_asset_sha256":witness.source_asset_sha256,
             "native_face_witness_sha256":witness.receipt_sha256(),
             "skin_transport_receipt_sha256":self.receipt_sha256(),

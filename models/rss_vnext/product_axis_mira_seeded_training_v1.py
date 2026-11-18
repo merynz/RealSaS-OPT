@@ -143,6 +143,11 @@ def product_seeded_axis_mira_objective_v1(
         tokens_per_joint=model.cfg.skin_tokens_per_joint,
         executable_constraint_operators=RIG_CONSTRAINT_OPERATOR_IDS_V1,
         control_intervention_qualified=intervention,
+        # Non-control CHAIN events are teachable from independently admitted
+        # source joint-parent and skin partitions, not from control motion.
+        # Exact registry, M* and causal chain replay are checked below before
+        # this objective may return to the optimizer.
+        structural_chains_qualified=weights.chain_skin>0,
     )
     total=weights.axis_program*axis_loss
     skin_loss=pose_loss=dynamic_loss=hard_loss=chain_loss=None

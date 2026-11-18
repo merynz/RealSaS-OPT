@@ -113,12 +113,12 @@ def test_untrusted_axis_source_and_fake_teacher_frozen_codec_fail_closed(monkeyp
         trainer.objective(batch)
 
 
-def test_source_skin_pose_requires_exact_native_witness_not_vertex_count(monkeypatch):
+def test_source_skin_requires_real_face_support_not_merely_vertex_count(monkeypatch):
     _,batch,make,*_=_rig_case(monkeypatch)
     trainer=make(weights=ProductSeededAXISMIRAWeightsV1(
         axis_program=1.,source_skin=1.,
     ))
-    with pytest.raises(ValueError,match="AXIS_NATIVE_POSE_REQUIRED"):
+    with pytest.raises(ValueError,match="AXIS_SOURCE_FACE_REQUIRED"):
         trainer.objective(batch)
 
 

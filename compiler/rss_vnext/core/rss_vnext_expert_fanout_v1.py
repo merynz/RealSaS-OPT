@@ -206,6 +206,9 @@ class RSSvNextExpertEvidenceFanoutV1:
             rtol=0.0, atol=1.0e-5,
         ):
             raise QualificationError("RSS_VNEXT_FANOUT_SYMMETRIC_REGION_CHANNEL_DRIFT")
+        if model_config.typed_region_relation_policy=="PRODUCT_NO_TYPED_RELATIONS":
+            if bool((relation != 0.).any()):
+                raise QualificationError("RSS_VNEXT_PRODUCT_TYPED_RELATION_CARRIER_NOT_DISABLED")
         self.schema = SCHEMA
         self.evidence = evidence
         self.model_config = model_config
@@ -227,7 +230,11 @@ class RSSvNextExpertEvidenceFanoutV1:
         return RSSvNextExpertAvailabilityV1(
             semantic_and_presentation="TYPED_NEURAL_CANDIDATE",
             geometry_and_graphics_field="TYPED_NEURAL_CANDIDATE",
-            relational_mechanics="TYPED_AFFORDANCE_AND_DIRECTED_SLOT_RELATIONS",
+            relational_mechanics=(
+                "REGION_SLOTS_ONLY_MECHANICS_FROM_AXIS"
+                if self.model_config.typed_region_relation_policy=="PRODUCT_NO_TYPED_RELATIONS"
+                else "RESEARCH_TYPED_REGION_RELATIONS"
+            ),
             decoded_mesh_candidate=(
                 "UNQUALIFIED" if self.evidence.mesh_status != "ABSTAIN"
                 else "ABSTAIN_NO_TOPOLOGY"
@@ -291,6 +298,7 @@ class RSSvNextExpertEvidenceFanoutV1:
     def region_relation(
         self, from_slot_index: int, to_slot_index: int,
     ) -> RSSvNextTypedRegionRelationV1:
+        self._require_research_typed_relations()
         _checked_index(
             from_slot_index, self.region_slot_count,
             "RSS_VNEXT_FANOUT_FROM_SLOT_INVALID",
@@ -314,7 +322,12 @@ class RSSvNextExpertEvidenceFanoutV1:
             directed_attachment_affinity=_prob(raw[2]),
         )
 
+    def _require_research_typed_relations(self) -> None:
+        if self.model_config.typed_region_relation_policy!="RESEARCH_SOURCE_QUALIFIED":
+            raise QualificationError("RSS_VNEXT_PRODUCT_TYPED_REGION_RELATIONS_DISABLED")
+
     def region_relation_matrix_v1(self) -> Tensor:
+        self._require_research_typed_relations()
         """Bounded R×R typed view; no giant N×N or F×F duplication.
 
         Return a detached *copy* of the small learned relation expert, never
@@ -337,6 +350,7 @@ class RSSvNextExpertEvidenceFanoutV1:
         qualified_source_typed_relation_loss; an argmax slot or arbitrary
         source part mapping would be an irreversible evidence bottleneck.
         """
+        self._require_research_typed_relations()
         if not isinstance(ordered_query_pairs, (tuple, list)):
             raise QualificationError("RSS_VNEXT_FANOUT_PAIR_BATCH_TYPE_INVALID")
         if len(ordered_query_pairs) > self.model_config.max_pair_queries:

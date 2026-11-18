@@ -164,6 +164,10 @@ class RSSvNextStructuralTrainingBatch:
     # admission. Control/constraint tokens additionally need intervention truth.
     axis_teacher_sequence: AXISSequenceV6 | None = None
     axis_teacher_admission_key: str = ""
+    # Externally admitted native joint -> mechanical chain partition. -1=UNKNOWN.
+    axis_chain_joint_ids: Tensor | None = None  # [J] aligned to native AXIS order
+    axis_chain_vertex_mask: Tensor | None = None  # [1,V] exact final M* vertex order
+    axis_chain_teacher_admission_key: str = ""
     # Independent source-native, LBS-qualified pose surface samples in the
     # exact matched TESSA mesh/AXIS joint domain; never generated-view truth.
     axis_pose_joint_skin_matrices: Tensor | None = None  # [1,P,J,4,4]
@@ -457,6 +461,7 @@ class RSSvNextStructuralTrainer:
         trusted_region_pair_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_typed_relation_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_axis_teacher_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_chain_teacher_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_axis_pose_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_anchor_face_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_signed_source_registry: Mapping[str, Mapping[str, object]] | None = None,
@@ -551,6 +556,8 @@ class RSSvNextStructuralTrainer:
         if not isinstance(product_axis_mira_weights,ProductSeededAXISMIRAWeightsV1):
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_MIRA_PHASE_POLICY")
         product_axis_mira_weights.validate()
+        if product_axis_mira_weights.chain_skin>0 and not trusted_chain_teacher_registry:
+            raise ValueError("RSS_VNEXT_CHAIN_SKIN_REQUIRES_SOURCE_NATIVE_REGISTRY")
         if product_axis_mira_weights.enabled and (
             not seeded_mode or not trusted_axis_teacher_registry
             or axis_training_policy!="PRODUCT_MESH_MATCHED_REQUIRED"
@@ -852,6 +859,18 @@ class RSSvNextStructuralTrainer:
             hashlib.sha256(json.dumps(
                 axis_snapshot, sort_keys=True, separators=(",", ":"), allow_nan=False,
             ).encode("utf8")).hexdigest() if axis_snapshot else ""
+        )
+        chain_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_chain_teacher_registry or {}).items()
+        }
+        self.trusted_chain_teacher_registry = MappingProxyType({
+            key: MappingProxyType(value) for key, value in chain_snapshot.items()
+        })
+        self.chain_teacher_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                chain_snapshot, sort_keys=True, separators=(",", ":"), allow_nan=False,
+            ).encode("utf8")).hexdigest() if chain_snapshot else ""
         )
         pose_snapshot = {
             str(key): dict(value)
@@ -2634,6 +2653,7 @@ class RSSvNextStructuralTrainer:
             dataset_manifest_sha256=self.dataset_manifest_sha256,
             trusted_axis_teacher_registry=self.trusted_axis_teacher_registry,
             trusted_native_pose_registry=driver.trusted_registry,
+            trusted_chain_teacher_registry=self.trusted_chain_teacher_registry,
             tensor_digest=source_surface_tensor_sha256,
             axis_sequence_digest=axis_teacher_sequence_sha256_v6,
             frozen_codec_digest=frozen_mira_codec_state_sha256_v6,
@@ -2725,6 +2745,7 @@ class RSSvNextStructuralTrainer:
                     ("axis",axis_mira.axis),("skin",axis_mira.skin),
                     ("posed",axis_mira.posed),("dynamic",axis_mira.dynamic),
                     ("hard_skin",axis_mira.hard_skin),
+                    ("chain_skin",axis_mira.chain_skin),
                 ) if v is not None
             },
             axis_rig_skin_loss=axis_mira.axis,
@@ -3000,6 +3021,7 @@ class RSSvNextStructuralTrainer:
             "region_pair_registry_sha256": self.region_pair_registry_sha256,
             "typed_relation_registry_sha256": self.typed_relation_registry_sha256,
             "axis_teacher_registry_sha256": self.axis_teacher_registry_sha256,
+            "chain_teacher_registry_sha256": self.chain_teacher_registry_sha256,
             "topology_teacher_registry_sha256": self.topology_teacher_registry_sha256,
             "axis_pose_registry_sha256": self.axis_pose_registry_sha256,
             "anchor_face_registry_sha256": self.anchor_face_registry_sha256,
@@ -3075,6 +3097,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_TOPOLOGY_TEACHER_REGISTRY_DRIFT")
         if data.get("axis_teacher_registry_sha256", "") != self.axis_teacher_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_AXIS_TEACHER_REGISTRY_DRIFT")
+        if data.get("chain_teacher_registry_sha256", "") != self.chain_teacher_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_CHAIN_TEACHER_REGISTRY_DRIFT")
         if data.get("axis_pose_registry_sha256", "") != self.axis_pose_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_AXIS_POSE_REGISTRY_DRIFT")
         if data.get("anchor_face_registry_sha256", "") != self.anchor_face_registry_sha256:

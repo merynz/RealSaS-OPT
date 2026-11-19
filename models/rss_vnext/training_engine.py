@@ -489,6 +489,7 @@ class RSSvNextStructuralTrainer:
         product_semantic_weights: ProductSemanticWeightsV1 = ProductSemanticWeightsV1(),
         product_axis_mira_weights: ProductSeededAXISMIRAWeightsV1 = ProductSeededAXISMIRAWeightsV1(),
         product_anchor_face_weight: float = 0.0,
+        allow_sparse_qualified_source_batches: bool = False,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -503,6 +504,11 @@ class RSSvNextStructuralTrainer:
         ):
             raise ValueError("RSS_VNEXT_TRAIN_UNKNOWN_GEOMETRY_PROFILE")
         seeded_mode = training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1"
+        if (
+            type(allow_sparse_qualified_source_batches) is not bool
+            or (allow_sparse_qualified_source_batches and not seeded_mode)
+        ):
+            raise ValueError("RSS_VNEXT_SPARSE_SOURCE_BATCH_PHASE_POLICY")
         component_mode = training_profile == "PRODUCT_COMPONENT_UDF_V1"
         if type(component_udf_weight) not in (float,int):
             raise ValueError("RSS_VNEXT_PRODUCT_COMPONENT_UDF_PHASE_POLICY")
@@ -677,6 +683,7 @@ class RSSvNextStructuralTrainer:
         self.product_semantic_active = semantic_active
         self.product_axis_mira_weights = product_axis_mira_weights
         self.product_anchor_face_weight = float(product_anchor_face_weight)
+        self.allow_sparse_qualified_source_batches = allow_sparse_qualified_source_batches
         component_snapshot = {
             str(k): dict(v)
             for k,v in (trusted_component_udf_registry or {}).items()
@@ -750,6 +757,10 @@ class RSSvNextStructuralTrainer:
                 "product_axis_mira_weights":asdict(self.product_axis_mira_weights),
                 "requires_exact_native_mstar_face_pose_and_pinned_codec":True,
             } if self.product_axis_mira_weights.enabled else {}),
+            **({
+                "allow_sparse_qualified_source_batches":True,
+                "missing_source_truth_is_unknown_not_verified_absent":True,
+            } if self.allow_sparse_qualified_source_batches else {}),
             **({
                 "product_anchor_face_weight":self.product_anchor_face_weight,
                 "seeded_anchor_native_mstar_address_required":True,
@@ -2702,11 +2713,20 @@ class RSSvNextStructuralTrainer:
             source_face_budget=batch.seeded_tessa_source_face_budget,
             sampler_step=self.global_step,
         )
+        axis_fields_absent=(
+            batch.axis_teacher_sequence is None
+            and not batch.axis_teacher_admission_key
+        )
+        axis_weights=(
+            ProductSeededAXISMIRAWeightsV1()
+            if self.allow_sparse_qualified_source_batches and axis_fields_absent
+            else self.product_axis_mira_weights
+        )
         axis_mira=product_seeded_axis_mira_objective_v1(
             model=self.model,state=state,mesh=mesh,
             structural_memory=structural_memory,
             teacher=teacher,batch=batch,
-            weights=self.product_axis_mira_weights,
+            weights=axis_weights,
             dataset_manifest_sha256=self.dataset_manifest_sha256,
             trusted_axis_teacher_registry=self.trusted_axis_teacher_registry,
             trusted_native_pose_registry=driver.trusted_registry,
@@ -2804,7 +2824,11 @@ class RSSvNextStructuralTrainer:
             anchor_negative = qualified.eligible_negative
         component = (
             self._component_udf_objective_v1(batch,state)
-            if self.component_udf_enabled else None
+            if self.component_udf_enabled
+            and (
+                not self.allow_sparse_qualified_source_batches
+                or batch.component_udf_source_teacher is not None
+            ) else None
         )
         rgb_loss,n_rgb=product_source_graphics_loss_v1(
             model=self.model,state=state,
@@ -2848,6 +2872,7 @@ class RSSvNextStructuralTrainer:
             (self.product_graphics_rgb_weight>0
              or self.product_joint_ray_weight>0)
             and rgb_loss is None and ray_loss is None
+            and not self.allow_sparse_qualified_source_batches
         ):
             raise ValueError("RSS_VNEXT_PRODUCT_GRAPHICS_ENABLED_NO_SOURCE_TRUTH")
         semantic=product_source_semantic_objective_v1(
@@ -2859,6 +2884,7 @@ class RSSvNextStructuralTrainer:
             trusted_region_registry=self.trusted_region_pair_registry,
             trusted_typed_registry=self.trusted_typed_relation_registry,
             tensor_digest=source_surface_tensor_sha256,
+            allow_absent_qualified_targets=self.allow_sparse_qualified_source_batches,
         )
         joint_total = losses["total"] + (
             self.component_udf_weight * component["total"]
@@ -3043,6 +3069,14 @@ class RSSvNextStructuralTrainer:
             if coefficient <= 0:
                 return
             if (
+                self.allow_sparse_qualified_source_batches
+                and loss is None
+                and name.startswith(("axis_mira.","semantic."))
+            ):
+                # This specific source witness does not exist on this asset.
+                # Incomplete provided teachers still fail at their input gate.
+                return
+            if (
                 not isinstance(loss,Tensor) or loss.numel()!=1
                 or not bool(torch.isfinite(loss).all())
             ):
@@ -3066,11 +3100,14 @@ class RSSvNextStructuralTrainer:
         if result.anchor_face_correspondence_loss is not None:
             add("product_anchor_face",result.anchor_face_correspondence_loss,
                 self.product_anchor_face_weight)
-        add("component_udf", result.component_udf_loss,self.component_udf_weight)
-        add("source_graphics_rgb",result.graphics_source_rgb_loss,
-            self.product_graphics_rgb_weight)
-        add("joint_source_rays",result.realsas_joint_slrm_loss,
-            self.product_joint_ray_weight)
+        if result.component_udf_loss is not None or not self.allow_sparse_qualified_source_batches:
+            add("component_udf", result.component_udf_loss,self.component_udf_weight)
+        if result.graphics_source_rgb_loss is not None or not self.allow_sparse_qualified_source_batches:
+            add("source_graphics_rgb",result.graphics_source_rgb_loss,
+                self.product_graphics_rgb_weight)
+        if result.realsas_joint_slrm_loss is not None or not self.allow_sparse_qualified_source_batches:
+            add("joint_source_rays",result.realsas_joint_slrm_loss,
+                self.product_joint_ray_weight)
         if not admitted:
             raise RuntimeError("RSS_VNEXT_SEEDED_GRADIENT_AUDIT_NO_LIVE_OBJECTIVE")
         report = audit_rss_vnext_gradient_interference_v1(

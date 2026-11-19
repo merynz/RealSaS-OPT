@@ -38,6 +38,7 @@ from .animation_ready_mesh import posed_lbs_from_joint_matrices
 from .qualified_chain_skin_v1 import qualified_source_chain_skin_loss_v1
 from .native_skin_transport_v1 import SourceNativeCandidateSkinTransportV1
 from .axis_mechanical_chain_partition_v1 import assert_qualified_chain_partition_matches_axis_v1
+from .hierarchical_skin_field_v1 import axis_joint_group_ids_v1
 
 
 @dataclass(frozen=True)
@@ -354,6 +355,7 @@ def product_seeded_axis_mira_objective_v1(
             hard=model.mira.decode_discrete_skin_v1(
                 mesh.mechanics_local_features,mesh.rest_vertices_iris,
                 joint_state[:,:joints],ids,vertex_normals=mesh.normals,
+                joint_group_ids=axis_joint_group_ids_v1(seq)[None],
             )
             if hard.shape!=source_skin.shape:
                 raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_MIRA_HARD_SKIN_SHAPE")

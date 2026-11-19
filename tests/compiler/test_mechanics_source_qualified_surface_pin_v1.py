@@ -78,6 +78,9 @@ def _case(*,pins=("MV:0",),source_pins=("NATIVE:0",)):
         host_canonical_chain_id=bundle.rig.chains[0].canonical_chain_id,
         source_native_face_indices=(7,),
         canonical_face_indices=(0,),
+        source_native_face_corner_barycentric=(
+            ((1.,0.,0.),(0.,1.,0.),(0.,0.,1.)),
+        ),
         source_native_pin_vertex_ids=source_pins,
         canonical_pin_vertex_ids=pins,
         native_open_boundary_sha256="d"*64,
@@ -238,3 +241,34 @@ def test_unknown_native_pin_is_not_verified_negative_or_auto_activation():
         prepare_source_qualified_open_surface_xpbd_v1(
             **{**args,"program":missing},
         )
+
+
+def test_one_native_face_can_parent_multiple_refined_mstar_children():
+    from compiler.realsas_compiler_core.mechanics_source_qualified_surface_pin_v1 import (
+        _validate_native_face_corners_v1,
+    )
+    _,_,_,args=_case()
+    p=args["program"]
+    # Two triangles split from ONE native face. Positive winding and all
+    # barycentric children are exact addresses, not nearest-vertex guesses.
+    refined=replace(
+        p,source_native_face_indices=(7,7),
+        canonical_face_indices=(10,11),
+        source_native_face_corner_barycentric=(
+            ((1.,0.,0.),(.5,.5,0.),(.5,0.,.5)),
+            ((.5,.5,0.),(0.,1.,0.),(.5,0.,.5)),
+        ),
+    )
+    _validate_native_face_corners_v1(refined)
+    assert refined.transport_hash()!=p.transport_hash()
+    bad=replace(
+        refined,source_native_face_corner_barycentric=(
+            refined.source_native_face_corner_barycentric[0],
+            ((1.,0.,0.),(1.,0.,0.),(0.,1.,0.)),
+        ),
+    )
+    with pytest.raises(QualificationError,match="FACE_BARYCENTRIC_INVALID"):
+        _validate_native_face_corners_v1(bad)
+    wrong=replace(refined,source_native_face_corner_barycentric=())
+    with pytest.raises(QualificationError,match="FACE_BARYCENTRIC_CARDINALITY"):
+        _validate_native_face_corners_v1(wrong)

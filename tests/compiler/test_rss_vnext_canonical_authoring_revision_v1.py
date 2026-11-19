@@ -25,6 +25,128 @@ from tests.compiler.test_rss_vnext_native_preview_package_v1 import (
 )
 
 
+def _multijoint_preview_fixture(tmp_path):
+    """Two-view canonical Geometry/Graphics with TEST-ONLY second deform joint.
+
+    The live two-image test pipeline currently qualifies exactly one joint.
+    Painting a different valid simplex requires >=2 joints, not fake weights
+    such as root=0.3. Add a second independently marked *regression-only*
+    deform joint to the already compiled developer .rss and recompute all
+    real Rig/Skin/pose hashes. No source rig or training truth is asserted.
+    This regression adapter is never a product compiler input.
+    """
+    from compiler.realsas_compiler_core.canonical_rig_ir_v2 import (
+        _hash_deform_structure,_hash_control_program,
+        canonical_rig_lineage_hash_v2,validate_canonical_rig_domain_v2,
+    )
+    from compiler.realsas_compiler_core.canonical_skin_ir_v2 import (
+        canonical_skin_lineage_hash_v2,validate_canonical_skin_domain_v2,
+    )
+    from compiler.rss_vnext.workers.rss_vnext_native_preview_package_v1 import (
+        _make_pose_binary,
+    )
+    original,manifest,mesh,rig,skin,controls=_compiled_preview_fixture(tmp_path)
+    if len(rig.joints)>=2:
+        return original,manifest,mesh,rig,skin,controls
+    assert len(rig.joints)==1
+    base=reopen_rss_vnext_native_preview_package_v1(original)
+    root=rig.joints[0]
+    child_id="J:USER_EDIT_REGRESSION_ONLY_CHILD"
+    child=replace(
+        root,canonical_joint_id=child_id,
+        parent_canonical_joint_id=root.canonical_joint_id,
+        source_proposal_joint_id="TEST_ONLY_NOT_NATIVE_SOURCE",
+        P=(root.P[0]+.12,root.P[1]+.01,root.P[2]),
+        metadata={**root.metadata,"regression_only_not_source_qualified":True},
+    )
+    frame=replace(
+        rig.local_frames[0],canonical_joint_id=child_id,
+        metadata={
+            **rig.local_frames[0].metadata,
+            "regression_only_not_source_qualified":True,
+        },
+    )
+    revised_rig=replace(
+        rig,joints=rig.joints+(child,),
+        local_frames=rig.local_frames+(frame,),
+        deform_structure_hash="",control_program_hash="",rig_lineage_hash="",
+        metadata={
+            **rig.metadata,
+            "second_joint_regression_only_not_native_truth":True,
+        },
+    )
+    revised_rig=replace(
+        revised_rig,
+        deform_structure_hash=_hash_deform_structure(revised_rig),
+    )
+    revised_rig=replace(
+        revised_rig,
+        control_program_hash=_hash_control_program(revised_rig),
+    )
+    revised_rig=replace(
+        revised_rig,
+        rig_lineage_hash=canonical_rig_lineage_hash_v2(revised_rig),
+    )
+    validate_canonical_rig_domain_v2(revised_rig)
+    root_id=root.canonical_joint_id
+    rows=list(skin.rows)
+    rows[0]=replace(
+        rows[0],
+        influences=((root_id,.75),(child_id,.25)),
+    )
+    revised_skin=replace(
+        skin,rows=tuple(rows),
+        deform_structure_hash=revised_rig.deform_structure_hash,
+        skin_lineage_hash="",
+        metadata={
+            **skin.metadata,
+            "multi_joint_weights_regression_only_not_native_truth":True,
+        },
+    )
+    revised_skin=replace(
+        revised_skin,
+        skin_lineage_hash=canonical_skin_lineage_hash_v2(revised_skin),
+    )
+    validate_canonical_skin_domain_v2(revised_skin)
+    pose,pose_hashes=_make_pose_binary(
+        mesh,revised_rig,revised_skin,controls,base["virtual_camera"],
+    )
+    entries=read_rss_v2(original)
+    entries["rig.json"]=json.dumps(
+        revised_rig.to_dict(),sort_keys=True,separators=(",",":"),
+    ).encode()
+    entries["skin.json"]=json.dumps(
+        revised_skin.to_dict(),sort_keys=True,separators=(",",":"),
+    ).encode()
+    controls_payload=json.loads(entries["controls.json"])
+    controls_payload["mechanics_pose_hashes"]=pose_hashes
+    entries["controls.json"]=json.dumps(
+        controls_payload,sort_keys=True,separators=(",",":"),
+    ).encode()
+    entries["pose.bin"]=pose
+    manifest=dict(
+        line.split("=",1)
+        for line in entries["manifest.txt"].decode().splitlines()
+    )
+    manifest["canonical_rig_lineage_hash"]=revised_rig.rig_lineage_hash
+    manifest["canonical_skin_lineage_hash"]=revised_skin.skin_lineage_hash
+    for name in ("rig.json","skin.json","pose.bin","controls.json"):
+        manifest["sha256:"+name]=sha256(entries[name]).hexdigest()
+    entries["manifest.txt"]=(
+        "\n".join(f"{key}={value}" for key,value in sorted(manifest.items()))
+        +"\n"
+    ).encode()
+    revised=tmp_path/"two_source_geometry_test_only_multijoint.rss"
+    revised.write_bytes(_entry_bytes(entries))
+    reopened=reopen_rss_vnext_native_preview_package_v1(revised)
+    assert reopened["rig"]==revised_rig
+    assert reopened["skin"]==revised_skin
+    assert reopened["mesh"]==mesh
+    assert reopened["control_frames"]==controls
+    assert reopened["product_revision_minted"] is False
+    return revised,manifest,mesh,revised_rig,revised_skin,controls
+
+
 def _args(mesh,rig,skin):
     vertex=mesh.vertices[0]
     joint=rig.joints[0]
@@ -62,7 +184,7 @@ def _write_edit(tmp_path,archive,**kwargs):
 
 
 def test_all_three_canonical_edits_roundtrip_and_replay_actual_LBS(tmp_path):
-    original,_,mesh,rig,skin,controls=_compiled_preview_fixture(tmp_path)
+    original,_,mesh,rig,skin,controls=_multijoint_preview_fixture(tmp_path)
     unchanged_bytes=original.read_bytes()
     path,receipt=_write_edit(
         tmp_path,original,**_args(mesh,rig,skin),
@@ -100,7 +222,7 @@ def test_all_three_canonical_edits_roundtrip_and_replay_actual_LBS(tmp_path):
 
 
 def test_weight_only_does_not_rename_mesh_or_rig(tmp_path):
-    original,_,mesh,rig,skin,_=_compiled_preview_fixture(tmp_path)
+    original,_,mesh,rig,skin,_=_multijoint_preview_fixture(tmp_path)
     path,_=_write_edit(
         tmp_path,original,skin_weight_edits=_args(mesh,rig,skin)[
             "skin_weight_edits"
@@ -117,7 +239,7 @@ def test_weight_only_does_not_rename_mesh_or_rig(tmp_path):
 
 
 def test_rest_edit_preserves_mesh_but_invalidates_actual_deform_structure(tmp_path):
-    original,_,mesh,rig,skin,_=_compiled_preview_fixture(tmp_path)
+    original,_,mesh,rig,skin,_=_multijoint_preview_fixture(tmp_path)
     path,_=_write_edit(
         tmp_path,original,joint_rest_position_edits=_args(mesh,rig,skin)[
             "joint_rest_position_edits"
@@ -133,7 +255,7 @@ def test_rest_edit_preserves_mesh_but_invalidates_actual_deform_structure(tmp_pa
 
 
 def test_invalid_weight_and_source_entity_addresses_fail_closed(tmp_path):
-    archive,_,mesh,rig,skin,_=_compiled_preview_fixture(tmp_path)
+    archive,_,mesh,rig,skin,_=_multijoint_preview_fixture(tmp_path)
     args=_args(mesh,rig,skin)
     with pytest.raises(ValueError,match="WEIGHT_SIMPLEX_OR_JOINT"):
         compile_rss_vnext_canonical_user_edit_revision_v1(
@@ -161,7 +283,7 @@ def test_invalid_weight_and_source_entity_addresses_fail_closed(tmp_path):
 
 
 def test_rehashed_forged_pose_still_fails_independent_mechanics_replay(tmp_path):
-    original,_,mesh,rig,skin,_=_compiled_preview_fixture(tmp_path)
+    original,_,mesh,rig,skin,_=_multijoint_preview_fixture(tmp_path)
     path,_=_write_edit(tmp_path,original,**_args(mesh,rig,skin))
     entries=read_rss_v2(path)
     mutated=bytearray(entries["pose.bin"])
@@ -181,7 +303,7 @@ def test_rehashed_forged_pose_still_fails_independent_mechanics_replay(tmp_path)
 
 
 def test_rehashed_fake_product_release_cannot_claim_authoring_revision(tmp_path):
-    original,_,mesh,rig,skin,_=_compiled_preview_fixture(tmp_path)
+    original,_,mesh,rig,skin,_=_multijoint_preview_fixture(tmp_path)
     path,_=_write_edit(tmp_path,original,**_args(mesh,rig,skin))
     entries=read_rss_v2(path)
     receipt=json.loads(entries["revision.json"])
@@ -212,7 +334,7 @@ def test_rehashed_fake_product_release_cannot_claim_authoring_revision(tmp_path)
 
 
 def test_authoring_revision_requires_exact_original_rss_parent(tmp_path):
-    original,_,mesh,rig,skin,_=_compiled_preview_fixture(tmp_path)
+    original,_,mesh,rig,skin,_=_multijoint_preview_fixture(tmp_path)
     path,_=_write_edit(tmp_path,original,**_args(mesh,rig,skin))
     from compiler.rss_vnext.workers.rss_vnext_native_preview_package_v1 import (
         edit_rss_vnext_native_preview_controls_v1,

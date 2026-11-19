@@ -143,6 +143,15 @@ func (ProductMotionProvider) Capabilities(context.Context) ([]Descriptor, error)
 	metadata["input_mechanics_schema_version"] = "v1"
 	metadata["input_proposal_artifact_type"] = "RealSaS.ControlMotionClipProposalIR"
 	metadata["input_proposal_schema_version"] = "v1"
+	// Optional independently provided source-rig animation and an EXACT
+	// source joint -> canonical FK/ROOT control address map. A source clip
+	// never authorizes a new neural model, a license claim or ProductPASS.
+	metadata["input_source_rig_motion_artifact_type"] = "RealSaS.SourceRigMotion"
+	metadata["input_source_rig_motion_schema_version"] = "v1"
+	metadata["input_control_retarget_binding_artifact_type"] = "RealSaS.ControlMotionRetargetBinding"
+	metadata["input_control_retarget_binding_schema_version"] = "v1"
+	metadata["source_motion_mapping_requires_exact_existing_controls"] = true
+	metadata["source_motion_retarget_does_not_claim_rights_or_visual_parity"] = true
 	metadata["output_artifact_type"] = "RealSaS.CanonicalMotionIR"
 	metadata["output_schema_version"] = "v2"
 	metadata["required_models"] = []any{}

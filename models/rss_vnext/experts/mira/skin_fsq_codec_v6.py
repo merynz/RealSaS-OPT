@@ -235,6 +235,19 @@ class MIRASkinFSQCodecV6(nn.Module):
     def _decode_code_vectors(
         self, codes: Tensor, vertex_features: Tensor, joint_features: Tensor,
     ) -> Tensor:
+        return torch.softmax(
+            self.decode_code_logits_v1(codes, vertex_features, joint_features),
+            dim=-1,
+        )
+
+    def decode_code_logits_v1(
+        self, codes: Tensor, vertex_features: Tensor, joint_features: Tensor,
+    ) -> Tensor:
+        """Same learned FSQ decode weights before single-stage normalization.
+
+        Enables true chain-group mixture without a second codec/skin model.
+        Existing source codec forward keeps its identical flat-softmax ABI.
+        """
         """One decoder for training STE latents and production discrete tokens.
 
         Never replace the product token IDs with soft expected latent values.
@@ -255,7 +268,7 @@ class MIRASkinFSQCodecV6(nn.Module):
             "bnh,bjh->bnj", vertex_state, joint_state,
         ) / math.sqrt(float(self.config.hidden_dim))
         logits = logits + self.bias_head(joint_state).transpose(1, 2)
-        return torch.softmax(logits, dim=-1)
+        return logits
 
     def decode_tokens(
         self, token_ids: Tensor, vertex_features: Tensor, joint_features: Tensor,

@@ -22,6 +22,15 @@ from compiler.rss_vnext.workers.product_downstream_executor_v1 import (
 from tests.compiler.test_control_motion_v2 import _rig,_mechanics
 from tests.compiler.test_motion_retarget_frames_v3 import RetargetFrameTests
 from tests.compiler.test_product_downstream_cas_v1 import _Cas
+from tests.compiler.test_mechanics_cas_worker_main_v1 import _fixture as _canonical_fixture
+from compiler.realsas_compiler_core.canonical_mechanics_ir_v1 import mint_canonical_mechanics_v1
+
+
+def _sealed_cas_parents():
+    # Worker CAS decoders reject the old lightweight direct-call fixtures.
+    # These are actually sealed mesh/rig/skin hashes, never fake hashes.
+    _,_,_,_,mesh,rig,skin=_canonical_fixture()
+    return rig,mint_canonical_mechanics_v1(mesh,rig,skin)
 
 
 def _source():
@@ -94,8 +103,7 @@ def test_correspondence_must_be_exact_fk_control_not_nearest_joint():
 
 def test_source_motion_worker_reopens_two_exact_cas_artifacts():
     cas=_Cas()
-    rig=_rig()
-    mechanics=_mechanics(rig)
+    rig,mechanics=_sealed_cas_parents()
     refs=[
         cas.put(rig,"RealSaS.CanonicalRigIR","v2"),
         cas.put(mechanics,"RealSaS.CanonicalMechanicsIR","v1"),
@@ -132,8 +140,7 @@ def test_source_motion_worker_reopens_two_exact_cas_artifacts():
 
 def test_worker_rejects_claimed_source_without_exact_binding():
     cas=_Cas()
-    rig=_rig()
-    mechanics=_mechanics(rig)
+    rig,mechanics=_sealed_cas_parents()
     request={
         "capability_id":"product.motion","kind":"MODULE",
         "capability_metadata":{"executor_contract":MOTION_CONTRACT},

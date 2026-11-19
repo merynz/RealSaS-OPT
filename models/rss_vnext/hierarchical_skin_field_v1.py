@@ -60,10 +60,11 @@ def axis_joint_group_ids_from_cas_events_v1(
             raise ValueError("RSS_VNEXT_MIRA_GROUP_EVENT_KIND_INVALID") from exc
         pa = row.get("pointer_a", -1)
         pb = row.get("pointer_b", -1)
-        if type(pa) is not int or type(pb) is not int:
+        pc = row.get("pointer_c", -1)
+        if any(type(value) is not int for value in (pa,pb,pc)):
             raise ValueError("RSS_VNEXT_MIRA_GROUP_POINTER_TYPE_INVALID")
         converted.append(RigProgramEventV6(
-            kind=kind, pointer_a=pa, pointer_b=pb,
+            kind=kind, pointer_a=pa, pointer_b=pb, pointer_c=pc,
         ))
     sequence = AXISSequenceV6.from_events(
         converted, device=torch.device("cpu"),

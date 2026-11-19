@@ -48,6 +48,9 @@ from .component_conditioned_udf_v1 import RSSvNextComponentConditionedUDFV1
 from .surface_topology_context_v1 import iris_surface_incidence_v1
 from .surface_mechanics_context_v1 import RSSvNextSurfaceMechanicsContextV1
 from .layered_iris_seed_v1 import make_layered_iris_seed_v1
+from .product_hybrid_open_seed_v1 import (
+    ProductHybridOpenM0PolicyV1, propose_product_hybrid_open_m0_v1,
+)
 from .tessa_seeded_surface_v1 import (
     TESSASeededSurfaceV1, tessa_seed_from_flexicubes_v1,
     tessa_adaptive_split_edges_v1,
@@ -1392,6 +1395,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         flexicubes_layer: RSSvNextSemanticLayerSpec | None = None,
         flexicubes_layers: tuple[RSSvNextSemanticLayerSpec,...] | None = None,
         flexicubes_sparse_resolution: tuple[int,int,int] | None = None,
+        hybrid_open_policy: ProductHybridOpenM0PolicyV1 | None = None,
     ) -> dict:
         """Free-running constrained topology and mechanical proposal.
 
@@ -1417,6 +1421,15 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             flexicubes_extractor is None or flexicubes_layer is None
         ):
             raise ValueError("RSS_VNEXT_SPARSE_FC_REQUIRES_PINNED_LAYER")
+        if hybrid_open_policy is not None and (
+            type(hybrid_open_policy) is not ProductHybridOpenM0PolicyV1
+            or generated_rgba is None or generated_cameras is None
+            or generated_normals is None
+            or generation_checkpoint_sha256 is None
+            or source_binding_sha256 is None
+            or flexicubes_extractor is None or flexicubes_layer is None
+        ):
+            raise ValueError("RSS_VNEXT_HYBRID_PRODUCT_GENERATED_SCENE_REQUIRED")
         if flexicubes_layers is not None and (
             not isinstance(flexicubes_layers,tuple)
             or len(flexicubes_layers)<2
@@ -1472,6 +1485,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         mesh = None
         failure = None
         layered = None
+        hybrid_proposal = None
         if seeded_geometry:
             try:
                 if flexicubes_layers is not None:
@@ -1507,13 +1521,22 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                         witness=out.flexicubes_surface_evidence,
                         scene_triplanes=out.state.scene_triplanes,
                     )
+                if hybrid_open_policy is not None:
+                    # OPEN slot selection reads only predicted same-H kind
+                    # logits. No source teacher/mesh/garment ID participates.
+                    hybrid_proposal = propose_product_hybrid_open_m0_v1(
+                        model=self, state=out.state,
+                        signed_seed=seed, policy=hybrid_open_policy,
+                    )
+                    seed = hybrid_proposal.hybrid.seed
                 # A layered candidate cannot inherit global structural
                 # memory from ONLY its first shell. Use the full shared
                 # scene as the global memory and the final indexed mesh as
                 # the per-face AXIS/MIRA context.
                 structural_memory = (
                     self._structural_memory(out.state, None)
-                    if layered is not None else out.structural_memory
+                    if (layered is not None or hybrid_proposal is not None)
+                    else out.structural_memory
                 )
                 candidate = self.build_seeded_mechanics_candidate_v1(
                     out.state, seed, structural_memory=structural_memory,
@@ -1578,12 +1601,28 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             "auxiliary_view_authority": "LEARNED_PREDICTED_ONLY",
             "semantic_layer_identity_schema": (
                 "RealSaS.RSSvNext.SemanticLayerIndexedSurface.v1"
-                if layered is not None and mesh is not None else None
+                if (layered is not None or hybrid_proposal is not None)
+                   and mesh is not None else None
             ),
             "semantic_layer_names": (
-                layered.layer_names
+                hybrid_proposal.hybrid.seed.layer_names
+                if hybrid_proposal is not None and mesh is not None
+                else layered.layer_names
                 if layered is not None and mesh is not None else ()
             ),
+            "hybrid_open_surface_authority": (
+                hybrid_proposal.source_authority
+                if hybrid_proposal is not None and mesh is not None else None
+            ),
+            "hybrid_open_component_surface_kinds": (
+                hybrid_proposal.hybrid.component_surface_kinds
+                if hybrid_proposal is not None and mesh is not None else ()
+            ),
+            "hybrid_open_selected_slot_index": (
+                hybrid_proposal.predicted_open_slot_index
+                if hybrid_proposal is not None and mesh is not None else None
+            ),
+            "hybrid_open_candidate_product_qualified": False,
         }
         if generate_controls:
             if mesh is None:
@@ -1595,7 +1634,8 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             memory = self._control_memory(
                 out.state,
                 self._structural_memory(out.state, None)
-                if layered is not None else out.structural_memory,
+                if (layered is not None or hybrid_proposal is not None)
+                else out.structural_memory,
                 mesh,
             )
             events = self.axis.generate_events(

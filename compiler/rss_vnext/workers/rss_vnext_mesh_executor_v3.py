@@ -140,6 +140,86 @@ def _validate_generated_views(arrays: dict[str, np.ndarray]) -> None:
         raise RuntimeError("RSS_VNEXT_RAW_MESH_GENERATED_VIEW_ABI_DRIFT")
 
 
+
+def _validate_model_hybrid_m0_boundary_v1(
+    *, original_faces: np.ndarray,
+    original_vertex_components: np.ndarray,
+    original_vertex_layers: np.ndarray,
+    layer_count: int,
+    component_kinds: list[str],
+) -> dict[str, int]:
+    """Topology-only court; not a source garment or material certificate.
+
+    Inspect ORIGINAL pre-TESSA M0 connectivity, not the resampled/restored
+    vertex positions. Closed components have no boundary edges; open ones
+    have one-or-more degree-2 manifold boundary loops. Require exact
+    disjoint component and layer addresses, never proximity-based welding.
+    """
+    closed="SIGNED_IRIS_H_CLOSED"
+    opened="UDF_IRIS_H_OPEN"
+    if (
+        not isinstance(component_kinds,list)
+        or not 2 <= len(component_kinds) <= 256
+        or set(component_kinds)!={closed,opened}
+        or original_faces.ndim!=2 or original_faces.shape[1]!=3
+        or original_vertex_components.ndim!=1
+        or original_vertex_layers.shape != original_vertex_components.shape
+        or layer_count<2
+    ):
+        raise RuntimeError("RSS_VNEXT_RAW_MESH_HYBRID_COMPONENT_KIND_DOMAIN")
+    names=np.unique(original_vertex_components)
+    if not np.array_equal(names,np.arange(len(component_kinds))):
+        raise RuntimeError("RSS_VNEXT_RAW_MESH_HYBRID_COMPONENT_INDEX_GAP")
+    if np.any(original_vertex_layers<0) or np.any(
+        original_vertex_layers>=layer_count
+    ):
+        raise RuntimeError("RSS_VNEXT_RAW_MESH_HYBRID_LAYER_DOMAIN")
+    counts={"closed":0,"open":0,"open_boundary_edges":0}
+    face_components=original_vertex_components[original_faces]
+    if not np.all(face_components == face_components[:,:1]):
+        raise RuntimeError("RSS_VNEXT_RAW_MESH_HYBRID_CROSS_COMPONENT_FACE")
+    for component,kind in enumerate(component_kinds):
+        owned=np.flatnonzero(original_vertex_components==component)
+        tris=original_faces[face_components[:,0]==component]
+        if not len(tris) or not np.array_equal(np.unique(tris),owned):
+            raise RuntimeError("RSS_VNEXT_RAW_MESH_HYBRID_ORPHAN_OR_MIXED_VERTEX")
+        layer=np.unique(original_vertex_layers[owned])
+        if (
+            len(layer)!=1
+            or (kind==opened and int(layer[0])!=layer_count-1)
+            or (kind==closed and int(layer[0])==layer_count-1)
+        ):
+            raise RuntimeError("RSS_VNEXT_RAW_MESH_HYBRID_LAYER_KIND_DRIFT")
+        edges=np.sort(np.concatenate(
+            (tris[:,[0,1]],tris[:,[1,2]],tris[:,[2,0]]),axis=0,
+        ),axis=1)
+        _,incidence=np.unique(edges,axis=0,return_counts=True)
+        if bool(np.any(incidence>2)):
+            raise RuntimeError("RSS_VNEXT_RAW_MESH_HYBRID_NONMANIFOLD_EDGE")
+        # Recompute indexed edges for boundary degree; no floating geometry
+        # or resampling heuristic can invent/cap an OPEN hem.
+        edge_keys,edge_counts=np.unique(
+            edges,axis=0,return_counts=True,
+        )
+        border=edge_keys[edge_counts==1]
+        if kind==closed:
+            if len(border) or bool(np.any(incidence!=2)):
+                raise RuntimeError("RSS_VNEXT_RAW_MESH_HYBRID_SIGNED_SHELL_OPEN")
+            counts["closed"]+=1
+        else:
+            if len(border)<3:
+                raise RuntimeError("RSS_VNEXT_RAW_MESH_HYBRID_OPEN_HEM_MISSING")
+            degree=np.bincount(
+                border.reshape(-1),
+                minlength=len(original_vertex_components),
+            )
+            if not bool(np.all(degree[degree>0]==2)):
+                raise RuntimeError("RSS_VNEXT_RAW_MESH_HYBRID_OPEN_HEM_BRANCH")
+            counts["open"]+=1
+            counts["open_boundary_edges"]+=len(border)
+    return counts
+
+
 def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[str, Any]:
     state = receipt.get("mesh_status")
     tokens = arrays["tessa_topology_token_ids"]
@@ -173,6 +253,10 @@ def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[st
     ):
         raise RuntimeError("RSS_VNEXT_RAW_MESH_PREMATURE_CANONICAL_AUTHORITY")
     if not has_mesh:
+        if any(k.startswith("tessa_seed_hybrid_") for k in receipt) or (
+            "tessa_seed_component_surface_kinds" in receipt
+        ):
+            raise RuntimeError("RSS_VNEXT_RAW_MESH_ABSTAIN_HYBRID_EVIDENCE")
         if set(arrays) & (SEEDED_EXTRA_KEYS | LAYER_EXTRA_KEYS):
             raise RuntimeError("RSS_VNEXT_RAW_MESH_ABSTAIN_FAKE_SEEDED_ATTRIBUTES")
         if (
@@ -318,6 +402,42 @@ def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[st
                 "tessa_seed_layer_namespace_sha256"
             ):
                 raise RuntimeError("RSS_VNEXT_RAW_MESH_LAYER_NAMESPACE_HASH_DRIFT")
+
+        # Hybrid OPEN is not synonymous with a signed solid or with a 2D
+        # drawable. Preserve explicit component-kind evidence only when all
+        # five source-independent receipt fields agree with original M0.
+        hybrid_fields=(
+            "tessa_seed_component_surface_kinds",
+            "tessa_seed_hybrid_open_source_authority",
+            "tessa_seed_hybrid_open_selected_slot",
+            "tessa_seed_hybrid_open_model_only",
+            "tessa_seed_hybrid_product_qualified",
+        )
+        hybrid_present=any(k in receipt for k in hybrid_fields)
+        hybrid_topology=None
+        if hybrid_present:
+            from models.rss_vnext.product_hybrid_open_seed_v1 import (
+                AUTHORITY as OPEN_AUTH,
+            )
+            if (
+                not all(k in receipt for k in hybrid_fields)
+                or not has_layer
+                or receipt.get("tessa_seed_hybrid_open_source_authority")
+                    != OPEN_AUTH
+                or type(receipt.get("tessa_seed_hybrid_open_selected_slot"))
+                    is not int
+                or not 0 <= receipt["tessa_seed_hybrid_open_selected_slot"] < 256
+                or receipt.get("tessa_seed_hybrid_open_model_only") is not True
+                or receipt.get("tessa_seed_hybrid_product_qualified") is not False
+            ):
+                raise RuntimeError("RSS_VNEXT_RAW_MESH_HYBRID_MODEL_ONLY_AUTHORITY")
+            hybrid_topology=_validate_model_hybrid_m0_boundary_v1(
+                original_faces=src_faces,
+                original_vertex_components=original_components,
+                original_vertex_layers=layers[:original_n],
+                layer_count=len(names),
+                component_kinds=receipt["tessa_seed_component_surface_kinds"],
+            )
         for idx in range(original_n,n):
             a,b=map(int,p[idx])
             expected=0.5*(base[0,a]+base[0,b])
@@ -364,6 +484,9 @@ def _validate_candidate(arrays: dict[str, np.ndarray], receipt: dict) -> dict[st
     return {
         "mesh_state": state,
         "topology_token_count": int(tokens.shape[1]),
+        "hybrid_m0_topology_court": (
+            hybrid_topology if seeded_abi else None
+        ),
         "topology_candidate_abi": (
             "ONE_IRIS_SEEDED_MESH_V1" if seeded_abi
             else "LEGACY_INDEPENDENT_TESSA_GRAMMAR"

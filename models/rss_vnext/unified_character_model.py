@@ -1428,6 +1428,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
             or generation_checkpoint_sha256 is None
             or source_binding_sha256 is None
             or flexicubes_extractor is None or flexicubes_layer is None
+            or flexicubes_layers is not None
         ):
             raise ValueError("RSS_VNEXT_HYBRID_PRODUCT_GENERATED_SCENE_REQUIRED")
         if flexicubes_layers is not None and (
@@ -1527,6 +1528,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                     hybrid_proposal = propose_product_hybrid_open_m0_v1(
                         model=self, state=out.state,
                         signed_seed=seed, policy=hybrid_open_policy,
+                        signed_layer_name=flexicubes_layer.name,
+                        signed_presentation_roles=tuple(
+                            flexicubes_layer.keep_roles,
+                        ),
                     )
                     seed = hybrid_proposal.hybrid.seed
                 # A layered candidate cannot inherit global structural

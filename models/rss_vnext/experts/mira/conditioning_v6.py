@@ -164,6 +164,7 @@ def carrier_skin_proposal_from_decoded_v6(
     conditioning: MIRAConditioningV6,
     *,
     model_provenance: str,
+    max_influences: int | None = None,
 ) -> CarrierSkinProposalIR:
     if weights.ndim == 3:
         if weights.shape[0] != 1:
@@ -173,16 +174,30 @@ def carrier_skin_proposal_from_decoded_v6(
     j = len(conditioning.joint_ids)
     if tuple(weights.shape) != (n, j):
         raise RuntimeError("MIRA_V6_DECODED_WEIGHT_SHAPE_DRIFT")
-    if not bool(torch.isfinite(weights).all()):
-        raise RuntimeError("MIRA_V6_DECODED_WEIGHT_NONFINITE")
+    if (
+        not bool(torch.isfinite(weights).all())
+        or bool((weights < 0).any())
+        or not bool(torch.allclose(
+            weights.sum(dim=-1),torch.ones_like(weights[:,0]),
+            atol=1.e-5,rtol=0.,
+        ))
+        or (max_influences is not None and (
+            type(max_influences) is not int or not 1 <= max_influences <= 41
+            or bool(((weights > 0).sum(dim=-1) > max_influences).any())
+        ))
+    ):
+        raise RuntimeError("MIRA_V6_DECODED_SPARSE_SIMPLEX_INVALID")
+    # Dense V*J traversal is not viable for 30k vertices and 174+ joints.
+    # Convert exactly once; serialization scales with actual nonzero support.
+    nonzero = torch.nonzero(weights.detach() > 0, as_tuple=False).tolist()
+    values = weights.detach().cpu()
     influences = tuple(
         CarrierSkinInfluenceProposal(
             carrier_vertex_id=conditioning.carrier.ordered_vertex_ids[vi],
             canonical_joint_id=conditioning.joint_ids[ji],
-            weight=float(weights[vi, ji].item()),
+            weight=float(values[vi, ji]),
         )
-        for vi in range(n)
-        for ji in range(j)
+        for vi, ji in nonzero
     )
     return CarrierSkinProposalIR(
         influences=influences,
@@ -199,6 +214,9 @@ def carrier_skin_proposal_from_decoded_v6(
             "source_skin_runtime_authority": False,
             "mesh_mutation_invalidates_prediction": True,
             "decoded_from_axis_generated_discrete_skin_codes": True,
+            "sparse_skin_source": "PINNED_MIRA_DECODED_EXACT_ZERO_SUPPORT",
+            "skin_max_influences": max_influences,
+            "zero_weights_not_serialized": True,
         },
     )
 

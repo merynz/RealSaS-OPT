@@ -300,8 +300,11 @@ def execute_rss_vnext_skin_capability_v4(
             "RSSVNEXT:" + receipt["checkpoint_sha256"] + ":"
             + replay.embedded_decoder_sha256
         ),
+        max_influences=cfg.skin_max_influences,
     )
     policy = _qualification_policy(meta)
+    if policy["max_influences"] < cfg.skin_max_influences:
+        raise RuntimeError("RSS_VNEXT_SKIN_PRODUCT_POLICY_WEAKER_THAN_DECODER")
     qualified = qualify_carrier_skin_v1(
         conditioning.carrier, conditioning.skeleton, dense_proposal,
         max_simplex_repair_l1=policy["max_simplex_repair_l1"],

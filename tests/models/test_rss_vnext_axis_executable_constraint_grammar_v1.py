@@ -120,3 +120,45 @@ def test_product_decoder_exactly_replays_ik_and_refuses_unfinished_ik():
     missing=tuple(x for x in base if x.kind!=K.CONSTRAINT_INPUT)
     with pytest.raises(ValueError,match="CONTROL_ARITY_INVALID"):
         _decode_product_events(missing)
+
+
+def test_source_teacher_trains_declared_executable_ik_and_rejects_unfinished_ik():
+    from models.axis.rig_program_model_v6 import (
+        AXISSequenceV6, qualified_axis_rig_skin_sequence_loss_v6,
+    )
+    from tests.models.test_rss_vnext_axis_structural_chain_training_v1 import _setup
+    model,_=_setup(with_control=True)
+    events=(
+        E(K.BOS),
+        E(K.JOINT,coord_indices=(1,2,3),pointer_a=-1),
+        E(K.FRAMES_START),
+        E(K.FRAME,pointer_a=0,frame_6d=(1.,0.,0.,0.,1.,0.)),
+        E(K.CONTROLS_START),
+        E(K.CONTROL,coord_indices=(1,2,3),pointer_a=-1,aux_type_id=0),
+        E(K.CONTROL_TARGET,pointer_a=0),
+        E(K.CHAINS_START),
+        E(K.CHAIN,pointer_a=0,pointer_b=0),
+        E(K.CONSTRAINTS_START),
+        E(K.CONSTRAINT,pointer_a=0,aux_type_id=CONSTRAINT_OPERATORS_V6.index("IK")),
+        E(K.CONSTRAINT_INPUT,pointer_a=0),
+        E(K.ANCHORS_START),
+        E(K.SKIN_START),
+        *(E(K.SKIN_CODE,skin_code_id=i) for i in range(4)),
+        E(K.EOS),
+    )
+    def loss(xs):
+        seq=AXISSequenceV6.from_events(xs,device=torch.device("cpu"))
+        return qualified_axis_rig_skin_sequence_loss_v6(
+            model,torch.zeros(1,4,32),seq,
+            tokens_per_joint=4,
+            executable_constraint_operators=("IK",),
+            control_intervention_qualified=True,
+            structural_chains_qualified=True,
+        )[0]
+    value=loss(events)
+    assert torch.isfinite(value)
+    value.backward()
+    assert model.kind_head.weight.grad is not None
+    bad=tuple(x for x in events if x.kind!=K.CONSTRAINT_INPUT)
+    with pytest.raises(ValueError,match="CONSTRAINT_CONTROL_ARITY_INVALID"):
+        loss(bad)

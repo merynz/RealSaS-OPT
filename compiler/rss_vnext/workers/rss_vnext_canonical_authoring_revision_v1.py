@@ -84,6 +84,13 @@ def _edited_mesh(
     known={v.canonical_mesh_vertex_id for v in mesh.vertices}
     if not set(moves).issubset(known):
         raise ValueError("RSS_AUTHORING_EDIT_UNKNOWN_MESH_VERTEX")
+    if any(
+        _coordinates(moves[v.canonical_mesh_vertex_id],
+                     "RSS_AUTHORING_EDIT_MESH_POSITION")==v.P
+        for v in mesh.vertices
+        if v.canonical_mesh_vertex_id in moves
+    ):
+        raise ValueError("RSS_AUTHORING_EDIT_MESH_NO_OP")
     vertices=tuple(
         replace(v,P=_coordinates(moves[v.canonical_mesh_vertex_id],
                                 "RSS_AUTHORING_EDIT_MESH_POSITION"))
@@ -124,6 +131,12 @@ def _edited_rig(
     known={j.canonical_joint_id for j in rig.joints}
     if not set(moves).issubset(known):
         raise ValueError("RSS_AUTHORING_EDIT_UNKNOWN_RIG_JOINT")
+    if any(
+        _coordinates(moves[j.canonical_joint_id],
+                     "RSS_AUTHORING_EDIT_JOINT_REST")==j.P
+        for j in rig.joints if j.canonical_joint_id in moves
+    ):
+        raise ValueError("RSS_AUTHORING_EDIT_JOINT_NO_OP")
     joints=tuple(
         replace(j,P=_coordinates(moves[j.canonical_joint_id],
                                 "RSS_AUTHORING_EDIT_JOINT_REST"))
@@ -189,6 +202,13 @@ def _edited_skin(
                                    for jid,v in w.items() if v>0))
         if not overrides[vid]:
             raise ValueError("RSS_AUTHORING_EDIT_WEIGHT_ZERO")
+    if any(
+        overrides[row.canonical_mesh_vertex_id]==tuple(
+            sorted((jid,float(w)) for jid,w in row.influences if w>0)
+        )
+        for row in skin.rows if row.canonical_mesh_vertex_id in overrides
+    ):
+        raise ValueError("RSS_AUTHORING_EDIT_SKIN_NO_OP")
     rows=tuple(
         replace(row,influences=overrides[row.canonical_mesh_vertex_id])
         if row.canonical_mesh_vertex_id in overrides else row
@@ -312,8 +332,26 @@ def reopen_rss_vnext_canonical_user_edit_revision_v1(
         raise RuntimeError("RSS_AUTHORING_REOPEN_TYPED_ARCHIVE_INVALID") from exc
     base=reopen_rss_vnext_native_preview_package_v1(source_rss_path)
     base_sha=_sha(source_rss_path.read_bytes())
+    actual_scope={
+        "mesh_positions":sorted(
+            new.canonical_mesh_vertex_id
+            for new,old in zip(mesh.vertices,base["mesh"].vertices)
+            if new.P!=old.P
+        ),
+        "joint_rest_positions":sorted(
+            new.canonical_joint_id
+            for new,old in zip(rig.joints,base["rig"].joints)
+            if new.P!=old.P
+        ),
+        "skin_weights":sorted(
+            new.canonical_mesh_vertex_id
+            for new,old in zip(skin.rows,base["skin"].rows)
+            if new.influences!=old.influences
+        ),
+    }
     if (
-        manifest.get("schema")!=SCHEMA
+        receipt.get("edit_scope")!=actual_scope
+        or manifest.get("schema")!=SCHEMA
         or manifest.get("authority")!=AUTHORITY
         or manifest.get("product_revision_minted")!="0"
         or manifest.get("graphics_uv_binding_qualified")!="0"

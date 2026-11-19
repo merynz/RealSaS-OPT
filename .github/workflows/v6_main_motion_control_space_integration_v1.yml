@@ -6,7 +6,10 @@ on:
       - 'compiler/realsas_compiler_core/control_motion_ir_v1.py'
       - 'compiler/realsas_compiler_core/canonical_motion_ir_v2.py'
       - 'compiler/realsas_compiler_core/control_motion_runtime_v2.py'
+      - 'compiler/realsas_compiler_core/source_motion_to_controls_v1.py'
+      - 'compiler/rss_vnext/workers/product_downstream_executor_v1.py'
       - 'tests/compiler/test_control_motion_v2.py'
+      - 'tests/compiler/test_source_motion_to_controls_v1.py'
       - 'tests/compiler/test_control_motion_ik_integration_v1.py'
       - 'tests/compiler/test_v6_motion_main_integration_v1.py'
       - '.github/workflows/v6_main_motion_control_space_integration_v1.yml'
@@ -35,11 +38,14 @@ jobs:
           python -m py_compile \
             compiler/realsas_compiler_core/control_motion_ir_v1.py \
             compiler/realsas_compiler_core/canonical_motion_ir_v2.py \
-            compiler/realsas_compiler_core/control_motion_runtime_v2.py
+            compiler/realsas_compiler_core/control_motion_runtime_v2.py \
+            compiler/realsas_compiler_core/source_motion_to_controls_v1.py \
+            compiler/rss_vnext/workers/product_downstream_executor_v1.py
       - name: Test original and mainline motion semantics
         run: |
           python -m pytest -q \
             tests/compiler/test_control_motion_v2.py \
+            tests/compiler/test_source_motion_to_controls_v1.py \
             tests/compiler/test_control_motion_ik_integration_v1.py \
             tests/compiler/test_v6_motion_main_integration_v1.py
       - name: Enforce edit-control motion and authority firewall

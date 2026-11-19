@@ -113,6 +113,8 @@ def _minimal_product_events():
         RigProgramEventV6(RigTokenKindV6.BOS),
         RigProgramEventV6(RigTokenKindV6.JOINT, coord_indices=(128, 128, 128)),
         RigProgramEventV6(RigTokenKindV6.FRAMES_START),
+        RigProgramEventV6(RigTokenKindV6.FRAME, pointer_a=0,
+                          frame_6d=(1.,0.,0.,0.,1.,0.)),
         RigProgramEventV6(RigTokenKindV6.CONTROLS_START),
         RigProgramEventV6(RigTokenKindV6.CHAINS_START),
         RigProgramEventV6(RigTokenKindV6.CONSTRAINTS_START),
@@ -146,7 +148,7 @@ def test_product_decoder_accepts_complete_joint_coupled_skin_grammar():
 
 
 @pytest.mark.parametrize("mutation,expected", [
-    (lambda e: e[:7] + (e[8],) + e[7:8] + e[9:],
+    (lambda e: e[:8] + (e[9],) + e[8:9] + e[10:],
      "AXIS_V6_EVENT_GRAMMAR_INVALID"),  # skin before SKIN_START
     (lambda e: e[:-2] + e[-1:],
      "AXIS_V6_EVENT_GRAMMAR_INVALID"),  # EOS before required skin cardinality
@@ -156,9 +158,9 @@ def test_product_decoder_accepts_complete_joint_coupled_skin_grammar():
      "AXIS_V6_EVENT_GRAMMAR_INVALID"),  # BOS inside joints
     (lambda e: e[:-1] + (e[-1], e[-1]),
      "AXIS_V6_EVENT_TRAILING_AFTER_EOS"),
-    (lambda e: e[:8] + (replace(e[8], skin_code_id=True),) + e[9:],
+    (lambda e: e[:9] + (replace(e[9], skin_code_id=True),) + e[10:],
      "AXIS_V6_EVENT_INTEGER_DOMAIN_INVALID"),
-    (lambda e: e[:8] + (replace(e[8], skin_code_id=81),) + e[9:],
+    (lambda e: e[:9] + (replace(e[9], skin_code_id=81),) + e[10:],
      "AXIS_V6_SKIN_CODE_OUT_OF_CODEC_DOMAIN"),
     (lambda e: e[:1] + (replace(e[1], coord_indices=(128, True, 128)),) + e[2:],
      "AXIS_V6_EVENT_COORD_DOMAIN_INVALID"),

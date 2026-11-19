@@ -26,9 +26,12 @@ prediction, or a physics material oracle.
 
 1. **Candidate**: A separately compiled canonical mesh/rig/skin/Mechanics
    already exists, born from the same final TESSA M* (signed body and open
-   surface). The candidate records exact native face IDs ↔ final canonical
-   face indices, and native pin vertex IDs ↔ final canonical vertex IDs.
-   Nearest-neighbor or role-only guesses are forbidden.
+   surface). Every final canonical face carries its native parent face ID
+   and three source-native barycentric corner addresses. One native face may
+   parent multiple TESSA-refined triangles; corners, orientation, face order
+   and target IDs are sealed in the transport digest. Native pin vertex IDs
+   map separately to final canonical pin IDs. Nearest-neighbor or role-only
+   guesses are forbidden.
 2. **Evidence court**: `SourceQualifiedOpenSurfacePinProgramV1` must bind
    source asset, dataset manifest, final M* topology address, canonical mesh
    lineage, component, chain, full native OPEN boundary SHA, independent pin

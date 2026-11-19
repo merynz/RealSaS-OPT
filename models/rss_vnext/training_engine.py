@@ -2654,8 +2654,15 @@ class RSSvNextStructuralTrainer:
             seed = tessa_seed_from_flexicubes_v1(
                 witness=surface,scene_triplanes=state.scene_triplanes,
             )
+        # The EXACT FlexiCubes witness tokens used during teacher-free
+        # product inference must also reach TESSA and AXIS training.
+        # Otherwise the same image/seed would produce different control H.
+        structural_memory=self.model._structural_memory(
+            state,None,flexicubes=surface,
+        )
         candidate = self.model.build_seeded_mechanics_candidate_v1(
-            state, seed, adaptive_refinement=True,
+            state,seed,structural_memory=structural_memory,
+            adaptive_refinement=True,
         )
         mesh = candidate["mesh_candidate"]
         if (
@@ -2670,6 +2677,7 @@ class RSSvNextStructuralTrainer:
         )
         axis_mira=product_seeded_axis_mira_objective_v1(
             model=self.model,state=state,mesh=mesh,
+            structural_memory=structural_memory,
             teacher=teacher,batch=batch,
             weights=self.product_axis_mira_weights,
             dataset_manifest_sha256=self.dataset_manifest_sha256,

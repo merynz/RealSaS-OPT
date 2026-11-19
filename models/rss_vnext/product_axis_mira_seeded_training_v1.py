@@ -150,6 +150,21 @@ def product_seeded_axis_mira_objective_v1(
         # Exact registry, M* and causal chain replay are checked below before
         # this objective may return to the optimizer.
         structural_chains_qualified=weights.chain_skin>0,
+        # Native rig/skin alone never proves the *absence* of authored
+        # controls, constraints, or auxiliary chains.
+        control_absence_qualified=(
+            row.get("source_authored_control_graph_status")
+                == "VERIFIED_NO_AUTHORED_CONTROLS"
+        ),
+        chain_absence_qualified=(
+            row.get("source_auxiliary_chain_status")
+                == "VERIFIED_NO_AUXILIARY_CHAINS"
+        ) and weights.chain_skin<=0,
+        # Bind-local frame matrices do not imply observed physical DOF/limits.
+        frame_dof_qualified=(
+            row.get("source_joint_dof_qualification_status")
+                == "QUALIFIED_SOURCE_JOINT_DOF_LIMITS"
+        ),
     )
     total=weights.axis_program*axis_loss
     skin_loss=pose_loss=dynamic_loss=hard_loss=chain_loss=None

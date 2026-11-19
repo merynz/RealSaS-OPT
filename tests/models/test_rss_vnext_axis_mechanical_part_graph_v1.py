@@ -181,3 +181,25 @@ def test_compiler_rejects_forged_canonical_chain_part_metadata():
     ))
     with pytest.raises(Exception,match="MECHANICAL_PART_ADDRESS_INVALID"):
         qualify_rig_program_v1(forged)
+
+
+def test_learned_multi_chain_part_does_not_implicitly_activate_cloth_physics():
+    """A part graph is causal rig evidence, never XPBD source authority."""
+    from compiler.realsas_compiler_core.controllable_puppet_runtime_v1 import (
+        ControllablePuppetSessionV1,
+    )
+    from compiler.realsas_compiler_core.types import QualificationError
+    from tests.compiler.test_controllable_puppet_runtime_v1 import (
+        qualified_synthetic_bundle,
+    )
+
+    seq=AXISSequenceV6.from_events(
+        _events(part_ids=(0,0)),device=torch.device("cpu"),
+    )
+    graph=decode_axis_mechanical_part_graph_v1(seq)
+    assert graph.declared_part_count==1
+    assert graph.authority=="AXIS_CAUSAL_PART_GRAPH_PROPOSAL_NOT_SEMANTIC_TRUTH"
+    editor=ControllablePuppetSessionV1(qualified_synthetic_bundle())
+    assert editor.frame().xpbd_surface_state is None
+    with pytest.raises(QualificationError,match="DT_WITHOUT_POLICY"):
+        editor.frame(dt_seconds=1./60.)

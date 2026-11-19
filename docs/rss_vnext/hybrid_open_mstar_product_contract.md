@@ -56,15 +56,46 @@ hybrid_open_policy=ProductHybridOpenM0PolicyV1(...))`
    order remain Graphics truth. Neither a role label nor an open boundary
    alone is a pixel/visibility certificate.
 
-## Training limitation to close before product readiness
+## Opt-in production training route (#618)
 
-The existing seeded TESSA objective accepts signed-source truth. Its current
-source-surface loss must **not** be applied naively to an open+closed mesh:
-doing so may pull the valid garment toward signed-only body supervision.
+The seeded product trainer can enable `product_hybrid_open_policy` only with:
+- `training_profile=PRODUCT_SEEDED_IRIS_TESSA_V1`;
+- nonzero `component_udf_weight` and source-native component UDF registry;
+- nonzero `seeded_tessa_weights.boundary`;
+- nonempty `trusted_hybrid_open_source_registry` and source-independent,
+  confident predicted OPEN slot selection. An uncertain head ABSTAINS;
+- exactly two declared model geometry layers: SIGNED first, OPEN second.
+  `flexicubes_signed_layer_admission_keys` contains **only the signed key**;
+  `product_hybrid_open_source_admission_key` carries the separate open proof.
+- one qualified `SeededTESSASourceTeacherV1` with all source layers and
+  `NativeFaceLayerSamplesV1`, `NativeLayerOpenBoundaryV1`, exact native
+  boundary XYZ/mask, and independently admitted per-component UDF teacher.
 
-The current component-UDF source-native objective can train the open field on
-the same H, but that fact **does not prove** a joint combined-M* TESSA
-topology/rig/skin loss. A separate source-qualified masked
-signed/open combined-M* objective and exact face transport are required
-before marking the hybrid training/release task complete. This document is
-a strict handoff contract, not a synthetic dataset or release proof.
+The OPEN row in `trusted_hybrid_open_source_registry` must state:
+`admission_status=QUALIFIED_SOURCE_NATIVE_OPEN_INDEXED_SHEET`,
+`source_component_domain=QUALIFIED_OPEN_MANIFOLD_SHEET`,
+`source_rights_independently_verified=True`,
+`generated_views_as_source_truth=False`,
+`student_slot_ids_as_source_truth=False`,
+`source_native_open_boundary_sha256`,
+`native_face_layer_samples_sha256`, dataset, source asset/qualification,
+role schema, layer name and source-native layer partition/namespace hashes.
+
+The signed receipt remains strictly closed-SDF; it cannot authorize OPEN.
+The main seeded TESSA source receipt additionally binds the signed and open
+source keys, all native sample/hem witnesses, original source observation,
+pinned generation checkpoint and source layer namespace. It must not reuse a
+signed-only source receipt for a combined teacher.
+
+Once accepted, the geometry is constructed in ONE student H(x), ONE joined M0,
+ONE refined M*, and the existing seeded TESSA, AXIS/MIRA, component UDF and
+other source losses share the same optimizer. Face/skin/pose transport is
+required to reference the **actual final combined M*** before these terms
+can be activated. Checkpoint policy records the hybrid configuration and
+registered native receipts.
+
+**Remaining proof:** This training route and its CPU synthetic regression
+do not certify real source dataset availability, real GPU training, scalable
+multiple-open-component association, learned garment quality, graphics RGB
+authority, temporal pin policy, or ProductRevision PASS. Those remain explicit
+release admissions, not implicit consequences of a compiling model.

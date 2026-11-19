@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 """AXIS can LEARN multi-branch mechanical parts without semantic invention."""
-from dataclasses import replace
+from dataclasses import replace,asdict
 
 import pytest
 import torch
@@ -19,7 +19,9 @@ from models.rss_vnext.axis_mechanical_part_graph_v1 import (
     candidate_axis_part_pointer_choices_v1,
     decode_axis_mechanical_part_graph_v1,
 )
-from models.rss_vnext.hierarchical_skin_field_v1 import axis_joint_group_ids_v1
+from models.rss_vnext.hierarchical_skin_field_v1 import (
+    axis_joint_group_ids_v1,axis_joint_group_ids_from_cas_events_v1,
+)
 from compiler.realsas_compiler_core.rig_program_ir_v1 import qualify_rig_program_v1
 
 
@@ -80,6 +82,11 @@ def test_connected_multi_branch_chains_form_one_explicit_mechanical_part():
     torch.testing.assert_close(
         axis_joint_group_ids_v1(seq),torch.zeros(5,dtype=torch.long),
         atol=0,rtol=0,
+    )
+    serialized=[{**asdict(e),"kind":int(e.kind)} for e in events]
+    torch.testing.assert_close(
+        axis_joint_group_ids_from_cas_events_v1(serialized),
+        graph.joint_group_ids,atol=0,rtol=0,
     )
     rig,skin=_decode(events)
     qualified=qualify_rig_program_v1(rig)

@@ -240,6 +240,16 @@ def test_seeded_product_mira_source_skin_without_native_motion_clip(monkeypatch)
     assert result.product_axis_mira_parts["axis"] is not None
     assert result.axis_posed_surface_loss is None
     assert torch.isfinite(result.total_loss)
+    # A transport receipt made for a previous TESSA/M* refinement revision
+    # cannot be recycled, even when candidate face count remains unchanged.
+    stale=replace(support,candidate_mstar_topology_address_sha256="0"*64)
+    stale_batch=replace(
+        batch,seeded_tessa_source_teacher=replace(
+            batch.seeded_tessa_source_teacher,native_skin_transport=stale,
+        ),
+    )
+    with pytest.raises(ValueError,match="MSTAR_TEACHER_TOPOLOGY_ADDRESS_DRIFT"):
+        trainer.objective(stale_batch)
     with pytest.raises(ValueError,match="AXIS_NATIVE_POSE_REQUIRED"):
         make(
             weights=ProductSeededAXISMIRAWeightsV1(

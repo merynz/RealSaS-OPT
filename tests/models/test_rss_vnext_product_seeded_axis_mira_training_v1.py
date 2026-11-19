@@ -300,6 +300,10 @@ def test_seeded_anchor_uses_exact_mstar_and_backprop_to_source_face_head(monkeyp
     net,batch,make,axis_row,_=_rig_case(monkeypatch)
     seq=_qualified_axis_sequence(net)
     axis_row["teacher_sequence_sha256"]=axis_teacher_sequence_sha256_v6(seq)
+    # Socket/CONTROL/ANCHOR tokens require their own independently admitted
+    # source control intervention. Synthetic tests explicitly qualify it.
+    axis_row["intervention_qualification_status"]="QUALIFIED_SOURCE_CONTROL_CONSEQUENCE"
+    axis_row["source_intervention_sha256"]="9"*64
     batch=replace(batch,axis_teacher_sequence=seq)
     captured={}
     original=net.build_seeded_mechanics_candidate_v1
@@ -359,6 +363,10 @@ def test_seeded_anchor_fail_closed_on_stale_address_and_missing_labels(monkeypat
     net,batch,make,axis_row,_=_rig_case(monkeypatch)
     seq=_qualified_axis_sequence(net)
     axis_row["teacher_sequence_sha256"]=axis_teacher_sequence_sha256_v6(seq)
+    # Socket/CONTROL/ANCHOR tokens require their own independently admitted
+    # source control intervention. Synthetic tests explicitly qualify it.
+    axis_row["intervention_qualification_status"]="QUALIFIED_SOURCE_CONTROL_CONSEQUENCE"
+    axis_row["source_intervention_sha256"]="9"*64
     batch=replace(batch,axis_teacher_sequence=seq)
     key="socket"
     registry={key:{

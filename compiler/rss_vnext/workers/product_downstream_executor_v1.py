@@ -984,6 +984,67 @@ def execute_motion_capability_v2(
     }
 
 
+def _reopen_unpromoted_source_pose_graphics_courts_v1(
+    request: dict[str, Any], read_object: Callable, *,
+    mesh, rig, skin, compiled, motion,
+) -> dict[str, Any]:
+    """Reopen optional measured frame courts without laundering source trust.
+
+    This stage can verify CAS structure and the active canonical parents,
+    but it has no independently trusted source/native witness registries or
+    raw external source pixels. An attested CAS document is *not* independent
+    evidence by itself; no positive receipt from here clears release gaps.
+    """
+    from compiler.realsas_compiler_core.rss_vnext_source_pose_graphics_court_v1 import (
+        reopen_source_pose_graphics_court_v1,
+    )
+    kind="RealSaS.RSSvNextSourcePoseGraphicsCourt"
+    refs=[
+        row for row in request.get("input_artifacts") or ()
+        if type(row) is dict and row.get("artifact_type")==kind
+    ]
+    if len(refs)>64 or any(row.get("schema_version")!="v1" for row in refs):
+        raise RuntimeError("PRODUCT_PROOF_SOURCE_POSE_GRAPHICS_COURT_CARDINALITY_OR_SCHEMA")
+    courts=[]
+    addresses=set()
+    for ref in refs:
+        payload=_read({
+            "input_artifacts":[ref],
+        },read_object,kind,"v1")
+        court=reopen_source_pose_graphics_court_v1(
+            payload,
+            canonical_mesh_lineage_hash=mesh.mesh_lineage_hash,
+            canonical_rig_lineage_hash=rig.rig_lineage_hash,
+            canonical_skin_lineage_hash=skin.skin_lineage_hash,
+            compiled_graphics_hash=compiled.graph_hash,
+            canonical_motion_lineage_hash=motion.motion_lineage_hash,
+        )
+        key=(court.source_view_index,court.frame_index,court.source_target_kind)
+        if key in addresses:
+            raise RuntimeError("PRODUCT_PROOF_SOURCE_POSE_GRAPHICS_DUPLICATE_FRAME")
+        addresses.add(key)
+        courts.append(court)
+    return {
+        "typed_source_pose_graphics_frame_receipts_reopened":len(courts),
+        "source_pose_graphics_local_positive_claim_count":sum(
+            bool(c.source_registered_pixels_passed) for c in courts
+        ),
+        "registered_source_rest_views_claimed":sorted({
+            c.source_view_index for c in courts
+            if c.source_registered_pixels_passed
+            and c.source_target_kind=="ORIGINAL_SOURCE_REST_RGBA"
+        }),
+        "registered_artist_motion_views_claimed":sorted({
+            c.source_view_index for c in courts
+            if c.source_registered_pixels_passed
+            and c.source_target_kind=="ARTIST_VALIDATED_POSTMOTION_RGBA"
+        }),
+        "independent_native_and_source_pixel_replay_in_proof":False,
+        "source_graphics_product_authority_promoted":False,
+        "known_pixels_are_not_full_hidden_surface_or_motion_proof":True,
+    }
+
+
 def execute_proof_capability_v1(
     request: dict[str, Any], *, read_object: Callable, put_bytes: Callable,
 ) -> dict[str, Any]:
@@ -1066,6 +1127,10 @@ def execute_proof_capability_v1(
         and dynamic_integrity.no_new_self_intersections
         and dynamic_integrity.all_probe_vertices_finite
     )
+    source_pose_graphics=_reopen_unpromoted_source_pose_graphics_courts_v1(
+        request,read_object,mesh=mesh,rig=rig,skin=skin,
+        compiled=compiled,motion=motion,
+    )
     # This court has rechecked the whole present canonical graph and pose
     # authority. ProductPASS still requires independent source pixels/rays,
     # native parity, time-varying collision/contact and edit consequences.
@@ -1108,6 +1173,7 @@ def execute_proof_capability_v1(
         }),
         "raw_original_source_graphics_replay": raw_replay,
         "raw_two_image_replay_completed": raw_replay is not None,
+        "source_pose_graphics_courts":source_pose_graphics,
         "source_visibility_independent_witness_present": False,
         "source_contact_independent_witness_present": False,
         "missing_independent_witnesses": list(missing),

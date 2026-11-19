@@ -18,6 +18,7 @@ by the owning Mechanics runtime before receiving product authority.
 from hashlib import sha256
 import json
 import math
+from pathlib import Path
 import struct
 from typing import Any, Mapping, Sequence
 
@@ -40,6 +41,9 @@ from compiler.realsas_compiler_core.mechanics_control_solver_v1 import (
 )
 from compiler.realsas_compiler_core.playback_full_surface_v3 import (
     qualify_camera_v3, project_points_xyz_v3,
+)
+from .rss_vnext_native_preview_package_v1 import (
+    reopen_rss_vnext_native_preview_package_v1,
 )
 
 SCHEMA = "RealSaS.RSSvNext.LiveMechanicsNativePoseTransport.v1"
@@ -175,8 +179,13 @@ def encode_rss_vnext_live_mechanics_native_pose_v1(
     if len(out) != expected:
         raise RuntimeError("RSS_LIVE_GRAPHICS_NATIVE_POSE_LAYOUT_DRIFT")
     payload = bytes(out)
+    camera_receipt_sha256 = sha256(json.dumps(
+        [dict(c) for c in cameras] if is_multi else dict(cameras),
+        sort_keys=True, separators=(",", ":"), allow_nan=False,
+    ).encode()).hexdigest()
     receipt = {
         "schema": SCHEMA,
+        "camera_policy_sha256": camera_receipt_sha256,
         "authority": AUTHORITY,
         "product_revision_id": revision,
         "mesh_lineage_hash": mesh.mesh_lineage_hash,
@@ -195,7 +204,78 @@ def encode_rss_vnext_live_mechanics_native_pose_v1(
     return payload, receipt
 
 
+
+def bind_rss_vnext_live_pose_to_native_preview_v1(
+    *,
+    template_rss_path: Path,
+    live_pose_bytes: bytes,
+    live_pose_receipt: Mapping[str, Any],
+) -> tuple[dict[str, bytes], dict[str, Any]]:
+    """Create a raw-mode native renderer input from a reopened template.
+
+    The authored .rss remains untouched; reopening it MUST still reproduce
+    its LBS controls. The live frame stream substitutes only the ephemeral
+    pose.bin passed to the C++ player's raw input mode:
+      player graphics.bin texture.bin pose.bin frame view source_view out.rgba
+
+    Source visibility/style and XPBD behavior remain unqualified. The template
+    is never silently rewritten as an independently replayable product.
+    """
+    state = reopen_rss_vnext_native_preview_package_v1(template_rss_path)
+    m = state["manifest"]
+    r = live_pose_receipt
+    if (
+        not isinstance(live_pose_bytes, bytes)
+        or r.get("schema") != SCHEMA
+        or r.get("authority") != AUTHORITY
+        or r.get("product_release_admission") is not False
+        or r.get("source_color_or_visibility_qualified") is not False
+        or r.get("mesh_lineage_hash") != m["canonical_mesh_lineage_hash"]
+        or r.get("rig_lineage_hash") != m["canonical_rig_lineage_hash"]
+        or r.get("skin_lineage_hash") != m["canonical_skin_lineage_hash"]
+        or r.get("native_pose_bytes_sha256")
+            != sha256(live_pose_bytes).hexdigest()
+        or r.get("native_pose_bytes_count") != len(live_pose_bytes)
+        or r.get("view_count") != int(m["native_view_count"])
+        or r.get("resolution") not in (16,32,64,96,128,256,512,1024,2048)
+        or not isinstance(r.get("frame_count"),int)
+        or not 1 <= r["frame_count"] <= 512
+    ):
+        raise ValueError("RSS_LIVE_GRAPHICS_TEMPLATE_OR_RECEIPT_DRIFT")
+    cameras = state["virtual_camera"]
+    expected_camera_sha = sha256(json.dumps(
+        [dict(c) for c in cameras]
+        if isinstance(cameras,(tuple,list)) else dict(cameras),
+        sort_keys=True, separators=(",", ":"), allow_nan=False,
+    ).encode()).hexdigest()
+    if r.get("camera_policy_sha256") != expected_camera_sha:
+        raise ValueError("RSS_LIVE_GRAPHICS_TEMPLATE_CAMERA_POLICY_DRIFT")
+    magic = b"RSPOSE02" if r["view_count"] == 8 else b"RSPOSE01"
+    if not live_pose_bytes.startswith(magic):
+        raise ValueError("RSS_LIVE_GRAPHICS_NATIVE_POSE_SCHEMA_DRIFT")
+    # Native player is responsible for its own header/count validation.
+    # Bind to the immutable, fully reopened Graphics+UV payload.
+    assets = {
+        "graphics.bin":state["graphics_bytes"],
+        "texture.bin":state["texture_bytes"],
+        "pose.bin":live_pose_bytes,
+    }
+    transport_receipt = {
+        "schema":"RealSaS.RSSvNext.LiveNativeGraphicsInput.v1",
+        "authority":AUTHORITY,
+        "template_schema":m["schema"],
+        "template_pose_remains_authoring_lbs":True,
+        "native_source_color_qualified":False,
+        "product_release_admission":False,
+        "graphics_runtime_hash":m["graphics_runtime_hash"],
+        "pose_sha256":sha256(live_pose_bytes).hexdigest(),
+        "texture_sha256":sha256(assets["texture.bin"]).hexdigest(),
+        "graphics_sha256":sha256(assets["graphics.bin"]).hexdigest(),
+    }
+    return assets, transport_receipt
+
 __all__ = [
     "SCHEMA", "AUTHORITY",
     "encode_rss_vnext_live_mechanics_native_pose_v1",
+    "bind_rss_vnext_live_pose_to_native_preview_v1",
 ]

@@ -19,7 +19,6 @@ reduces exactly to the existing flat softmax (no invented grouping).
 """
 
 from collections.abc import Mapping, Sequence
-import math
 
 import torch
 from torch import Tensor, nn
@@ -78,10 +77,15 @@ class RSSvNextLearnedChainMixtureV1(nn.Module):
     def __init__(
         self, *, vertex_feature_dim: int, joint_feature_dim: int,
         hidden_dim: int,
+        max_query_chunk: int = 512,
     ) -> None:
         super().__init__()
-        if min(vertex_feature_dim, joint_feature_dim, hidden_dim) < 1:
+        if (
+            min(vertex_feature_dim,joint_feature_dim,hidden_dim,max_query_chunk) < 1
+            or max_query_chunk>8192
+        ):
             raise ValueError("RSS_VNEXT_MIRA_GROUP_DIM_INVALID")
+        self.max_query_chunk=max_query_chunk
         self.vertex_projection = nn.Sequential(
             nn.LayerNorm(vertex_feature_dim),
             nn.Linear(vertex_feature_dim, hidden_dim),
@@ -148,13 +152,19 @@ class RSSvNextLearnedChainMixtureV1(nn.Module):
             group_log_mass.append(torch.logsumexp(chunk,dim=-1))
             conditional.append(torch.softmax(chunk,dim=-1))
         gh=torch.stack(group_context,dim=0)
-        n=vertex_h.shape[0]
         k=gh.shape[0]
-        pair=torch.cat((
-            vertex_h[:,None,:].expand(n,k,-1),
-            gh[None,:,:].expand(n,k,-1),
-        ),dim=-1)
-        learned_group_logit=self.group_pair(pair).squeeze(-1)
+        # Bound O(V*K*H) scratch space on real 30k+ mesh surfaces.
+        # Chunked and unchunked compute the same pair logits.
+        gate_rows=[]
+        for start in range(0,vertex_h.shape[0],self.max_query_chunk):
+            q=vertex_h[start:start+self.max_query_chunk]
+            n=q.shape[0]
+            pair=torch.cat((
+                q[:,None,:].expand(n,k,-1),
+                gh[None,:,:].expand(n,k,-1),
+            ),dim=-1)
+            gate_rows.append(self.group_pair(pair).squeeze(-1))
+        learned_group_logit=torch.cat(gate_rows,dim=0)
         # The logsumexp baseline is important: with zero learned correction
         # this exactly recovers the flat joint softmax; the group-specific
         # network must LEARN deviations rather than obtaining a group prior

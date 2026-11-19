@@ -88,6 +88,8 @@ def propose_product_hybrid_open_m0_v1(
     state,
     signed_seed: TESSASeededSurfaceV1,
     policy: ProductHybridOpenM0PolicyV1,
+    signed_layer_name: str = "signed_solid",
+    signed_presentation_roles: tuple[str, ...] = ("primary_form",),
 ) -> ProductHybridOpenM0ProposalV1:
     """Use exactly the six-conditioned scene H; do not infer from teacher IDs."""
     if type(policy) is not ProductHybridOpenM0PolicyV1:
@@ -104,6 +106,17 @@ def propose_product_hybrid_open_m0_v1(
     ):
         raise ValueError("RSS_VNEXT_HYBRID_REQUIRES_SAME_GENERATED_SIX_VIEW_H")
     valid_roles = set(model.cfg.semantic_role_schema().roles)
+    if (
+        type(signed_layer_name) is not str or not signed_layer_name
+        or type(signed_presentation_roles) is not tuple
+        or not signed_presentation_roles
+        or any(type(role) is not str or role not in valid_roles
+               for role in signed_presentation_roles)
+        or set(signed_presentation_roles).intersection(
+            policy.open_presentation_roles,
+        )
+    ):
+        raise ValueError("RSS_VNEXT_HYBRID_SIGNED_LAYER_ROLE_POLICY")
     if not set(policy.open_presentation_roles).issubset(valid_roles):
         raise ValueError("RSS_VNEXT_HYBRID_UNKNOWN_PRESENTATION_ROLE")
 
@@ -164,6 +177,8 @@ def propose_product_hybrid_open_m0_v1(
         scene_triplanes=state.scene_triplanes,
         open_layer_name=policy.open_layer_name,
         open_presentation_roles=policy.open_presentation_roles,
+        signed_layer_name=signed_layer_name,
+        signed_presentation_roles=signed_presentation_roles,
     )
     hybrid.validate()
     return ProductHybridOpenM0ProposalV1(

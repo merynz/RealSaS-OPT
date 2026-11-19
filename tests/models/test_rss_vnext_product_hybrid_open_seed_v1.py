@@ -179,3 +179,81 @@ def test_inference_rejects_hybrid_without_generated_construction(monkeypatch):
     cam=torch.zeros(1,2,13)
     with pytest.raises(ValueError,match="HYBRID_PRODUCT_GENERATED_SCENE_REQUIRED"):
         model.propose_teacher_free(rgba,cam,hybrid_open_policy=_policy())
+
+
+def test_hybrid_shape_cas_to_mesh_court_preserves_open_closed_topology(monkeypatch):
+    """Compiler must retain component kind, not treat OPEN as signed SDF."""
+    import io
+    import numpy as np
+    from compiler.rss_vnext.workers.rss_vnext_shape_executor_v4 import (
+        _tessa_candidate_tensors_v1, _tensor_archive,
+    )
+    from compiler.rss_vnext.workers.rss_vnext_mesh_executor_v3 import (
+        _validate_candidate,
+    )
+    model,state=_model_and_state(monkeypatch)
+    source=propose_product_hybrid_open_m0_v1(
+        model=model,state=state,signed_seed=_signed(state.scene_triplanes),
+        policy=_policy(),
+    )
+    mesh=model.build_seeded_mechanics_candidate_v1(
+        state,source.hybrid.seed,adaptive_refinement=True,
+    )["mesh_candidate"]
+    proposal={
+        "mesh_candidate":mesh,
+        "structural_token_proposal":torch.tensor(
+            [[model.cfg.tessa.BOS]],dtype=torch.long,
+        ),
+        "mesh_status":"UNQUALIFIED_MESH_CANDIDATE",
+        "topology_candidate_abi":"ONE_IRIS_SEEDED_MESH_V1",
+        "hybrid_open_component_surface_kinds":
+            source.hybrid.component_surface_kinds,
+        "hybrid_open_surface_authority":source.source_authority,
+        "hybrid_open_selected_slot_index":source.predicted_open_slot_index,
+        "hybrid_open_candidate_product_qualified":False,
+    }
+    arrays,receipt=_tessa_candidate_tensors_v1(proposal)
+    receipt["mesh_status"]="UNQUALIFIED_MESH_CANDIDATE"
+    blob=_tensor_archive(**arrays,scene_triplanes=state.scene_triplanes)
+    with np.load(io.BytesIO(blob),allow_pickle=False) as archive:
+        named={k:archive[k] for k in archive.files}
+    evaluated=_validate_candidate(named,receipt)
+    assert evaluated["hybrid_m0_topology_court"]["closed"]==1
+    assert evaluated["hybrid_m0_topology_court"]["open"]>=1
+    assert evaluated["hybrid_m0_topology_court"]["open_boundary_edges"]>=3
+    altered={**receipt,
+             "tessa_seed_component_surface_kinds":
+                ["UDF_IRIS_H_OPEN"] * len(source.hybrid.component_surface_kinds)}
+    with pytest.raises(RuntimeError,match="HYBRID_COMPONENT_KIND_DOMAIN"):
+        _validate_candidate(named,altered)
+    forged={**receipt,"tessa_seed_hybrid_product_qualified":True}
+    with pytest.raises(RuntimeError,match="HYBRID_MODEL_ONLY_AUTHORITY"):
+        _validate_candidate(named,forged)
+
+
+def test_hybrid_compiler_rejects_open_signed_boundary_relabel(monkeypatch):
+    import numpy as np
+    from compiler.rss_vnext.workers.rss_vnext_mesh_executor_v3 import (
+        _validate_model_hybrid_m0_boundary_v1,
+    )
+    model,state=_model_and_state(monkeypatch)
+    source=propose_product_hybrid_open_m0_v1(
+        model=model,state=state,signed_seed=_signed(state.scene_triplanes),
+        policy=_policy(),
+    )
+    seed=source.hybrid.seed
+    faces=seed.original_faces.detach().cpu().numpy()
+    comp=seed.vertex_component_ids[:seed.original_vertex_count].detach().cpu().numpy()
+    layer=seed.vertex_layer_ids[:seed.original_vertex_count].detach().cpu().numpy()
+    def inspect(f,k=source.hybrid.component_surface_kinds):
+        return _validate_model_hybrid_m0_boundary_v1(
+            original_faces=f,original_vertex_components=comp,
+            original_vertex_layers=layer,layer_count=len(seed.layer_names),
+            component_kinds=list(k),
+        )
+    assert inspect(faces)["open"]>=1
+    # Remove one tetra face; all four vertices remain referenced but a
+    # supposedly CLOSED shell now has a topological hole.
+    bad=np.concatenate((faces[:3],faces[4:]),axis=0)
+    with pytest.raises(RuntimeError,match="HYBRID_SIGNED_SHELL_OPEN"):
+        inspect(bad)

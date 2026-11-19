@@ -475,12 +475,15 @@ class AXISRigProgramModelV6(nn.Module):
         tokens_per_joint: int,
         max_steps: int | None = None,
         allowed_constraint_operators: Sequence[str] | None = None,
+        emit_mechanical_parts: bool = False,
     ) -> tuple[RigProgramEventV6, ...]:
         self.eval()
         if scene_memory.ndim != 3 or scene_memory.shape[0] != 1:
             raise ValueError("AXIS_V6_GENERATION_REQUIRES_BATCH_ONE")
         if tokens_per_joint < 1:
             raise ValueError("AXIS_V6_TOKENS_PER_JOINT_INVALID")
+        if type(emit_mechanical_parts) is not bool:
+            raise ValueError("AXIS_V6_MECHANICAL_PART_EMISSION_POLICY_INVALID")
         if allowed_constraint_operators is not None:
             # Fail before any expensive causal decode rather than producing
             # unsupported product constraints and discarding the whole mesh.
@@ -575,6 +578,26 @@ class AXISRigProgramModelV6(nn.Module):
                     last["pointer_b_logits"]+allowed,
                     state.joint_count,allow_null=False,
                 )
+                if emit_mechanical_parts:
+                    from models.rss_vnext.axis_mechanical_part_graph_v1 import (
+                        candidate_axis_part_pointer_choices_v1,
+                    )
+                    previous=tuple((
+                        e.pointer_a,e.pointer_b,e.pointer_c
+                    ) for e in events if e.kind==RigTokenKindV6.CHAIN)
+                    choices=candidate_axis_part_pointer_choices_v1(
+                        parents=parents,existing_chains=previous,
+                        start_joint=pa,end_joint=pb,
+                    )
+                    part_logits=torch.full_like(
+                        last["pointer_c_logits"],float("-inf"),
+                    )
+                    for choice in choices:
+                        part_logits[choice+1]=0.
+                    pc=self._pointer(
+                        last["pointer_c_logits"]+part_logits,
+                        max(choices)+1,allow_null=True,
+                    )
             elif kind == RigTokenKindV6.CONSTRAINT:
                 from compiler.realsas_compiler_core.rig_constraint_schema_v1 import (
                     rig_constraint_operator_schema_v1,
@@ -684,6 +707,7 @@ def qualified_axis_rig_skin_sequence_loss_v6(
     control_absence_qualified: bool = False,
     chain_absence_qualified: bool = False,
     frame_dof_qualified: bool = True,
+    mechanical_part_graph_qualified: bool = False,
 ) -> tuple[Tensor, dict[str, Tensor]]:
     """Source-admitted teacher-forced AXIS V6 autoregressive objective.
 
@@ -693,6 +717,24 @@ def qualified_axis_rig_skin_sequence_loss_v6(
     from an unqualified student proposal or compiler heuristics.
     """
     teacher.validate(model.config)
+    if type(mechanical_part_graph_qualified) is not bool:
+        raise ValueError("AXIS_V6_TRAIN_PART_AUTHORITY_INVALID")
+    chain_members=teacher.kind_ids==int(RigTokenKindV6.CHAIN)
+    if (
+        not mechanical_part_graph_qualified
+        and bool((teacher.pointer_c[chain_members]>=0).any())
+    ):
+        raise ValueError("AXIS_V6_TRAIN_PART_TEACHER_PROVENANCE_REQUIRED")
+    if mechanical_part_graph_qualified:
+        if not structural_chains_qualified:
+            raise ValueError("AXIS_V6_TRAIN_PART_REQUIRES_QUALIFIED_CHAINS")
+        from models.rss_vnext.axis_mechanical_part_graph_v1 import (
+            decode_axis_mechanical_part_graph_v1,
+        )
+        for batch_index in range(teacher.kind_ids.shape[0]):
+            decode_axis_mechanical_part_graph_v1(
+                teacher,batch_index=batch_index,
+            )
     if type(frame_dof_qualified) is not bool:
         raise ValueError("AXIS_V6_TRAIN_FRAME_DOF_PROVENANCE_INVALID")
     known_kind_mask=qualified_axis_v6_kind_mask_v1(
@@ -831,6 +873,14 @@ def qualified_axis_rig_skin_sequence_loss_v6(
         "pointer_b_logits", teacher.pointer_b,
         positions(RigTokenKindV6.CHAIN) | anchor_control, offset=1,
     )
+    if mechanical_part_graph_qualified:
+        # The pointer-c distribution is the EXISTING trainable AXIS head.
+        # Part ordinals are learned only from independently admitted source
+        # group programs, never inferred from names or missing chain labels.
+        supervised_ce(
+            "pointer_c_logits",teacher.pointer_c,
+            positions(RigTokenKindV6.CHAIN),offset=1,
+        )
     supervised_ce(
         "control_kind_logits", teacher.aux_type_ids,
         positions(RigTokenKindV6.CONTROL),

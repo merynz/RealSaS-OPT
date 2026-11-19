@@ -34,7 +34,8 @@ class AXISV6CausalKVCacheV1:
             raise ValueError("AXIS_V6_KV_CACHE_EVAL_BATCH_ONE_REQUIRED")
         self.model=model
         self.count=0
-        self.scene=model.scene_projection(scene_memory)
+        self.scene_memory=scene_memory
+        self.scene:Tensor|None=None
         self.layers=tuple(model.causal.layers)
         for layer in self.layers:
             a=layer.self_attn
@@ -61,6 +62,10 @@ class AXISV6CausalKVCacheV1:
         # Apply the exact learned causal position in the SAME addition order
         # as full-prefix embedding; subtract/add would drift under fp16.
         x=self.model._embed(seq,position_offset=self.count)
+        if self.scene is None:
+            self.scene=self.model.scene_projection(
+                self.scene_memory.to(dtype=x.dtype),
+            )
         for li,layer in enumerate(self.layers):
             attn=layer.self_attn
             h=attn.num_heads

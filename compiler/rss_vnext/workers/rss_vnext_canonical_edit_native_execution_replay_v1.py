@@ -138,7 +138,6 @@ def _raster_cpp(
         np.any(owners < -1) or np.any(owners >= face_count)
         or not np.isin(authority,[0,2]).all()
         or not np.isin(unknown,[0,1]).all()
-        or np.any((unknown != 0) & (authority != 0))
     ):
         raise QualificationError("RSS_EDIT_CPP_SIDECAR_DOMAIN_OR_SOURCE_AUTHORITY")
     return {
@@ -204,8 +203,7 @@ def reopen_native_edited_puppet_rasters_v1(
             np.any(owners < -1) or np.any(owners >= face_count)
             or not np.isin(authority,[0,2]).all()
             or not np.isin(unknown,[0,1]).all()
-            or np.any((unknown!=0)&(authority!=0))
-        ):
+            ):
             raise QualificationError("RSS_EDIT_CPP_BUNDLE_FALSE_SOURCE_OR_FACE_OWNER")
     return rows
 

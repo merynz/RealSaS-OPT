@@ -53,6 +53,8 @@ from .mechanics_xpbd_body_mesh_contact_v1 import (
     XPBDBodyMeshColliderV1,
     qualify_xpbd_body_mesh_colliders_v1,
     resolve_xpbd_body_mesh_contact_v1,
+    prepare_xpbd_body_mesh_swept_bvh_v1,
+    resolve_xpbd_body_mesh_edge_contact_v1,
 )
 
 Vec3 = tuple[float, float, float]
@@ -747,6 +749,12 @@ def step_declared_xpbd_surface_v1(
     body_contact_swept_hits=0
     body_contact_max_candidates=0
     body_contact_unresolved_sweeps=0
+    body_bvh_examined_primitives=0
+    body_bvh_visited_nodes=0
+    body_edge_contact_projections=0
+    body_edge_swept_hits=0
+    body_edge_max_candidates=0
+    body_edge_bvh_examined_primitives=0
     body_max_penetration=0.
     for sub in range(steps):
         fraction=(sub+1)/steps
@@ -769,7 +777,19 @@ def step_declared_xpbd_surface_v1(
             vid:prior_body[vid]+fraction*(current_body[vid]-prior_body[vid])
             for vid in body_ids
         }
+        prepared_body_bvh=(
+            prepare_xpbd_body_mesh_swept_bvh_v1(
+                policy.body_mesh_colliders,body_start,body_end,
+            ) if policy.body_mesh_colliders else None
+        )
         before={jid:pos[jid].copy() for jid in dynamic}
+        edge_before={
+            **{
+                jid:prior_pins[jid]+(sub/steps)*(primary[jid]-prior_pins[jid])
+                for jid in pins
+            },
+            **before,
+        }
         for jid in dynamic:
             pos[jid]=pos[jid]+h*damping*velocity[jid]+h*h*gravity
         lambda_stretch=np.zeros(len(domain.stretch_edges),dtype=np.float64)
@@ -881,13 +901,30 @@ def step_declared_xpbd_surface_v1(
                     pos,before,body_start,body_end,dynamic,
                     policy.body_mesh_colliders,
                     max_candidates=policy.max_body_mesh_candidates,
-                    project=True,
+                    project=True,prepared_bvh=prepared_body_bvh,
                 )
+                body_bvh_examined_primitives+=body_result.broadphase_examined_primitives
+                body_bvh_visited_nodes+=body_result.broadphase_visited_nodes
                 body_contact_projections+=body_result.projections
                 body_contact_swept_hits+=body_result.swept_hits
                 body_contact_max_candidates=max(
                     body_contact_max_candidates,body_result.candidates,
                 )
+                if any(c.swept_edge_edge_ccd for c in policy.body_mesh_colliders):
+                    edge_result=resolve_xpbd_body_mesh_edge_contact_v1(
+                        pos,edge_before,body_start,body_end,
+                        domain.stretch_edges,mass,policy.body_mesh_colliders,
+                        max_candidates=policy.max_body_mesh_candidates,
+                        project=True,prepared_bvh=prepared_body_bvh,
+                    )
+                    body_edge_contact_projections+=edge_result.projections
+                    body_edge_swept_hits+=edge_result.swept_hits
+                    body_edge_max_candidates=max(
+                        body_edge_max_candidates,edge_result.candidates,
+                    )
+                    body_edge_bvh_examined_primitives+=(
+                        edge_result.broadphase_examined_primitives
+                    )
         if policy.body_mesh_colliders:
             # Anchored cloth roots cannot be moved by XPBD. If an authored
             # body surface intersects a pin, fail the contact court unless
@@ -900,7 +937,7 @@ def step_declared_xpbd_surface_v1(
                 pos,pin_start,body_start,body_end,pins,
                 policy.body_mesh_colliders,
                 max_candidates=policy.max_body_mesh_candidates,
-                project=False,
+                project=False,prepared_bvh=prepared_body_bvh,
             )
             body_max_penetration=max(
                 body_max_penetration,pinned_final.max_penetration,
@@ -912,12 +949,23 @@ def step_declared_xpbd_surface_v1(
                 pos,before,body_start,body_end,dynamic,
                 policy.body_mesh_colliders,
                 max_candidates=policy.max_body_mesh_candidates,
-                project=False,
+                project=False,prepared_bvh=prepared_body_bvh,
             )
             body_max_penetration=max(
                 body_max_penetration,body_final.max_penetration,
             )
             body_contact_unresolved_sweeps+=body_final.unresolved_sweeps
+            if any(c.swept_edge_edge_ccd for c in policy.body_mesh_colliders):
+                edge_final=resolve_xpbd_body_mesh_edge_contact_v1(
+                    pos,edge_before,body_start,body_end,
+                    domain.stretch_edges,mass,policy.body_mesh_colliders,
+                    max_candidates=policy.max_body_mesh_candidates,
+                    project=False,prepared_bvh=prepared_body_bvh,
+                )
+                body_max_penetration=max(
+                    body_max_penetration,edge_final.max_penetration,
+                )
+                body_contact_unresolved_sweeps+=edge_final.unresolved_sweeps
         for jid in dynamic:
             velocity[jid]=(pos[jid]-before[jid])/h
             if (not np.isfinite(pos[jid]).all()
@@ -1051,6 +1099,18 @@ def step_declared_xpbd_surface_v1(
             "body_mesh_contact_projections":body_contact_projections,
             "body_mesh_swept_vertex_triangle_hits":body_contact_swept_hits,
             "body_mesh_contact_max_candidate_pairs":body_contact_max_candidates,
+            "body_mesh_swept_bvh_enabled":bool(policy.body_mesh_colliders),
+            "body_mesh_bvh_examined_primitives":body_bvh_examined_primitives,
+            "body_mesh_bvh_visited_nodes":body_bvh_visited_nodes,
+            "body_mesh_edge_contact_projections":body_edge_contact_projections,
+            "body_mesh_edge_swept_hits":body_edge_swept_hits,
+            "body_mesh_edge_max_candidate_pairs":body_edge_max_candidates,
+            "body_mesh_edge_bvh_examined_primitives":body_edge_bvh_examined_primitives,
+            "body_mesh_edge_linear_ccd_qualified":bool(
+                policy.body_mesh_colliders and steps>0
+                and any(c.swept_edge_edge_ccd for c in policy.body_mesh_colliders)
+                and status=="PASS_XPBD_SURFACE_RUNTIME"
+            ),
             "body_mesh_contact_max_penetration":body_max_penetration,
             "body_mesh_unresolved_sweeps":body_contact_unresolved_sweeps,
             "body_mesh_point_triangle_linear_ccd_qualified":bool(

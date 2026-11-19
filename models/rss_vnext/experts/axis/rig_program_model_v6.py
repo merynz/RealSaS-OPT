@@ -501,10 +501,21 @@ class AXISRigProgramModelV6(nn.Module):
             RigGrammarStateV6(), RigTokenKindV6.BOS, tokens_per_joint=tokens_per_joint
         )
 
+        from models.rss_vnext.axis_executable_constraint_grammar_v1 import (
+            mask_axis_v6_executable_constraint_kinds_v1,
+            mask_axis_v6_executable_constraint_operators_v1,
+        )
         for _ in range(limit - 1):
             out=cache.consume(events[-1])
             kind_logits = AXISRigProgramGrammarV6Product.mask(
                 out["kind_logits"][0, -1], state, tokens_per_joint=tokens_per_joint
+            )
+            kind_logits=mask_axis_v6_executable_constraint_kinds_v1(
+                kind_logits,events=events,state=state,
+                executable_operators=(
+                    allowed_constraint_operators if allowed_constraint_operators is not None
+                    else ("IK","AIM","FOLLOW","COPY_TRANSFORM","STRETCH")
+                ),
             )
             kind = RigTokenKindV6(int(torch.argmax(kind_logits).item()))
             last = {key: value[0, -1] for key, value in out.items() if key != "hidden"}
@@ -561,14 +572,29 @@ class AXISRigProgramModelV6(nn.Module):
                     state.joint_count,allow_null=False,
                 )
             elif kind == RigTokenKindV6.CONSTRAINT:
-                proposal_logits = last["constraint_operator_logits"]
-                if allowed_constraint_operators is not None:
-                    proposal_logits = self.capability_masked_constraint_logits(
-                        proposal_logits,
-                        allowed_constraint_operators=allowed_constraint_operators,
-                    )
+                from compiler.realsas_compiler_core.rig_constraint_schema_v1 import (
+                    rig_constraint_operator_schema_v1,
+                )
+                proposal_logits=mask_axis_v6_executable_constraint_operators_v1(
+                    last["constraint_operator_logits"],
+                    control_count=state.control_count,
+                    chain_count=state.chain_count,
+                    executable_operators=(
+                        allowed_constraint_operators if allowed_constraint_operators is not None
+                        else ("IK","AIM","FOLLOW","COPY_TRANSFORM","STRETCH")
+                    ),
+                )
                 aux = int(torch.argmax(proposal_logits).item())
-                pa = self._pointer(last["pointer_a_logits"], state.chain_count, allow_null=True)
+                schema=rig_constraint_operator_schema_v1(
+                    CONSTRAINT_OPERATORS_V6[aux],
+                )
+                pa = (
+                    -1 if schema.chain_requirement=="FORBIDDEN"
+                    else self._pointer(
+                        last["pointer_a_logits"],state.chain_count,
+                        allow_null=schema.chain_requirement!="REQUIRED",
+                    )
+                )
                 scalars = tuple(float(v) for v in last["scalar_params"].tolist())
             elif kind == RigTokenKindV6.CONSTRAINT_INPUT:
                 pa = self._pointer(last["pointer_a_logits"], state.control_count, allow_null=False)
@@ -623,10 +649,14 @@ def qualified_axis_rig_skin_sequence_loss_v6(
     if not executable_constraint_operators or invalid_operators:
         raise ValueError("AXIS_V6_TRAIN_EXECUTABLE_OPERATORS_INVALID")
     b, steps = teacher.kind_ids.shape
+    from models.rss_vnext.axis_executable_constraint_grammar_v1 import (
+        inspect_axis_v6_constraint_events_v1,
+    )
     for bi in range(b):
         state = RigGrammarStateV6()
         parents: list[int] = []
         seen_frames: set[int] = set()
+        source_event_contract: list[RigProgramEventV6] = []
         for step in range(steps):
             try:
                 kind = RigTokenKindV6(int(teacher.kind_ids[bi, step]))
@@ -635,6 +665,11 @@ def qualified_axis_rig_skin_sequence_loss_v6(
                 )
             except (ValueError, TypeError):
                 raise ValueError("AXIS_V6_TRAIN_TEACHER_GRAMMAR_INVALID") from None
+            source_event_contract.append(RigProgramEventV6(
+                kind=kind,
+                pointer_a=int(teacher.pointer_a[bi,step]),
+                aux_type_id=int(teacher.aux_type_ids[bi,step]),
+            ))
             # A causal CHAIN is mechanically observable from a source-native
             # joint-parent graph. It needs its own admitted structural receipt,
             # but not an invented IK/control intervention or animation clip.
@@ -675,6 +710,10 @@ def qualified_axis_rig_skin_sequence_loss_v6(
             raise ValueError("AXIS_V6_TRAIN_TEACHER_NOT_TERMINATED")
         if len(seen_frames) != len(parents):
             raise ValueError("AXIS_V6_TRAIN_JOINT_FRAME_COVERAGE_DRIFT")
+        inspect_axis_v6_constraint_events_v1(
+            source_event_contract,
+            executable_operators=executable_constraint_operators,
+        )
 
     logits = model(scene_memory, teacher)
     kinds = teacher.kind_ids[:, 1:]

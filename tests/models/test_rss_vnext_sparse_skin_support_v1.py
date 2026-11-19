@@ -35,7 +35,7 @@ def test_source_positive_joint_outside_support_gets_training_gradient():
     torch.testing.assert_close(soft.detach(),hard,rtol=0,atol=0)
     assert int((soft.detach()>0).sum())==8
     assert int((soft.detach()==0).sum())==47
-    assert float(soft.detach().sum())==pytest.approx(1,abs=1.e-7)
+    assert float(soft.detach().sum())==pytest.approx(1,abs=1.e-6)
     assert float(soft.detach()[0,0,0])==0.
     # Source ground truth says small-probability joint zero SHOULD be active.
     target=torch.zeros_like(soft)

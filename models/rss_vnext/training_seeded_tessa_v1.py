@@ -29,6 +29,9 @@ from .seeded_surface_sampling_v1 import (
     component_spatial_sample_indices_v1,
 )
 from .tessa_seeded_surface_v1 import TESSASeededSurfaceV1
+from .seeded_mstar_teacher_address_v1 import (
+    seeded_mstar_teacher_address_sha256_v1,
+)
 from .seeded_layer_source_court_v1 import qualify_layer_source_court_v1
 from .native_face_layer_truth_v1 import NativeFaceLayerSamplesV1
 from .native_dynamic_tessa_importance_v1 import (
@@ -668,6 +671,9 @@ class RSSvNextSeededTESSATrainerV1:
                 native_face_witness=teacher.native_face_layer_samples,
                 candidate_faces=mesh.faces,
                 candidate_rest=xyz,
+                active_mstar_topology_address_sha256=(
+                    seeded_mstar_teacher_address_sha256_v1(mesh.seeded_surface)
+                ),
                 source_candidate_skin=skin,
                 source_candidate_posed=target,
                 source_pose_mask=mask,

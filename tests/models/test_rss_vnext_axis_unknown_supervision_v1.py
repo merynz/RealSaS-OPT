@@ -5,7 +5,7 @@ import pytest
 import torch
 
 from models.axis.rig_program_model_v6 import (
-    RigTokenKindV6 as K,
+    RigTokenKindV6 as K, RigProgramEventV6 as E, AXISSequenceV6,
     qualified_axis_v6_kind_mask_v1,
     qualified_axis_rig_skin_sequence_loss_v6,
 )
@@ -24,8 +24,24 @@ def _index(seq, kind):
     return int(idx[0])
 
 
+def _no_chain():
+    return AXISSequenceV6.from_events([
+        E(K.BOS),
+        E(K.JOINT,pointer_a=-1),
+        E(K.FRAMES_START),
+        E(K.FRAME,pointer_a=0,frame_6d=(1.,0.,0.,0.,1.,0.)),
+        E(K.CONTROLS_START),
+        E(K.CHAINS_START),
+        E(K.CONSTRAINTS_START),
+        E(K.ANCHORS_START),
+        E(K.SKIN_START),
+        *(E(K.SKIN_CODE,skin_code_id=i) for i in range(4)),
+        E(K.EOS),
+    ],device=torch.device("cpu"))
+
+
 def test_unknown_control_chain_and_anchor_are_not_negative_kind_labels():
-    _,seq=_setup()
+    seq=_no_chain()
     masked=qualified_axis_v6_kind_mask_v1(
         seq,control_consequences_qualified=False,
         structural_chains_qualified=False,
@@ -52,7 +68,7 @@ def test_real_chain_receipt_does_not_claim_authored_controls_are_absent():
 
 
 def test_explicit_source_verified_absence_trains_negative_without_guessing():
-    _,seq=_setup()
+    seq=_no_chain()
     all_known=qualified_axis_v6_kind_mask_v1(
         seq,control_consequences_qualified=False,
         control_absence_qualified=True,

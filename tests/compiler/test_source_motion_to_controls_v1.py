@@ -112,7 +112,12 @@ def test_source_motion_worker_reopens_two_exact_cas_artifacts():
     ]
     request={
         "capability_id":"product.motion","kind":"MODULE",
-        "capability_metadata":{"executor_contract":MOTION_CONTRACT},
+        "capability_metadata":{
+            "executor_contract":MOTION_CONTRACT,
+            # The real Go capability catalog ALWAYS advertises rest-hold
+            # as a fallback. An explicit source clip must override it.
+            "default_rest_hold_policy":"DETERMINISTIC_ZERO_TRACK_REST_HOLD_V1",
+        },
         "model_releases":[],"input_artifacts":refs,
     }
     out=execute_motion_capability_v2(

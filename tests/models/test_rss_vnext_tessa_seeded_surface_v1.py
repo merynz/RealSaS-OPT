@@ -98,7 +98,9 @@ def test_cannot_invent_canonical_authority_or_silent_mesh_rebind():
     r = _prepare()
     with pytest.raises(ValueError, match="TESSA_SEEDED_SURFACE_DOMAIN_INVALID"):
         replace(r, canonical_mesh_authority=True).validate()
-    with pytest.raises(ValueError, match="PARENT_VERTEX_SUPPORT_DRIFT"):
+    # A counterfeit original M0 parent is now rejected by the stronger
+    # original-index identity gate, before midpoint/Compiler processing.
+    with pytest.raises(ValueError, match="ORIGINAL_VERTEX_PARENT_DRIFT"):
         replace(
             r, parent_seed_edges=((0, 0), (1, 1), (2, 2), (3, 0)),
         ).validate()

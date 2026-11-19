@@ -21,7 +21,8 @@
     {
       "old_path": "compiler/realsas_compiler_core/rss_vnext_discrete_skin_replay_v1.py",
       "new_path": "compiler/rss_vnext/core/rss_vnext_discrete_skin_replay_v1.py",
-      "git_blob_sha1": "9e89ae61bf7af3601d3a9b592831b06e9c9ca7d3"
+      "git_blob_sha1": "98bc0078dc40e38eb749118fcb56eccaeeb50d1c",
+      "original_git_blob_sha1": "9e89ae61bf7af3601d3a9b592831b06e9c9ca7d3"
     },
     {
       "old_path": "compiler/realsas_compiler_core/rss_vnext_expert_fanout_v1.py",

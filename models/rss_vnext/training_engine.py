@@ -93,7 +93,7 @@ from .seeded_layer_source_court_v1 import (
 from .training_seeded_tessa_v1 import _digest as seeded_source_tensor_digest_v1
 from .tessa_seeded_surface_v1 import tessa_seed_from_flexicubes_v1
 from .component_conditioned_udf_v1 import (
-    SourceNativeComponentUDFFitV1,
+    KIND_OPEN, SourceNativeComponentUDFFitV1,
     source_native_component_udf_objective_v1,
 )
 from .native_face_layer_truth_v1 import tensor_sha256_v1 as native_tensor_sha256_v1
@@ -2593,7 +2593,16 @@ class RSSvNextStructuralTrainer:
                 !=self.product_hybrid_open_policy.open_presentation_roles
             or teacher.native_face_layer_samples is None
             or teacher.native_open_boundary is None
-            or batch.component_udf_source_teacher is None
+            or not isinstance(
+                batch.component_udf_source_teacher, SourceNativeComponentUDFFitV1
+            )
+            or not batch.component_udf_source_teacher.independently_complete_inventory
+            or batch.component_udf_source_teacher.source_asset_sha256
+                !=teacher.source_asset_sha256
+            or not bool((
+                batch.component_udf_source_teacher.source_component_open_kind
+                == KIND_OPEN
+            ).any())
         ):
             raise ValueError("RSS_VNEXT_PRODUCT_HYBRID_OPEN_NATIVE_TEACHER_REQUIRED")
         if (

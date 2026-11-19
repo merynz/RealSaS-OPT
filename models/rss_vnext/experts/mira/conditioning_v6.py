@@ -187,14 +187,17 @@ def carrier_skin_proposal_from_decoded_v6(
         ))
     ):
         raise RuntimeError("MIRA_V6_DECODED_SPARSE_SIMPLEX_INVALID")
+    # Dense V*J traversal is not viable for 30k vertices and 174+ joints.
+    # Convert exactly once; serialization scales with actual nonzero support.
+    nonzero = torch.nonzero(weights.detach() > 0, as_tuple=False).tolist()
+    values = weights.detach().cpu()
     influences = tuple(
         CarrierSkinInfluenceProposal(
             carrier_vertex_id=conditioning.carrier.ordered_vertex_ids[vi],
             canonical_joint_id=conditioning.joint_ids[ji],
-            weight=float(weights[vi, ji].item()),
+            weight=float(values[vi, ji]),
         )
-        for vi in range(n)
-        for ji in range(j) if float(weights[vi,ji].item()) > 0.
+        for vi, ji in nonzero
     )
     return CarrierSkinProposalIR(
         influences=influences,

@@ -25,8 +25,26 @@ from models.rss_vnext.realsas_cleanroom_diffusion_training_v1 import (
     STAGE_CANONICAL,STAGE_MULTIVIEW,
 )
 from tests.models.test_rss_vnext_two_stage_generation_v1 import (
-    stage,model,source_cameras,six_cameras,
+    stage,source_cameras,six_cameras,
 )
+from models.rss_vnext import (
+    RSSvNextConfig,RSSvNextPatchEncoderForTests,
+    RSSvNextUnifiedCharacterModel,
+)
+
+
+def _product_model():
+    """Use the production required-signed topology policy, not tiny ablation."""
+    cfg=replace(
+        RSSvNextConfig.tiny_for_test(),
+        constructed_total_views=0,
+        tessa_surface_requirement="REQUIRE_SIGNED_IRIS_SURFACE",
+    )
+    return RSSvNextUnifiedCharacterModel(
+        cfg,vision_encoder=RSSvNextPatchEncoderForTests(
+            cfg.iris.image_token_dim,
+        ),
+    ).eval()
 
 
 def _policy_request():
@@ -44,7 +62,7 @@ def _policy_request():
 
 
 def test_shape_policy_typed_and_model_only_with_no_source_part_hint():
-    net=model().eval()
+    net=_product_model()
     open_policy,signed=_raw_shape_hybrid_open_policy_v1(
         _policy_request(),net,
     )
@@ -70,13 +88,13 @@ def test_shape_policy_typed_and_model_only_with_no_source_part_hint():
 ])
 def test_shape_rejects_partial_or_forged_hybrid_source_hints(bad):
     with pytest.raises(RuntimeError,match="RSS_VNEXT_SHAPE_HYBRID_POLICY"):
-        _raw_shape_hybrid_open_policy_v1(bad,model().eval())
+        _raw_shape_hybrid_open_policy_v1(bad,_product_model())
 
 
 def test_pinned_two_stage_routes_open_policy_to_same_model_without_teacher(tmp_path,monkeypatch):
     torch.manual_seed(1608)
     torch.set_num_threads(1)
-    net=model().eval()
+    net=_product_model()
     signed=RSSvNextSemanticLayerSpec("body",("primary_form",))
     policy=ProductHybridOpenM0PolicyV1(
         open_layer_name="cape",open_presentation_roles=("outer_covering",),
@@ -122,7 +140,7 @@ def test_pinned_two_stage_routes_open_policy_to_same_model_without_teacher(tmp_p
 
 
 def test_two_stage_hybrid_never_uses_unpinned_or_implicit_signed_layer():
-    net=model().eval()
+    net=_product_model()
     policy=ProductHybridOpenM0PolicyV1()
     with pytest.raises(ValueError,match="HYBRID_EXPLICIT_POLICY_REQUIRED"):
         run_two_source_neural_construction_v1(

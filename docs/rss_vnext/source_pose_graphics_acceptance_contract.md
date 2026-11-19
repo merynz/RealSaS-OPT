@@ -53,6 +53,25 @@ source image style when registration is absent. Every receipt has immutable
 `hidden_surface_color_proven=False`,
 `unobserved_motion_quality_proven=False`.
 
+## Independent raw source/native raster replayer
+
+The additional `independently_replay_registered_source_pose_graphics_v1`
+opens TWO bounded binary raster bundles, not a prior JSON verdict:
+a source-qualified RGB/alpha/face-owner/known-mask bundle, and an
+independently executed native C++ RGBA/front-face/color-authority/
+unknown-occlusion bundle. These are typed NPZ payloads with no pickle and
+strict resource limits. Both bundles must have independently pinned
+SHA-256 hashes and an explicit source extraction or C++ execution witness
+in registries supplied **out of band by the trusted host**.
+
+The replayer recomputes the identical local court using the actual pixels,
+final pose and canonical hashes; it compares the result to an optional
+claimed CAS court and rejects any rehashed drift. Absence of an independent
+native renderer execution record, a missing source issuer, a changed camera,
+unknown mask, wrong face ID or tampered raster archive is fail-closed.
+This is the first raw source-pixel independent replay capability; it
+is not a global release proof or a new dataset pipeline.
+
 ## ProductProof consumer
 
 `product.proof` now optionally reopens these typed CAS receipts and checks
@@ -67,6 +86,25 @@ reopens the source and native RGBA/owner/unknown bytes, reruns this exact
 court, verifies source+native issuers and complete temporal/view coverage,
 then binds release-specific source visibility and hidden-reveal programs.
 Until that exists, ProductProof remains fail-closed.
+
+## Trusted ProductProof invocation
+
+The optional `execute_proof_capability_v1(...,
+trusted_source_native_pixel_replayer=...)` parameter is an **operator-injected
+callable**, never a value in `capability_metadata`. It receives the reopened,
+current-parent-matched typed court, independently reopens source and C++
+native raster bundles using the approved SHA registries, reruns the real
+source/Graphics measurement, and must return an exactly equal court object.
+Missing or forged replay fails closed. Raw raster replay count and positive
+locally known-pixel frame count are diagnostic-only: they cannot, alone,
+clear `SOURCE_APPEARANCE_AND_POSE_VISIBILITY`, source hidden-reveal,
+contact/attachment, edit consequence, or final release admission.
+
+This deliberately prevents a service caller from attaching a self-hashed
+`source_registered_pixels_passed=true` JSON and minting a product.
+Only trusted infrastructure may provide the two independent registries.
+The executable C++ renderer's owner/unknown sidecars are required alongside
+RGBA; style and pose constraints do not collapse into alpha alone.
 
 ## Data-side handoff (not an operation by this change)
 

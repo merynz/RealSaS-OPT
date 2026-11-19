@@ -196,6 +196,10 @@ def validate_axis_v6_product_event_stream(
         raise ValueError("AXIS_V6_EVENT_UNFINISHED_GRAMMAR")
     if len(frame_owners)!=state.joint_count:
         raise ValueError("AXIS_V6_PRODUCT_JOINT_FRAME_COVERAGE_DRIFT")
+    from models.rss_vnext.axis_executable_constraint_grammar_v1 import (
+        inspect_axis_v6_constraint_events_v1,
+    )
+    inspect_axis_v6_constraint_events_v1(events)
 
 
 def decode_axis_v6_events(

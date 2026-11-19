@@ -90,10 +90,7 @@ def inspect_axis_v6_constraint_events_v1(
             if not 0<=op_index<len(CONSTRAINT_OPERATORS_V6):
                 raise ValueError("AXIS_V6_CONSTRAINT_OPERATOR_INDEX_INVALID")
             name=CONSTRAINT_OPERATORS_V6[op_index]
-            if name not in allowed or name not in _viable(
-                control_count=controls,chain_count=chains,
-                executable_operators=allowed,
-            ):
+            if name not in allowed:
                 raise ValueError("AXIS_V6_CONSTRAINT_UNEXECUTABLE_OPERATOR")
             schema=rig_constraint_operator_schema_v1(name)
             if (schema.chain_requirement=="REQUIRED" and
@@ -103,6 +100,11 @@ def inspect_axis_v6_constraint_events_v1(
                 raise ValueError("AXIS_V6_CONSTRAINT_FORBIDDEN_CHAIN_DECLARED")
             if event.pointer_a < -1 or event.pointer_a >= chains:
                 raise ValueError("AXIS_V6_CONSTRAINT_CHAIN_POINTER_INVALID")
+            if name not in _viable(
+                control_count=controls,chain_count=chains,
+                executable_operators=allowed,
+            ):
+                raise ValueError("AXIS_V6_CONSTRAINT_UNEXECUTABLE_OPERATOR")
             active_name=name
             n_input=n_output=0
         elif k==RigTokenKindV6.CONSTRAINT_INPUT:

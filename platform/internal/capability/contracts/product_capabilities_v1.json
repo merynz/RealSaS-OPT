@@ -501,7 +501,13 @@
         "required_models": [],
         "animation_source_input_required": false,
         "can_mint_product_revision": false,
-        "default_rest_hold_policy": "DETERMINISTIC_ZERO_TRACK_REST_HOLD_V1"
+        "default_rest_hold_policy": "DETERMINISTIC_ZERO_TRACK_REST_HOLD_V1",
+        "input_source_rig_motion_artifact_type": "RealSaS.SourceRigMotion",
+        "input_source_rig_motion_schema_version": "v1",
+        "input_control_retarget_binding_artifact_type": "RealSaS.ControlMotionRetargetBinding",
+        "input_control_retarget_binding_schema_version": "v1",
+        "source_motion_mapping_requires_exact_existing_controls": true,
+        "source_motion_retarget_does_not_claim_rights_or_visual_parity": true
       }
     },
     "product.proof": {

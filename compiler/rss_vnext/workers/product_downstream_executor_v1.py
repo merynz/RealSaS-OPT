@@ -999,6 +999,9 @@ def _reopen_unpromoted_source_pose_graphics_courts_v1(
     from compiler.realsas_compiler_core.rss_vnext_source_pose_graphics_court_v1 import (
         reopen_source_pose_graphics_court_v1,
     )
+    from compiler.realsas_compiler_core.rss_vnext_temporal_graphics_evidence_audit_v1 import (
+        audit_independently_replayed_graphics_samples_v1,
+    )
     kind="RealSaS.RSSvNextSourcePoseGraphicsCourt"
     refs=[
         row for row in request.get("input_artifacts") or ()
@@ -1013,6 +1016,7 @@ def _reopen_unpromoted_source_pose_graphics_courts_v1(
     courts=[]
     replayed_count=0
     positively_verified_count=0
+    independently_replayed_positive_courts=[]
     addresses=set()
     for ref in refs:
         payload=_read({
@@ -1041,6 +1045,8 @@ def _reopen_unpromoted_source_pose_graphics_courts_v1(
             positively_verified_count += int(
                 replayed.source_registered_pixels_passed
             )
+            if replayed.source_registered_pixels_passed:
+                independently_replayed_positive_courts.append(replayed)
         courts.append(court)
     return {
         "typed_source_pose_graphics_frame_receipts_reopened":len(courts),
@@ -1062,6 +1068,11 @@ def _reopen_unpromoted_source_pose_graphics_courts_v1(
         ),
         "independently_raw_replayed_frame_count":replayed_count,
         "independently_raw_positive_frame_count":positively_verified_count,
+        "independent_temporal_sample_inventory":
+            audit_independently_replayed_graphics_samples_v1(
+                independently_replayed_positive_courts,
+                canonical_motion_duration_seconds=float(motion.duration_seconds),
+            ),
         "source_graphics_product_authority_promoted":False,
         "known_pixels_are_not_full_hidden_surface_or_motion_proof":True,
     }

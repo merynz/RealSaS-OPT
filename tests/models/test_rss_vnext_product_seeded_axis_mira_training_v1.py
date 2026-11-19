@@ -233,3 +233,26 @@ def test_seeded_product_mira_source_skin_without_native_motion_clip(monkeypatch)
             ),
             native_skin_registry=registry,
         ).objective(batch)
+
+
+def test_seeded_axis_and_tessa_consume_identical_flexicubes_witness_memory(monkeypatch):
+    """P0 parity: AXIS must not train without the live FlexiCubes witness."""
+    net,batch,make,*_=_rig_case(monkeypatch)
+    captured={}
+    original_build=net.build_seeded_mechanics_candidate_v1
+    original_control=net._control_memory
+    def build(state,seed,**kwargs):
+        structural=kwargs.get("structural_memory")
+        assert structural is not None
+        captured["tessa_memory_id"]=id(structural)
+        captured["memory_token_count"]=int(structural.shape[1])
+        return original_build(state,seed,**kwargs)
+    def control(state,structural,mesh):
+        captured["axis_memory_id"]=id(structural)
+        return original_control(state,structural,mesh)
+    monkeypatch.setattr(net,"build_seeded_mechanics_candidate_v1",build)
+    monkeypatch.setattr(net,"_control_memory",control)
+    result=make().objective(batch)
+    assert result.product_axis_mira_loss is not None
+    assert captured["axis_memory_id"]==captured["tessa_memory_id"]
+    assert captured["memory_token_count"]>0

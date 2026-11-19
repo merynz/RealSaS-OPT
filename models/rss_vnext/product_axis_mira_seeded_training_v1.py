@@ -78,6 +78,7 @@ class ProductSeededAXISMIRAResultV1:
 
 def product_seeded_axis_mira_objective_v1(
     *,model,state,mesh,teacher: SeededTESSASourceTeacherV1,
+    structural_memory: Tensor,
     batch,
     weights: ProductSeededAXISMIRAWeightsV1,
     dataset_manifest_sha256: str,
@@ -138,8 +139,17 @@ def product_seeded_axis_mira_objective_v1(
         and isinstance(row.get("source_intervention_sha256"),str)
         and len(row["source_intervention_sha256"])==64
     )
-    structural=model._structural_memory(state,None)
-    memory=model._control_memory(state,structural,mesh)
+    # Never recompute a weaker H here: TESSA and AXIS must see the same
+    # constructed source + native FlexiCubes witness memory as inference.
+    if (
+        not isinstance(structural_memory,Tensor)
+        or structural_memory.ndim!=3 or structural_memory.shape[0]!=1
+        or structural_memory.shape[-1]!=model.cfg.tessa.d_model
+        or structural_memory.device!=mesh.rest_vertices_iris.device
+        or not bool(torch.isfinite(structural_memory).all())
+    ):
+        raise ValueError("RSS_VNEXT_SEEDED_AXIS_STRUCTURAL_MEMORY_INVALID")
+    memory=model._control_memory(state,structural_memory,mesh)
     axis_loss,axis_parts=qualified_axis_rig_skin_sequence_loss_v6(
         model.axis,memory,seq,
         tokens_per_joint=model.cfg.skin_tokens_per_joint,

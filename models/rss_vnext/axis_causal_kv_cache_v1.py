@@ -58,7 +58,7 @@ class AXISV6CausalKVCacheV1:
             or self.count >= self.model.config.max_sequence_length
         ):
             raise ValueError("AXIS_V6_KV_CACHE_EVENT_RESOURCE_GUARD")
-        seq=AXISSequenceV6.from_events((event,),device=self.scene.device)
+        seq=AXISSequenceV6.from_events((event,),device=self.scene_memory.device)
         # Apply the exact learned causal position in the SAME addition order
         # as full-prefix embedding; subtract/add would drift under fp16.
         x=self.model._embed(seq,position_offset=self.count)

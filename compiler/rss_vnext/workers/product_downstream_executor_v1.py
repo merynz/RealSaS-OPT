@@ -919,8 +919,6 @@ def execute_motion_capability_v2(
         if (
             source.get("schema_version")!="RealSaS.SourceRigMotion.v1"
             or binding.get("schema_version")!="RealSaS.ControlMotionRetargetBinding.v1"
-            or (request.get("capability_metadata") or {}).get("default_rest_hold_policy")
-                == "DETERMINISTIC_ZERO_TRACK_REST_HOLD_V1"
         ):
             raise RuntimeError("PRODUCT_MOTION_SOURCE_RETARGET_INPUT_SCHEMA_DRIFT")
         # Explicit correspondences are required; no nearest joint mapping

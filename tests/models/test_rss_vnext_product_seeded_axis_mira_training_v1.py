@@ -50,7 +50,9 @@ def _rig_case(monkeypatch):
     old=make_base()
     registry={key:receipt}
     def make(*,weights=None,registry_override=None,native_skin_registry=None,
-             anchor_weight=0.,anchor_registry=None):
+             anchor_weight=0.,anchor_registry=None,sparse=False,
+             semantic_weights=None,role_registry=None,
+             graphics_weight=0.,graphics_registry=None):
         if weights is None:
             weights=ProductSeededAXISMIRAWeightsV1(axis_program=1.)
         return RSSvNextStructuralTrainer(
@@ -74,6 +76,13 @@ def _rig_case(monkeypatch):
             trusted_native_skin_registry=native_skin_registry,
             product_anchor_face_weight=anchor_weight,
             trusted_anchor_face_registry=anchor_registry,
+            allow_sparse_qualified_source_batches=sparse,
+            **({
+                "product_semantic_weights":semantic_weights,
+                "trusted_surface_role_registry":role_registry,
+            } if semantic_weights is not None else {}),
+            product_graphics_rgb_weight=graphics_weight,
+            trusted_graphics_rgb_registry=graphics_registry,
         )
     return net,batch,make,receipt,key
 
@@ -393,3 +402,50 @@ def test_seeded_anchor_fail_closed_on_stale_address_and_missing_labels(monkeypat
             source_anchor_face_mask=torch.ones_like(labels,dtype=torch.bool),
             source_anchor_face_admission_key=key,
         ))
+
+
+def test_sparse_source_batches_train_geometry_without_inventing_axis_semantic_or_rgb(
+    monkeypatch,
+):
+    """Mixed-corpus P0: no teacher is UNKNOWN, not a zero or NO_FACE label."""
+    from models.rss_vnext.product_semantic_supervision_v1 import (
+        ProductSemanticWeightsV1,
+    )
+    net,batch,make,*_=_rig_case(monkeypatch)
+    unlabelled=replace(
+        batch,axis_teacher_sequence=None,axis_teacher_admission_key="",
+    )
+    sparse=make(
+        sparse=True,
+        semantic_weights=ProductSemanticWeightsV1(surface_roles=1.),
+        role_registry={"other-source":{"admission_status":"NOT_FOR_THIS_ASSET"}},
+        graphics_weight=1.,
+        graphics_registry={"other-source":{"admission_status":"NOT_FOR_THIS_ASSET"}},
+    )
+    result=sparse.train_step(unlabelled)
+    assert result.seeded_tessa_loss is not None
+    assert result.axis_rig_skin_loss is None
+    assert result.product_semantic_loss is None
+    assert result.graphics_source_rgb_loss is None
+    assert result.anchor_face_correspondence_loss is None
+    assert torch.isfinite(result.total_loss)
+    assert sparse.global_step==1
+    with pytest.raises(ValueError,match="AXIS_SOURCE_REQUIRED"):
+        make().objective(unlabelled)
+    # An incomplete provided AXIS program is not an absent teacher.
+    with pytest.raises(ValueError,match="AXIS_SOURCE_REQUIRED"):
+        sparse.objective(replace(
+            unlabelled,axis_teacher_admission_key="native-axis-product-mstar",
+        ))
+
+
+def test_sparse_phase_changes_checkpoint_identity_and_never_runs_in_legacy(
+    monkeypatch,tmp_path,
+):
+    net,batch,make,*_=_rig_case(monkeypatch)
+    strict=make()
+    sparse=make(sparse=True)
+    path=tmp_path/"strict-source-phase.pt"
+    strict.save_checkpoint(path,sampler_cursor=0)
+    with pytest.raises(ValueError,match="OBJECTIVE_POLICY_DRIFT"):
+        sparse.load_checkpoint(path)

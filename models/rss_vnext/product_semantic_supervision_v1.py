@@ -68,8 +68,11 @@ def product_source_semantic_objective_v1(
     trusted_region_registry:Mapping[str,Mapping[str,object]],
     trusted_typed_registry:Mapping[str,Mapping[str,object]],
     tensor_digest,
+    allow_absent_qualified_targets: bool = False,
 )->ProductSemanticLossesV1:
     weights.validate()
+    if type(allow_absent_qualified_targets) is not bool:
+        raise ValueError("RSS_VNEXT_PRODUCT_SEMANTIC_SPARSE_POLICY_TYPE")
     out={"patch":None,"patch_risk":None,
          "roles":None,"region":None,"typed":None}
     counts={"patch":0,"roles":0,"region":0,"typed":(0,0,0)}
@@ -238,7 +241,8 @@ def product_source_semantic_objective_v1(
         if value is not None and weight>0:
             term=weight*value
             total=term if total is None else total+term
-    if total is None and any(v>0 for v in asdict(weights).values()):
+    if (total is None and any(v>0 for v in asdict(weights).values())
+            and not allow_absent_qualified_targets):
         raise ValueError("RSS_VNEXT_PRODUCT_SEMANTIC_NO_QUALIFIED_TARGET")
     return ProductSemanticLossesV1(
         total=total,patch=out["patch"],patch_risk=out["patch_risk"],

@@ -100,6 +100,7 @@ def _edited_mesh(
     pos={v.canonical_mesh_vertex_id:np.asarray(v.P,dtype=np.float64)
          for v in vertices}
     if any(
+        (a in moves or b in moves or c in moves) and
         float(np.linalg.norm(np.cross(
             pos[b]-pos[a],pos[c]-pos[a],
         ))) <= 1e-10
@@ -147,6 +148,10 @@ def _edited_rig(
                for j in joints}
     if any(
         j.parent_canonical_joint_id is not None
+        and (
+            j.canonical_joint_id in moves
+            or j.parent_canonical_joint_id in moves
+        )
         and float(np.linalg.norm(
             positions[j.canonical_joint_id]
             -positions[j.parent_canonical_joint_id],

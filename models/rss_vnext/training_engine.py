@@ -580,7 +580,6 @@ class RSSvNextStructuralTrainer:
                 or model.cfg.tessa_surface_requirement
                     != "REQUIRE_SIGNED_IRIS_SURFACE"
                 or phase_contract is not None
-                or gradient_court_policy.every_n_steps != 0
                 or weights != RSSvNextTrainingWeights()
             ):
                 raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_PHASE_POLICY_INVALID")
@@ -2845,6 +2844,8 @@ class RSSvNextStructuralTrainer:
         )
 
     def _measure_gradient_conflicts(self, result: RSSvNextTrainingResult) -> dict:
+        if self.training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1":
+            return self._measure_seeded_gradient_conflicts_v1(result)
         # The same independent qualified terms that compose total_loss.
         # A diagnostic never reweights, backpropagates, or rewrites .grad.
         candidates = (
@@ -2881,6 +2882,78 @@ class RSSvNextStructuralTrainer:
         report["global_step_before_update"] = self.global_step
         report["dataset_manifest_sha256"] = self.dataset_manifest_sha256
         report["objective_policy_sha256"] = self.objective_policy_sha256
+        return report
+
+    def _measure_seeded_gradient_conflicts_v1(
+        self, result: RSSvNextTrainingResult,
+    ) -> dict:
+        """Read-only gradients from ACTUAL seeded H/TESSA/AXIS/MIRA losses.
+
+        Legacy self.weights are zero in this profile, so their generic audit
+        would silently ignore all product objectives. These are exactly the
+        independently admitted component losses of result.total_loss, with
+        their checkpoint-pinned coefficients. Sampling never promotes a
+        synthetic teacher or changes the weighted-sum optimizer update.
+        """
+        if self.seeded_tessa_weights is None or result.seeded_tessa_loss is None:
+            raise RuntimeError("RSS_VNEXT_SEEDED_GRADIENT_AUDIT_SOURCE_REQUIRED")
+        sources = (
+            ("seeded_tessa.", result.seeded_tessa_loss_parts or {},
+             asdict(self.seeded_tessa_weights), frozenset({"clip_gradient_norm"})),
+            ("axis_mira.", result.product_axis_mira_parts or {},
+             asdict(self.product_axis_mira_weights), frozenset()),
+            ("semantic.", result.product_semantic_loss_parts or {}, {
+                "patch":self.product_semantic_weights.patch_axes,
+                "patch_risk":self.product_semantic_weights.patch_risk,
+                "roles":self.product_semantic_weights.surface_roles,
+                "region":self.product_semantic_weights.region_pairs,
+                "typed":self.product_semantic_weights.typed_relations,
+            }, frozenset()),
+        )
+        admitted: dict[str, tuple[Tensor, float]] = {}
+        nondifferentiable: list[str] = []
+
+        def add(name: str, loss: Tensor | None, coefficient: float) -> None:
+            if coefficient <= 0:
+                return
+            if (
+                not isinstance(loss,Tensor) or loss.numel()!=1
+                or not bool(torch.isfinite(loss).all())
+            ):
+                raise RuntimeError(
+                    "RSS_VNEXT_SEEDED_GRADIENT_AUDIT_ACTIVE_LOSS_MISSING:"+name
+                )
+            if loss.requires_grad:
+                admitted[name]=(loss,float(coefficient))
+            else:
+                # E.g. deterministic face-budget count. Report explicitly;
+                # do not misrepresent it as a measured zero gradient.
+                nondifferentiable.append(name)
+
+        for namespace, observed, coefficients, ignored in sources:
+            for key, coefficient in coefficients.items():
+                if key in ignored:
+                    continue
+                add(namespace+key,observed.get(key),float(coefficient))
+        add("component_udf", result.component_udf_loss,self.component_udf_weight)
+        add("source_graphics_rgb",result.graphics_source_rgb_loss,
+            self.product_graphics_rgb_weight)
+        add("joint_source_rays",result.realsas_joint_slrm_loss,
+            self.product_joint_ray_weight)
+        if not admitted:
+            raise RuntimeError("RSS_VNEXT_SEEDED_GRADIENT_AUDIT_NO_LIVE_OBJECTIVE")
+        report = audit_rss_vnext_gradient_interference_v1(
+            named_parameters=tuple(self.model.named_parameters()),
+            loss_terms=admitted,
+            policy=self.gradient_court_policy,
+        )
+        report["training_profile"]="PRODUCT_SEEDED_IRIS_TESSA_V1"
+        report["admitted_differentiable_loss_count"]=len(admitted)
+        report["active_nondifferentiable_loss_families"]=sorted(nondifferentiable)
+        report["source_teacher_authority"]="SOURCE_ADMITTED_LOSSES_ONLY"
+        report["global_step_before_update"]=self.global_step
+        report["dataset_manifest_sha256"]=self.dataset_manifest_sha256
+        report["objective_policy_sha256"]=self.objective_policy_sha256
         return report
 
     def _assert_optimizer_ownership(self) -> None:

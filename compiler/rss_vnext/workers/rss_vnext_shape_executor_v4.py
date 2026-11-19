@@ -121,8 +121,37 @@ def _tessa_candidate_tensors_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
             else "LEGACY_INDEPENDENT_TESSA_GRAMMAR"
         ),
     }
+    hybrid_kinds = proposal.get("hybrid_open_component_surface_kinds") or ()
+    hybrid_authority = proposal.get("hybrid_open_surface_authority")
+    hybrid_slot = proposal.get("hybrid_open_selected_slot_index")
     if mesh is None:
+        if hybrid_kinds or hybrid_authority is not None or hybrid_slot is not None:
+            raise RuntimeError("RSS_VNEXT_SHAPE_V4_ABSTAIN_HYBRID_AUTHORITY")
         return tensors, receipt
+    if hybrid_kinds or hybrid_authority is not None or hybrid_slot is not None:
+        from models.rss_vnext.product_hybrid_open_seed_v1 import AUTHORITY as OPEN_AUTH
+        from models.rss_vnext.hybrid_signed_open_iris_seed_v1 import (
+            SIGNED_KIND, OPEN_KIND,
+        )
+        if (
+            not seeded_abi or mesh.seeded_surface is None
+            or type(hybrid_kinds) is not tuple
+            or set(hybrid_kinds) != {SIGNED_KIND, OPEN_KIND}
+            or mesh.seeded_surface.vertex_layer_ids is None
+            or len(hybrid_kinds)
+                != int(mesh.seeded_surface.vertex_component_ids.max().item()) + 1
+            or hybrid_authority != OPEN_AUTH
+            or type(hybrid_slot) is not int or not 0 <= hybrid_slot < 256
+            or proposal.get("hybrid_open_candidate_product_qualified") is not False
+        ):
+            raise RuntimeError("RSS_VNEXT_SHAPE_V4_HYBRID_EVIDENCE_INVALID")
+        receipt.update({
+            "tessa_seed_component_surface_kinds": list(hybrid_kinds),
+            "tessa_seed_hybrid_open_source_authority": hybrid_authority,
+            "tessa_seed_hybrid_open_selected_slot": hybrid_slot,
+            "tessa_seed_hybrid_open_model_only": True,
+            "tessa_seed_hybrid_product_qualified": False,
+        })
     if (
         type(mesh) is not RSSvNextStructuralMeshCandidate
         or mesh.canonical_mesh_authority

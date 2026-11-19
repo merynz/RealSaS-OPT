@@ -11,6 +11,7 @@ semantics are synthesized downstream.
 from dataclasses import dataclass
 from typing import Sequence
 import math
+import torch
 
 from compiler.realsas_compiler_core.rig_program_ir_v1 import (
     RigProgramAttachmentAnchorProposalIR,
@@ -29,6 +30,7 @@ from compiler.realsas_compiler_core.skin_code_ir_v1 import (
 )
 from models.axis.rig_program_model_v6 import (
     AXISRigProgramConfigV6,
+    AXISSequenceV6,
     CONSTRAINT_OPERATORS_V6,
     CONTROL_KINDS_V6,
     DOF_LABELS_V6,

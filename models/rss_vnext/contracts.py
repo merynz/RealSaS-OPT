@@ -66,6 +66,12 @@ class RSSvNextConfig:
     skin_decoder_mode: str = "DOT_PRODUCT_BASELINE"
     skin_query_heads: int = 8
     skin_query_chunk: int = 1024
+    # Learned MIRA weights must have exact zero support before LBS, FSQ
+    # replay, Compiler and .rss export. 41 is the existing strict Go cap;
+    # the product default K=8 is a baseline to be tuned on held-out rigs,
+    # not a claim that every source rig has eight necessary influences.
+    skin_max_influences: int = 8
+    skin_support_policy: str = "STABLE_CAUSAL_TOPK_STRAIGHT_THROUGH_V1"
     # 128 tokens cap encoded only a handful of triangles and was a
     # proof-of-wiring configuration, not a generic product mesh capacity.
     # Incremental V3.1 decoding permits a bounded larger hypothesis; this is
@@ -110,6 +116,12 @@ class RSSvNextConfig:
             "DOT_PRODUCT_BASELINE", "POINT_QUERY_CROSS_ATTENTION",
         ):
             raise ValueError("RSS_VNEXT_SKIN_DECODER_MODE_INVALID")
+        if (
+            type(self.skin_max_influences) is not int
+            or not 1 <= self.skin_max_influences <= 41
+            or self.skin_support_policy != "STABLE_CAUSAL_TOPK_STRAIGHT_THROUGH_V1"
+        ):
+            raise ValueError("RSS_VNEXT_SKIN_SUPPORT_POLICY_INVALID")
         if (
             self.skin_query_heads < 1 or self.skin_hidden_dim % self.skin_query_heads
             or self.skin_query_chunk < 1 or self.skin_query_chunk > 8192

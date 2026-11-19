@@ -390,6 +390,10 @@ class AXISRigProgramModelV6(nn.Module):
         scene = self.scene_projection(scene_memory.to(dtype=x.dtype))
         cross, _ = self.scene_cross_attention(x, scene, scene, need_weights=False)
         x = self.cross_norm(x + cross)
+        return self._prediction_heads(x)
+
+    def _prediction_heads(self, x: Tensor) -> dict[str, Tensor]:
+        """One projection ABI shared by full-prefix training and KV inference."""
         return {
             "kind_logits": self.kind_head(x),
             "coord_logits": self.coord_head(x).view(*x.shape[:2], 3, self.config.coord_bins),
@@ -475,14 +479,16 @@ class AXISRigProgramModelV6(nn.Module):
             raise ValueError("AXIS_V6_GENERATION_LIMIT_INVALID")
 
         device = scene_memory.device
+        # Fast exact-weight streaming decode; no full-prefix recomputation.
+        from models.rss_vnext.axis_causal_kv_cache_v1 import AXISV6CausalKVCacheV1
+        cache=AXISV6CausalKVCacheV1(self,scene_memory)
         events: list[RigProgramEventV6] = [RigProgramEventV6(RigTokenKindV6.BOS)]
         state = AXISRigProgramGrammarV6Product.advance(
             RigGrammarStateV6(), RigTokenKindV6.BOS, tokens_per_joint=tokens_per_joint
         )
 
         for _ in range(limit - 1):
-            seq = AXISSequenceV6.from_events(events, device=device)
-            out = self(scene_memory, seq)
+            out=cache.consume(events[-1])
             kind_logits = AXISRigProgramGrammarV6Product.mask(
                 out["kind_logits"][0, -1], state, tokens_per_joint=tokens_per_joint
             )

@@ -9,6 +9,7 @@ import pytest
 import torch
 
 from models.rss_vnext.open_udf_surface_v1 import tensor_bytes_sha256_v1
+from models.rss_vnext.semantic_geometry_prior import RSSvNextSemanticLayerSpec
 from models.rss_vnext.product_hybrid_open_seed_v1 import (
     ProductHybridOpenM0PolicyV1, propose_product_hybrid_open_m0_v1,
 )
@@ -156,10 +157,9 @@ def test_real_teacher_free_product_inference_uses_hybrid_mstar_not_legacy_tessa(
         generation_checkpoint_sha256="a"*64,
         source_binding_sha256="b"*64,
         flexicubes_extractor=object(),
-        flexicubes_layer=model.cfg.semantic_role_schema() and
-            __import__("models.rss_vnext.semantic_geometry_prior",
-                       fromlist=["RSSvNextSemanticLayerSpec"])
-            .RSSvNextSemanticLayerSpec("all",tuple(schema.roles)),
+        flexicubes_layer=RSSvNextSemanticLayerSpec(
+            "all",tuple(schema.roles),
+        ),
         hybrid_open_policy=_policy(),
     )
     assert result["mesh_status"]=="UNQUALIFIED_MESH_CANDIDATE"

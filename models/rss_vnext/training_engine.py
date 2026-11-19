@@ -3061,8 +3061,11 @@ class RSSvNextStructuralTrainer:
                 if key in ignored:
                     continue
                 add(namespace+key,observed.get(key),float(coefficient))
-        add("product_anchor_face",result.anchor_face_correspondence_loss,
-            self.product_anchor_face_weight)
+        # Source attachment labels may be absent on a perfectly valid
+        # geometry/rig asset. Audit only terms admitted by THIS batch.
+        if result.anchor_face_correspondence_loss is not None:
+            add("product_anchor_face",result.anchor_face_correspondence_loss,
+                self.product_anchor_face_weight)
         add("component_udf", result.component_udf_loss,self.component_udf_weight)
         add("source_graphics_rgb",result.graphics_source_rgb_loss,
             self.product_graphics_rgb_weight)

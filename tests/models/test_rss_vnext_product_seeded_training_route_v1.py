@@ -25,6 +25,9 @@ from models.rss_vnext.training_engine import (
     RSSvNextStructuralTrainer,RSSvNextStructuralTrainingBatch,
     RSSvNextTrainingWeights,source_surface_tensor_sha256,
 )
+from models.rss_vnext.training_gradient_interference_v1 import (
+    RSSvNextGradientCourtPolicyV1,
+)
 from models.rss_vnext.training_seeded_tessa_v1 import (
     SCHEMA,PHASE,SeededTESSALossWeightsV1,
     SeededTESSASourceTeacherV1,_digest,
@@ -168,9 +171,11 @@ def _scenario(monkeypatch):
     )
     optimizer=torch.optim.AdamW(net.parameters(),lr=1.e-3)
     def trainer(native_registry=native_registry,
-                signed_registry_override=None):
+                signed_registry_override=None,
+                gradient_court_policy=RSSvNextGradientCourtPolicyV1()):
         return RSSvNextStructuralTrainer(
             net,optimizer,dataset_manifest_sha256=manifest,
+            gradient_court_policy=gradient_court_policy,
             scene_conditioning_policy="PRODUCT_GENERATED_SIX_VIEW",
             training_profile="PRODUCT_SEEDED_IRIS_TESSA_V1",
             seeded_tessa_weights=weights,

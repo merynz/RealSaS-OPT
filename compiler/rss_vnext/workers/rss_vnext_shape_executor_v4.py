@@ -78,6 +78,67 @@ def _tensor_archive(**arrays) -> bytes:
 
 
 
+def _raw_shape_hybrid_open_policy_v1(
+    metadata: dict[str, Any], model,
+):
+    """Explicit source-independent per-run geometry option, never a teacher.
+
+    The request may suggest which learned presentation role corresponds to a
+    signed shell and one OPEN UDF layer. The student must independently
+    predict an OPEN region slot or ABSTAIN; a caller cannot supply a source
+    part index, native face ID or make the candidate product-qualified.
+    """
+    from models.rss_vnext.product_hybrid_open_seed_v1 import (
+        ProductHybridOpenM0PolicyV1,
+    )
+    from models.rss_vnext.semantic_geometry_prior import (
+        RSSvNextSemanticLayerSpec,
+    )
+
+    open_config = metadata.get("hybrid_open_policy")
+    signed_config = metadata.get("hybrid_signed_layer")
+    if open_config is None and signed_config is None:
+        return None, None
+    if type(open_config) is not dict or type(signed_config) is not dict:
+        raise RuntimeError("RSS_VNEXT_SHAPE_HYBRID_POLICY_PAIR_REQUIRED")
+    if (
+        not set(open_config).issubset(ProductHybridOpenM0PolicyV1.__dataclass_fields__)
+        or set(signed_config)!={"name","keep_roles"}
+        or type(signed_config["name"]) is not str
+        or type(signed_config["keep_roles"]) not in (list,tuple)
+        or "open_presentation_roles" in open_config
+           and type(open_config["open_presentation_roles"]) not in (list,tuple)
+        or "resolution" in open_config
+           and type(open_config["resolution"]) not in (list,tuple)
+    ):
+        raise RuntimeError("RSS_VNEXT_SHAPE_HYBRID_POLICY_FIELDS_INVALID")
+    fields = dict(open_config)
+    if "open_presentation_roles" in fields:
+        fields["open_presentation_roles"]=tuple(fields["open_presentation_roles"])
+    if "resolution" in fields:
+        fields["resolution"]=tuple(fields["resolution"])
+    try:
+        open_policy=ProductHybridOpenM0PolicyV1(**fields)
+        signed=RSSvNextSemanticLayerSpec(
+            signed_config["name"],tuple(signed_config["keep_roles"]),
+        )
+        schema=model.cfg.semantic_role_schema()
+        open_policy.validate()
+        signed.validate(schema)
+        if (
+            model.cfg.tessa_surface_requirement!="REQUIRE_SIGNED_IRIS_SURFACE"
+            or not set(open_policy.open_presentation_roles).issubset(schema.roles)
+            or set(signed.keep_roles).intersection(
+                open_policy.open_presentation_roles,
+            )
+            or signed.name==open_policy.open_layer_name
+        ):
+            raise ValueError("RSS_VNEXT_SHAPE_HYBRID_POLICY_ROLE_OR_SURFACE")
+    except (TypeError,ValueError) as exc:
+        raise RuntimeError("RSS_VNEXT_SHAPE_HYBRID_POLICY_NOT_ADMITTED") from exc
+    return open_policy,signed
+
+
 def _tessa_candidate_tensors_v1(proposal: dict[str, Any]) -> tuple[dict, dict]:
     """Persist *all* decoded TESSA topology/surface proposals in the H(x) CAS.
 
@@ -433,11 +494,16 @@ def execute_rss_vnext_shape_capability_v4(
     bundle = getattr(model, "_pinned_neural_bundle", None)
     if bundle is None or bundle.checkpoint_sha256 != checkpoint["content_sha256"]:
         raise RuntimeError("RSS_VNEXT_SHAPE_V4_SINGLE_NEURAL_BUNDLE_REQUIRED")
+    hybrid_open_policy,hybrid_signed_layer=(
+        _raw_shape_hybrid_open_policy_v1(metadata,model)
+    )
     construction = run_uncalibrated_two_image_neural_scene_v1(
         raw_cas_bytes=raw,
         expected_raw_cas_sha256=source["content_sha256"],
         neural_bundle=bundle,
         max_topology_tokens=metadata.get("maximum_new_tokens"),
+        hybrid_open_policy=hybrid_open_policy,
+        hybrid_signed_layer=hybrid_signed_layer,
     )
     if (
         construction.source.source_binding_sha256

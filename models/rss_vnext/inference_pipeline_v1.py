@@ -32,6 +32,7 @@ from compiler.realsas_compiler_core.rss_vnext_inference_evidence_v1 import (
 )
 from .inference_checkpoint_v1 import load_inference_checkpoint_v1
 from .semantic_geometry_prior import RSSvNextSemanticLayerSpec
+from .product_hybrid_open_seed_v1 import ProductHybridOpenM0PolicyV1
 from .embedded_mira_decoder_v1 import (
     SCHEMA as EMBEDDED_MIRA_SCHEMA,
     encode_embedded_mira_decoder_v1,
@@ -128,6 +129,8 @@ def run_two_view_to_compiler_proposal_v1(
     source_observation: RSSvNextTwoViewSourceObservationV1 | None = None,
     flexicubes_extractor=None,
     semantic_layer_specs: tuple[RSSvNextSemanticLayerSpec,...] | None = None,
+    hybrid_open_policy: ProductHybridOpenM0PolicyV1 | None = None,
+    hybrid_signed_layer: RSSvNextSemanticLayerSpec | None = None,
 ) -> dict:
     """Execute pinned checkpoint and commit the proposal with two source frames.
 
@@ -135,6 +138,16 @@ def run_two_view_to_compiler_proposal_v1(
     A successful neural output remains unqualified until existing courts pass.
     """
     _source_preflight(observed_rgba, camera_features)
+    if (
+        (hybrid_open_policy is None)!=(hybrid_signed_layer is None)
+        or (hybrid_open_policy is not None and (
+            type(hybrid_open_policy) is not ProductHybridOpenM0PolicyV1
+            or type(hybrid_signed_layer) is not RSSvNextSemanticLayerSpec
+            or semantic_layer_specs is not None
+            or not product_mode
+        ))
+    ):
+        raise ValueError("RSS_VNEXT_PIPELINE_HYBRID_EXPLICIT_PRODUCT_POLICY")
     if product_mode and source_observation is None:
         raise RuntimeError("RSS_VNEXT_PRODUCT_CANONICAL_SOURCE_REQUIRED")
     if source_observation is not None:
@@ -182,6 +195,8 @@ def run_two_view_to_compiler_proposal_v1(
     if product_mode and bundle is None:
         raise RuntimeError("RSS_VNEXT_SHAPE_THREE_STAGE_BUNDLE_REQUIRED")
     generation = None
+    if hybrid_open_policy is not None and bundle is None:
+        raise RuntimeError("RSS_VNEXT_PIPELINE_HYBRID_PINNED_GENERATOR_REQUIRED")
     if bundle is not None:
         if source_observation is None:
             raise RuntimeError("RSS_VNEXT_GENERATIVE_RELEASE_REQUIRES_BOUND_ORIGINAL_SOURCE")
@@ -216,6 +231,8 @@ def run_two_view_to_compiler_proposal_v1(
             generate_controls=generate_controls,
             flexicubes_extractor=flexicubes_extractor,
             flexicubes_layers=semantic_layer_specs,
+            hybrid_open_policy=hybrid_open_policy,
+            hybrid_signed_layer=hybrid_signed_layer,
         )
         prediction = generation.proposal
     else:
@@ -568,6 +585,8 @@ def run_canonical_two_view_to_compiler_proposal_v1(
     max_topology_tokens: int | None = None,
     generate_controls: bool = True,
     product_mode: bool = True,
+    hybrid_open_policy: ProductHybridOpenM0PolicyV1 | None = None,
+    hybrid_signed_layer: RSSvNextSemanticLayerSpec | None = None,
 ) -> dict:
     """Only canonical source entry into production-oriented RSS.vNext inference.
 
@@ -586,6 +605,8 @@ def run_canonical_two_view_to_compiler_proposal_v1(
         generate_controls=generate_controls,
         product_mode=product_mode,
         source_observation=source_observation,
+        hybrid_open_policy=hybrid_open_policy,
+        hybrid_signed_layer=hybrid_signed_layer,
     )
 
 

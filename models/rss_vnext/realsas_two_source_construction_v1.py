@@ -20,6 +20,7 @@ from .realsas_cleanroom_diffusion_training_v1 import (
 )
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 from .semantic_geometry_prior import RSSvNextSemanticLayerSpec
+from .product_hybrid_open_seed_v1 import ProductHybridOpenM0PolicyV1
 
 
 @dataclass(frozen=True)
@@ -74,6 +75,8 @@ def run_two_source_neural_construction_v1(
     generate_controls: bool = False,
     flexicubes_extractor=None,
     flexicubes_layers: tuple[RSSvNextSemanticLayerSpec,...] | None = None,
+    hybrid_open_policy: ProductHybridOpenM0PolicyV1 | None = None,
+    hybrid_signed_layer: RSSvNextSemanticLayerSpec | None = None,
 ) -> RSSvNextTwoSourceConstructionV1:
     """Runs actual pinned stage samplers, never substitutes static test views.
 
@@ -81,6 +84,24 @@ def run_two_source_neural_construction_v1(
     Compiler binding requires a legitimate original 13D camera pair. This
     function does not invent calibration to bypass that upstream dependency.
     """
+    if (
+        (hybrid_open_policy is None) != (hybrid_signed_layer is None)
+        or (hybrid_open_policy is not None and (
+            type(hybrid_open_policy) is not ProductHybridOpenM0PolicyV1
+            or type(hybrid_signed_layer) is not RSSvNextSemanticLayerSpec
+            or flexicubes_extractor is None or flexicubes_layers is not None
+            or model.cfg.tessa_surface_requirement
+                != "REQUIRE_SIGNED_IRIS_SURFACE"
+        ))
+    ):
+        raise ValueError("RSS_VNEXT_TWO_SOURCE_HYBRID_EXPLICIT_POLICY_REQUIRED")
+    if hybrid_open_policy is not None:
+        hybrid_open_policy.validate()
+        hybrid_signed_layer.validate(model.cfg.semantic_role_schema())
+        if set(hybrid_signed_layer.keep_roles).intersection(
+            hybrid_open_policy.open_presentation_roles,
+        ):
+            raise ValueError("RSS_VNEXT_TWO_SOURCE_HYBRID_ROLE_OVERLAP")
     if (
         type(model) is not RSSvNextUnifiedCharacterModel
         or model.training or not isinstance(source_binding_sha256, str)
@@ -165,6 +186,7 @@ def run_two_source_neural_construction_v1(
         ),
         flexicubes_extractor=flexicubes_extractor,
         flexicubes_layer=(
+            hybrid_signed_layer if hybrid_open_policy is not None else
             (flexicubes_layers[0] if flexicubes_layers is not None
              else RSSvNextSemanticLayerSpec(
                 "all", model.cfg.semantic_role_schema().roles,
@@ -172,6 +194,7 @@ def run_two_source_neural_construction_v1(
             if flexicubes_extractor is not None else None
         ),
         flexicubes_layers=flexicubes_layers,
+        hybrid_open_policy=hybrid_open_policy,
     )
     if (
         prediction["state"].scene_conditioning_authority

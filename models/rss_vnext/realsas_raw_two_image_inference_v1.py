@@ -28,6 +28,8 @@ from .realsas_two_source_construction_v1 import (
 from .realsas_virtual_camera_policy_v1 import (
     target_canonical_and_six_cameras_v1,
 )
+from .product_hybrid_open_seed_v1 import ProductHybridOpenM0PolicyV1
+from .semantic_geometry_prior import RSSvNextSemanticLayerSpec
 
 SCHEMA = "RealSaS.RSSvNext.UncalibratedSourceToNeuralScene.v1"
 
@@ -58,6 +60,8 @@ def run_uncalibrated_two_image_neural_scene_v1(
     multiview_seed: int | None = None,
     max_topology_tokens: int | None = None,
     flexicubes_extractor=None,
+    hybrid_open_policy: ProductHybridOpenM0PolicyV1 | None = None,
+    hybrid_signed_layer: RSSvNextSemanticLayerSpec | None = None,
 ) -> RSSvNextUncalibratedNeuralSceneCandidateV1:
     """Decode two raw image files and actually run both learned stages.
 
@@ -145,6 +149,8 @@ def run_uncalibrated_two_image_neural_scene_v1(
         max_topology_tokens=max_topology_tokens,
         generate_controls=True,
         flexicubes_extractor=flexicubes_extractor,
+        hybrid_open_policy=hybrid_open_policy,
+        hybrid_signed_layer=hybrid_signed_layer,
     )
     state = construction.proposal["state"]
     mesh = construction.proposal.get("mesh_candidate")

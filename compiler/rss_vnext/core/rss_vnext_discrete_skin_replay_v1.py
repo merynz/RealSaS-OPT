@@ -23,6 +23,9 @@ from compiler.realsas_compiler_core.types import QualificationError
 from models.axis.rig_program_model_v6 import RigTokenKindV6
 from models.rss_vnext.contracts import RSSvNextConfig
 from models.rss_vnext.unified_character_model import RSSvNextSkinCoupler
+from models.rss_vnext.hierarchical_skin_field_v1 import (
+    axis_joint_group_ids_from_cas_events_v1,
+)
 
 SCHEMA = "RealSaS.RSSvNext.DiscreteSkinReplayReceipt.v1"
 _MAX_REPLAY_WEIGHTS = 2_000_000
@@ -116,8 +119,14 @@ def replay_rss_vnext_discrete_skin_candidate_v1(
     candidate_weights = torch.as_tensor(np.asarray(
         dynamic["discrete_skin_weights"], dtype=np.float32,
     ))[None]
+    # The independent Compiler must replay the SAME group identities from
+    # exact persisted AXIS CHAIN/JOINT events, not a source teacher partition.
+    group_ids=axis_joint_group_ids_from_cas_events_v1(control_events)
+    if group_ids.shape != (j,):
+        raise QualificationError("RSS_VNEXT_SKIN_REPLAY_GROUP_JOINT_ADDRESS_DRIFT")
     replay = decoder.decode_discrete_skin_v1(
         features, xyz, joint_hidden, token_ids, vertex_normals=normals,
+        joint_group_ids=group_ids[None],
     )
     diff = (replay - candidate_weights).abs()
     maximum = float(diff.max().item())

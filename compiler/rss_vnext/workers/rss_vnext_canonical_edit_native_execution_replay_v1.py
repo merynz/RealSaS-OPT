@@ -12,6 +12,7 @@ from hashlib import sha256
 from pathlib import Path
 import math
 import os
+import shutil
 import struct
 import subprocess
 import sys
@@ -89,12 +90,29 @@ def _dimensions(state: Mapping, view: int, frame: int) -> int:
 def _raster_cpp(
     executable: Path, archive: Path, *, frame: int, view: int,
     side: int, face_count: int,
+    expected_renderer_sha256: str, expected_archive_sha256: str,
 ) -> dict[str, np.ndarray]:
     if sys.byteorder != "little":
         raise QualificationError("RSS_EDIT_CPP_ENDIAN_UNSUPPORTED")
     n = side * side
     with TemporaryDirectory(prefix="rss-edited-raster-") as td:
         dest = Path(td)
+        # Render only independently hashed immutable private snapshots. Hashing
+        # an attacker-replaceable path and then executing it would leave a
+        # time-of-check/time-of-use gap in the native proof boundary.
+        pinned_exe = dest/"pinned-renderer"
+        pinned_archive = dest/"pinned-canonical.rss"
+        try:
+            shutil.copyfile(executable,pinned_exe)
+            shutil.copyfile(archive,pinned_archive)
+            os.chmod(pinned_exe,0o700)
+        except OSError as exc:
+            raise QualificationError("RSS_EDIT_CPP_NATIVE_SNAPSHOT_FAILED") from exc
+        if (
+            _file_sha(pinned_exe,MAX_RENDERER_BYTES)!=expected_renderer_sha256
+            or _file_sha(pinned_archive,MAX_RSS_BYTES)!=expected_archive_sha256
+        ):
+            raise QualificationError("RSS_EDIT_CPP_NATIVE_SNAPSHOT_PIN_DRIFT")
         files = {
             "rgba":dest/"image.rgba",
             "owners":dest/"front.i32",
@@ -102,7 +120,7 @@ def _raster_cpp(
             "unknown":dest/"unknown.u8",
         }
         args = [
-            str(executable.resolve()), "--rss", str(archive.resolve()),
+            str(pinned_exe), "--rss", str(pinned_archive),
             str(frame),str(view),"-1",
             str(files["rgba"]),str(files["owners"]),
             str(files["authority"]),
@@ -296,10 +314,14 @@ def execute_canonical_user_edit_native_cpp_capture_v1(
     original=_raster_cpp(
         executable,source_path,frame=frame_index,view=view_index,
         side=side,face_count=face_count,
+        expected_renderer_sha256=exe_sha,
+        expected_archive_sha256=source_sha,
     )
     edited=_raster_cpp(
         executable,preview_path,frame=frame_index,view=view_index,
         side=side,face_count=face_count,
+        expected_renderer_sha256=exe_sha,
+        expected_archive_sha256=preview_sha,
     )
     binary=_pack(original,edited,side)
     pixels=int(np.count_nonzero(

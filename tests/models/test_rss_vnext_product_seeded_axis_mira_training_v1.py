@@ -49,7 +49,8 @@ def _rig_case(monkeypatch):
     batch=replace(batch,axis_teacher_sequence=seq,axis_teacher_admission_key=key)
     old=make_base()
     registry={key:receipt}
-    def make(*,weights=None,registry_override=None,native_skin_registry=None):
+    def make(*,weights=None,registry_override=None,native_skin_registry=None,
+             anchor_weight=0.,anchor_registry=None):
         if weights is None:
             weights=ProductSeededAXISMIRAWeightsV1(axis_program=1.)
         return RSSvNextStructuralTrainer(
@@ -71,6 +72,8 @@ def _rig_case(monkeypatch):
             ),
             product_axis_mira_weights=weights,
             trusted_native_skin_registry=native_skin_registry,
+            product_anchor_face_weight=anchor_weight,
+            trusted_anchor_face_registry=anchor_registry,
         )
     return net,batch,make,receipt,key
 
@@ -280,3 +283,105 @@ def test_seeded_axis_and_tessa_consume_identical_flexicubes_witness_memory(monke
     assert result.product_axis_mira_loss is not None
     assert captured["axis_memory_id"]==captured["tessa_memory_id"]
     assert captured["memory_token_count"]>0
+
+
+def test_seeded_anchor_uses_exact_mstar_and_backprop_to_source_face_head(monkeypatch):
+    """Source-accepted socket faces now reach THE production seeded optimizer."""
+    from tests.models.test_rss_vnext_anchor_face_trainer_v1 import (
+        _qualified_axis_sequence,
+    )
+    from models.rss_vnext.attachment_face_correspondence_v1 import (
+        axis_sequence_digest_v1,mesh_topology_digest_v1,_digest_tensor,
+    )
+    from models.rss_vnext.seeded_mstar_teacher_address_v1 import (
+        seeded_mstar_teacher_address_sha256_v1,
+    )
+
+    net,batch,make,axis_row,_=_rig_case(monkeypatch)
+    seq=_qualified_axis_sequence(net)
+    axis_row["teacher_sequence_sha256"]=axis_teacher_sequence_sha256_v6(seq)
+    batch=replace(batch,axis_teacher_sequence=seq)
+    captured={}
+    original=net.build_seeded_mechanics_candidate_v1
+    def see_mesh(*args,**kwargs):
+        result=original(*args,**kwargs)
+        captured["mesh"]=result["mesh_candidate"]
+        return result
+    monkeypatch.setattr(net,"build_seeded_mechanics_candidate_v1",see_mesh)
+    assert make().objective(batch).axis_rig_skin_loss is not None
+    mesh=captured["mesh"]
+    assert len(mesh.faces)>1
+    labels=torch.tensor([[0,1]],dtype=torch.long)
+    mask=torch.tensor([[True,True]],dtype=torch.bool)
+    key="source-native-mstar-socket-face"
+    registry={key:{
+        "admission_status":"QUALIFIED_SOURCE_NATIVE_ATTACHMENT_FACE_REINDEX",
+        "source_semantics":"NATIVE_RIG_ATTACHMENT_HELD_HOLDER_FACE_OR_VERIFIED_NO_FACE",
+        "source_asset_sha256":batch.seeded_tessa_source_teacher.source_asset_sha256,
+        "dataset_manifest_sha256":"f"*64,
+        "source_qualification_key":batch.source_qualification_key,
+        "observed_rgba_sha256":source_surface_tensor_sha256(batch.rgba),
+        "observed_camera_sha256":source_surface_tensor_sha256(batch.camera_features),
+        "source_binding_sha256":batch.product_source_binding_sha256,
+        "combined_generation_checkpoint_sha256":
+            batch.product_generation_checkpoint_sha256,
+        "candidate_mstar_topology_address_sha256":
+            seeded_mstar_teacher_address_sha256_v1(mesh.seeded_surface),
+        "tessa_mesh_topology_sha256":mesh_topology_digest_v1(mesh),
+        "axis_teacher_sequence_sha256":axis_sequence_digest_v1(seq),
+        "source_face_targets_sha256":_digest_tensor(labels),
+        "source_face_mask_sha256":_digest_tensor(mask),
+        "source_reindex_proven":True,
+    }}
+    batch=replace(
+        batch,source_anchor_face_targets=labels,
+        source_anchor_face_mask=mask,
+        source_anchor_face_admission_key=key,
+    )
+    trainer=make(anchor_weight=1.,anchor_registry=registry)
+    before=net.anchor_face_correspondence.held_query.weight.detach().clone()
+    result=trainer.train_step(batch)
+    assert result.anchor_face_correspondence_loss is not None
+    assert result.eligible_anchor_held_faces==1
+    assert result.eligible_anchor_holder_faces==1
+    assert result.eligible_anchor_negative_faces==0
+    assert net.anchor_face_correspondence.held_query.weight.grad is not None
+    assert net.anchor_face_correspondence.held_query.weight.grad.abs().sum()>0
+    assert not torch.equal(before,net.anchor_face_correspondence.held_query.weight)
+    assert torch.isfinite(result.total_loss)
+    assert trainer.global_step==1
+
+
+def test_seeded_anchor_fail_closed_on_stale_address_and_missing_labels(monkeypatch):
+    from tests.models.test_rss_vnext_anchor_face_trainer_v1 import (
+        _qualified_axis_sequence,
+    )
+    net,batch,make,axis_row,_=_rig_case(monkeypatch)
+    seq=_qualified_axis_sequence(net)
+    axis_row["teacher_sequence_sha256"]=axis_teacher_sequence_sha256_v6(seq)
+    batch=replace(batch,axis_teacher_sequence=seq)
+    key="socket"
+    registry={key:{
+        "admission_status":"QUALIFIED_SOURCE_NATIVE_ATTACHMENT_FACE_REINDEX",
+        "candidate_mstar_topology_address_sha256":"0"*64,
+        "source_qualification_key":batch.source_qualification_key,
+        "source_asset_sha256":batch.seeded_tessa_source_teacher.source_asset_sha256,
+        "dataset_manifest_sha256":"f"*64,
+        "observed_rgba_sha256":source_surface_tensor_sha256(batch.rgba),
+        "observed_camera_sha256":source_surface_tensor_sha256(batch.camera_features),
+        "source_binding_sha256":batch.product_source_binding_sha256,
+        "combined_generation_checkpoint_sha256":
+            batch.product_generation_checkpoint_sha256,
+    }}
+    trainer=make(anchor_weight=1.,anchor_registry=registry)
+    # An unlabeled source remains UNKNOWN (no supervised negative).
+    assert trainer.objective(batch).anchor_face_correspondence_loss is None
+    labels=torch.tensor([[0,1]],dtype=torch.long)
+    with pytest.raises(ValueError,match="ANCHOR_TEACHER_INCOMPLETE"):
+        trainer.objective(replace(batch,source_anchor_face_targets=labels))
+    with pytest.raises(ValueError,match="ANCHOR_SOURCE_MSTAR_DRIFT"):
+        trainer.objective(replace(
+            batch,source_anchor_face_targets=labels,
+            source_anchor_face_mask=torch.ones_like(labels,dtype=torch.bool),
+            source_anchor_face_admission_key=key,
+        ))

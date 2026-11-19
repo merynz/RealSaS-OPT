@@ -17,6 +17,9 @@ from typing import Mapping
 import torch
 from torch import Tensor
 
+from .seeded_mstar_teacher_address_v1 import (
+    require_qualified_mstar_teacher_address_v1,
+)
 from .native_face_layer_truth_v1 import (
     NativeFaceLayerSamplesV1, tensor_sha256_v1,
 )
@@ -39,6 +42,8 @@ class SourceNativeCandidateSkinTransportV1:
     native_skin: Tensor                 # [N,J], indexed on original vertices
     candidate_native_face_ids: Tensor  # [V], exact source face address
     candidate_barycentric: Tensor      # [V,3], independently admitted
+    # Frozen M* indexed face order + source-M0 parent identity, NOT live XYZ.
+    candidate_mstar_topology_address_sha256: str
     source_candidate_support_derivation: str = DERIVATION
 
     def receipt_sha256(self) -> str:
@@ -54,6 +59,7 @@ class SourceNativeCandidateSkinTransportV1:
             "native_skin_sha256":tensor_sha256_v1(self.native_skin),
             "candidate_native_face_ids_sha256":tensor_sha256_v1(self.candidate_native_face_ids),
             "candidate_barycentric_sha256":tensor_sha256_v1(self.candidate_barycentric),
+            "candidate_mstar_topology_address_sha256":self.candidate_mstar_topology_address_sha256,
         }
         return sha256(json.dumps(value,sort_keys=True,separators=(",",":")).encode()).hexdigest()
 
@@ -63,6 +69,7 @@ class SourceNativeCandidateSkinTransportV1:
         trusted_source_registry:Mapping[str,Mapping[str,object]],
         dataset_manifest_sha256:str,
         expected_axis_teacher_sequence_sha256:str,
+        active_mstar_topology_address_sha256:str,
         projection_tolerance_ratio:float=.07,
         chunk_size:int=4096,
     ) -> Tensor:
@@ -76,6 +83,10 @@ class SourceNativeCandidateSkinTransportV1:
         if not isinstance(witness,NativeFaceLayerSamplesV1):
             raise ValueError("RSS_VNEXT_NATIVE_SKIN_SOURCE_FACE_REQUIRED")
         witness.replay()
+        require_qualified_mstar_teacher_address_v1(
+            transport_address_sha256=self.candidate_mstar_topology_address_sha256,
+            active_mstar_address_sha256=active_mstar_topology_address_sha256,
+        )
         if (
             type(projection_tolerance_ratio) not in (float,int)
             or not 0 < projection_tolerance_ratio <= .07
@@ -144,6 +155,7 @@ class SourceNativeCandidateSkinTransportV1:
             "native_skin_joint_order_sha256":self.native_skin_joint_order_sha256,
             "native_skin_columns_match_axis_joint_order":True,
             "candidate_faces_sha256":tensor_sha256_v1(candidate_faces),
+            "candidate_mstar_topology_address_sha256":active_mstar_topology_address_sha256,
             "candidate_source_support_not_student_nearest":True,
             "source_rights_independently_verified":True,
             "generated_views_as_source_skin_truth":False,

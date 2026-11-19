@@ -25,6 +25,9 @@ import torch
 from torch import Tensor
 
 from .animation_ready_mesh import posed_lbs_from_joint_matrices
+from .seeded_mstar_teacher_address_v1 import (
+    require_qualified_mstar_teacher_address_v1,
+)
 from .native_face_layer_truth_v1 import (
     NativeFaceLayerSamplesV1,tensor_sha256_v1,
 )
@@ -51,6 +54,7 @@ class SourceNativeCandidatePoseTransportV1:
     candidate_barycentric: Tensor   # [V,3] native face support
     candidate_pose_mask: Tensor     # [1,P,V] qualified source observation
     source_candidate_mesh_face_sha256: str  # target EXACT M* faces/index order
+    candidate_mstar_topology_address_sha256: str  # M0 parent support + M* order
     source_candidate_support_derivation: str = (
         "INDEPENDENT_SOURCE_NATIVE_FACE_BARYCENTRIC_NOT_STUDENT_NEAREST"
     )
@@ -70,11 +74,16 @@ class SourceNativeCandidatePoseTransportV1:
         self,*,witness:NativeFaceLayerSamplesV1,
         candidate_faces:Tensor,
         candidate_rest:Tensor,
+        active_mstar_topology_address_sha256:str,
         trusted_source_registry:Mapping[str,Mapping[str,object]],
         projection_tolerance_ratio:float=.07,
     )->tuple[Tensor,Tensor,Tensor,Tensor]:
         """Return exact candidate skin, target poses, pose mask, rest support."""
         witness.replay()
+        require_qualified_mstar_teacher_address_v1(
+            transport_address_sha256=self.candidate_mstar_topology_address_sha256,
+            active_mstar_address_sha256=active_mstar_topology_address_sha256,
+        )
         if (
             type(projection_tolerance_ratio) not in (float,int)
             or not 0<projection_tolerance_ratio<=.07
@@ -160,6 +169,7 @@ class SourceNativeCandidatePoseTransportV1:
             "native_face_witness_sha256":witness.receipt_sha256(),
             "pose_transport_receipt_sha256":self.receipt_sha256(),
             "candidate_faces_sha256":tensor_sha256_v1(candidate_faces),
+            "candidate_mstar_topology_address_sha256":active_mstar_topology_address_sha256,
             "candidate_source_support_not_student_nearest":True,
             "source_rights_independently_verified":True,
             "generated_views_as_source_pose_truth":False,
@@ -207,6 +217,7 @@ def validate_source_native_pose_candidate_teacher_v1(
     *,support:SourceNativeCandidatePoseTransportV1 | None,
     native_face_witness:NativeFaceLayerSamplesV1 | None,
     candidate_faces:Tensor,candidate_rest:Tensor,
+    active_mstar_topology_address_sha256:str,
     source_candidate_skin:Tensor,
     source_candidate_posed:Tensor,
     source_pose_mask:Tensor,
@@ -222,6 +233,7 @@ def validate_source_native_pose_candidate_teacher_v1(
     skin,target,mask,_=support.replay(
         witness=native_face_witness,candidate_faces=candidate_faces,
         candidate_rest=candidate_rest,
+        active_mstar_topology_address_sha256=active_mstar_topology_address_sha256,
         trusted_source_registry=trusted_source_registry,
     )
     if (

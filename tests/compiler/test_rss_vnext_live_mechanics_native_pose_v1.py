@@ -176,3 +176,115 @@ def test_native_cpp_raw_renderer_consumes_bound_live_frames_without_rewriting_rs
             live_pose_receipt=forged,
         )
     assert archive.read_bytes().startswith(b"RSASV2R1")
+
+
+def test_real_two_image_canonical_xpbd_final_pose_reaches_native_cpp_rgba(
+    tmp_path,
+):
+    """Post-XPBD canonical pixels, not just a projected vertex/byte transport.
+
+    Uses the existing actual raw-two-image-derived Mesh/Rig/Skin/Graphics/UV
+    preview template. Native material/color are still NOT source-qualified.
+    """
+    import subprocess
+
+    from compiler.realsas_compiler_core.canonical_mechanics_ir_v1 import (
+        mint_canonical_mechanics_v1,
+    )
+    from compiler.realsas_compiler_core.mechanics_control_solver_v1 import (
+        deform_mesh_lbs_v1,solve_control_pose_v1,
+    )
+    from compiler.realsas_compiler_core.mechanics_xpbd_surface_v1 import (
+        DeclaredXPBDSurfaceRequestV1,XPBDSurfacePolicyV1,
+        prepare_declared_xpbd_surface_domain_v1,step_declared_xpbd_surface_v1,
+    )
+    from compiler.realsas_compiler_core.playback_runtime_v3 import (
+        RuntimeV3FrameComposition,
+    )
+    from compiler.realsas_compiler_core.controllable_puppet_runtime_v1 import (
+        PuppetRuntimeFrameV1,
+    )
+    from compiler.rss_vnext.workers.rss_vnext_live_mechanics_native_pose_v1 import (
+        bind_rss_vnext_live_pose_to_native_preview_v1,
+    )
+    from compiler.rss_vnext.workers.rss_vnext_native_preview_package_v1 import (
+        reopen_rss_vnext_native_preview_package_v1,
+    )
+    from tests.compiler.test_rss_vnext_native_preview_package_v1 import (
+        _compiled_preview_fixture,_build_player,
+    )
+
+    archive,_,mesh,rig,skin,_=_compiled_preview_fixture(tmp_path)
+    preserved=archive.read_bytes()
+    reopened=reopen_rss_vnext_native_preview_package_v1(archive)
+    # Mechanics is minted by the existing independent canonical qualifier;
+    # there is no duplicate synthetic mesh, MIRA skin or preview camera.
+    mechanics=mint_canonical_mechanics_v1(mesh,rig,skin)
+    request=DeclaredXPBDSurfaceRequestV1(
+        selected_faces=mesh.faces,
+        pinned_vertex_ids=(mesh.vertices[0].canonical_mesh_vertex_id,),
+    )
+    domain=prepare_declared_xpbd_surface_domain_v1(
+        mesh,rig,skin,mechanics,request,
+    )
+    policy=XPBDSurfacePolicyV1(domain_hash=domain.domain_hash)
+    pose=solve_control_pose_v1(rig,())
+    lbs=deform_mesh_lbs_v1(mesh,rig,skin,pose)
+    first=step_declared_xpbd_surface_v1(
+        mesh,lbs,domain,policy,
+    )
+    final=first
+    for _ in range(4):
+        final=step_declared_xpbd_surface_v1(
+            mesh,lbs,domain,policy,
+            previous_state=final.state,dt_seconds=.08,
+        )
+    assert final.state.ticks>0
+    assert final.deformation.canonical_mesh_vertex_ids==(
+        lbs.canonical_mesh_vertex_ids
+    )
+    assert final.deformation.mesh_lineage_hash==mesh.mesh_lineage_hash
+    assert final.deformation.positions!=lbs.positions
+    assert final.deformation.positions[0]==lbs.positions[0]
+    f0=PuppetRuntimeFrameV1(
+        view_id="V0",meshes=(),
+        composition=RuntimeV3FrameComposition("V0",(),{}),
+        pose=pose,deformed=first.deformation,
+        product_revision_id="developer-xpbd-graphics-not-product",
+        xpbd_surface_state=first.state,
+    )
+    f1=replace(
+        f0,deformed=final.deformation,xpbd_surface_state=final.state,
+    )
+    blob,receipt=encode_rss_vnext_live_mechanics_native_pose_v1(
+        mesh=mesh,rig=rig,skin=skin,frames=(f0,f1),
+        frame_times_seconds=(0.,.32),
+        cameras=reopened["virtual_camera"],
+    )
+    assert blob!=reopened["pose_bytes"]  # final XPBD is NOT LBS replay.
+    assert receipt["frames"][1]["xpbd_surface_state_hash"]==final.state.state_hash
+    assert receipt["independent_xpbd_behavior_proof"] is False
+    assert receipt["source_color_or_visibility_qualified"] is False
+    assets,binding=bind_rss_vnext_live_pose_to_native_preview_v1(
+        template_rss_path=archive,live_pose_bytes=blob,
+        live_pose_receipt=receipt,
+    )
+    assert binding["product_release_admission"] is False
+    for name,content in assets.items():
+        (tmp_path/name).write_bytes(content)
+    exe=_build_player(tmp_path)
+    pixels=[]
+    for frame in (0,1):
+        target=tmp_path/f"native-xpbd-final-frame-{frame}.rgba"
+        subprocess.run([
+            str(exe),str(tmp_path/"graphics.bin"),
+            str(tmp_path/"texture.bin"),str(tmp_path/"pose.bin"),
+            str(frame),"0","0",str(target),
+        ],check=True,capture_output=True,text=True)
+        image=np.frombuffer(target.read_bytes(),dtype=np.uint8).reshape(
+            96,96,4,
+        )
+        assert np.count_nonzero(image[:,:,3])>0
+        pixels.append(image)
+    assert not np.array_equal(pixels[0],pixels[1])
+    assert archive.read_bytes()==preserved

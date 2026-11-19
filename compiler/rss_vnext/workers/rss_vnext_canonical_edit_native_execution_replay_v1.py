@@ -286,7 +286,10 @@ def execute_canonical_user_edit_native_cpp_capture_v1(
         edit["mesh"].mesh_lineage_hash!=revised["mesh"].mesh_lineage_hash
         or edit["rig"].rig_lineage_hash!=revised["rig"].rig_lineage_hash
         or edit["skin"].skin_lineage_hash!=revised["skin"].skin_lineage_hash
-        or edit["pose_bytes"]!=revised["pose_bytes"]
+        or (
+            not isinstance(base["virtual_camera"], (tuple, list))
+            and edit["pose_bytes"]!=revised["pose_bytes"]
+        )
         or base["mesh"].faces != revised["mesh"].faces
         or edit["receipt"]["base_rss_sha256"]!=source_sha
     ):

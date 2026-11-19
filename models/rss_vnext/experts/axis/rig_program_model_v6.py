@@ -505,6 +505,13 @@ class AXISRigProgramModelV6(nn.Module):
             mask_axis_v6_executable_constraint_kinds_v1,
             mask_axis_v6_executable_constraint_operators_v1,
         )
+        from compiler.realsas_compiler_core.rig_constraint_schema_v1 import (
+            RIG_CONSTRAINT_OPERATOR_IDS_V1,
+        )
+        admitted_operators=(
+            tuple(allowed_constraint_operators) if allowed_constraint_operators is not None
+            else RIG_CONSTRAINT_OPERATOR_IDS_V1
+        )
         for _ in range(limit - 1):
             out=cache.consume(events[-1])
             kind_logits = AXISRigProgramGrammarV6Product.mask(
@@ -512,10 +519,7 @@ class AXISRigProgramModelV6(nn.Module):
             )
             kind_logits=mask_axis_v6_executable_constraint_kinds_v1(
                 kind_logits,events=events,state=state,
-                executable_operators=(
-                    allowed_constraint_operators if allowed_constraint_operators is not None
-                    else ("IK","AIM","FOLLOW","COPY_TRANSFORM","STRETCH")
-                ),
+                executable_operators=admitted_operators,
             )
             kind = RigTokenKindV6(int(torch.argmax(kind_logits).item()))
             last = {key: value[0, -1] for key, value in out.items() if key != "hidden"}
@@ -579,10 +583,7 @@ class AXISRigProgramModelV6(nn.Module):
                     last["constraint_operator_logits"],
                     control_count=state.control_count,
                     chain_count=state.chain_count,
-                    executable_operators=(
-                        allowed_constraint_operators if allowed_constraint_operators is not None
-                        else ("IK","AIM","FOLLOW","COPY_TRANSFORM","STRETCH")
-                    ),
+                    executable_operators=admitted_operators,
                 )
                 aux = int(torch.argmax(proposal_logits).item())
                 schema=rig_constraint_operator_schema_v1(

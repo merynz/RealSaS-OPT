@@ -144,8 +144,8 @@ def _admit_open_patch(
     *,
     canonical_component_id: str,
     selected_face_indices: tuple[int, ...],
-) -> tuple[tuple[str, str, str], ...]:
-    """A complete, disjoint OPEN manifold component; never a body crop."""
+) -> tuple[tuple[tuple[str, str, str], ...], str]:
+    """A complete OPEN manifold component plus its canonical hem address."""
     if (
         not selected_face_indices
         or len(set(selected_face_indices)) != len(selected_face_indices)
@@ -198,8 +198,13 @@ def _admit_open_patch(
             todo.append(u)
     if visited != owned:
         raise QualificationError("SOURCE_PIN_OPEN_COMPONENT_DISCONNECTED")
+    # Boundary identity must be separately transported from the source hem.
+    hem_sha256 = content_sha256({
+        "schema":"RealSaS.Mechanics.CanonicalOpenHemAddress.v1",
+        "canonical_open_boundary_edges":sorted(boundary),
+    })
     # Geometry quality and self-contact remain separate runtime/product courts.
-    return selected
+    return selected,hem_sha256
 
 
 def prepare_source_qualified_open_surface_xpbd_v1(
@@ -257,6 +262,14 @@ def prepare_source_qualified_open_surface_xpbd_v1(
     ):
         raise QualificationError("SOURCE_PIN_PROGRAM_ADDRESS_OR_HASH_DRIFT")
     _validate_native_face_corners_v1(program)
+    validate_canonical_mesh_domain_v1(mesh)
+    validate_canonical_rig_domain_v2(rig)
+    validate_canonical_skin_domain_v2(skin)
+    selected,canonical_hem_sha256 = _admit_open_patch(
+        mesh,
+        canonical_component_id=program.canonical_component_id,
+        selected_face_indices=program.canonical_face_indices,
+    )
     source_row = trusted_native_pin_registry.get(program.source_qualification_key)
     transport_row = trusted_compiler_transport_registry.get(
         program.source_face_pin_transport_sha256
@@ -293,6 +306,9 @@ def prepare_source_qualified_open_surface_xpbd_v1(
             program.candidate_mstar_topology_address_sha256,
         "source_asset_sha256": program.source_asset_sha256,
         "native_pin_witness_sha256": program.native_pin_witness_sha256,
+        "native_open_boundary_sha256": program.native_open_boundary_sha256,
+        "canonical_open_boundary_edges_sha256": canonical_hem_sha256,
+        "source_to_canonical_hem_transport_verified": True,
         "source_face_pin_transport_sha256":
             program.source_face_pin_transport_sha256,
         "independently_qualified_final_mstar_address": True,
@@ -302,14 +318,6 @@ def prepare_source_qualified_open_surface_xpbd_v1(
         or any(transport_row.get(k) != v for k,v in expected_transport.items())
     ):
         raise QualificationError("SOURCE_PIN_NATIVE_OR_MSTAR_RECEIPT_DRIFT")
-    validate_canonical_mesh_domain_v1(mesh)
-    validate_canonical_rig_domain_v2(rig)
-    validate_canonical_skin_domain_v2(skin)
-    selected = _admit_open_patch(
-        mesh,
-        canonical_component_id=program.canonical_component_id,
-        selected_face_indices=program.canonical_face_indices,
-    )
     selected_ids = set(v for face in selected for v in face)
     pins = program.canonical_pin_vertex_ids
     if not set(pins).issubset(selected_ids) or len(pins) == len(selected_ids):
@@ -345,6 +353,7 @@ def prepare_source_qualified_open_surface_xpbd_v1(
         "source_witness_sha256": program.witness_hash(),
         "source_face_pin_transport_sha256":
             program.source_face_pin_transport_sha256,
+        "canonical_open_boundary_edges_sha256":canonical_hem_sha256,
         "source_registry_admission": PIN_ADMISSION,
         "compiler_registry_admission": TRANSPORT_ADMISSION,
         "host_canonical_chain_id": program.host_canonical_chain_id,

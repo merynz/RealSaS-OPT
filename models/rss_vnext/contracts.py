@@ -72,6 +72,10 @@ class RSSvNextConfig:
     # not a claim that every source rig has eight necessary influences.
     skin_max_influences: int = 8
     skin_support_policy: str = "STABLE_CAUSAL_TOPK_STRAIGHT_THROUGH_V1"
+    # MIRA source-qualified 2-stage skin: P(group|vertex) * P(joint|group,vertex).
+    # Unknown/unclaimed joints form an explicit fallback group; never infer a
+    # semantic class from source bone names or arbitrary chain IDs.
+    skin_group_mixture_policy: str = "AXIS_CAUSAL_CHAIN_LEARNED_MIXTURE_V1"
     # 128 tokens cap encoded only a handful of triangles and was a
     # proof-of-wiring configuration, not a generic product mesh capacity.
     # Incremental V3.1 decoding permits a bounded larger hypothesis; this is
@@ -120,6 +124,7 @@ class RSSvNextConfig:
             type(self.skin_max_influences) is not int
             or not 1 <= self.skin_max_influences <= 41
             or self.skin_support_policy != "STABLE_CAUSAL_TOPK_STRAIGHT_THROUGH_V1"
+            or self.skin_group_mixture_policy != "AXIS_CAUSAL_CHAIN_LEARNED_MIXTURE_V1"
         ):
             raise ValueError("RSS_VNEXT_SKIN_SUPPORT_POLICY_INVALID")
         if (

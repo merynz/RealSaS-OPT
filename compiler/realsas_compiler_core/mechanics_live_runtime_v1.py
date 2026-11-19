@@ -39,6 +39,9 @@ from .mechanics_xpbd_secondary_v1 import (
     XPBDSecondaryStateV1,
     step_declared_xpbd_secondary_v1,
 )
+from .mechanics_physics_ownership_v1 import (
+    qualify_mechanics_physics_domain_ownership_v1,
+)
 from .mechanics_xpbd_surface_v1 import (
     XPBDSurfaceDomainV1, XPBDSurfacePolicyV1, XPBDSurfaceStateV1,
     requalify_declared_xpbd_surface_domain_v1,
@@ -235,6 +238,14 @@ def evaluate_mechanics_intervention_frame_v1(
     xpbd_surface_dt_seconds: float | None = None,
 ) -> MechanicsInterventionFrameV1:
     _strict_lineage(mesh, rig, skin, mechanics)
+    # Pure domain preflight before primary IK or Physics stepping, including
+    # oscillator + surface double-ownership absent from the prior live path.
+    physics_ownership=qualify_mechanics_physics_domain_ownership_v1(
+        rig,skin,
+        secondary_motion_policy=secondary_motion_policy,
+        xpbd_secondary_domain=xpbd_secondary_domain,
+        xpbd_surface_domain=xpbd_surface_domain,
+    )
     limit_residual = _finite_tolerance(
         max_allowed_constraint_residual, "LIVE_MECHANICS_RESIDUAL_POLICY_INVALID",
     )
@@ -419,15 +430,6 @@ def evaluate_mechanics_intervention_frame_v1(
     if xpbd_surface_policy is not None:
         if xpbd_surface_domain is None:
             raise QualificationError("LIVE_XPBD_SURFACE_DOMAIN_REQUIRED")
-        if xpbd_secondary_domain is not None:
-            # Surface material vertices may be pinned to secondary bones, but
-            # two solvers cannot independently own the same deformable vertex.
-            joint_surface_owned={
-                vid for region in xpbd_secondary_domain.regions
-                for vid in region.skinned_vertex_ids
-            }
-            if set(xpbd_surface_domain.dynamic_vertex_ids)&joint_surface_owned:
-                raise QualificationError("LIVE_XPBD_JOINT_SURFACE_DOUBLE_OWNERSHIP")
         requalify_declared_xpbd_surface_domain_v1(
             mesh,rig,skin,mechanics,xpbd_surface_domain,
         )
@@ -493,6 +495,11 @@ def evaluate_mechanics_intervention_frame_v1(
         relative_attachment_court=relative_result,
         metadata={
             "authority": "MECHANICS_RUNTIME_DIAGNOSTIC_ONLY",
+            "physics_ownership_authority": physics_ownership.authority,
+            "physics_secondary_joint_mode": physics_ownership.secondary_joint_mode,
+            "physics_surface_mode": physics_ownership.surface_mode,
+            "physics_domain_disjoint": physics_ownership.disjoint,
+            "physics_source_material_truth_claimed": physics_ownership.source_material_truth_claimed,
             "control_synthesis_performed": False,
             "rig_or_skin_mutated": False,
             "model_inference_performed": False,

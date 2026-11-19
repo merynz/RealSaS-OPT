@@ -42,6 +42,7 @@ jobs:
             tests/compiler/test_v6_motion_main_integration_v1.py \
             tests/compiler/test_mechanics_cas_worker_main_v1.py \
             tests/compiler/test_mechanics_secondary_runtime_contract_v1.py \
+            tests/compiler/test_mechanics_physics_ownership_v1.py \
             tests/compiler/test_mechanics_multigoal_solver_v1.py \
             tests/compiler/test_mechanics_live_multigoal_integration_v1.py \
             tests/compiler/test_mechanics_attachment_frames_v1.py \

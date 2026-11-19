@@ -9,6 +9,12 @@ import torch
 from models.rss_vnext.native_face_layer_truth_v1 import (
     NativeFaceLayerSamplesV1, tensor_sha256_v1,
 )
+from models.rss_vnext.seeded_mstar_teacher_address_v1 import (
+    seeded_mstar_teacher_address_sha256_v1,
+)
+from models.rss_vnext.tessa_seeded_surface_v1 import (
+    build_tessa_seeded_surface_v1,
+)
 from models.rss_vnext.native_skin_transport_v1 import (
     DERIVATION, RECEIPT_SCHEMA, SourceNativeCandidateSkinTransportV1,
 )
@@ -26,6 +32,12 @@ def _fixture():
         sample_barycentric=torch.tensor([[.25,.25,.5]]),
         source_asset_sha256="a"*64,layer_namespace_sha256="b"*64,
     )
+    seed=build_tessa_seeded_surface_v1(
+        iris_surface_xyz=vertices[None],iris_surface_faces=faces,
+        component_ids_by_vertex=torch.zeros(3,dtype=torch.long),
+        scene_sha256="e"*64,original_surface_sha256="f"*64,
+    )
+    mstar_address=seeded_mstar_teacher_address_sha256_v1(seed)
     transport=SourceNativeCandidateSkinTransportV1(
         source_asset_sha256=witness.source_asset_sha256,
         source_qualification_key="native-rig-skin-only",
@@ -36,6 +48,7 @@ def _fixture():
         native_skin=torch.tensor([[1.,0.],[.5,.5],[0.,1.]]),
         candidate_native_face_ids=torch.tensor([0,0,0],dtype=torch.long),
         candidate_barycentric=torch.eye(3),
+        candidate_mstar_topology_address_sha256=mstar_address,
     )
     receipt={
         "schema":RECEIPT_SCHEMA,
@@ -48,6 +61,7 @@ def _fixture():
         "native_skin_joint_order_sha256":"a"*64,
         "native_skin_columns_match_axis_joint_order":True,
         "candidate_faces_sha256":tensor_sha256_v1(faces),
+        "candidate_mstar_topology_address_sha256":mstar_address,
         "candidate_source_support_not_student_nearest":True,
         "source_rights_independently_verified":True,
         "generated_views_as_source_skin_truth":False,
@@ -62,6 +76,7 @@ def _replay(w,t,f,xyz,receipt):
         trusted_source_registry={t.source_qualification_key:receipt},
         dataset_manifest_sha256="3"*64,
         expected_axis_teacher_sequence_sha256="9"*64,
+        active_mstar_topology_address_sha256=t.candidate_mstar_topology_address_sha256,
         chunk_size=2,
     )
 
@@ -123,5 +138,38 @@ def test_native_skin_rejects_axial_joint_order_forgery():
             witness=w,candidate_faces=f,candidate_rest=xyz,
             dataset_manifest_sha256="3"*64,
             expected_axis_teacher_sequence_sha256="0"*64,
+            active_mstar_topology_address_sha256=t.candidate_mstar_topology_address_sha256,
             trusted_source_registry={t.source_qualification_key:receipt},
         )
+
+
+
+def test_native_skin_rejects_new_mstar_revision_even_if_face_index_buffer_same():
+    w,t,f,xyz,receipt=_fixture()
+    # Same source 3D, same exact triangle array, same native barycentrics.
+    # A changed original M0 parent order must NEVER reuse source labels.
+    source=build_tessa_seeded_surface_v1(
+        iris_surface_xyz=xyz,iris_surface_faces=f,
+        component_ids_by_vertex=torch.zeros(3,dtype=torch.long),
+        scene_sha256="e"*64,original_surface_sha256="f"*64,
+    )
+    altered=replace(source,parent_seed_edges=((1,1),(0,0),(2,2)))
+    altered.validate()
+    changed=seeded_mstar_teacher_address_sha256_v1(altered)
+    assert changed!=t.candidate_mstar_topology_address_sha256
+    with pytest.raises(ValueError,match="MSTAR_TEACHER_TOPOLOGY_ADDRESS_DRIFT"):
+        t.replay(
+            witness=w,candidate_faces=f,candidate_rest=xyz,
+            active_mstar_topology_address_sha256=changed,
+            trusted_source_registry={t.source_qualification_key:receipt},
+            dataset_manifest_sha256="3"*64,
+            expected_axis_teacher_sequence_sha256="9"*64,
+        )
+
+
+def test_native_skin_rejects_missing_topology_receipt():
+    w,t,f,xyz,receipt=_fixture()
+    forged=dict(receipt)
+    forged.pop("candidate_mstar_topology_address_sha256")
+    with pytest.raises(ValueError,match="SOURCE_RECEIPT_REQUIRED"):
+        _replay(w,t,f,xyz,forged)

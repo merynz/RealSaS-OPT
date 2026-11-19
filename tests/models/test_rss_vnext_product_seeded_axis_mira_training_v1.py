@@ -155,6 +155,12 @@ def test_seeded_product_mira_source_skin_without_native_motion_clip(monkeypatch)
     from models.rss_vnext.native_skin_transport_v1 import (
         SourceNativeCandidateSkinTransportV1, RECEIPT_SCHEMA,
     )
+    from models.rss_vnext.tessa_seeded_surface_v1 import (
+        build_tessa_seeded_surface_v1,
+    )
+    from models.rss_vnext.seeded_mstar_teacher_address_v1 import (
+        seeded_mstar_teacher_address_sha256_v1,
+    )
     import models.rss_vnext.unified_character_model as unified
 
     net,batch,make,*_=_rig_case(monkeypatch)
@@ -179,11 +185,18 @@ def test_seeded_product_mira_source_skin_without_native_motion_clip(monkeypatch)
         source_asset_sha256=teacher.source_asset_sha256,
         layer_namespace_sha256="8"*64,
     )
+    seed=build_tessa_seeded_surface_v1(
+        iris_surface_xyz=xyz[None], iris_surface_faces=faces,
+        component_ids_by_vertex=torch.zeros(4,dtype=torch.long),
+        scene_sha256="e"*64, original_surface_sha256="f"*64,
+    )
+    mstar_address=seeded_mstar_teacher_address_sha256_v1(seed)
     support=SourceNativeCandidateSkinTransportV1(
         source_asset_sha256=teacher.source_asset_sha256,
         source_qualification_key=teacher.source_qualification_key,
         native_face_witness_sha256=witness.receipt_sha256(),
         source_candidate_mesh_face_sha256=tensor_sha256_v1(faces),
+        candidate_mstar_topology_address_sha256=mstar_address,
         axis_teacher_sequence_sha256=axis_teacher_sequence_sha256_v6(batch.axis_teacher_sequence),
         native_skin_joint_order_sha256="9"*64,
         native_skin=xyz.new_ones((4,1)),
@@ -203,6 +216,7 @@ def test_seeded_product_mira_source_skin_without_native_motion_clip(monkeypatch)
         "native_skin_joint_order_sha256":"9"*64,
         "native_skin_columns_match_axis_joint_order":True,
         "candidate_faces_sha256":tensor_sha256_v1(faces),
+        "candidate_mstar_topology_address_sha256":mstar_address,
         "candidate_source_support_not_student_nearest":True,
         "source_rights_independently_verified":True,
         "generated_views_as_source_skin_truth":False,
@@ -226,6 +240,16 @@ def test_seeded_product_mira_source_skin_without_native_motion_clip(monkeypatch)
     assert result.product_axis_mira_parts["axis"] is not None
     assert result.axis_posed_surface_loss is None
     assert torch.isfinite(result.total_loss)
+    # A transport receipt made for a previous TESSA/M* refinement revision
+    # cannot be recycled, even when candidate face count remains unchanged.
+    stale=replace(support,candidate_mstar_topology_address_sha256="0"*64)
+    stale_batch=replace(
+        batch,seeded_tessa_source_teacher=replace(
+            batch.seeded_tessa_source_teacher,native_skin_transport=stale,
+        ),
+    )
+    with pytest.raises(ValueError,match="MSTAR_TEACHER_TOPOLOGY_ADDRESS_DRIFT"):
+        trainer.objective(stale_batch)
     with pytest.raises(ValueError,match="AXIS_NATIVE_POSE_REQUIRED"):
         make(
             weights=ProductSeededAXISMIRAWeightsV1(

@@ -25,6 +25,9 @@ from compiler.realsas_compiler_core.rig_constraint_schema_v1 import (
     RIG_CONSTRAINT_OPERATOR_IDS_V1,
 )
 from .training_seeded_tessa_v1 import SeededTESSASourceTeacherV1
+from .seeded_mstar_teacher_address_v1 import (
+    seeded_mstar_teacher_address_sha256_v1,
+)
 from .native_pose_transport_v1 import (
     validate_source_native_pose_candidate_teacher_v1,
 )
@@ -185,6 +188,11 @@ def product_seeded_axis_mira_objective_v1(
         weights.dynamic_surface,weights.hard_skin,weights.chain_skin,
     ))
     if needs_skin:
+        # M* can move continuously under H(x); its discrete face, component,
+        # layer and original-parent identity MUST be exactly teacher-pinned.
+        active_mstar_topology_address_sha256=seeded_mstar_teacher_address_sha256_v1(
+            mesh.seeded_surface,
+        )
         if not bool((seq.kind_ids==int(RigTokenKindV6.SKIN_CODE)).any()):
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_SKIN_TOKEN_REQUIRED")
         if teacher.native_face_layer_samples is None:
@@ -218,6 +226,7 @@ def product_seeded_axis_mira_objective_v1(
                 trusted_source_registry=trusted_native_skin_registry,
                 dataset_manifest_sha256=dataset_manifest_sha256,
                 expected_axis_teacher_sequence_sha256=axis_sequence_digest(seq),
+                active_mstar_topology_address_sha256=active_mstar_topology_address_sha256,
             )
         elif pose_support:
             # Pose-qualified legacy path remains unchanged for source-animated
@@ -232,6 +241,7 @@ def product_seeded_axis_mira_objective_v1(
                 native_face_witness=teacher.native_face_layer_samples,
                 candidate_faces=mesh.faces,
                 candidate_rest=mesh.rest_vertices_iris,
+                active_mstar_topology_address_sha256=active_mstar_topology_address_sha256,
                 source_candidate_skin=teacher.source_candidate_skin,
                 source_candidate_posed=teacher.source_candidate_posed,
                 source_pose_mask=teacher.source_pose_mask,

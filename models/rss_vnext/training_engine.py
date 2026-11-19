@@ -2772,7 +2772,11 @@ class RSSvNextStructuralTrainer:
                     "source_label_student_checkpoint_dependency":False,
                 }.items()
             ):
-                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_NATIVE_LAYER_RECEIPT_DRIFT")
+                raise ValueError(
+                    "RSS_VNEXT_PRODUCT_SEEDED_NATIVE_OPEN_LAYER_RECEIPT_DRIFT"
+                    if is_open else
+                    "RSS_VNEXT_PRODUCT_SEEDED_NATIVE_SIGNED_LAYER_RECEIPT_DRIFT"
+                )
         receipt = driver.trusted_registry.get(
             teacher.source_qualification_key,
         )

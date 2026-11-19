@@ -360,11 +360,20 @@ class AXISRigProgramModelV6(nn.Module):
     def _shift(values: Tensor, cap: int) -> Tensor:
         return (values.to(torch.long) + 1).clamp(min=0, max=cap)
 
-    def _embed(self, seq: AXISSequenceV6) -> Tensor:
+    def _embed(
+        self, seq: AXISSequenceV6, *, position_offset: int = 0,
+    ) -> Tensor:
         cfg = self.config
         seq.validate(cfg)
         b, s = seq.kind_ids.shape
-        pos = torch.arange(s, device=seq.kind_ids.device)[None].expand(b, -1)
+        if (
+            type(position_offset) is not int or position_offset<0
+            or position_offset+s>cfg.max_sequence_length
+        ):
+            raise ValueError("AXIS_V6_POSITION_EMBEDDING_RESOURCE_BOUND")
+        pos = torch.arange(
+            position_offset, position_offset+s, device=seq.kind_ids.device,
+        )[None].expand(b, -1)
         x = self.kind_embedding(seq.kind_ids) + self.position_embedding(pos)
         x = x + self.coord_embedding(self._shift(seq.coord_indices, cfg.coord_bins)).sum(dim=2)
         for ptr in (seq.pointer_a, seq.pointer_b, seq.pointer_c):

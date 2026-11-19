@@ -27,18 +27,18 @@ import torch.nn.functional as F
 from models.axis.rig_program_model_v6 import (
     AXISSequenceV6, RigProgramEventV6, RigTokenKindV6,
 )
-from .axis_mechanical_chain_partition_v1 import decode_axis_joint_chain_partition_v1
+from .axis_mechanical_part_graph_v1 import decode_axis_mechanical_part_graph_v1
 
 
 def axis_joint_group_ids_v1(
     sequence: AXISSequenceV6, *, batch_index: int = 0,
 ) -> Tensor:
-    partition = decode_axis_joint_chain_partition_v1(
-        sequence, batch_index=batch_index,
+    part_graph = decode_axis_mechanical_part_graph_v1(
+        sequence,batch_index=batch_index,
     )
-    # -1 is reserved for UNKNOWN; chain IDs are causal event ordinal, not
-    # mechanical morphology or semantic labels.
-    return partition.joint_chain_ids
+    # Branched groups are explicit joint sets compiled from AXIS CHAIN
+    # memberships. Part ordinals are local graph addresses, not labels.
+    return part_graph.joint_group_ids
 
 
 def axis_joint_group_ids_from_cas_events_v1(

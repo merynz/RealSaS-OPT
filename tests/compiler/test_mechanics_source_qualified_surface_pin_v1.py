@@ -157,6 +157,7 @@ def test_two_host_anchored_pins_keep_one_free_dynamic_particle():
             domain_hash=accepted.domain.domain_hash,
         ),
     )
+    assert editor.frame().xpbd_surface_state.ticks==0
     assert editor.frame(dt_seconds=1./60.).xpbd_surface_state.ticks==2
 
 

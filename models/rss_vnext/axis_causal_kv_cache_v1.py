@@ -58,11 +58,9 @@ class AXISV6CausalKVCacheV1:
         ):
             raise ValueError("AXIS_V6_KV_CACHE_EVENT_RESOURCE_GUARD")
         seq=AXISSequenceV6.from_events((event,),device=self.scene.device)
-        # A 1-token source sequence always gets position zero. Replace ONLY
-        # that learned position embedding with the true event offset.
-        x=self.model._embed(seq)
-        pos=self.model.position_embedding.weight
-        x=x-pos[0].view(1,1,-1)+pos[self.count].view(1,1,-1)
+        # Apply the exact learned causal position in the SAME addition order
+        # as full-prefix embedding; subtract/add would drift under fp16.
+        x=self.model._embed(seq,position_offset=self.count)
         for li,layer in enumerate(self.layers):
             attn=layer.self_attn
             h=attn.num_heads

@@ -891,11 +891,51 @@ def execute_motion_capability_v2(
         if type(row) is dict
         and row.get("artifact_type") == "RealSaS.ControlMotionClipProposalIR"
     ]
-    if len(proposed) == 1:
+    source_refs=[
+        row for row in request.get("input_artifacts") or ()
+        if type(row) is dict
+        and row.get("artifact_type") == "RealSaS.SourceRigMotion"
+    ]
+    binding_refs=[
+        row for row in request.get("input_artifacts") or ()
+        if type(row) is dict
+        and row.get("artifact_type") == "RealSaS.ControlMotionRetargetBinding"
+    ]
+    if (len(proposed)>1 or len(source_refs)>1 or len(binding_refs)>1
+        or bool(source_refs)!=bool(binding_refs)
+        or (proposed and (source_refs or binding_refs))
+    ):
+        raise RuntimeError("PRODUCT_MOTION_SOURCE_AMBIGUOUS_OR_ABSENT")
+    if len(proposed)==1:
         proposal = control_motion_proposal_from_dict_v1(
             _read(request,read_object,"RealSaS.ControlMotionClipProposalIR","v1"))
         motion_source = "EXTERNAL_CONTROL_MOTION_PROPOSAL"
-    elif not proposed and (
+    elif len(source_refs)==1 and len(binding_refs)==1:
+        from compiler.realsas_compiler_core.source_motion_to_controls_v1 import (
+            retarget_source_motion_to_canonical_controls_v1,
+        )
+        source=_read(request,read_object,"RealSaS.SourceRigMotion","v1")
+        binding=_read(request,read_object,"RealSaS.ControlMotionRetargetBinding","v1")
+        if (
+            source.get("schema_version")!="RealSaS.SourceRigMotion.v1"
+            or binding.get("schema_version")!="RealSaS.ControlMotionRetargetBinding.v1"
+            or (request.get("capability_metadata") or {}).get("default_rest_hold_policy")
+                == "DETERMINISTIC_ZERO_TRACK_REST_HOLD_V1"
+        ):
+            raise RuntimeError("PRODUCT_MOTION_SOURCE_RETARGET_INPUT_SCHEMA_DRIFT")
+        # Explicit correspondences are required; no nearest joint mapping
+        # and no hidden animation library source enters Compiler.
+        proposal=retarget_source_motion_to_canonical_controls_v1(
+            source,rig=rig,mechanics=mechanics,
+            target_joint_to_source=binding["target_joint_to_source"],
+            target_joint_to_control=binding["target_joint_to_control"],
+            object_rotation=binding["object_rotation"],
+            target_body_scale=binding["target_body_scale"],
+            clip_id=binding["clip_id"],display_name=binding["display_name"],
+            intent=binding["intent"],loop=binding["loop"],
+        )
+        motion_source="EXPLICIT_SOURCE_RIG_RETARGET_CANDIDATE_NOT_SOURCE_TRUTH"
+    elif not proposed and not source_refs and not binding_refs and (
         (request.get("capability_metadata") or {}).get("default_rest_hold_policy")
         == "DETERMINISTIC_ZERO_TRACK_REST_HOLD_V1"
     ):

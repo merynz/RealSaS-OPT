@@ -622,6 +622,56 @@ class AXISRigProgramModelV6(nn.Module):
         raise RuntimeError("AXIS_V6_GENERATION_RESOURCE_LIMIT_EXHAUSTED")
 
 
+def qualified_axis_v6_kind_mask_v1(
+    teacher: AXISSequenceV6,
+    *,
+    control_consequences_qualified: bool,
+    control_absence_qualified: bool = False,
+    structural_chains_qualified: bool = False,
+    chain_absence_qualified: bool = False,
+) -> Tensor:
+    """Mask absent *observations*, not absent structure, in causal kind CE.
+
+    Missing control/chain fields in a native FBX are UNKNOWN, not a
+    ground-truth request to generate no controls or no auxiliary chains.
+    An explicitly independently verified empty authored section MAY act
+    as a negative. Positive control events require source consequences.
+    """
+    if (
+        type(control_consequences_qualified) is not bool
+        or type(control_absence_qualified) is not bool
+        or type(structural_chains_qualified) is not bool
+        or type(chain_absence_qualified) is not bool
+        or (control_consequences_qualified and control_absence_qualified)
+        or (structural_chains_qualified and chain_absence_qualified)
+        or teacher.kind_ids.ndim != 2
+        or teacher.kind_ids.shape[1] < 2
+    ):
+        raise ValueError("AXIS_V6_SOURCE_SECTION_AUTHORITY_INVALID")
+    previous=teacher.kind_ids[:,:-1]
+    target=teacher.kind_ids[:,1:]
+    eligible=teacher.attention_mask[:,1:].bool().clone()
+    if not (control_consequences_qualified or control_absence_qualified):
+        eligible &= ~(
+            (previous==int(RigTokenKindV6.CONTROLS_START))
+            & (target==int(RigTokenKindV6.CHAINS_START))
+        )
+        eligible &= ~(
+            (previous==int(RigTokenKindV6.CONSTRAINTS_START))
+            & (target==int(RigTokenKindV6.ANCHORS_START))
+        )
+        eligible &= ~(
+            (previous==int(RigTokenKindV6.ANCHORS_START))
+            & (target==int(RigTokenKindV6.SKIN_START))
+        )
+    if not (structural_chains_qualified or chain_absence_qualified):
+        eligible &= ~(
+            (previous==int(RigTokenKindV6.CHAINS_START))
+            & (target==int(RigTokenKindV6.CONSTRAINTS_START))
+        )
+    return eligible
+
+
 def qualified_axis_rig_skin_sequence_loss_v6(
     model: AXISRigProgramModelV6,
     scene_memory: Tensor,
@@ -631,6 +681,9 @@ def qualified_axis_rig_skin_sequence_loss_v6(
     executable_constraint_operators: Sequence[str],
     control_intervention_qualified: bool,
     structural_chains_qualified: bool = False,
+    control_absence_qualified: bool = False,
+    chain_absence_qualified: bool = False,
+    frame_dof_qualified: bool = True,
 ) -> tuple[Tensor, dict[str, Tensor]]:
     """Source-admitted teacher-forced AXIS V6 autoregressive objective.
 
@@ -640,6 +693,15 @@ def qualified_axis_rig_skin_sequence_loss_v6(
     from an unqualified student proposal or compiler heuristics.
     """
     teacher.validate(model.config)
+    if type(frame_dof_qualified) is not bool:
+        raise ValueError("AXIS_V6_TRAIN_FRAME_DOF_PROVENANCE_INVALID")
+    known_kind_mask=qualified_axis_v6_kind_mask_v1(
+        teacher,
+        control_consequences_qualified=control_intervention_qualified,
+        control_absence_qualified=control_absence_qualified,
+        structural_chains_qualified=structural_chains_qualified,
+        chain_absence_qualified=chain_absence_qualified,
+    )
     if teacher.kind_ids.shape[1] < 3 or not bool(teacher.attention_mask.all()):
         raise ValueError("AXIS_V6_TRAIN_COMPLETE_UNPADDED_TEACHER_REQUIRED")
     if tokens_per_joint < 1:
@@ -720,9 +782,11 @@ def qualified_axis_rig_skin_sequence_loss_v6(
     kinds = teacher.kind_ids[:, 1:]
     logits_by_target = {key: value[:, :-1] for key, value in logits.items() if key != "hidden"}
     losses: dict[str, Tensor] = {}
+    if not bool(known_kind_mask.any()):
+        raise ValueError("AXIS_V6_TRAIN_NO_KNOWN_KIND_SUPERVISION")
     losses["token_kind"] = F.cross_entropy(
-        logits_by_target["kind_logits"].reshape(-1, len(RigTokenKindV6)),
-        kinds.reshape(-1),
+        logits_by_target["kind_logits"][known_kind_mask],
+        kinds[known_kind_mask],
     )
 
     def positions(*types: RigTokenKindV6) -> Tensor:
@@ -788,9 +852,10 @@ def qualified_axis_rig_skin_sequence_loss_v6(
         ):
             raise ValueError("AXIS_V6_TRAIN_FRAME_DOF_LABEL_INVALID")
         losses["frame"] = F.smooth_l1_loss(logits_by_target["frame_6d"][frame_mask], truth_frame)
-        losses["dof"] = F.binary_cross_entropy_with_logits(
-            logits_by_target["dof_logits"][frame_mask], truth_dof,
-        )
+        if frame_dof_qualified:
+            losses["dof"] = F.binary_cross_entropy_with_logits(
+                logits_by_target["dof_logits"][frame_mask], truth_dof,
+            )
     param_mask = positions(RigTokenKindV6.CONSTRAINT)
     if bool(param_mask.any()):
         truth = teacher.scalar_params[:, 1:][param_mask]
@@ -830,5 +895,6 @@ __all__ = [
     "CONSTRAINT_OPERATORS_V6", "DOF_LABELS_V6", "RigGrammarStateV6", "RigProgramEventV6",
     "RigSectionV6", "RigTokenKindV6", "rotation_6d_to_basis_v6",
     "qualified_axis_rig_skin_sequence_loss_v6",
+    "qualified_axis_v6_kind_mask_v1",
     "causal_chain_descendants_v6",
 ]

@@ -51,9 +51,7 @@ def decode_axis_mechanical_part_graph_v1(
     kinds=seq.kind_ids[batch_index]
     valid=seq.attention_mask[batch_index].bool()
     chain_tokens=torch.where(valid & (kinds==int(RigTokenKindV6.CHAIN)))[0].tolist()
-    if not torch.equal(
-        torch.tensor(len(chain_tokens)),torch.tensor(len(partition.causal_chain_paths))
-    ):
+    if len(chain_tokens) != len(partition.causal_chain_paths):
         raise ValueError("AXIS_V6_PART_CHAIN_COUNT_DRIFT")
     raw_group_ids=[]
     part_count=0

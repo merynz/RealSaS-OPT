@@ -53,12 +53,25 @@ def test_refinement_changes_identity_without_changing_original_source():
         )
 
 
-def test_parent_support_changes_topology_address_even_for_same_final_faces():
+def test_forged_original_m0_parent_order_rejected_before_teacher_fingerprint():
     seed=_source()
     flipped=replace(seed,parent_seed_edges=((1,1),(0,0),(2,2),(3,3)))
-    flipped.validate()  # Same indexed F and V: parent provenance alone differs.
     assert torch.equal(seed.faces,flipped.faces)
-    assert address(seed)!=address(flipped)
+    with pytest.raises(ValueError,match="TESSA_SEEDED_ORIGINAL_VERTEX_PARENT_DRIFT"):
+        address(flipped)
+
+
+def test_repeated_or_non_native_midpoint_parent_edge_rejected():
+    seed=_source(refine=True)
+    mid=seed.original_vertex_count
+    repeated=list(seed.parent_seed_edges)
+    repeated[mid+1]=repeated[mid]
+    with pytest.raises(ValueError,match="TESSA_SEEDED_MIDPOINT_PARENT_EDGE_DRIFT"):
+        address(replace(seed,parent_seed_edges=tuple(repeated)))
+    forged=list(seed.parent_seed_edges)
+    forged[mid]=(0,0)
+    with pytest.raises(ValueError,match="TESSA_SEEDED_MIDPOINT_PARENT_EDGE_DRIFT"):
+        address(replace(seed,parent_seed_edges=tuple(forged)))
 
 
 def test_layer_namespace_and_component_partition_are_addressed():

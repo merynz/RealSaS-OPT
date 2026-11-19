@@ -52,7 +52,11 @@ class TESSASeededSurfaceV1:
                 or bool((self.faces < 0).any())
                 or int(self.faces.max()) >= n
                 or self.vertex_component_ids.shape != (n,)
+                or self.vertex_component_ids.dtype != torch.long
+                or self.vertex_component_ids.device != self.faces.device
                 or self.face_component_ids.shape != (len(self.faces),)
+                or self.face_component_ids.dtype != torch.long
+                or self.face_component_ids.device != self.faces.device
                 or self.canonical_mesh_authority
                 or self.source_authority != "ONE_IRIS_SURFACE_TESSA_REFINEMENT_CANDIDATE"
                 or len(self.parent_seed_edges) != n
@@ -82,14 +86,55 @@ class TESSASeededSurfaceV1:
                 raise ValueError("TESSA_SEEDED_LAYER_NAMESPACE_INVALID")
         elif self.layer_names or self.layer_roles or self.layer_namespace_sha256:
             raise ValueError("TESSA_SEEDED_LAYER_NAMESPACE_INCOMPLETE")
-        for (a, b), (wa, wb) in zip(
-            self.parent_seed_edges, self.parent_seed_weights
+        # Each original source vertex retains its original M0 index.
+        # Additional vertices are UNIQUE midpoints of genuine original M0
+        # edges. Arbitrary parent reassignment cannot become new source truth.
+        original_faces=self.original_faces.detach().cpu().tolist()
+        original_edges={
+            tuple(sorted((u,v))) for a,b,c in original_faces
+            for u,v in ((a,b),(b,c),(c,a))
+        }
+        source_components=self.vertex_component_ids[:self.original_vertex_count]
+        if (
+            not bool((
+                source_components[self.original_faces]
+                ==source_components[self.original_faces[:,0:1]]
+            ).all())
+            or not bool((
+                self.vertex_component_ids[self.faces]
+                ==self.face_component_ids[:,None]
+            ).all())
         ):
-            if (not 0 <= a < self.original_vertex_count
-                    or not 0 <= b < self.original_vertex_count
-                    or (wa, wb) not in ((1.0, 0.0), (0.5, 0.5))
-                    or (a == b) != (wa == 1.0)):
+            raise ValueError("TESSA_SEEDED_COMPONENT_PARENT_FACE_DRIFT")
+        seen_midpoint_edges=set()
+        for i, ((a, b), (wa, wb)) in enumerate(zip(
+            self.parent_seed_edges,self.parent_seed_weights,
+        )):
+            if (
+                type(a) is not int or type(b) is not int
+                or not 0 <= a < self.original_vertex_count
+                or not 0 <= b < self.original_vertex_count
+            ):
                 raise ValueError("TESSA_SEEDED_PARENT_VERTEX_SUPPORT_DRIFT")
+            if i < self.original_vertex_count:
+                if (a,b)!=(i,i) or (wa,wb)!=(1.0,0.0):
+                    raise ValueError("TESSA_SEEDED_ORIGINAL_VERTEX_PARENT_DRIFT")
+            else:
+                edge=(a,b)
+                if (
+                    a>=b or (wa,wb)!=(0.5,0.5)
+                    or edge not in original_edges
+                    or edge in seen_midpoint_edges
+                    or int(self.vertex_component_ids[i]) != int(source_components[a])
+                    or int(source_components[a]) != int(source_components[b])
+                ):
+                    raise ValueError("TESSA_SEEDED_MIDPOINT_PARENT_EDGE_DRIFT")
+                if self.vertex_layer_ids is not None and (
+                    int(self.vertex_layer_ids[i]) != int(self.vertex_layer_ids[a])
+                    or int(self.vertex_layer_ids[a]) != int(self.vertex_layer_ids[b])
+                ):
+                    raise ValueError("TESSA_SEEDED_MIDPOINT_LAYER_PARENT_DRIFT")
+                seen_midpoint_edges.add(edge)
         if (self.original_vertex_count < 3 or self.original_face_count < 1
                 or any(type(s) is not str or len(s) != 64
                        or any(c not in "0123456789abcdef" for c in s)

@@ -2900,8 +2900,14 @@ class RSSvNextStructuralTrainer:
         sources = (
             ("seeded_tessa.", result.seeded_tessa_loss_parts or {},
              asdict(self.seeded_tessa_weights), frozenset({"clip_gradient_norm"})),
-            ("axis_mira.", result.product_axis_mira_parts or {},
-             asdict(self.product_axis_mira_weights), frozenset()),
+            ("axis_mira.", result.product_axis_mira_parts or {}, {
+                "axis":self.product_axis_mira_weights.axis_program,
+                "skin":self.product_axis_mira_weights.source_skin,
+                "posed":self.product_axis_mira_weights.posed_surface,
+                "dynamic":self.product_axis_mira_weights.dynamic_surface,
+                "hard_skin":self.product_axis_mira_weights.hard_skin,
+                "chain_skin":self.product_axis_mira_weights.chain_skin,
+            }, frozenset()),
             ("semantic.", result.product_semantic_loss_parts or {}, {
                 "patch":self.product_semantic_weights.patch_axes,
                 "patch_risk":self.product_semantic_weights.patch_risk,

@@ -253,6 +253,16 @@ def test_hybrid_native_boundary_missing_or_forged_abstains(monkeypatch):
     )
     with pytest.raises(ValueError,match="HYBRID_OPEN_NATIVE_TEACHER_REQUIRED"):
         trainer.objective(missing)
+    closed_inventory=replace(
+        batch.component_udf_source_teacher,
+        source_component_open_kind=torch.zeros_like(
+            batch.component_udf_source_teacher.source_component_open_kind,
+        ),
+    )
+    with pytest.raises(ValueError,match="HYBRID_OPEN_NATIVE_TEACHER_REQUIRED"):
+        trainer.objective(replace(
+            batch,component_udf_source_teacher=closed_inventory,
+        ))
     bad={**row,"surface_target_sha256":"0"*64}
     with pytest.raises(ValueError,match="HYBRID_OPEN_SOURCE_NOT_ADMITTED"):
         make(open_registry={key:bad}).objective(batch)

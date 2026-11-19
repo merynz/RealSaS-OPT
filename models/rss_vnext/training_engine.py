@@ -41,6 +41,9 @@ from .attachment_face_correspondence_v1 import (
     source_qualified_socket_face_loss_v1, axis_sequence_digest_v1,
     mesh_topology_digest_v1,
 )
+from .seeded_mstar_teacher_address_v1 import (
+    seeded_mstar_teacher_address_sha256_v1,
+)
 from .early_semantic_field import (
     masked_source_semantic_evidence_loss,
     masked_semantic_expected_brier_risk_loss,
@@ -485,6 +488,7 @@ class RSSvNextStructuralTrainer:
         product_joint_ray_weight: float = 0.0,
         product_semantic_weights: ProductSemanticWeightsV1 = ProductSemanticWeightsV1(),
         product_axis_mira_weights: ProductSeededAXISMIRAWeightsV1 = ProductSeededAXISMIRAWeightsV1(),
+        product_anchor_face_weight: float = 0.0,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -569,6 +573,20 @@ class RSSvNextStructuralTrainer:
             or axis_training_policy!="PRODUCT_MESH_MATCHED_REQUIRED"
         ):
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_MIRA_PHASE_POLICY")
+        # Product anchor supervision is source-qualified, optional per asset,
+        # and shares the SAME seeded M* and AXIS teacher program. It must not
+        # be silently routed through legacy topology-token training.
+        if (
+            type(product_anchor_face_weight) not in (int,float)
+            or not math.isfinite(product_anchor_face_weight)
+            or product_anchor_face_weight < 0
+            or (product_anchor_face_weight > 0 and (
+                not seeded_mode or not product_axis_mira_weights.enabled
+                or axis_training_policy != "PRODUCT_MESH_MATCHED_REQUIRED"
+                or not trusted_anchor_face_registry
+            ))
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_ANCHOR_FACE_PHASE_POLICY")
         seeded_tessa_sampling_policy.validate()
         if not seeded_mode and seeded_tessa_sampling_policy != SeededSurfaceSamplingPolicyV1():
             raise ValueError("RSS_VNEXT_LEGACY_SEEDED_SAMPLING_POLICY_FORBIDDEN")
@@ -658,6 +676,7 @@ class RSSvNextStructuralTrainer:
         self.product_semantic_weights = product_semantic_weights
         self.product_semantic_active = semantic_active
         self.product_axis_mira_weights = product_axis_mira_weights
+        self.product_anchor_face_weight = float(product_anchor_face_weight)
         component_snapshot = {
             str(k): dict(v)
             for k,v in (trusted_component_udf_registry or {}).items()
@@ -731,6 +750,11 @@ class RSSvNextStructuralTrainer:
                 "product_axis_mira_weights":asdict(self.product_axis_mira_weights),
                 "requires_exact_native_mstar_face_pose_and_pinned_codec":True,
             } if self.product_axis_mira_weights.enabled else {}),
+            **({
+                "product_anchor_face_weight":self.product_anchor_face_weight,
+                "seeded_anchor_native_mstar_address_required":True,
+                "source_anchor_missing_is_unknown_not_negative":True,
+            } if self.product_anchor_face_weight>0 else {}),
             **({
                 "product_graphics_rgb_weight":self.product_graphics_rgb_weight,
                 "product_joint_ray_weight":self.product_joint_ray_weight,
@@ -2433,6 +2457,10 @@ class RSSvNextStructuralTrainer:
                 "source_typed_relation_admission_key",
             } if self.product_semantic_weights.typed_relations>0 else set()),
             *({
+                "source_anchor_face_targets","source_anchor_face_mask",
+                "source_anchor_face_admission_key",
+            } if self.product_anchor_face_weight>0 else set()),
+            *({
                 "source_graphics_rgb_target",
                 "source_graphics_view_directions",
                 "source_graphics_rgb_mask",
@@ -2688,6 +2716,92 @@ class RSSvNextStructuralTrainer:
             axis_sequence_digest=axis_teacher_sequence_sha256_v6,
             frozen_codec_digest=frozen_mira_codec_state_sha256_v6,
         )
+        # Same forward carrier, same final indexed M* and source-qualified AXIS
+        # sequence as the production skin/rig objective above. The loss is
+        # conditional: unlabeled assets are UNKNOWN, not negative examples.
+        anchor_loss = None
+        anchor_held = anchor_holder = anchor_negative = 0
+        requested_anchor = (
+            batch.source_anchor_face_targets is not None
+            or batch.source_anchor_face_mask is not None
+            or bool(batch.source_anchor_face_admission_key)
+        )
+        if requested_anchor:
+            if (
+                self.product_anchor_face_weight <= 0
+                or batch.source_anchor_face_targets is None
+                or batch.source_anchor_face_mask is None
+                or not batch.source_anchor_face_admission_key
+                or batch.axis_teacher_sequence is None
+                or not batch.axis_teacher_admission_key
+            ):
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_ANCHOR_TEACHER_INCOMPLETE")
+            seq = batch.axis_teacher_sequence
+            row = self.trusted_anchor_face_registry.get(
+                batch.source_anchor_face_admission_key,
+            )
+            axis_row = self.trusted_axis_teacher_registry.get(
+                batch.axis_teacher_admission_key,
+            )
+            mstar_address = seeded_mstar_teacher_address_sha256_v1(
+                mesh.seeded_surface,
+            )
+            if (
+                row is None or axis_row is None
+                or row.get("admission_status")
+                    != "QUALIFIED_SOURCE_NATIVE_ATTACHMENT_FACE_REINDEX"
+                or row.get("source_qualification_key")
+                    != batch.source_qualification_key
+                or row.get("source_asset_sha256")
+                    != teacher.source_asset_sha256
+                or row.get("dataset_manifest_sha256")
+                    != self.dataset_manifest_sha256
+                or row.get("observed_rgba_sha256")
+                    != source_surface_tensor_sha256(batch.rgba)
+                or row.get("observed_camera_sha256")
+                    != source_surface_tensor_sha256(batch.camera_features)
+                or row.get("source_binding_sha256")
+                    != batch.product_source_binding_sha256
+                or row.get("combined_generation_checkpoint_sha256")
+                    != batch.product_generation_checkpoint_sha256
+                or row.get("candidate_mstar_topology_address_sha256")
+                    != mstar_address
+                or row.get("axis_teacher_sequence_sha256")
+                    != axis_sequence_digest_v1(seq)
+                or axis_row.get("teacher_sequence_sha256")
+                    != axis_teacher_sequence_sha256_v6(seq)
+                or axis_row.get("source_qualification_key")
+                    != batch.source_qualification_key
+                or axis_row.get("dataset_manifest_sha256")
+                    != self.dataset_manifest_sha256
+            ):
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_ANCHOR_SOURCE_MSTAR_DRIFT")
+            causal_memory = self.model._control_memory(
+                state, structural_memory, mesh,
+            )
+            axis_hidden = self.model.axis(causal_memory, seq)["hidden"]
+            prediction = self.model.anchor_face_correspondence(
+                mesh=mesh, axis_hidden=axis_hidden,
+                axis_sequence=seq,
+                region_relation_logits=(
+                    state.region_relation_logits
+                    if self.model.cfg.typed_region_relation_policy
+                       == "RESEARCH_SOURCE_QUALIFIED" else None
+                ),
+            )
+            qualified = source_qualified_socket_face_loss_v1(
+                prediction,
+                source_face_targets=batch.source_anchor_face_targets,
+                source_face_mask=batch.source_anchor_face_mask,
+                source_asset_sha256=teacher.source_asset_sha256,
+                dataset_manifest_sha256=self.dataset_manifest_sha256,
+                source_admission_key=batch.source_anchor_face_admission_key,
+                trusted_registry=self.trusted_anchor_face_registry,
+            )
+            anchor_loss = qualified.loss
+            anchor_held = qualified.eligible_held
+            anchor_holder = qualified.eligible_holder
+            anchor_negative = qualified.eligible_negative
         component = (
             self._component_udf_objective_v1(batch,state)
             if self.component_udf_enabled else None
@@ -2752,6 +2866,8 @@ class RSSvNextStructuralTrainer:
         )
         if axis_mira.total is not None:
             joint_total=joint_total+axis_mira.total
+        if anchor_loss is not None:
+            joint_total=joint_total+self.product_anchor_face_weight*anchor_loss
         if semantic.total is not None:
             joint_total=joint_total+semantic.total
         if rgb_loss is not None:
@@ -2786,6 +2902,10 @@ class RSSvNextStructuralTrainer:
             eligible_axis_dynamic_pose_count=(
                 axis_mira.eligible_pose_faces if axis_mira.dynamic is not None else 0
             ),
+            anchor_face_correspondence_loss=anchor_loss,
+            eligible_anchor_held_faces=anchor_held,
+            eligible_anchor_holder_faces=anchor_holder,
+            eligible_anchor_negative_faces=anchor_negative,
             graphics_source_rgb_loss=rgb_loss,
             eligible_graphics_source_rgb_queries=n_rgb,
             realsas_joint_slrm_loss=ray_loss,
@@ -2941,6 +3061,11 @@ class RSSvNextStructuralTrainer:
                 if key in ignored:
                     continue
                 add(namespace+key,observed.get(key),float(coefficient))
+        # Source attachment labels may be absent on a perfectly valid
+        # geometry/rig asset. Audit only terms admitted by THIS batch.
+        if result.anchor_face_correspondence_loss is not None:
+            add("product_anchor_face",result.anchor_face_correspondence_loss,
+                self.product_anchor_face_weight)
         add("component_udf", result.component_udf_loss,self.component_udf_weight)
         add("source_graphics_rgb",result.graphics_source_rgb_loss,
             self.product_graphics_rgb_weight)
@@ -3011,6 +3136,8 @@ class RSSvNextStructuralTrainer:
                     ("SOURCE_RGB_VIEW_CORE",self.model.constructed_view_renderer.core),
                     ("SOURCE_RGB_VIEW_HEAD",self.model.constructed_view_renderer.rgb),
                 ))
+            if result.anchor_face_correspondence_loss is not None:
+                required.append(("ANCHOR_FACE",self.model.anchor_face_correspondence))
             if result.product_axis_mira_loss is not None:
                 required.append(("AXIS",self.model.axis))
                 required.append(("AXIS_FACE_CONTEXT",self.model.mesh_face_to_control))

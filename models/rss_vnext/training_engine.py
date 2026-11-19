@@ -462,6 +462,7 @@ class RSSvNextStructuralTrainer:
         trusted_typed_relation_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_axis_teacher_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_chain_teacher_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_native_skin_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_axis_pose_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_anchor_face_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_signed_source_registry: Mapping[str, Mapping[str, object]] | None = None,
@@ -876,6 +877,18 @@ class RSSvNextStructuralTrainer:
             hashlib.sha256(json.dumps(
                 chain_snapshot, sort_keys=True, separators=(",", ":"), allow_nan=False,
             ).encode("utf8")).hexdigest() if chain_snapshot else ""
+        )
+        native_skin_snapshot = {
+            str(key): dict(value)
+            for key, value in (trusted_native_skin_registry or {}).items()
+        }
+        self.trusted_native_skin_registry = MappingProxyType({
+            key: MappingProxyType(value) for key, value in native_skin_snapshot.items()
+        })
+        self.native_skin_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                native_skin_snapshot, sort_keys=True, separators=(",", ":"), allow_nan=False,
+            ).encode("utf8")).hexdigest() if native_skin_snapshot else ""
         )
         pose_snapshot = {
             str(key): dict(value)
@@ -2662,6 +2675,7 @@ class RSSvNextStructuralTrainer:
             dataset_manifest_sha256=self.dataset_manifest_sha256,
             trusted_axis_teacher_registry=self.trusted_axis_teacher_registry,
             trusted_native_pose_registry=driver.trusted_registry,
+            trusted_native_skin_registry=self.trusted_native_skin_registry,
             trusted_chain_teacher_registry=self.trusted_chain_teacher_registry,
             tensor_digest=source_surface_tensor_sha256,
             axis_sequence_digest=axis_teacher_sequence_sha256_v6,
@@ -3031,6 +3045,7 @@ class RSSvNextStructuralTrainer:
             "typed_relation_registry_sha256": self.typed_relation_registry_sha256,
             "axis_teacher_registry_sha256": self.axis_teacher_registry_sha256,
             "chain_teacher_registry_sha256": self.chain_teacher_registry_sha256,
+            "native_skin_registry_sha256": self.native_skin_registry_sha256,
             "topology_teacher_registry_sha256": self.topology_teacher_registry_sha256,
             "axis_pose_registry_sha256": self.axis_pose_registry_sha256,
             "anchor_face_registry_sha256": self.anchor_face_registry_sha256,
@@ -3108,6 +3123,8 @@ class RSSvNextStructuralTrainer:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_AXIS_TEACHER_REGISTRY_DRIFT")
         if data.get("chain_teacher_registry_sha256", "") != self.chain_teacher_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_CHAIN_TEACHER_REGISTRY_DRIFT")
+        if data.get("native_skin_registry_sha256", "") != self.native_skin_registry_sha256:
+            raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_NATIVE_SKIN_REGISTRY_DRIFT")
         if data.get("axis_pose_registry_sha256", "") != self.axis_pose_registry_sha256:
             raise ValueError("RSS_VNEXT_TRAIN_CHECKPOINT_AXIS_POSE_REGISTRY_DRIFT")
         if data.get("anchor_face_registry_sha256", "") != self.anchor_face_registry_sha256:

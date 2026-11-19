@@ -79,6 +79,8 @@ def _edited_mesh(
     mesh:CanonicalMeshIR, moves:Mapping[str,tuple[float,float,float]],
     base_sha:str,
 ) -> CanonicalMeshIR:
+    if not moves:
+        return mesh
     known={v.canonical_mesh_vertex_id for v in mesh.vertices}
     if not set(moves).issubset(known):
         raise ValueError("RSS_AUTHORING_EDIT_UNKNOWN_MESH_VERTEX")
@@ -117,6 +119,8 @@ def _edited_rig(
     moves:Mapping[str,tuple[float,float,float]],
     base_sha:str,
 ) -> CanonicalRigIRV2:
+    if not moves and rig.mesh_lineage_hash==mesh.mesh_lineage_hash:
+        return rig
     known={j.canonical_joint_id for j in rig.joints}
     if not set(moves).issubset(known):
         raise ValueError("RSS_AUTHORING_EDIT_UNKNOWN_RIG_JOINT")
@@ -159,6 +163,9 @@ def _edited_skin(
     skin:CanonicalSkinIRV2, mesh:CanonicalMeshIR,rig:CanonicalRigIRV2,
     weights:Mapping[str,Mapping[str,float]],base_sha:str,
 ) -> CanonicalSkinIRV2:
+    if (not weights and skin.mesh_lineage_hash==mesh.mesh_lineage_hash
+        and skin.deform_structure_hash==rig.deform_structure_hash):
+        return skin
     known={row.canonical_mesh_vertex_id for row in skin.rows}
     valid_joints={j.canonical_joint_id for j in rig.joints}
     if not set(weights).issubset(known):
@@ -365,14 +372,19 @@ def reopen_rss_vnext_canonical_user_edit_revision_v1(
         or tuple(c.canonical_control_id for c in rig.controls)!=tuple(
             c.canonical_control_id for c in base["rig"].controls
         )
-        or mesh.metadata.get("original_canonical_mesh_lineage_hash")
-            !=base["mesh"].mesh_lineage_hash
-        or rig.metadata.get("original_canonical_rig_lineage_hash")
-            !=base["rig"].rig_lineage_hash
-        or skin.metadata.get("original_canonical_skin_lineage_hash")
-            !=base["skin"].skin_lineage_hash
-        or any(obj.metadata.get("original_rss_sha256")!=base_sha
-               for obj in (mesh,rig,skin))
+        or any(
+            obj != original and (
+                obj.metadata.get("original_canonical_"+name+"_lineage_hash")
+                    != getattr(original,name+"_lineage_hash")
+                or obj.metadata.get("original_rss_sha256")!=base_sha
+                or obj.metadata.get("authoring_revision_schema")!=SCHEMA
+            )
+            for name,obj,original in (
+                ("mesh",mesh,base["mesh"]),
+                ("rig",rig,base["rig"]),
+                ("skin",skin,base["skin"]),
+            )
+        )
     ):
         raise RuntimeError("RSS_AUTHORING_REOPEN_REVISION_OR_PARENT_DRIFT")
     validate_canonical_mesh_domain_v1(mesh)

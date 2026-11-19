@@ -191,6 +191,9 @@ class RSSvNextAuxiliaryViewLatents(nn.Module):
 
 
 from .sparse_skin_support_v1 import sparse_skin_support_v1
+from .hierarchical_skin_field_v1 import (
+    RSSvNextLearnedChainMixtureV1, axis_joint_group_ids_v1,
+)
 
 
 class RSSvNextSkinCoupler(nn.Module):
@@ -223,6 +226,11 @@ class RSSvNextSkinCoupler(nn.Module):
             hidden_dim=cfg.skin_hidden_dim,
             heads=cfg.skin_query_heads,
             max_query_chunk=cfg.skin_query_chunk,
+        )
+        self.chain_mixture = RSSvNextLearnedChainMixtureV1(
+            vertex_feature_dim=cfg.iris.local_feature_dim+3,
+            joint_feature_dim=cfg.control_hidden_dim,
+            hidden_dim=cfg.skin_hidden_dim,
         )
 
     def forward(
@@ -298,7 +306,7 @@ class RSSvNextSkinCoupler(nn.Module):
                         else vertex_normals[bi:bi+1]
                     ),
                 )
-                weights = queried.weights[0]
+                logits = queried.unnormalized_logits[0]
             else:
                 assert vertex_state is not None
                 joint_state = (
@@ -309,7 +317,16 @@ class RSSvNextSkinCoupler(nn.Module):
                     vertex_state[bi], joint_state.transpose(0, 1),
                 ) / math.sqrt(self.codec.config.hidden_dim)
                 logits = logits + self.codec.bias_head(joint_state).flatten()[None, :]
-                weights = torch.softmax(logits, dim=-1)
+            # Independently learned group gate: NOT a chain-sum loss over
+            # existing flat skin. Source-only chain teacher is not a feature;
+            # the exact AXIS causal CHAIN events are the sole group address.
+            joint_group_ids=axis_joint_group_ids_v1(sequence,batch_index=bi)
+            weights=self.chain_mixture(
+                joint_logits=logits,
+                vertex_features=vfeat[bi],
+                joint_features=jstate,
+                joint_group_ids=joint_group_ids,
+            )
             # Training forward is sparse EXACTLY as the product hard decoder.
             # Surrogate backward keeps missing source-positive joints trainable.
             weights=sparse_skin_support_v1(
@@ -332,6 +349,7 @@ class RSSvNextSkinCoupler(nn.Module):
         skin_code_ids: Tensor,
         *,
         vertex_normals: Tensor | None = None,
+        joint_group_ids: Tensor | None = None,
     ) -> Tensor:
         """Replay the EXACT generated FSQ IDs with the embedded MIRA decoder.
 
@@ -360,6 +378,20 @@ class RSSvNextSkinCoupler(nn.Module):
             raise ValueError("RSS_VNEXT_DISCRETE_SKIN_CODE_ADDRESS_DRIFT")
         if vertex_normals is not None and vertex_normals.shape != vertex_xyz.shape:
             raise ValueError("RSS_VNEXT_DISCRETE_SKIN_NORMAL_ADDRESS_DRIFT")
+        if joint_group_ids is not None and (
+            not isinstance(joint_group_ids,Tensor)
+            or joint_group_ids.shape != (b,j)
+            or joint_group_ids.dtype != torch.long
+            or joint_group_ids.device != joint_hidden.device
+            or bool((joint_group_ids < -1).any())
+        ):
+            raise ValueError("RSS_VNEXT_DISCRETE_SKIN_GROUP_ADDRESS_DRIFT")
+        # Standalone research callers may omit causal CHAIN evidence.
+        # The production replay court supplies IDs from serialized events.
+        if joint_group_ids is None:
+            joint_group_ids=torch.full(
+                (b,j),-1,device=joint_hidden.device,dtype=torch.long,
+            )
         tensors = (local_features, vertex_xyz, joint_hidden)
         if vertex_normals is not None:
             tensors += (vertex_normals,)
@@ -378,16 +410,26 @@ class RSSvNextSkinCoupler(nn.Module):
             if vertex_normals is None:
                 raise ValueError("RSS_VNEXT_DISCRETE_SKIN_INDEXED_NORMALS_REQUIRED")
             mask = torch.ones((b, j), dtype=torch.bool, device=joint_hidden.device)
-            weights = self.spatial_decoder(
+            logits = self.spatial_decoder(
                 local_features, vertex_xyz, joint_hidden, codes, mask,
                 vertex_normals=vertex_normals,
-            ).weights
+            ).unnormalized_logits
         else:
-            weights = self.codec.decode_tokens(
-                skin_code_ids,
+            logits = self.codec.decode_code_logits_v1(
+                codes,
                 torch.cat((local_features, vertex_xyz), dim=-1),
                 joint_hidden,
             )
+        weights=torch.stack([
+            self.chain_mixture(
+                joint_logits=logits[bi],
+                vertex_features=torch.cat(
+                    (local_features[bi],vertex_xyz[bi]),dim=-1,
+                ),
+                joint_features=joint_hidden[bi],
+                joint_group_ids=joint_group_ids[bi],
+            ) for bi in range(b)
+        ])
         # No dense softmax escapes into Compiler: same deterministic support
         # on source-teacher and embedded FSQ replay. Training hard-skin loss
         # still backpropagates into the spatial decoder via the STE branch.
@@ -1325,6 +1367,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 mechanics_h, mesh.rest_vertices_iris,
                 joints[:, :n_joints], hard_token_ids,
                 vertex_normals=mesh.normals,
+                joint_group_ids=axis_joint_group_ids_v1(rig_sequence)[None],
             )
             result["discrete_skin_weight_proposal"] = decoded
             if decoded.shape != weights.shape:

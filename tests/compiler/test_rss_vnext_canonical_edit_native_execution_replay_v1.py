@@ -135,3 +135,76 @@ def test_source_view_cannot_be_selected_as_original_source_camera(tmp_path):
             **args,expected_renderer_executable_sha256=court.renderer_executable_sha256,
             frame_index=1,view_index=1,
         )
+
+
+def test_unknown_reveal_can_coexist_with_known_translucent_foreground():
+    # Native renderer may encounter a colored translucent foreground before
+    # a still UNKNOWN back layer. The unknown-occlusion bit must survive,
+    # without erasing the visible known candidate or inventing source RGB.
+    from compiler.rss_vnext.workers.rss_vnext_canonical_edit_native_execution_replay_v1 import _pack
+    def empty():
+        return {
+            "rgba":np.zeros((16,16,4),dtype=np.uint8),
+            "owners":np.full((16,16),-1,dtype="<i4"),
+            "authority":np.zeros((16,16),dtype=np.uint8),
+            "unknown":np.zeros((16,16),dtype=np.uint8),
+        }
+    original=empty()
+    edited=empty()
+    edited["rgba"][4,4]=[80,40,70,100]
+    edited["owners"][4,4]=0
+    edited["authority"][4,4]=2
+    edited["unknown"][4,4]=1
+    payload=_pack(original,edited,16)
+    opened=reopen_native_edited_puppet_rasters_v1(
+        payload,resolution=16,face_count=1,
+    )
+    assert opened["edited_unknown_occlusion_u8"][4,4]==1
+    assert opened["edited_color_authority_u8"][4,4]==2
+
+
+def test_eight_way_mesh_edit_replays_reselected_virtual_cameras(tmp_path):
+    from compiler.rss_vnext.workers.rss_vnext_canonical_authoring_revision_v1 import (
+        compile_rss_vnext_canonical_user_edit_revision_v1,
+    )
+    from compiler.rss_vnext.workers.rss_vnext_edited_graphics_preview_v1 import (
+        compile_rss_vnext_edited_graphics_preview_v1,
+    )
+    from tests.compiler.test_rss_vnext_native_preview_package_v1 import (
+        _compiled_preview_fixture,
+    )
+    original,_,mesh,_,_,_=_compiled_preview_fixture(
+        tmp_path,eight_way=True,
+    )
+    vertex=mesh.vertices[0]
+    blob,_=compile_rss_vnext_canonical_user_edit_revision_v1(
+        source_rss_path=original,
+        mesh_vertex_position_edits={
+            vertex.canonical_mesh_vertex_id:(
+                vertex.P[0],vertex.P[1],vertex.P[2]+.02,
+            ),
+        },
+    )
+    revision=tmp_path/"eight-way-user-edit.rsedit"
+    revision.write_bytes(blob)
+    preview_blob,_=compile_rss_vnext_edited_graphics_preview_v1(
+        source_rss_path=original,revision_path=revision,
+    )
+    preview=tmp_path/"eight-way-edited-puppet.rss"
+    preview.write_bytes(preview_blob)
+    exe=_build_player(tmp_path)
+    kwargs={
+        "source_rss_path":original,
+        "rsedit_path":revision,
+        "edited_preview_rss_path":preview,
+        "renderer_executable":exe,
+    }
+    evidence,court=execute_canonical_user_edit_native_cpp_capture_v1(
+        **kwargs,frame_index=1,view_index=2,
+        expected_renderer_executable_sha256=sha256(exe.read_bytes()).hexdigest(),
+    )
+    assert court.view_index==2
+    assert court.product_release_admission is False
+    assert independently_replay_canonical_user_edit_native_cpp_v1(
+        **kwargs,raster_bundle=evidence,claimed_court=court.to_dict(),
+    )==court

@@ -158,13 +158,13 @@ def test_real_teacher_free_product_inference_uses_hybrid_mstar_not_legacy_tessa(
         source_binding_sha256="b"*64,
         flexicubes_extractor=object(),
         flexicubes_layer=RSSvNextSemanticLayerSpec(
-            "all",tuple(schema.roles),
+            "body",("primary_form",),
         ),
         hybrid_open_policy=_policy(),
     )
     assert result["mesh_status"]=="UNQUALIFIED_MESH_CANDIDATE"
     assert result["mesh_candidate"].seeded_surface is not None
-    assert result["semantic_layer_names"]==("signed_solid","cape")
+    assert result["semantic_layer_names"]==("body","cape")
     assert result["hybrid_open_component_surface_kinds"]==(
         "SIGNED_IRIS_H_CLOSED","UDF_IRIS_H_OPEN",
     )

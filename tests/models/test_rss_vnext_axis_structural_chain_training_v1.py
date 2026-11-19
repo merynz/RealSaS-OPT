@@ -24,6 +24,8 @@ def _setup(*, with_control: bool = False):
         E(K.JOINT,coord_indices=(1,2,3),pointer_a=-1),
         E(K.JOINT,coord_indices=(4,5,6),pointer_a=0),
         E(K.FRAMES_START),
+        E(K.FRAME,pointer_a=0,frame_6d=(1.,0.,0.,0.,1.,0.)),
+        E(K.FRAME,pointer_a=1,frame_6d=(1.,0.,0.,0.,1.,0.)),
         E(K.CONTROLS_START),
     ]
     if with_control:

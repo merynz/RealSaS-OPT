@@ -117,6 +117,7 @@ def validate_axis_v6_product_event_stream(
         raise ValueError("AXIS_V6_EVENT_BOUNDARY_INVALID")
 
     state = RigGrammarStateV6()
+    frame_owners: set[int] = set()
     for index, event in enumerate(events):
         if type(event) is not RigProgramEventV6 or type(event.kind) is not RigTokenKindV6:
             raise ValueError("AXIS_V6_EVENT_TYPED_DOMAIN_INVALID")
@@ -176,6 +177,13 @@ def validate_axis_v6_product_event_stream(
         elif event.anchor_parent_kind != -1:
             raise ValueError("AXIS_V6_EVENT_UNUSED_ANCHOR_KIND_INVALID")
 
+        if event.kind == RigTokenKindV6.FRAME:
+            jid=event.pointer_a
+            if jid < 0 or jid >= state.joint_count or jid in frame_owners:
+                raise ValueError("AXIS_V6_PRODUCT_JOINT_FRAME_DUPLICATE_OR_UNKNOWN")
+            frame_owners.add(jid)
+        if event.kind == RigTokenKindV6.CONTROLS_START and len(frame_owners)!=state.joint_count:
+            raise ValueError("AXIS_V6_PRODUCT_JOINT_FRAME_COVERAGE_DRIFT")
         state = AXISRigProgramGrammarV6Product.advance(
             state, event.kind, tokens_per_joint=codec_binding.tokens_per_joint,
         )
@@ -186,6 +194,8 @@ def validate_axis_v6_product_event_stream(
 
     if state.section != RigSectionV6.DONE:
         raise ValueError("AXIS_V6_EVENT_UNFINISHED_GRAMMAR")
+    if len(frame_owners)!=state.joint_count:
+        raise ValueError("AXIS_V6_PRODUCT_JOINT_FRAME_COVERAGE_DRIFT")
 
 
 def decode_axis_v6_events(

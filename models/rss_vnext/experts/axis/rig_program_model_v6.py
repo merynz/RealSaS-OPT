@@ -158,7 +158,12 @@ class AXISRigProgramGrammarV6Product:
             return ((RigTokenKindV6.JOINT,) if state.joint_count == 0 else
                     (RigTokenKindV6.JOINT, RigTokenKindV6.FRAMES_START))
         if s == RigSectionV6.FRAMES:
-            return (RigTokenKindV6.FRAME, RigTokenKindV6.CONTROLS_START)
+            # Every deform joint must receive EXACTLY one source-addressed
+            # joint frame. Compiler cannot mint the missing local axes.
+            if state.frame_count > state.joint_count:
+                raise ValueError("AXIS_V6_FRAMES_OUTNUMBER_JOINTS")
+            return ((RigTokenKindV6.FRAME,) if state.frame_count < state.joint_count
+                    else (RigTokenKindV6.CONTROLS_START,))
         if s == RigSectionV6.CONTROLS:
             kinds = [RigTokenKindV6.CONTROL, RigTokenKindV6.CHAINS_START]
             if state.control_count > 0:
@@ -515,7 +520,22 @@ class AXISRigProgramModelV6(nn.Module):
             if kind == RigTokenKindV6.JOINT:
                 pa = -1 if state.joint_count == 0 else self._pointer(last["pointer_a_logits"], state.joint_count, allow_null=True)
             elif kind == RigTokenKindV6.FRAME:
-                pa = self._pointer(last["pointer_a_logits"], state.joint_count, allow_null=False)
+                # Exactly one frame for each of the emitted deform joints.
+                # Do not let a generic pointer head choose the same joint
+                # twice and subsequently fail the Compiler frame-coverage gate.
+                used={
+                    e.pointer_a for e in events if e.kind==RigTokenKindV6.FRAME
+                }
+                permitted=torch.full_like(
+                    last["pointer_a_logits"],float("-inf"),
+                )
+                for joint_index in range(state.joint_count):
+                    if joint_index not in used:
+                        permitted[joint_index+1]=0.
+                pa = self._pointer(
+                    last["pointer_a_logits"]+permitted,
+                    state.joint_count,allow_null=False,
+                )
                 frame = tuple(float(v) for v in last["frame_6d"].tolist())
                 dof = tuple(float(v) for v in (torch.sigmoid(last["dof_logits"]) >= 0.5).to(torch.float32).tolist())
             elif kind == RigTokenKindV6.CONTROL:
@@ -606,6 +626,7 @@ def qualified_axis_rig_skin_sequence_loss_v6(
     for bi in range(b):
         state = RigGrammarStateV6()
         parents: list[int] = []
+        seen_frames: set[int] = set()
         for step in range(steps):
             try:
                 kind = RigTokenKindV6(int(teacher.kind_ids[bi, step]))
@@ -622,6 +643,11 @@ def qualified_axis_rig_skin_sequence_loss_v6(
                 if parent < -1 or parent >= len(parents):
                     raise ValueError("AXIS_V6_TRAIN_NONCAUSAL_JOINT_PARENT")
                 parents.append(parent)
+            if kind == RigTokenKindV6.FRAME:
+                joint=int(teacher.pointer_a[bi,step])
+                if joint < 0 or joint >= len(parents) or joint in seen_frames:
+                    raise ValueError("AXIS_V6_TRAIN_JOINT_FRAME_DUPLICATE_OR_UNKNOWN")
+                seen_frames.add(joint)
             if kind == RigTokenKindV6.CHAIN:
                 start=int(teacher.pointer_a[bi,step])
                 end=int(teacher.pointer_b[bi,step])
@@ -647,6 +673,8 @@ def qualified_axis_rig_skin_sequence_loss_v6(
                     raise ValueError("AXIS_V6_TRAIN_UNEXECUTABLE_CONSTRAINT_LABEL")
         if state.section != RigSectionV6.DONE:
             raise ValueError("AXIS_V6_TRAIN_TEACHER_NOT_TERMINATED")
+        if len(seen_frames) != len(parents):
+            raise ValueError("AXIS_V6_TRAIN_JOINT_FRAME_COVERAGE_DRIFT")
 
     logits = model(scene_memory, teacher)
     kinds = teacher.kind_ids[:, 1:]

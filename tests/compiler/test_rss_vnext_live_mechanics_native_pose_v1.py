@@ -234,10 +234,12 @@ def test_real_two_image_canonical_xpbd_final_pose_reaches_native_cpp_rgba(
         mesh,lbs,domain,policy,
     )
     final=first
-    for _ in range(4):
+    # The existing solver is fixed-step (1/120 s). Every frame must
+    # partition into an exact positive integer count of physics substeps.
+    for _ in range(6):
         final=step_declared_xpbd_surface_v1(
             mesh,lbs,domain,policy,
-            previous_state=final.state,dt_seconds=.08,
+            previous_state=final.state,dt_seconds=1./30.,
         )
     assert final.state.ticks>0
     assert final.deformation.canonical_mesh_vertex_ids==(
@@ -258,7 +260,7 @@ def test_real_two_image_canonical_xpbd_final_pose_reaches_native_cpp_rgba(
     )
     blob,receipt=encode_rss_vnext_live_mechanics_native_pose_v1(
         mesh=mesh,rig=rig,skin=skin,frames=(f0,f1),
-        frame_times_seconds=(0.,.32),
+        frame_times_seconds=(0.,6./30.),
         cameras=reopened["virtual_camera"],
     )
     assert blob!=reopened["pose_bytes"]  # final XPBD is NOT LBS replay.

@@ -214,12 +214,26 @@ def test_rehashed_fake_product_release_cannot_claim_authoring_revision(tmp_path)
 def test_authoring_revision_requires_exact_original_rss_parent(tmp_path):
     original,_,mesh,rig,skin,_=_compiled_preview_fixture(tmp_path)
     path,_=_write_edit(tmp_path,original,**_args(mesh,rig,skin))
-    original.write_bytes(original.read_bytes()+b"")
-    # Wrong source bytes must fail rather than silently attach revision to
-    # another candidate with the same human-facing character name.
-    other=tmp_path/"not-original.rss"
-    other.write_bytes(b"not-a-puppet")
-    with pytest.raises(Exception):
+    from compiler.rss_vnext.workers.rss_vnext_native_preview_package_v1 import (
+        edit_rss_vnext_native_preview_controls_v1,
+    )
+    from compiler.realsas_compiler_core.mechanics_control_solver_v1 import (
+        ControlTransformIRV1,
+    )
+    root=rig.controls[0].canonical_control_id
+    other_blob,_=edit_rss_vnext_native_preview_controls_v1(
+        source_package_path=original,
+        control_frames=(
+            (),
+            (ControlTransformIRV1(
+                canonical_control_id=root,translation=(.32,.03,0.),
+            ),),
+        ),
+    )
+    other=tmp_path/"valid-but-different-original.rss"
+    other.write_bytes(other_blob)
+    assert reopen_rss_vnext_native_preview_package_v1(other)["mesh"]==mesh
+    with pytest.raises(RuntimeError,match="REVISION_OR_PARENT_DRIFT"):
         reopen_rss_vnext_canonical_user_edit_revision_v1(
             revision_path=path,source_rss_path=other,
         )

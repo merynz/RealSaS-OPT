@@ -2584,7 +2584,18 @@ class RSSvNextStructuralTrainer:
             else (batch.flexicubes_layer,)
         )
         layered = batch.flexicubes_layers is not None
+        hybrid_mode = self.product_hybrid_open_policy is not None
         schema = self.model.cfg.semantic_role_schema()
+        if hybrid_mode and (
+            not layered or len(layers)!=2
+            or layers[-1].name!=self.product_hybrid_open_policy.open_layer_name
+            or tuple(layers[-1].keep_roles)
+                !=self.product_hybrid_open_policy.open_presentation_roles
+            or teacher.native_face_layer_samples is None
+            or teacher.native_open_boundary is None
+            or batch.component_udf_source_teacher is None
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_HYBRID_OPEN_NATIVE_TEACHER_REQUIRED")
         if (
             not isinstance(layers,tuple)
             or not all(isinstance(v,RSSvNextSemanticLayerSpec) for v in layers)
@@ -2599,8 +2610,16 @@ class RSSvNextStructuralTrainer:
             if (
                 not 2 <= len(layers) <= schema.count
                 or not isinstance(batch.flexicubes_signed_layer_admission_keys,tuple)
-                or len(batch.flexicubes_signed_layer_admission_keys)!=len(layers)
-                or len(set(batch.flexicubes_signed_layer_admission_keys))!=len(layers)
+                or len(batch.flexicubes_signed_layer_admission_keys)!=(
+                    len(layers)-(1 if hybrid_mode else 0)
+                )
+                or len(set(batch.flexicubes_signed_layer_admission_keys))!=(
+                    len(layers)-(1 if hybrid_mode else 0)
+                )
+                or (hybrid_mode and
+                    not batch.product_hybrid_open_source_admission_key)
+                or (not hybrid_mode and
+                    batch.product_hybrid_open_source_admission_key)
                 or batch.flexicubes_signed_layer_admission_keys[0]
                     != batch.flexicubes_signed_source_admission_key
                 or teacher.source_layer_ids is None
@@ -2621,7 +2640,13 @@ class RSSvNextStructuralTrainer:
                 tuple(layer.name for layer in layers),
                 tuple(layer.keep_roles for layer in layers),
             )
-            keys=batch.flexicubes_signed_layer_admission_keys
+            keys=(
+                batch.flexicubes_signed_layer_admission_keys
+                + ((batch.product_hybrid_open_source_admission_key,)
+                   if hybrid_mode else ())
+            )
+            if len(set(keys)) != len(keys):
+                raise ValueError("RSS_VNEXT_PRODUCT_HYBRID_OPEN_SOURCE_KEY_COLLISION")
         else:
             if (
                 batch.flexicubes_signed_layer_admission_keys
@@ -2635,13 +2660,65 @@ class RSSvNextStructuralTrainer:
         if any(not isinstance(k,str) or not k for k in keys):
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_LAYER_SIGNED_KEYS_INVALID")
         for layer_index,(layer,key) in enumerate(zip(layers,keys)):
-            signed=self.trusted_signed_source_registry.get(key)
+            is_open=hybrid_mode and layer_index==len(layers)-1
+            signed=(
+                self.trusted_hybrid_open_source_registry.get(key)
+                if is_open else self.trusted_signed_source_registry.get(key)
+            )
             native_part=(
                 teacher.source_xyz[
                     teacher.source_layer_ids==layer_index
                 ][None] if layered else target
             )
-            if (
+            if is_open:
+                witness=teacher.native_open_boundary
+                if (
+                    native_part.shape[1]<3
+                    or not isinstance(witness,NativeLayerOpenBoundaryV1)
+                    or signed is None
+                    or signed.get("admission_status")
+                        !="QUALIFIED_SOURCE_NATIVE_OPEN_INDEXED_SHEET"
+                    or signed.get("source_component_domain")
+                        !="QUALIFIED_OPEN_MANIFOLD_SHEET"
+                    or signed.get("source_rights_independently_verified") is not True
+                    or signed.get("generated_views_as_source_truth") is not False
+                    or signed.get("student_slot_ids_as_source_truth") is not False
+                    or signed.get("dataset_manifest_sha256")
+                        !=self.dataset_manifest_sha256
+                    or signed.get("source_qualification_key")
+                        !=batch.source_qualification_key
+                    or signed.get("source_asset_sha256")
+                        !=teacher.source_asset_sha256
+                    or signed.get("role_schema_id")
+                        !=self.model.cfg.semantic_role_schema_id
+                    or signed.get("layer_name")!=layer.name
+                    or signed.get("surface_target_sha256")
+                        !=source_surface_tensor_sha256(native_part)
+                    or signed.get("source_native_open_boundary_sha256")
+                        !=witness.receipt_sha256()
+                    or signed.get("native_face_layer_samples_sha256")
+                        !=teacher.native_face_layer_samples.receipt_sha256()
+                ):
+                    raise ValueError("RSS_VNEXT_PRODUCT_HYBRID_OPEN_SOURCE_NOT_ADMITTED")
+                native_receipt=driver.trusted_registry.get(
+                    teacher.source_qualification_key,
+                )
+                if native_receipt is None:
+                    raise ValueError("RSS_VNEXT_PRODUCT_HYBRID_OPEN_NATIVE_RECEIPT")
+                _,_,open_layers=validate_native_open_boundary_v1(
+                    witness,teacher.native_face_layer_samples,
+                    source_boundary_xyz=teacher.source_boundary_xyz,
+                    source_boundary_mask=teacher.source_boundary_mask,
+                    source_asset_sha256=teacher.source_asset_sha256,
+                    layer_namespace_sha256=namespace,
+                    receipt=dict(native_receipt),
+                )
+                if (
+                    open_layers.numel()!=1
+                    or int(open_layers[0])!=layer_index
+                ):
+                    raise ValueError("RSS_VNEXT_PRODUCT_HYBRID_OPEN_LAYER_HEM_SCOPE")
+            elif (
                 native_part.shape[1] < 3
                 or signed is None
                 or signed.get("admission_status")
@@ -2686,7 +2763,7 @@ class RSSvNextStructuralTrainer:
                     "source_label_student_checkpoint_dependency":False,
                 }.items()
             ):
-                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_NATIVE_SIGNED_LAYER_RECEIPT_DRIFT")
+                raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_NATIVE_LAYER_RECEIPT_DRIFT")
         receipt = driver.trusted_registry.get(
             teacher.source_qualification_key,
         )
@@ -2706,8 +2783,15 @@ class RSSvNextStructuralTrainer:
                     batch.flexicubes_signed_source_admission_key,
                 "semantic_layer_name":batch.flexicubes_layer.name,
                 **({
-                    "signed_layer_admission_keys":list(keys),
+                    "signed_layer_admission_keys":list(
+                        batch.flexicubes_signed_layer_admission_keys
+                        if hybrid_mode else keys
+                    ),
                     "source_layer_namespace_sha256":namespace,
+                    **({
+                        "native_open_layer_admission_key":
+                            batch.product_hybrid_open_source_admission_key,
+                    } if hybrid_mode else {}),
                 } if layered else {}),
             }.items()
         ):
@@ -2721,7 +2805,23 @@ class RSSvNextStructuralTrainer:
             field_policy="SIGNED_HYPOTHESIS_ONLY",
             high_resolution_training=batch.flexicubes_high_resolution_training,
         )
-        if layered:
+        if hybrid_mode:
+            signed_seed=tessa_seed_from_flexicubes_v1(
+                witness=surface,scene_triplanes=state.scene_triplanes,
+            )
+            hybrid_proposal=propose_product_hybrid_open_m0_v1(
+                model=self.model,state=state,signed_seed=signed_seed,
+                policy=self.product_hybrid_open_policy,
+                signed_layer_name=layers[0].name,
+                signed_presentation_roles=tuple(layers[0].keep_roles),
+            )
+            seed=hybrid_proposal.hybrid.seed
+            if (
+                seed.layer_names!=tuple(x.name for x in layers)
+                or seed.layer_namespace_sha256!=namespace
+            ):
+                raise ValueError("RSS_VNEXT_PRODUCT_HYBRID_OPEN_MSTAR_NAMESPACE_DRIFT")
+        elif layered:
             from .layered_iris_seed_v1 import make_layered_iris_seed_v1
             evidence=[(layers[0],surface)]
             for spec in layers[1:]:
@@ -2745,8 +2845,12 @@ class RSSvNextStructuralTrainer:
         # The EXACT FlexiCubes witness tokens used during teacher-free
         # product inference must also reach TESSA and AXIS training.
         # Otherwise the same image/seed would produce different control H.
-        structural_memory=self.model._structural_memory(
-            state,None,flexicubes=surface,
+        structural_memory=(
+            self.model._structural_memory(state,None)
+            if layered
+            else self.model._structural_memory(
+                state,None,flexicubes=surface,
+            )
         )
         candidate = self.model.build_seeded_mechanics_candidate_v1(
             state,seed,structural_memory=structural_memory,
@@ -3014,6 +3118,11 @@ class RSSvNextStructuralTrainer:
                 int(component["qualified_source_component_count"].item())
                 if component is not None else 0
             ),
+            hybrid_open_model_slot_index=(
+                hybrid_proposal.predicted_open_slot_index
+                if hybrid_mode else None
+            ),
+            hybrid_open_candidate_product_qualified=False,
             seeded_tessa_loss_parts={
                 k:v for k,v in losses.items()
                 if k not in (

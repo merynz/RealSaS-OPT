@@ -27,18 +27,18 @@ import torch.nn.functional as F
 from models.axis.rig_program_model_v6 import (
     AXISSequenceV6, RigProgramEventV6, RigTokenKindV6,
 )
-from .axis_mechanical_chain_partition_v1 import decode_axis_joint_chain_partition_v1
+from .axis_mechanical_part_graph_v1 import decode_axis_mechanical_part_graph_v1
 
 
 def axis_joint_group_ids_v1(
     sequence: AXISSequenceV6, *, batch_index: int = 0,
 ) -> Tensor:
-    partition = decode_axis_joint_chain_partition_v1(
-        sequence, batch_index=batch_index,
+    part_graph = decode_axis_mechanical_part_graph_v1(
+        sequence,batch_index=batch_index,
     )
-    # -1 is reserved for UNKNOWN; chain IDs are causal event ordinal, not
-    # mechanical morphology or semantic labels.
-    return partition.joint_chain_ids
+    # Branched groups are explicit joint sets compiled from AXIS CHAIN
+    # memberships. Part ordinals are local graph addresses, not labels.
+    return part_graph.joint_group_ids
 
 
 def axis_joint_group_ids_from_cas_events_v1(
@@ -60,10 +60,11 @@ def axis_joint_group_ids_from_cas_events_v1(
             raise ValueError("RSS_VNEXT_MIRA_GROUP_EVENT_KIND_INVALID") from exc
         pa = row.get("pointer_a", -1)
         pb = row.get("pointer_b", -1)
-        if type(pa) is not int or type(pb) is not int:
+        pc = row.get("pointer_c", -1)
+        if any(type(value) is not int for value in (pa,pb,pc)):
             raise ValueError("RSS_VNEXT_MIRA_GROUP_POINTER_TYPE_INVALID")
         converted.append(RigProgramEventV6(
-            kind=kind, pointer_a=pa, pointer_b=pb,
+            kind=kind, pointer_a=pa, pointer_b=pb, pointer_c=pc,
         ))
     sequence = AXISSequenceV6.from_events(
         converted, device=torch.device("cpu"),

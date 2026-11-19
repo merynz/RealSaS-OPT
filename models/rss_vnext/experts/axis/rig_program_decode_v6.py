@@ -11,6 +11,7 @@ semantics are synthesized downstream.
 from dataclasses import dataclass
 from typing import Sequence
 import math
+import torch
 
 from compiler.realsas_compiler_core.rig_program_ir_v1 import (
     RigProgramAttachmentAnchorProposalIR,
@@ -29,6 +30,7 @@ from compiler.realsas_compiler_core.skin_code_ir_v1 import (
 )
 from models.axis.rig_program_model_v6 import (
     AXISRigProgramConfigV6,
+    AXISSequenceV6,
     CONSTRAINT_OPERATORS_V6,
     CONTROL_KINDS_V6,
     DOF_LABELS_V6,
@@ -131,6 +133,8 @@ def validate_axis_v6_product_event_stream(
                 raise ValueError("AXIS_V6_EVENT_POINTER_DOMAIN_INVALID")
         # Aux is a vocabulary class index, not a pointer into causal
         # entities. Never bound it by max_pointer_entities.
+        if event.kind != RigTokenKindV6.CHAIN and event.pointer_c!=-1:
+            raise ValueError("AXIS_V6_EVENT_UNUSED_MECHANICAL_PART_POINTER")
         if type(event.aux_type_id) is not int:
             raise ValueError("AXIS_V6_EVENT_AUX_DOMAIN_INVALID")
         if event.kind == RigTokenKindV6.CONTROL:
@@ -200,6 +204,13 @@ def validate_axis_v6_product_event_stream(
         inspect_axis_v6_constraint_events_v1,
     )
     inspect_axis_v6_constraint_events_v1(events)
+    # Producer mask is NOT authority: independent persisted event consumer
+    # also checks contiguous causal part groups with real shared joint paths.
+    from models.rss_vnext.axis_mechanical_part_graph_v1 import (
+        decode_axis_mechanical_part_graph_v1,
+    )
+    sequence=AXISSequenceV6.from_events(events,device=torch.device("cpu"))
+    decode_axis_mechanical_part_graph_v1(sequence)
 
 
 def decode_axis_v6_events(
@@ -295,7 +306,16 @@ def decode_axis_v6_events(
                 proposal_chain_id=kid,
                 proposal_joint_ids=_chain_path(start, end, parent_by),
                 chain_kind="GENERIC_KINEMATIC_CHAIN",
-                metadata={"path_interpretation": "DECLARED_START_END_ON_DEFORM_PARENT_GRAPH"},
+                metadata={
+                    "path_interpretation":"DECLARED_START_END_ON_DEFORM_PARENT_GRAPH",
+                    "mechanical_part_ordinal":(
+                        event.pointer_c if event.pointer_c>=0 else None
+                    ),
+                    "mechanical_part_authority":(
+                        "AXIS_LEARNED_CAUSAL_PART_GROUP_PROPOSAL_NOT_SEMANTIC_TRUTH"
+                        if event.pointer_c>=0 else "UNKNOWN_PART_MEMBERSHIP"
+                    ),
+                },
             ))
             chain_ids.append(kid)
         elif kind == RigTokenKindV6.CONSTRAINT:

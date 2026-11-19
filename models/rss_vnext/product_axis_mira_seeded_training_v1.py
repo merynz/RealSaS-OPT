@@ -143,6 +143,23 @@ def product_seeded_axis_mira_objective_v1(
         and isinstance(row.get("source_intervention_sha256"),str)
         and len(row["source_intervention_sha256"])==64
     )
+    # Mechanical part grouping is a stronger, independently sourced label
+    # than either source-native CHAIN paths or inferred skeleton hierarchy.
+    # A bare "WING_L" bone name or missing part graph is NEVER a teacher.
+    part_status=row.get("mechanical_part_graph_status")
+    part_qualified=(
+        part_status=="QUALIFIED_SOURCE_NATIVE_MULTI_CHAIN_PART_PROGRAM"
+        and row.get("mechanical_part_teacher_sequence_sha256")
+            ==axis_sequence_digest(seq)
+        and row.get("mechanical_part_not_bone_name_heuristic") is True
+        and isinstance(row.get("mechanical_part_source_evidence_sha256"),str)
+        and len(row["mechanical_part_source_evidence_sha256"])==64
+        and weights.chain_skin>0
+        and model.cfg.axis_mechanical_part_policy
+            == "EMIT_SOURCE_QUALIFIED_PART_GRAPH_V1"
+    )
+    if part_status is not None and not part_qualified:
+        raise ValueError("RSS_VNEXT_PART_GRAPH_SOURCE_RECEIPT_UNQUALIFIED")
     # Never recompute a weaker H here: TESSA and AXIS must see the same
     # constructed source + native FlexiCubes witness memory as inference.
     if (
@@ -164,6 +181,7 @@ def product_seeded_axis_mira_objective_v1(
         # Exact registry, M* and causal chain replay are checked below before
         # this objective may return to the optimizer.
         structural_chains_qualified=weights.chain_skin>0,
+        mechanical_part_graph_qualified=part_qualified,
         # Native rig/skin alone never proves the *absence* of authored
         # controls, constraints, or auxiliary chains.
         control_absence_qualified=(

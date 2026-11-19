@@ -1647,6 +1647,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                 memory, tokens_per_joint=self.cfg.skin_tokens_per_joint,
                 max_steps=self.cfg.control_max_seq,
                 allowed_constraint_operators=executable_constraint_operators,
+                emit_mechanical_parts=(
+                    self.cfg.axis_mechanical_part_policy
+                    == "EMIT_SOURCE_QUALIFIED_PART_GRAPH_V1"
+                ),
             )
             result["control_event_proposal"] = events
             result["control_status"] = "UNQUALIFIED_AXISMIRA_CONTROL_CANDIDATE"

@@ -288,6 +288,38 @@ def qualify_rig_program_v1(proposal: RigProgramProposalIR) -> QualifiedRigProgra
             if parent_by.get(child) != parent:
                 raise QualificationError("RIG_PROGRAM_CHAIN_NOT_PARENT_CONTIGUOUS")
 
+    # PART is a first-class, source-learned CHAIN membership consequence.
+    # The Compiler does not group wings by names or "repair" disconnected
+    # parts: it independently verifies causal ordinals and common joint
+    # connectivity. CanonicalRig preserves this exact metadata for editors.
+    connected_parts: dict[int,set[str]] = {}
+    part_count=0
+    for chain in proposal.chains:
+        meta=chain.metadata or {}
+        if not isinstance(meta,dict):
+            raise QualificationError("RIG_PROGRAM_MECHANICAL_PART_METADATA_INVALID")
+        part=meta.get("mechanical_part_ordinal",None)
+        if part is None:
+            if meta.get("mechanical_part_authority") not in (
+                None,"UNKNOWN_PART_MEMBERSHIP",
+            ):
+                raise QualificationError("RIG_PROGRAM_MECHANICAL_PART_AUTHORITY_INVALID")
+            continue
+        if (
+            type(part) is not int or part<0 or part>part_count
+            or meta.get("mechanical_part_authority") !=
+                "AXIS_LEARNED_CAUSAL_PART_GROUP_PROPOSAL_NOT_SEMANTIC_TRUTH"
+        ):
+            raise QualificationError("RIG_PROGRAM_MECHANICAL_PART_ADDRESS_INVALID")
+        path=set(chain.proposal_joint_ids)
+        if part==part_count:
+            connected_parts[part]=path
+            part_count+=1
+        elif not (path & connected_parts[part]):
+            raise QualificationError("RIG_PROGRAM_MECHANICAL_PART_DISCONNECTED")
+        else:
+            connected_parts[part].update(path)
+
     _validate_id_set(
         tuple(c.proposal_constraint_id for c in proposal.constraints),
         "RIG_PROGRAM_CONSTRAINT_ID_INVALID",
@@ -332,6 +364,8 @@ def qualify_rig_program_v1(proposal: RigProgramProposalIR) -> QualifiedRigProgra
         "deform_root_count": len(roots),
         "control_count": len(proposal.controls),
         "chain_count": len(proposal.chains),
+        "mechanical_part_group_count": part_count,
+        "mechanical_part_semantics_qualified": False,
         "constraint_count": len(proposal.constraints),
         "attachment_anchor_count": len(proposal.attachment_anchors),
         "parent_reselection_performed": False,

@@ -76,6 +76,10 @@ class RSSvNextConfig:
     # Unknown/unclaimed joints form an explicit fallback group; never infer a
     # semantic class from source bone names or arbitrary chain IDs.
     skin_group_mixture_policy: str = "AXIS_CAUSAL_CHAIN_LEARNED_MIXTURE_V1"
+    # Explicitly enable only in a checkpoint trained with a separately
+    # qualified mechanical-part membership receipt. Until then each chain
+    # remains distinct; no claim that a shared root implies a whole wing.
+    axis_mechanical_part_policy: str = "DEFER_UNTIL_SOURCE_QUALIFIED_V1"
     # 128 tokens cap encoded only a handful of triangles and was a
     # proof-of-wiring configuration, not a generic product mesh capacity.
     # Incremental V3.1 decoding permits a bounded larger hypothesis; this is
@@ -125,6 +129,10 @@ class RSSvNextConfig:
             or not 1 <= self.skin_max_influences <= 41
             or self.skin_support_policy != "STABLE_CAUSAL_TOPK_STRAIGHT_THROUGH_V1"
             or self.skin_group_mixture_policy != "AXIS_CAUSAL_CHAIN_LEARNED_MIXTURE_V1"
+            or self.axis_mechanical_part_policy not in (
+                "DEFER_UNTIL_SOURCE_QUALIFIED_V1",
+                "EMIT_SOURCE_QUALIFIED_PART_GRAPH_V1",
+            )
         ):
             raise ValueError("RSS_VNEXT_SKIN_SUPPORT_POLICY_INVALID")
         if (

@@ -175,6 +175,13 @@ def test_exact_group_replay_from_compiler_cas_joint_chain_events():
         )
     dynamic=dict(dynamic)
     dynamic["discrete_skin_weights"]=hard[0].tolist()
+    difference=(
+        torch.tensor(dynamic["weights"])-hard[0]
+    ).abs()
+    # Independent evidence validator checks the measured soft/hard error
+    # before reading the replay result. This metric must match these bytes.
+    dynamic["soft_to_discrete_max_abs_difference"]=float(difference.max())
+    dynamic["soft_to_discrete_mean_abs_difference"]=float(difference.mean())
     receipt=_replay(net,cfg,mesh,dynamic,events)
     assert receipt.dense_weight_max_abs_replay_error<1e-6
     # A semantically different, even structurally legal, group program is

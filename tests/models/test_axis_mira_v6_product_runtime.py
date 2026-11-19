@@ -35,6 +35,7 @@ def test_product_grammar_allows_empty_optional_sections_but_exact_skin_cardinali
     state = AXISRigProgramGrammarV6Product.advance(state, RigTokenKindV6.JOINT, tokens_per_joint=2)
     for marker in (
         RigTokenKindV6.FRAMES_START,
+        RigTokenKindV6.FRAME,  # exactly one per deform joint
         RigTokenKindV6.CONTROLS_START,
         RigTokenKindV6.CHAINS_START,
         RigTokenKindV6.CONSTRAINTS_START,

@@ -27,6 +27,14 @@ from tests.compiler.test_mechanics_xpbd_surface_editor_v1 import _editor
 
 
 def _evidence(program):
+    from compiler.realsas_compiler_core.mechanics_source_qualified_surface_pin_v1 import (
+        _admit_open_patch,
+    )
+    mesh=_editor()[0].mesh
+    _,canonical_hem_sha256=_admit_open_patch(
+        mesh,canonical_component_id=program.canonical_component_id,
+        selected_face_indices=program.canonical_face_indices,
+    )
     native={
         "admission_status": PIN_ADMISSION,
         "source_qualification_key": program.source_qualification_key,
@@ -59,6 +67,9 @@ def _evidence(program):
                 program.candidate_mstar_topology_address_sha256,
             "source_asset_sha256":program.source_asset_sha256,
             "native_pin_witness_sha256":program.native_pin_witness_sha256,
+            "native_open_boundary_sha256":program.native_open_boundary_sha256,
+            "canonical_open_boundary_edges_sha256":canonical_hem_sha256,
+            "source_to_canonical_hem_transport_verified":True,
             "source_face_pin_transport_sha256":
                 program.source_face_pin_transport_sha256,
             "independently_qualified_final_mstar_address":True,
@@ -179,6 +190,14 @@ def test_no_native_pin_heldout_intervention_or_mstar_transport_no_authority():
             **{**args,"trusted_compiler_transport_registry":{
                 trans:{**transport[trans],
                        "independently_qualified_final_mstar_address":False}
+            }},
+        )
+    # An attested source OPEN hem cannot be reused with a different M* hem.
+    with pytest.raises(QualificationError,match="RECEIPT_DRIFT"):
+        prepare_source_qualified_open_surface_xpbd_v1(
+            **{**args,"trusted_compiler_transport_registry":{
+                trans:{**transport[trans],
+                       "canonical_open_boundary_edges_sha256":"0"*64}
             }},
         )
 

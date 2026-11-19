@@ -190,6 +190,9 @@ class RSSvNextAuxiliaryViewLatents(nn.Module):
         return latents, self.uncertainty(latents).clamp(-8, 4)
 
 
+from .sparse_skin_support_v1 import sparse_skin_support_v1
+
+
 class RSSvNextSkinCoupler(nn.Module):
     """Differentiable causal *hard* FSQ tokens coupled to local surface H.
 
@@ -307,6 +310,13 @@ class RSSvNextSkinCoupler(nn.Module):
                 ) / math.sqrt(self.codec.config.hidden_dim)
                 logits = logits + self.codec.bias_head(joint_state).flatten()[None, :]
                 weights = torch.softmax(logits, dim=-1)
+            # Training forward is sparse EXACTLY as the product hard decoder.
+            # Surrogate backward keeps missing source-positive joints trainable.
+            weights=sparse_skin_support_v1(
+                weights,
+                max_influences=self.cfg.skin_max_influences,
+                straight_through=True,
+            )
             weight_rows.append(F.pad(weights, (0, max_j - jstate.shape[0])))
             mask_rows.append(torch.arange(max_j, device=jstate.device) < jstate.shape[0])
         joint_rows_padded = [
@@ -378,6 +388,14 @@ class RSSvNextSkinCoupler(nn.Module):
                 torch.cat((local_features, vertex_xyz), dim=-1),
                 joint_hidden,
             )
+        # No dense softmax escapes into Compiler: same deterministic support
+        # on source-teacher and embedded FSQ replay. Training hard-skin loss
+        # still backpropagates into the spatial decoder via the STE branch.
+        weights=sparse_skin_support_v1(
+            weights,
+            max_influences=self.cfg.skin_max_influences,
+            straight_through=self.training and torch.is_grad_enabled(),
+        )
         if (
             weights.shape != (b, v, j)
             or not bool(torch.isfinite(weights).all())

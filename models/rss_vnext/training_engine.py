@@ -41,6 +41,12 @@ from .attachment_face_correspondence_v1 import (
     source_qualified_socket_face_loss_v1, axis_sequence_digest_v1,
     mesh_topology_digest_v1,
 )
+from .product_hybrid_open_seed_v1 import (
+    ProductHybridOpenM0PolicyV1, propose_product_hybrid_open_m0_v1,
+)
+from .native_layer_open_boundary_v1 import (
+    NativeLayerOpenBoundaryV1, validate_native_open_boundary_v1,
+)
 from .seeded_mstar_teacher_address_v1 import (
     seeded_mstar_teacher_address_sha256_v1,
 )
@@ -227,6 +233,9 @@ class RSSvNextStructuralTrainingBatch:
     # from four-way presentation role. No imaginary/open cloth shell.
     flexicubes_layers: tuple[RSSvNextSemanticLayerSpec,...] | None = None
     flexicubes_signed_layer_admission_keys: tuple[str,...] = ()
+    # A genuinely OPEN last layer cannot be assigned a signed-solid key.
+    # Present only when the final seeded M* is joint signed/open.
+    product_hybrid_open_source_admission_key: str = ""
     source_qualification_key: str = ""
     admission_status: str = ""
 
@@ -344,6 +353,8 @@ class RSSvNextTrainingResult:
     component_udf_loss: Tensor | None = None
     component_udf_loss_parts: dict[str, Tensor] | None = None
     eligible_component_udf_source_components: int = 0
+    hybrid_open_model_slot_index: int | None = None
+    hybrid_open_candidate_product_qualified: bool = False
     product_graphics_joint_loss_parts: dict[str, Tensor] | None = None
     product_semantic_loss: Tensor | None = None
     product_semantic_loss_parts: dict[str, Tensor] | None = None
@@ -490,6 +501,9 @@ class RSSvNextStructuralTrainer:
         product_axis_mira_weights: ProductSeededAXISMIRAWeightsV1 = ProductSeededAXISMIRAWeightsV1(),
         product_anchor_face_weight: float = 0.0,
         allow_sparse_qualified_source_batches: bool = False,
+        product_hybrid_open_policy: ProductHybridOpenM0PolicyV1 | None = None,
+        trusted_hybrid_open_source_registry:
+            Mapping[str, Mapping[str, object]] | None = None,
     ):
         if not dataset_manifest_sha256 or len(dataset_manifest_sha256) != 64:
             raise ValueError("RSS_VNEXT_TRAIN_DATASET_MANIFEST_SHA_REQUIRED")
@@ -593,6 +607,18 @@ class RSSvNextStructuralTrainer:
             ))
         ):
             raise ValueError("RSS_VNEXT_PRODUCT_ANCHOR_FACE_PHASE_POLICY")
+        if product_hybrid_open_policy is not None:
+            if (
+                type(product_hybrid_open_policy) is not ProductHybridOpenM0PolicyV1
+                or not seeded_mode or not component_enabled
+                or not trusted_hybrid_open_source_registry
+                or seeded_tessa_weights is None
+                or seeded_tessa_weights.boundary <= 0
+            ):
+                raise ValueError("RSS_VNEXT_PRODUCT_HYBRID_OPEN_PHASE_POLICY")
+            product_hybrid_open_policy.validate()
+        elif trusted_hybrid_open_source_registry:
+            raise ValueError("RSS_VNEXT_PRODUCT_HYBRID_UNUSED_SOURCE_REGISTRY")
         seeded_tessa_sampling_policy.validate()
         if not seeded_mode and seeded_tessa_sampling_policy != SeededSurfaceSamplingPolicyV1():
             raise ValueError("RSS_VNEXT_LEGACY_SEEDED_SAMPLING_POLICY_FORBIDDEN")
@@ -677,6 +703,21 @@ class RSSvNextStructuralTrainer:
         self.seeded_tessa_weights = seeded_tessa_weights
         self.component_udf_weight = float(component_udf_weight)
         self.component_udf_enabled = component_enabled
+        self.product_hybrid_open_policy = product_hybrid_open_policy
+        hybrid_snapshot = {
+            str(k): dict(v)
+            for k,v in (trusted_hybrid_open_source_registry or {}).items()
+        }
+        self.trusted_hybrid_open_source_registry = MappingProxyType({
+            k: MappingProxyType(v) for k,v in hybrid_snapshot.items()
+        })
+        self.hybrid_open_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                hybrid_snapshot, sort_keys=True,
+                separators=(",",":"), allow_nan=False,
+            ).encode()).hexdigest()
+            if product_hybrid_open_policy is not None else ""
+        )
         self.product_graphics_rgb_weight = float(product_graphics_rgb_weight)
         self.product_joint_ray_weight = float(product_joint_ray_weight)
         self.product_semantic_weights = product_semantic_weights
@@ -757,6 +798,13 @@ class RSSvNextStructuralTrainer:
                 "product_axis_mira_weights":asdict(self.product_axis_mira_weights),
                 "requires_exact_native_mstar_face_pose_and_pinned_codec":True,
             } if self.product_axis_mira_weights.enabled else {}),
+            **({
+                "product_hybrid_open_policy":asdict(self.product_hybrid_open_policy),
+                "hybrid_open_source_registry_sha256":
+                    self.hybrid_open_registry_sha256,
+                "native_open_hem_truth_required":True,
+                "single_shared_H_and_exact_final_MSTAR":True,
+            } if self.product_hybrid_open_policy is not None else {}),
             **({
                 "allow_sparse_qualified_source_batches":True,
                 "missing_source_truth_is_unknown_not_verified_absent":True,
@@ -2431,6 +2479,8 @@ class RSSvNextStructuralTrainer:
             "product_conditioning_admission_key",
             "flexicubes_extractor", "flexicubes_layer",
             "flexicubes_layers", "flexicubes_signed_layer_admission_keys",
+            *({"product_hybrid_open_source_admission_key"}
+                if self.product_hybrid_open_policy is not None else set()),
             "flexicubes_high_resolution_training",
             "flexicubes_reference_surface_xyz",
             "flexicubes_signed_source_admission_key",

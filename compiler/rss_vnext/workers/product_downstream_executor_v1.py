@@ -987,6 +987,7 @@ def execute_motion_capability_v2(
 def _reopen_unpromoted_source_pose_graphics_courts_v1(
     request: dict[str, Any], read_object: Callable, *,
     mesh, rig, skin, compiled, motion,
+    trusted_source_native_pixel_replayer: Callable | None = None,
 ) -> dict[str, Any]:
     """Reopen optional measured frame courts without laundering source trust.
 
@@ -1005,7 +1006,13 @@ def _reopen_unpromoted_source_pose_graphics_courts_v1(
     ]
     if len(refs)>64 or any(row.get("schema_version")!="v1" for row in refs):
         raise RuntimeError("PRODUCT_PROOF_SOURCE_POSE_GRAPHICS_COURT_CARDINALITY_OR_SCHEMA")
+    if trusted_source_native_pixel_replayer is not None and not callable(
+        trusted_source_native_pixel_replayer
+    ):
+        raise RuntimeError("PRODUCT_PROOF_TRUSTED_GRAPHICS_REPLAYER_CALLABLE")
     courts=[]
+    replayed_count=0
+    positively_verified_count=0
     addresses=set()
     for ref in refs:
         payload=_read({
@@ -1023,6 +1030,17 @@ def _reopen_unpromoted_source_pose_graphics_courts_v1(
         if key in addresses:
             raise RuntimeError("PRODUCT_PROOF_SOURCE_POSE_GRAPHICS_DUPLICATE_FRAME")
         addresses.add(key)
+        if trusted_source_native_pixel_replayer is not None:
+            replayed=trusted_source_native_pixel_replayer(court)
+            if (
+                type(replayed) is not type(court)
+                or replayed != court
+            ):
+                raise RuntimeError("PRODUCT_PROOF_RAW_SOURCE_GRAPHICS_REPLAY_DRIFT")
+            replayed_count += 1
+            positively_verified_count += int(
+                replayed.source_registered_pixels_passed
+            )
         courts.append(court)
     return {
         "typed_source_pose_graphics_frame_receipts_reopened":len(courts),
@@ -1039,7 +1057,11 @@ def _reopen_unpromoted_source_pose_graphics_courts_v1(
             if c.source_registered_pixels_passed
             and c.source_target_kind=="ARTIST_VALIDATED_POSTMOTION_RGBA"
         }),
-        "independent_native_and_source_pixel_replay_in_proof":False,
+        "independent_native_and_source_pixel_replay_in_proof":(
+            replayed_count > 0 and replayed_count == len(courts)
+        ),
+        "independently_raw_replayed_frame_count":replayed_count,
+        "independently_raw_positive_frame_count":positively_verified_count,
         "source_graphics_product_authority_promoted":False,
         "known_pixels_are_not_full_hidden_surface_or_motion_proof":True,
     }
@@ -1047,6 +1069,7 @@ def _reopen_unpromoted_source_pose_graphics_courts_v1(
 
 def execute_proof_capability_v1(
     request: dict[str, Any], *, read_object: Callable, put_bytes: Callable,
+    trusted_source_native_pixel_replayer: Callable | None = None,
 ) -> dict[str, Any]:
     _require(request, "product.proof", PROOF_CONTRACT)
     # A structurally valid canonical tuple is not independent source proof,
@@ -1079,6 +1102,8 @@ def execute_proof_capability_v1(
     ):
         raise RuntimeError("PRODUCT_PROOF_CANONICAL_PARENT_LINEAGE_DRIFT")
     metadata = request.get("capability_metadata") or {}
+    if "trusted_source_native_pixel_replayer" in metadata:
+        raise RuntimeError("PRODUCT_PROOF_TRUSTED_GRAPHICS_REPLAYER_HOST_ONLY")
     require_runtime = metadata.get("runtime_graphics_required", False)
     if type(require_runtime) is not bool:
         raise RuntimeError("PRODUCT_PROOF_RUNTIME_GRAPHICS_POLICY_TYPE")
@@ -1130,6 +1155,7 @@ def execute_proof_capability_v1(
     source_pose_graphics=_reopen_unpromoted_source_pose_graphics_courts_v1(
         request,read_object,mesh=mesh,rig=rig,skin=skin,
         compiled=compiled,motion=motion,
+        trusted_source_native_pixel_replayer=trusted_source_native_pixel_replayer,
     )
     # This court has rechecked the whole present canonical graph and pose
     # authority. ProductPASS still requires independent source pixels/rays,
@@ -1174,7 +1200,9 @@ def execute_proof_capability_v1(
         "raw_original_source_graphics_replay": raw_replay,
         "raw_two_image_replay_completed": raw_replay is not None,
         "source_pose_graphics_courts":source_pose_graphics,
-        "source_visibility_independent_witness_present": False,
+        "source_visibility_independent_witness_present":bool(
+            source_pose_graphics["independently_raw_positive_frame_count"]
+        ),
         "source_contact_independent_witness_present": False,
         "missing_independent_witnesses": list(missing),
         "product_pass_authority": False,

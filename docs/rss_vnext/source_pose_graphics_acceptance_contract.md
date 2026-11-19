@@ -87,6 +87,25 @@ court, verifies source+native issuers and complete temporal/view coverage,
 then binds release-specific source visibility and hidden-reveal programs.
 Until that exists, ProductProof remains fail-closed.
 
+## Trusted ProductProof invocation
+
+The optional `execute_proof_capability_v1(...,
+trusted_source_native_pixel_replayer=...)` parameter is an **operator-injected
+callable**, never a value in `capability_metadata`. It receives the reopened,
+current-parent-matched typed court, independently reopens source and C++
+native raster bundles using the approved SHA registries, reruns the real
+source/Graphics measurement, and must return an exactly equal court object.
+Missing or forged replay fails closed. Raw raster replay count and positive
+locally known-pixel frame count are diagnostic-only: they cannot, alone,
+clear `SOURCE_APPEARANCE_AND_POSE_VISIBILITY`, source hidden-reveal,
+contact/attachment, edit consequence, or final release admission.
+
+This deliberately prevents a service caller from attaching a self-hashed
+`source_registered_pixels_passed=true` JSON and minting a product.
+Only trusted infrastructure may provide the two independent registries.
+The executable C++ renderer's owner/unknown sidecars are required alongside
+RGBA; style and pose constraints do not collapse into alpha alone.
+
 ## Data-side handoff (not an operation by this change)
 
 Dataset/source foundry must deliver rights-qualified original source

@@ -237,7 +237,8 @@ def bind_rss_vnext_live_pose_to_native_preview_v1(
             != sha256(live_pose_bytes).hexdigest()
         or r.get("native_pose_bytes_count") != len(live_pose_bytes)
         or r.get("view_count") != int(m["native_view_count"])
-        or r.get("resolution") not in (16,32,64,96,128,256,512,1024,2048)
+        or not isinstance(r.get("resolution"),int)
+        or not 16 <= r["resolution"] <= 2048
         or not isinstance(r.get("frame_count"),int)
         or not 1 <= r["frame_count"] <= 512
     ):

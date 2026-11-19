@@ -360,11 +360,20 @@ class AXISRigProgramModelV6(nn.Module):
     def _shift(values: Tensor, cap: int) -> Tensor:
         return (values.to(torch.long) + 1).clamp(min=0, max=cap)
 
-    def _embed(self, seq: AXISSequenceV6) -> Tensor:
+    def _embed(
+        self, seq: AXISSequenceV6, *, position_offset: int = 0,
+    ) -> Tensor:
         cfg = self.config
         seq.validate(cfg)
         b, s = seq.kind_ids.shape
-        pos = torch.arange(s, device=seq.kind_ids.device)[None].expand(b, -1)
+        if (
+            type(position_offset) is not int or position_offset<0
+            or position_offset+s>cfg.max_sequence_length
+        ):
+            raise ValueError("AXIS_V6_POSITION_EMBEDDING_RESOURCE_BOUND")
+        pos = torch.arange(
+            position_offset, position_offset+s, device=seq.kind_ids.device,
+        )[None].expand(b, -1)
         x = self.kind_embedding(seq.kind_ids) + self.position_embedding(pos)
         x = x + self.coord_embedding(self._shift(seq.coord_indices, cfg.coord_bins)).sum(dim=2)
         for ptr in (seq.pointer_a, seq.pointer_b, seq.pointer_c):
@@ -390,6 +399,10 @@ class AXISRigProgramModelV6(nn.Module):
         scene = self.scene_projection(scene_memory.to(dtype=x.dtype))
         cross, _ = self.scene_cross_attention(x, scene, scene, need_weights=False)
         x = self.cross_norm(x + cross)
+        return self._prediction_heads(x)
+
+    def _prediction_heads(self, x: Tensor) -> dict[str, Tensor]:
+        """One projection ABI shared by full-prefix training and KV inference."""
         return {
             "kind_logits": self.kind_head(x),
             "coord_logits": self.coord_head(x).view(*x.shape[:2], 3, self.config.coord_bins),
@@ -475,14 +488,16 @@ class AXISRigProgramModelV6(nn.Module):
             raise ValueError("AXIS_V6_GENERATION_LIMIT_INVALID")
 
         device = scene_memory.device
+        # Fast exact-weight streaming decode; no full-prefix recomputation.
+        from models.rss_vnext.axis_causal_kv_cache_v1 import AXISV6CausalKVCacheV1
+        cache=AXISV6CausalKVCacheV1(self,scene_memory)
         events: list[RigProgramEventV6] = [RigProgramEventV6(RigTokenKindV6.BOS)]
         state = AXISRigProgramGrammarV6Product.advance(
             RigGrammarStateV6(), RigTokenKindV6.BOS, tokens_per_joint=tokens_per_joint
         )
 
         for _ in range(limit - 1):
-            seq = AXISSequenceV6.from_events(events, device=device)
-            out = self(scene_memory, seq)
+            out=cache.consume(events[-1])
             kind_logits = AXISRigProgramGrammarV6Product.mask(
                 out["kind_logits"][0, -1], state, tokens_per_joint=tokens_per_joint
             )

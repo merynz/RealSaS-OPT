@@ -12,8 +12,6 @@ Only batch-1 unpadded eval/no-grad generation is supported. Any unsupported
 Transformer implementation must fail closed, not silently run a different
 architecture. Numerics are verified against full-prefix forward in CI.
 """
-from __future__ import annotations
-
 import torch
 from torch import Tensor
 from torch.nn import functional as F

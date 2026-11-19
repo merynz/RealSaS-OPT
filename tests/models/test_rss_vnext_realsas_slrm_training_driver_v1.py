@@ -302,7 +302,10 @@ def test_six_view_joint_normal_conditioning_is_required_and_receipt_bound():
     tampered=replace(
         batch,conditioning_normals=batch.conditioning_normals.clone(),
     )
-    tampered.conditioning_normals[0,0,0,0,0]+=.1
+    # Keep the altered normal inside [-1,1], so the independent content
+    # receipt check is the first rejection. An additive perturbation could
+    # cross the valid normal range after a model initialization change.
+    tampered.conditioning_normals[0,0,0,0,0]*=-1.
     with pytest.raises(ValueError,match="RENDER_RECEIPT_DRIFT"):
         trainer.objective(tampered)
     # Even if a normal stream is syntactically valid, its teacher identity

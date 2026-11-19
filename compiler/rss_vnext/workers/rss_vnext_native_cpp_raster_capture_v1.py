@@ -211,9 +211,12 @@ def execute_native_cpp_candidate_raster_capture_v1(
     if (
         manifest.get("virtual_preview_camera_registered_to_graphics_view") != "0"
         or manifest.get("source_rgb_surface_ownership_qualified") != "0"
-        or not 0 <= frame_index < live_pose_receipt.get("frame_count",0)
-        or not 0 <= view_index < live_pose_receipt.get("view_count",0)
-        or live_pose_receipt.get("resolution") not in range(16,2049)
+        or type(live_pose_receipt.get("frame_count")) is not int
+        or type(live_pose_receipt.get("view_count")) is not int
+        or type(live_pose_receipt.get("resolution")) is not int
+        or not 0 <= frame_index < live_pose_receipt["frame_count"]
+        or not 0 <= view_index < live_pose_receipt["view_count"]
+        or not 16 <= live_pose_receipt["resolution"] <= 2048
         or len(state["mesh"].faces) < 1
     ):
         raise QualificationError("RSS_CPP_RASTER_CAPTURE_UNREGISTERED_CAMERA_REQUIRED")

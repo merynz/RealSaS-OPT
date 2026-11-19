@@ -155,6 +155,12 @@ def test_seeded_product_mira_source_skin_without_native_motion_clip(monkeypatch)
     from models.rss_vnext.native_skin_transport_v1 import (
         SourceNativeCandidateSkinTransportV1, RECEIPT_SCHEMA,
     )
+    from models.rss_vnext.tessa_seeded_surface_v1 import (
+        build_tessa_seeded_surface_v1,
+    )
+    from models.rss_vnext.seeded_mstar_teacher_address_v1 import (
+        seeded_mstar_teacher_address_sha256_v1,
+    )
     import models.rss_vnext.unified_character_model as unified
 
     net,batch,make,*_=_rig_case(monkeypatch)
@@ -179,11 +185,18 @@ def test_seeded_product_mira_source_skin_without_native_motion_clip(monkeypatch)
         source_asset_sha256=teacher.source_asset_sha256,
         layer_namespace_sha256="8"*64,
     )
+    seed=build_tessa_seeded_surface_v1(
+        iris_surface_xyz=xyz[None], iris_surface_faces=faces,
+        component_ids_by_vertex=torch.zeros(4,dtype=torch.long),
+        scene_sha256="e"*64, original_surface_sha256="f"*64,
+    )
+    mstar_address=seeded_mstar_teacher_address_sha256_v1(seed)
     support=SourceNativeCandidateSkinTransportV1(
         source_asset_sha256=teacher.source_asset_sha256,
         source_qualification_key=teacher.source_qualification_key,
         native_face_witness_sha256=witness.receipt_sha256(),
         source_candidate_mesh_face_sha256=tensor_sha256_v1(faces),
+        candidate_mstar_topology_address_sha256=mstar_address,
         axis_teacher_sequence_sha256=axis_teacher_sequence_sha256_v6(batch.axis_teacher_sequence),
         native_skin_joint_order_sha256="9"*64,
         native_skin=xyz.new_ones((4,1)),
@@ -203,6 +216,7 @@ def test_seeded_product_mira_source_skin_without_native_motion_clip(monkeypatch)
         "native_skin_joint_order_sha256":"9"*64,
         "native_skin_columns_match_axis_joint_order":True,
         "candidate_faces_sha256":tensor_sha256_v1(faces),
+        "candidate_mstar_topology_address_sha256":mstar_address,
         "candidate_source_support_not_student_nearest":True,
         "source_rights_independently_verified":True,
         "generated_views_as_source_skin_truth":False,

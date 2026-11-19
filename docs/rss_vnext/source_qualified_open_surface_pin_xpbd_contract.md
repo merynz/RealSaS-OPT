@@ -39,7 +39,10 @@ prediction, or a physics material oracle.
    transport SHA. TWO independently trusted receipts are required:
    `QUALIFIED_SOURCE_NATIVE_OPEN_PIN_WITH_HOST_INTERVENTION` for source
    and `COMPILER_FINAL_MSTAR_TO_CANONICAL_REINDEX_VERIFIED` for Compiler.
-   All confidence/status fields must be explicit; generated 6 views, model
+   The final canonical OPEN hem edge digest must also be tied to the native
+   source hem by the independent Compiler reindex receipt. A pin cannot
+   silently activate physics on an unrelated OPEN boundary. All
+   confidence/status fields must be explicit; generated 6 views, model
    slot IDs and material coefficients cannot pretend native truth.
 3. **Executable Mechanics**:
    `prepare_source_qualified_open_surface_xpbd_v1` verifies the entire

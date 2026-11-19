@@ -249,7 +249,7 @@ def test_rejects_unauthorized_source_camera_and_modified_live_pose(tmp_path):
         execute_native_cpp_candidate_raster_capture_v1(
             **bad,frame_index=0,
         )
-    with pytest.raises(QualificationError,match="INPUT_POLICY"):
+    with pytest.raises(QualificationError,match="UNREGISTERED_CAMERA_REQUIRED"):
         execute_native_cpp_candidate_raster_capture_v1(
             **kwargs,frame_index=99,
         )

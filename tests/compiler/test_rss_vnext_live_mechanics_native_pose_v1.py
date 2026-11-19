@@ -105,3 +105,74 @@ def test_bad_revision_lbs_or_timeline_cannot_be_accepted_as_live_frame():
         encode_rss_vnext_live_mechanics_native_pose_v1(
             **call,frames=(first,first),frame_times_seconds=(0.,0.),
         )
+
+
+def test_native_cpp_raw_renderer_consumes_bound_live_frames_without_rewriting_rss(
+    tmp_path,
+):
+    """Full native pixels prove new stream ABI matches the archived LBS ABI."""
+    from compiler.realsas_compiler_core.controllable_puppet_runtime_v1 import (
+        PuppetRuntimeFrameV1,
+    )
+    from compiler.realsas_compiler_core.playback_runtime_v3 import (
+        RuntimeV3FrameComposition,
+    )
+    from compiler.realsas_compiler_core.mechanics_control_solver_v1 import (
+        deform_mesh_lbs_v1, solve_control_pose_v1,
+    )
+    from compiler.rss_vnext.workers.rss_vnext_live_mechanics_native_pose_v1 import (
+        bind_rss_vnext_live_pose_to_native_preview_v1,
+    )
+    from compiler.rss_vnext.workers.rss_vnext_native_preview_package_v1 import (
+        reopen_rss_vnext_native_preview_package_v1,
+    )
+    from tests.compiler.test_rss_vnext_native_preview_package_v1 import (
+        _compiled_preview_fixture, _build_player, _render,
+    )
+    import subprocess
+
+    archive,_,mesh,rig,skin,controls=_compiled_preview_fixture(tmp_path)
+    reopened=reopen_rss_vnext_native_preview_package_v1(archive)
+    frames=[]
+    for rows in controls:
+        pose=solve_control_pose_v1(rig,rows)
+        deformed=deform_mesh_lbs_v1(mesh,rig,skin,pose)
+        frames.append(PuppetRuntimeFrameV1(
+            view_id="V0",meshes=(),
+            composition=RuntimeV3FrameComposition("V0",(),{}),
+            pose=pose,deformed=deformed,
+            product_revision_id="developer-runtime-not-product",
+        ))
+    pose_bytes,receipt=encode_rss_vnext_live_mechanics_native_pose_v1(
+        mesh=mesh,rig=rig,skin=skin,frames=frames,
+        frame_times_seconds=(0.,1./60.),
+        cameras=reopened["virtual_camera"],
+    )
+    assert pose_bytes==reopened["pose_bytes"]
+    assets,wire=bind_rss_vnext_live_pose_to_native_preview_v1(
+        template_rss_path=archive,live_pose_bytes=pose_bytes,
+        live_pose_receipt=receipt,
+    )
+    assert wire["product_release_admission"] is False
+    assert wire["template_pose_remains_authoring_lbs"] is True
+    for filename,data in assets.items():
+        (tmp_path/filename).write_bytes(data)
+    exe=_build_player(tmp_path)
+    raw=tmp_path/"ephemeral-native-rgba.rgba"
+    subprocess.run([
+        str(exe),str(tmp_path/"graphics.bin"),
+        str(tmp_path/"texture.bin"),str(tmp_path/"pose.bin"),
+        "1","0","0",str(raw),
+    ],check=True,capture_output=True,text=True)
+    expected,_=_render(exe,archive,tmp_path,1)
+    np.testing.assert_array_equal(
+        np.frombuffer(raw.read_bytes(),dtype=np.uint8).reshape(expected.shape),
+        expected,
+    )
+    forged={**receipt,"camera_policy_sha256":"0"*64}
+    with pytest.raises(ValueError,match="CAMERA_POLICY_DRIFT"):
+        bind_rss_vnext_live_pose_to_native_preview_v1(
+            template_rss_path=archive,live_pose_bytes=pose_bytes,
+            live_pose_receipt=forged,
+        )
+    assert archive.read_bytes().startswith(b"RSASV2R1")

@@ -147,13 +147,17 @@ def test_native_skin_rejects_axial_joint_order_forgery():
 def test_native_skin_rejects_new_mstar_revision_even_if_face_index_buffer_same():
     w,t,f,xyz,receipt=_fixture()
     # Same source 3D, same exact triangle array, same native barycentrics.
-    # A changed original M0 parent order must NEVER reuse source labels.
+    # Repartitioning the M* component domain invalidates old source truth.
     source=build_tessa_seeded_surface_v1(
         iris_surface_xyz=xyz,iris_surface_faces=f,
         component_ids_by_vertex=torch.zeros(3,dtype=torch.long),
         scene_sha256="e"*64,original_surface_sha256="f"*64,
     )
-    altered=replace(source,parent_seed_edges=((1,1),(0,0),(2,2)))
+    altered=replace(
+        source,
+        vertex_component_ids=torch.ones(3,dtype=torch.long),
+        face_component_ids=torch.ones(1,dtype=torch.long),
+    )
     altered.validate()
     changed=seeded_mstar_teacher_address_sha256_v1(altered)
     assert changed!=t.candidate_mstar_topology_address_sha256

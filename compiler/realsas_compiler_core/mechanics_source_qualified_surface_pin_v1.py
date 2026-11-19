@@ -30,7 +30,9 @@ from .mechanics_xpbd_surface_v1 import (
 from .types import QualificationError
 
 SCHEMA = "RealSaS.Mechanics.SourceQualifiedOpenSurfacePinProgram.v1"
-TRANSPORT_SCHEMA = "RealSaS.Mechanics.SourceNativeFacePinToCanonicalMstar.v1"
+TRANSPORT_SCHEMA = "RealSaS.Mechanics.SourceNativeFacePinToCanonicalMstar.v2"
+Barycentric3 = tuple[float, float, float]
+NativeFaceCornersV1 = tuple[Barycentric3, Barycentric3, Barycentric3]
 RECEIPT_SCHEMA = "RealSaS.Mechanics.SourceQualifiedXPBDSurfaceActivation.v1"
 PIN_ADMISSION = "QUALIFIED_SOURCE_NATIVE_OPEN_PIN_WITH_HOST_INTERVENTION"
 TRANSPORT_ADMISSION = "COMPILER_FINAL_MSTAR_TO_CANONICAL_REINDEX_VERIFIED"
@@ -61,6 +63,10 @@ class SourceQualifiedOpenSurfacePinProgramV1:
     host_canonical_chain_id: str
     source_native_face_indices: tuple[int, ...]
     canonical_face_indices: tuple[int, ...]
+    # For each final canonical face, THREE source-parent barycentric corner
+    # addresses in matching winding. One native face may have multiple TESSA
+    # children; no one-to-one native-face assumption is allowed here.
+    source_native_face_corner_barycentric: tuple[NativeFaceCornersV1, ...]
     source_native_pin_vertex_ids: tuple[str, ...]
     canonical_pin_vertex_ids: tuple[str, ...]
     native_open_boundary_sha256: str
@@ -78,6 +84,8 @@ class SourceQualifiedOpenSurfacePinProgramV1:
             "canonical_mesh_lineage_hash": self.canonical_mesh_lineage_hash,
             "source_native_face_indices": self.source_native_face_indices,
             "canonical_face_indices": self.canonical_face_indices,
+            "source_native_face_corner_barycentric":
+                self.source_native_face_corner_barycentric,
             "source_native_pin_vertex_ids": self.source_native_pin_vertex_ids,
             "canonical_pin_vertex_ids": self.canonical_pin_vertex_ids,
         })
@@ -99,6 +107,36 @@ class SourceQualifiedXPBDSurfaceActivationV1:
     source_material_truth_claimed: bool = False
     product_release_admission: bool = False
     schema_version: str = RECEIPT_SCHEMA
+
+
+def _validate_native_face_corners_v1(
+    program: SourceQualifiedOpenSurfacePinProgramV1,
+) -> None:
+    """Exact native-parent barycentric corners for every final M* child face.
+
+    An original native triangle can parent many TESSA refinement children.
+    The source must independently attest this transport; this court verifies
+    shape, valid barycentrics and orientation, never guesses a nearest face.
+    """
+    if len(program.source_native_face_corner_barycentric) != len(
+        program.canonical_face_indices
+    ):
+        raise QualificationError("SOURCE_PIN_FACE_BARYCENTRIC_CARDINALITY")
+    for corners in program.source_native_face_corner_barycentric:
+        try:
+            values = np.asarray(corners, dtype=np.float64)
+        except (TypeError, ValueError) as exc:
+            raise QualificationError("SOURCE_PIN_FACE_BARYCENTRIC_INVALID") from exc
+        if (
+            values.shape != (3,3) or not bool(np.isfinite(values).all())
+            or bool(np.any(values < -1e-7))
+            or bool(np.any(values > 1. + 1e-7))
+            or not bool(np.allclose(
+                values.sum(axis=1), 1., atol=1e-7, rtol=0.,
+            ))
+            or float(np.linalg.det(values)) <= 1e-12
+        ):
+            raise QualificationError("SOURCE_PIN_FACE_BARYCENTRIC_INVALID")
 
 
 def _admit_open_patch(
@@ -204,8 +242,8 @@ def prepare_source_qualified_open_surface_xpbd_v1(
             != len(program.canonical_face_indices)
         or len(program.source_native_pin_vertex_ids)
             != len(program.canonical_pin_vertex_ids)
-        or len(set(program.source_native_face_indices))
-            != len(program.source_native_face_indices)
+        # Source faces may repeat when TESSA refines one native parent into
+        # several canonical children; canonical face indices remain unique.
         or len(set(program.source_native_pin_vertex_ids))
             != len(program.source_native_pin_vertex_ids)
         or len(set(program.canonical_pin_vertex_ids))
@@ -218,6 +256,7 @@ def prepare_source_qualified_open_surface_xpbd_v1(
         or program.transport_hash() != program.source_face_pin_transport_sha256
     ):
         raise QualificationError("SOURCE_PIN_PROGRAM_ADDRESS_OR_HASH_DRIFT")
+    _validate_native_face_corners_v1(program)
     source_row = trusted_native_pin_registry.get(program.source_qualification_key)
     transport_row = trusted_compiler_transport_registry.get(
         program.source_face_pin_transport_sha256

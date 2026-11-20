@@ -219,3 +219,18 @@ def test_native_clearance_task_partition_respects_true_product_total():
     )
     assert set(groups)=={"GEOMETRY","POSED_LAYER_CLEARANCE"}
     torch.testing.assert_close(sum(groups.values()),result.total_loss)
+
+
+def test_legacy_untyped_seeded_layer_penetration_teacher_is_not_implicitly_accepted(
+    monkeypatch,
+):
+    from dataclasses import replace
+    from models.rss_vnext.training_seeded_tessa_v1 import _validate_source_teacher
+    _,batch,*_= _scenario(monkeypatch)
+    original=batch.seeded_tessa_source_teacher
+    forbidden=replace(
+        original, source_layer_penetration_target=torch.ones(1),
+        source_layer_penetration_mask=torch.ones(1,dtype=torch.bool),
+    )
+    with pytest.raises(ValueError,match="LEGACY_LAYER_PENETRATION_TEACHER_RETIRED"):
+        _validate_source_teacher(forbidden)

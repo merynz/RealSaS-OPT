@@ -45,6 +45,28 @@ def _source_context():
     return torch.zeros(1,2,2048),torch.zeros(1,1280),torch.zeros(1,6)
 
 
+def _source_registry(stage,batch):
+    from models.rss_vnext.realsas_stageab_source_court_v2 import (
+        SCHEMA,AUTHORITY,source_stageab_tensor_digests_v2,
+    )
+    key=batch.source_render_qualification_key
+    return {key:{
+        "schema":SCHEMA,
+        "admission_status":AUTHORITY,
+        "stage":stage,
+        "dataset_manifest_sha256":"a"*64,
+        "source_render_qualification_key":key,
+        "generated_model_prediction_as_teacher":False,
+        "source_3d_renders_independently_audited":True,
+        "source_asset_sha256":"a"*64,
+        "original_two_rgba_sha256":"b"*64,
+        "native_source_receipt_sha256":"c"*64,
+        **({"frozen_source_encoder_sha256":"e"*64}
+           if stage=="A_CANONICAL_SDXL" else {}),
+        **source_stageab_tensor_digests_v2(stage,batch),
+    }}
+
+
 def _stage_a():
     conditioner=RSSvNextTwoImageConditionerV1(
         source_dim=8,pose_dim=4,hidden_dim=16,output_dim=2048,
@@ -117,16 +139,17 @@ def test_stage_a_task_fit_checkpoint_resume_and_two_canonical_sampler(tmp_path):
     unet,conditioner,head=_stage_a()
     vae=VAE()
     vae._rss_vnext_vae_ancestor_sha256="d"*64
+    batch=_batch_a()
     optimizer=SourceSDXLStageABOptimizerV2(
         stage="A_CANONICAL_SDXL",unet=unet,vae=vae,
         noise_scheduler=Scheduler(),
         source_manifest_sha256="a"*64,
         pretrained_source_sha256="b"*64,
         source_vae_sha256="d"*64,
+        trusted_source_registry=_source_registry("A_CANONICAL_SDXL",batch),
         conditioner=conditioner,task_a_alpha=head,
         warmup_steps=2,
     )
-    batch=_batch_a()
     first=optimizer.train_step(batch)
     assert first.step==1
     assert set(first.gradient_norms)=={
@@ -172,6 +195,7 @@ def test_stage_a_task_fit_checkpoint_resume_and_two_canonical_sampler(tmp_path):
         noise_scheduler=Scheduler(),
         source_manifest_sha256="a"*64,pretrained_source_sha256="b"*64,
         source_vae_sha256="d"*64,
+        trusted_source_registry=_source_registry("A_CANONICAL_SDXL",batch),
         conditioner=new_c,task_a_alpha=new_h,warmup_steps=2,
     )
     resumed.load_resume_checkpoint(resume)
@@ -181,6 +205,7 @@ def test_stage_a_task_fit_checkpoint_resume_and_two_canonical_sampler(tmp_path):
 def test_stage_b_task_fit_exact_native_weights_and_six_rgb_normals(tmp_path):
     torch.manual_seed(31)
     pipeline,heads=_stage_b()
+    batch=_batch_b()
     optimizer=SourceSDXLStageABOptimizerV2(
         stage="B_PAIRED_RGB_NORMAL_MVADAPTER",
         unet=pipeline.unet,vae=pipeline.vae,
@@ -189,10 +214,11 @@ def test_stage_b_task_fit_exact_native_weights_and_six_rgb_normals(tmp_path):
         pretrained_source_sha256="b"*64,
         source_vae_sha256="d"*64,
         pretrained_mv_adapter_sha256="c"*64,
+        trusted_source_registry=_source_registry("B_PAIRED_RGB_NORMAL_MVADAPTER",batch),
         mv_pipeline=pipeline,task_b_heads=heads,
         warmup_steps=2,
     )
-    result=optimizer.train_step(_batch_b())
+    result=optimizer.train_step(batch)
     assert result.step==1
     assert result.normal_epsilon_loss is not None
     assert set(result.gradient_norms)=={
@@ -206,7 +232,6 @@ def test_stage_b_task_fit_exact_native_weights_and_six_rgb_normals(tmp_path):
     load_exact_stage_b_task_checkpoint_v2(
         pipe=other,task_heads=other_heads,receipt=receipt,
     )
-    batch=_batch_b()
     sampled=sample_stage_b_paired_rgb_normal_v2(
         pipe=other,task_heads=other_heads,receipt=receipt,
         canonical_rgba=batch.canonical_rgba,
@@ -238,6 +263,7 @@ def test_stage_b_task_fit_exact_native_weights_and_six_rgb_normals(tmp_path):
         pretrained_source_sha256="b"*64,
         source_vae_sha256="d"*64,
         pretrained_mv_adapter_sha256="c"*64,
+        trusted_source_registry=_source_registry("B_PAIRED_RGB_NORMAL_MVADAPTER",batch),
         mv_pipeline=other2,task_b_heads=heads2,warmup_steps=2,
     )
     restored.load_resume_checkpoint(resume)

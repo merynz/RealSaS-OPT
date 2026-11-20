@@ -28,6 +28,7 @@ from .product_real_pilot_cohort_v1 import RealPilotAssetV1, RealPilotCohortRecei
 from .product_real_pilot_execution_v1 import (
     PilotLedgerV1, RealPilotTrainingEnvelopeV1,
     _file_digest, run_source_qualified_pilot_updates_v1,
+    requalify_pilot_ledger_artifacts_v1,
 )
 from .product_seeded_phase_ownership_v1 import (
     PREFIXES_GEOMETRY, PREFIXES_SEMANTIC_GRAPHICS,
@@ -275,6 +276,7 @@ def build_real_pilot_slrm_phase_v1(
         or type(weights) is not RealSaSSLRMTrainingLossWeightsV1
     ):
         raise ValueError("RSS_VNEXT_PILOT_SLRM_B_NOT_ADMITTED")
+    requalify_pilot_ledger_artifacts_v1(ledger,cohort=cohort)
     a, b = ledger.completed
     # B and A are distinct pretrained/task weights. The V2 generation
     # receipt is a four-part construction pin, not the raw B SHA.

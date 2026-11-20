@@ -2658,6 +2658,9 @@ class RSSvNextStructuralTrainer:
             "product_multiview_checkpoint_sha256",
             "product_generation_checkpoint_sha256",
             "product_conditioning_admission_key",
+            # Generator ABI metadata is validated in objective() before this
+            # source-only UDF whitelist; it is not a teacher input.
+            "product_generation_abi","product_pose_program_sha256",
             "component_udf_source_teacher",
             "source_qualification_key","admission_status",
         }

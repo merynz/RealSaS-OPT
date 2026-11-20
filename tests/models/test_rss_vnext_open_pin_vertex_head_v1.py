@@ -205,3 +205,48 @@ def test_ninth_pin_support_family_matches_exact_weighted_total():
     )
     assert set(parts)=={"GEOMETRY","OPEN_PIN_SUPPORT"}
     torch.testing.assert_close(sum(parts.values()),result.total_loss)
+
+
+def test_real_seeded_pin_head_policy_never_invents_labels_and_is_checkpoint_pinned(
+    monkeypatch,tmp_path,
+):
+    from models.rss_vnext.product_axis_mira_seeded_training_v1 import (
+        ProductSeededAXISMIRAWeightsV1,
+    )
+    from tests.models.test_rss_vnext_product_seeded_axis_mira_training_v1 import (
+        _rig_case,
+    )
+    net,batch,make,*_=_rig_case(monkeypatch)
+    # The original fixture is one CLOSED tetra with no hem. A source pin
+    # label must NOT be manufactured, but a sparse-source model should
+    # still train its unrelated geometry/rig losses.
+    teacher=ProductSeededAXISMIRAWeightsV1(axis_program=1.)
+    anchor_registry={"known-source-only":{"admission_status":"NOT_FOR_THIS_ASSET"}}
+    pin_registry={"known-source-only":{"admission_status":"NOT_FOR_THIS_ASSET"}}
+    trainer=make(
+        weights=teacher,sparse=True,anchor_weight=1.,
+        anchor_registry=anchor_registry,
+        pin_weight=.5,pin_registry=pin_registry,
+    )
+    req=trainer.source_supervision_requirements_v1()
+    assert "source_native_open_hem_pin_vertices" in req["loss_required_source_families"]
+    assert req["model_release_ready"] is False
+    result=trainer.train_step(batch)
+    assert result.product_open_pin_vertex_loss is None
+    assert result.eligible_open_pin_vertex_labels==0
+    path=tmp_path/"seeded-open-pin-source.pt"
+    trainer.save_checkpoint(path,sampler_cursor=3)
+    other=make(
+        weights=teacher,sparse=True,anchor_weight=1.,
+        anchor_registry=anchor_registry,
+        pin_weight=.5,pin_registry=pin_registry,
+    )
+    assert other.load_checkpoint(path)==3
+    with pytest.raises(ValueError,match="OBJECTIVE_POLICY_DRIFT"):
+        make(weights=teacher,sparse=True,anchor_weight=1.,
+             anchor_registry=anchor_registry,
+             pin_weight=.7,pin_registry=pin_registry).load_checkpoint(path)
+    with pytest.raises(ValueError,match="OPEN_PIN_VERTEX_PHASE_POLICY"):
+        make(weights=teacher,sparse=True,anchor_weight=1.,
+             anchor_registry=anchor_registry,
+             pin_weight=.5).objective(batch)

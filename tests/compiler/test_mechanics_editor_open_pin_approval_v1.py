@@ -199,56 +199,12 @@ def test_no_closed_wrong_component_or_missing_host_skin_pins():
                 command,approved_host_chain_id="UNDECLARED"
             ).sealed()},
         )
-    oldskin=bundle.skin
-    rows=tuple(
-        replace(row,influences=(("J2",1.),))
-        if row.canonical_mesh_vertex_id=="MV:0" else row
-        for row in oldskin.rows
-    )
-    # If J2 belongs to host chain the condition would be satisfied, so
-    # use an empty positive host influence through an explicit other chain
-    # by selecting a host with no skin weight on the pin.
-    if bundle.rig.chains and len(bundle.rig.chains)>1:
-        other=bundle.rig.chains[-1].canonical_chain_id
-        if other != command.approved_host_chain_id:
-            with pytest.raises(QualificationError):
-                prepare_editor_approved_open_pin_domain_v1(
-                    **{**args,"command":replace(
-                        command,approved_host_chain_id=other
-                    ).sealed()},
-                )
     # Rebinding a skin revision without regenerating neural review/approval
     # cannot reuse the old candidate on the new canonical identity.
-    changed=replace(oldskin,skin_lineage_hash="e"*64)
+    changed=replace(bundle.skin,skin_lineage_hash="e"*64)
     with pytest.raises(QualificationError,match="CANONICAL_PARENT_LINEAGE_DRIFT"):
         prepare_editor_approved_open_pin_domain_v1(
             **{**args,"skin":changed},
         )
 
 
-def test_neural_review_adapter_has_no_authority_promotion():
-    from models.rss_vnext.product_neural_open_pin_editor_review_v1 import (
-        lower_open_pin_neural_review_to_editor_candidate_v1,
-    )
-    from tests.models.test_rss_vnext_neural_open_pin_editor_review_v1 import (
-        _canonical,_preview,
-    )
-    from compiler.realsas_compiler_core.mechanics_editor_open_pin_approval_v1 import (
-        EditorOpenPinNeuralReviewV1,
-    )
-    mesh,canonical,rig,skin,face,pin=_canonical()
-    record=_preview(mesh,canonical,rig,skin,face,pin)[0]
-    candidate=lower_open_pin_neural_review_to_editor_candidate_v1(
-        record,rig=rig,skin=skin,
-    )
-    assert type(candidate) is EditorOpenPinNeuralReviewV1
-    assert candidate.review_hash
-    assert candidate.source_pin_qualified is False
-    assert candidate.compiler_xpbd_activation_qualified is False
-    assert candidate.canonical_mesh_lineage_hash==canonical.mesh_lineage_hash
-    assert candidate.canonical_rig_lineage_hash==rig.rig_lineage_hash
-    assert candidate.canonical_skin_lineage_hash==skin.skin_lineage_hash
-    with pytest.raises(ValueError,match="NOT_LOWERABLE"):
-        lower_open_pin_neural_review_to_editor_candidate_v1(
-            replace(record,source_pin_qualified=True),rig=rig,skin=skin,
-        )

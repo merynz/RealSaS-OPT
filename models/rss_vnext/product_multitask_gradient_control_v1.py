@@ -17,7 +17,7 @@ from torch import Tensor, nn
 
 SCHEMA = "RealSaS.RSSvNext.ProductMultitaskGradientRouting.v1"
 MODES = frozenset({"WEIGHTED_SUM", "BOUNDED_SHARED_PCGRAD"})
-FAMILIES = ("GEOMETRY", "SEMANTIC", "GRAPHICS", "JOINT_RENDER", "MECHANICS", "POSED_MSTAR_RENDER", "POSED_LAYER_CLEARANCE")
+FAMILIES = ("GEOMETRY", "SEMANTIC", "GRAPHICS", "JOINT_RENDER", "MECHANICS", "POSED_MSTAR_RENDER", "POSED_LAYER_CLEARANCE", "CONTROL_INTERVENTION")
 # Ownership is explicit. Introducing additional owners requires code review.
 SHARED_OWNERS = (
     "iris.scene.",
@@ -70,6 +70,7 @@ def admitted_product_task_losses_v1(
     anchor_face_weight: float,
     mstar_pose_raster_weight: float = 0.,
     native_layer_clearance_weight: float = 0.,
+    native_control_intervention_weight: float = 0.,
 ) -> dict[str, Tensor]:
     """Partition EXACTLY the qualified product total; never duplicate a subloss.
 
@@ -89,6 +90,7 @@ def admitted_product_task_losses_v1(
             component_udf_weight, graphics_rgb_weight,
             graphics_joint_ray_weight, anchor_face_weight,
             mstar_pose_raster_weight, native_layer_clearance_weight,
+            native_control_intervention_weight,
         )
     ):
         raise ValueError("RSS_VNEXT_MULTITASK_LOSS_WEIGHTS_INVALID")
@@ -151,6 +153,14 @@ def admitted_product_task_losses_v1(
             raise RuntimeError("RSS_VNEXT_MULTITASK_UNWEIGHTED_LAYER_CLEARANCE")
         groups["POSED_LAYER_CLEARANCE"] = native_layer_clearance_weight * checked(
             clearance_loss,"source_native_layer_clearance",
+        )
+
+    control_loss = getattr(result,"product_native_control_intervention_loss",None)
+    if control_loss is not None:
+        if native_control_intervention_weight <= 0:
+            raise RuntimeError("RSS_VNEXT_MULTITASK_UNWEIGHTED_CONTROL_INTERVENTION")
+        groups["CONTROL_INTERVENTION"] = native_control_intervention_weight * checked(
+            control_loss,"source_native_control_intervention",
         )
 
     mechanical = []

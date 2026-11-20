@@ -279,3 +279,15 @@ def test_open_pin_source_checkpoint_and_sparse_truth_on_live_seeded_trainer(
     court.test_real_seeded_pin_head_policy_never_invents_labels_and_is_checkpoint_pinned(
         monkeypatch,tmp_path,
     )
+
+
+@pytest.mark.parametrize("test_name",(
+    "test_neural_open_pins_become_reviewable_canonical_ids_not_solver_authority",
+    "test_exact_mstar_geometry_face_and_parent_hash_cannot_be_silently_rebound",
+    "test_cross_component_pin_body_or_no_face_abstains_not_fabricates_xpbd",
+))
+def test_neural_open_pin_editor_preview_uses_exact_compiler_mstar_identity(
+    test_name,
+):
+    from tests.models import test_rss_vnext_neural_open_pin_editor_review_v1 as court
+    getattr(court,test_name)()

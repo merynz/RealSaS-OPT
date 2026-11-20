@@ -24,6 +24,8 @@ are checked for size, SHA-256 and exact source identity. The original
 existing ProductProof original source-native preview CAS SHA (which was
 independently regenerated from the original upload).
 
+The raw face-owner sidecar uses signed int32 indices, so the ABI admits canonical meshes with more than 4,096 faces; actual face indices are still range-checked against the current mesh. It does not silently reuse the tiny regression fixture's face-count ceiling.
+
 ProductProof reconstructs `.rsedit` canonical Mesh/Rig/Skin and byte-for-byte
 rebuilds the full edited Graphics/UV archive from the original source preview.
 It reopens the typed raster archive, verifies all sidecars and actual changed

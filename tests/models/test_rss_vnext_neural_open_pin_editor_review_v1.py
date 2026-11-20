@@ -105,6 +105,7 @@ def test_neural_open_pins_become_reviewable_canonical_ids_not_solver_authority()
     bundle=_canonical()
     record=_preview(*bundle)[0]
     assert record.state=="REVIEW_READY_NEURAL_PIN_AND_HOST_HYPOTHESIS"
+    assert not record.requires_host_pin_binding_repair
     assert record.held_canonical_face==("MV:0","MV:1","MV:2")
     assert record.holder_canonical_face==("MV:3","MV:4","MV:5")
     assert record.candidate_pin_vertex_ids==("MV:0","MV:1")
@@ -180,7 +181,8 @@ def test_open_cloth_pins_do_not_require_skin_to_holder_chain():
     skin=replace(skin,rows=rows,skin_lineage_hash="")
     skin=replace(skin,skin_lineage_hash=canonical_skin_lineage_hash_v2(skin))
     record=_preview(mesh,canonical,rig,skin,face,pin)[0]
-    assert record.state=="REVIEW_READY_NEURAL_PIN_AND_HOST_HYPOTHESIS"
+    assert record.state=="REVIEW_NEEDS_EXPLICIT_HOST_PIN_BINDING_REPAIR"
     assert record.suggested_host_chain_id=="K0"
     assert record.candidate_pin_vertex_ids==("MV:0","MV:1")
+    assert record.requires_host_pin_binding_repair
     assert not record.compiler_xpbd_activation_qualified

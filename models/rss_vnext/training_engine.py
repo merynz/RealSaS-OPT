@@ -114,6 +114,7 @@ from .product_multitask_gradient_control_v1 import (
     admitted_product_task_losses_v1,
     prepare_product_gradient_route_v1,
 )
+from .product_multitask_curriculum_v1 import ProductSeededCurriculumV1
 
 
 @dataclass
@@ -471,6 +472,7 @@ class RSSvNextStructuralTrainer:
         preference: RSSvNextTopologyPreferenceConfig = RSSvNextTopologyPreferenceConfig(),
         gradient_court_policy: RSSvNextGradientCourtPolicyV1 = RSSvNextGradientCourtPolicyV1(),
         product_gradient_route_policy: ProductMultitaskGradientPolicyV1 = ProductMultitaskGradientPolicyV1(),
+        product_curriculum: ProductSeededCurriculumV1 = ProductSeededCurriculumV1(),
         phase_contract: RSSvNextStructuralTrainingPhaseContractV1 | None = None,
         axis_skin_code_warmup: RSSvNextAxisSkinCodeWarmupV1 = RSSvNextAxisSkinCodeWarmupV1(),
         scene_conditioning_policy: str = "RESEARCH_CALIBRATED_TWO_VIEW",
@@ -526,6 +528,8 @@ class RSSvNextStructuralTrainer:
         ):
             raise ValueError("RSS_VNEXT_TRAIN_UNKNOWN_GEOMETRY_PROFILE")
         seeded_mode = training_profile == "PRODUCT_SEEDED_IRIS_TESSA_V1"
+        if not isinstance(product_curriculum, ProductSeededCurriculumV1):
+            raise ValueError("RSS_VNEXT_CURRICULUM_POLICY_INVALID")
         product_gradient_route_policy.validate()
         if product_gradient_route_policy.enabled and not seeded_mode:
             raise ValueError("RSS_VNEXT_MULTITASK_ROUTING_PRODUCT_SEEDED_ONLY")
@@ -597,6 +601,15 @@ class RSSvNextStructuralTrainer:
         if not isinstance(product_axis_mira_weights,ProductSeededAXISMIRAWeightsV1):
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_MIRA_PHASE_POLICY")
         product_axis_mira_weights.validate()
+        product_curriculum.validate(
+            seeded_mode=seeded_mode,
+            semantic_weights=product_semantic_weights,
+            axis_mira_weights=product_axis_mira_weights,
+            graphics_rgb_weight=product_graphics_rgb_weight,
+            graphics_joint_ray_weight=product_joint_ray_weight,
+            component_udf_weight=component_udf_weight,
+            anchor_face_weight=product_anchor_face_weight,
+        )
         if product_axis_mira_weights.chain_skin>0 and not trusted_chain_teacher_registry:
             raise ValueError("RSS_VNEXT_CHAIN_SKIN_REQUIRES_SOURCE_NATIVE_REGISTRY")
         if product_axis_mira_weights.enabled and (
@@ -776,6 +789,7 @@ class RSSvNextStructuralTrainer:
         self.preference = preference
         self.gradient_court_policy = gradient_court_policy
         self.product_gradient_route_policy = product_gradient_route_policy
+        self.product_curriculum = product_curriculum
         self.phase_contract = phase_contract
         self.axis_skin_code_warmup = axis_skin_code_warmup
         # Training/inference mesh ABI is versioned and CHECKPOINT-BOUND.
@@ -844,6 +858,8 @@ class RSSvNextStructuralTrainer:
             "gradient_court_policy": asdict(gradient_court_policy),
             **({"product_gradient_route_policy": asdict(product_gradient_route_policy)}
                if product_gradient_route_policy.enabled else {}),
+            **({"product_curriculum": asdict(product_curriculum)}
+               if product_curriculum.stage != "COMPATIBILITY_UNSCHEDULED" else {}),
             **({"phase_contract": asdict(phase_contract)} if phase_contract is not None else {}),
             **({"axis_skin_code_warmup": asdict(axis_skin_code_warmup)} if axis_skin_code_warmup.enabled else {}),
         }, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf8")).hexdigest()
@@ -3419,6 +3435,33 @@ class RSSvNextStructuralTrainer:
         self.global_step += 1
         result.gradient_norm = grad_norm
         return result
+
+    def source_supervision_requirements_v1(self) -> dict:
+        """Loss-specific Foundry handoff, not a corpus admission receipt."""
+        if self.training_profile != "PRODUCT_SEEDED_IRIS_TESSA_V1":
+            raise ValueError("RSS_VNEXT_SUPERVISION_MATRIX_PRODUCT_SEEDED_ONLY")
+        from .product_multitask_curriculum_v1 import SCHEMA as CURRICULUM_SCHEMA
+        return {
+            "schema": CURRICULUM_SCHEMA,
+            "stage": self.product_curriculum.stage,
+            "dataset_manifest_sha256": self.dataset_manifest_sha256,
+            "objective_policy_sha256": self.objective_policy_sha256,
+            "loss_required_source_families": dict(
+                self.product_curriculum.required_source_teacher_families(
+                    semantic_weights=self.product_semantic_weights,
+                    axis_mira_weights=self.product_axis_mira_weights,
+                    graphics_rgb_weight=self.product_graphics_rgb_weight,
+                    graphics_joint_ray_weight=self.product_joint_ray_weight,
+                    component_udf_weight=self.component_udf_weight,
+                    anchor_face_weight=self.product_anchor_face_weight,
+                )
+            ),
+            "compiler_acceptance_gaps": list(
+                self.product_curriculum.compiler_acceptance_gaps()
+            ),
+            "model_release_ready": False,
+            "product_proof_ready": False,
+        }
 
     def export_phase_handoff(
         self, path: str | Path, *, target_kind: str = "STRUCTURAL",

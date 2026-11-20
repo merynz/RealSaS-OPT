@@ -183,3 +183,39 @@ def test_qualified_native_mstar_pose_raster_in_required_model_ci(
     # The mandatory model source gate runs this file; no uncollected new test.
     from tests.models import test_rss_vnext_product_mstar_pose_graphics_v1 as court
     getattr(court, test_name)(monkeypatch)
+
+
+@pytest.mark.parametrize("test_name", (
+    "test_source_same_mstar_rest_and_pose_has_zero_clearance_loss",
+    "test_collapse_gradients_reach_predicted_garment_and_body_mstar_vertices",
+    "test_nonindependent_or_stale_source_native_pair_receipt_is_refused",
+    "test_unknown_pose_mask_and_source_body_penetration_do_not_teach_as_valid",
+))
+def test_native_body_garment_clearance_in_required_seeded_source_gate(test_name):
+    from tests.models import test_rss_vnext_product_native_layer_clearance_v1 as court
+    getattr(court, test_name)()
+
+
+def test_native_clearance_task_partition_respects_true_product_total():
+    from types import SimpleNamespace
+    from models.rss_vnext.product_multitask_gradient_control_v1 import (
+        admitted_product_task_losses_v1,
+    )
+    x=torch.tensor([.3,-.2],requires_grad=True)
+    geo=x.square().sum()
+    clearance=(x[0]-.5).square()
+    result=SimpleNamespace(
+        total_loss=geo+.4*clearance,seeded_tessa_loss=geo,
+        component_udf_loss=None,product_semantic_loss=None,
+        graphics_source_rgb_loss=None,realsas_joint_slrm_loss=None,
+        product_mstar_pose_raster_loss=None,
+        product_native_layer_clearance_loss=clearance,
+        product_axis_mira_loss=None,anchor_face_correspondence_loss=None,
+    )
+    groups=admitted_product_task_losses_v1(
+        result,component_udf_weight=0.,graphics_rgb_weight=0.,
+        graphics_joint_ray_weight=0.,anchor_face_weight=0.,
+        native_layer_clearance_weight=.4,
+    )
+    assert set(groups)=={"GEOMETRY","POSED_LAYER_CLEARANCE"}
+    torch.testing.assert_close(sum(groups.values()),result.total_loss)

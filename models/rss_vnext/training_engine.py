@@ -2787,6 +2787,10 @@ class RSSvNextStructuralTrainer:
                 "product_native_control_intervention_teacher",
                 "product_native_control_intervention_admission_key",
             } if self.product_native_control_intervention_weight>0 else set()),
+            *({
+                "product_open_pin_vertex_target",
+                "product_open_pin_vertex_admission_key",
+            } if self.product_open_pin_vertex_weight>0 else set()),
         }
         unexpected = []
         for name, value in vars(batch).items():
@@ -3331,6 +3335,43 @@ class RSSvNextStructuralTrainer:
             anchor_held = qualified.eligible_held
             anchor_holder = qualified.eligible_holder
             anchor_negative = qualified.eligible_negative
+        pin_requested=(batch.product_open_pin_vertex_target is not None
+                       or bool(batch.product_open_pin_vertex_admission_key))
+        if pin_requested and (
+            self.product_open_pin_vertex_weight<=0 or not requested_anchor
+            or batch.axis_teacher_sequence is None
+            or batch.product_open_pin_vertex_target is None
+            or not batch.product_open_pin_vertex_admission_key
+        ):
+            raise ValueError("RSS_VNEXT_OPEN_PIN_VERTEX_SOURCE_FACE_OR_TEACHER_MISSING")
+        pin_out=None
+        if pin_requested:
+            # Same AXIS forward and final M* as the admitted attachment-face
+            # loss; no separate teacher mesh or inferred socket training input.
+            pin_out=self.model.open_pin_vertex(
+                mesh=mesh,axis_hidden=axis_hidden,
+                axis_sequence=batch.axis_teacher_sequence,
+            )
+        pin_loss,n_pin_labels=source_native_open_pin_vertex_loss_v1(
+            output=pin_out,teacher=batch.product_open_pin_vertex_target,
+            admission_key=batch.product_open_pin_vertex_admission_key,
+            trusted_registry=self.trusted_product_open_pin_vertex_registry,
+            dataset_manifest_sha256=self.dataset_manifest_sha256,
+            candidate_mstar_topology_address_sha256=(
+                seeded_mstar_teacher_address_sha256_v1(mesh.seeded_surface)
+            ),
+            source_asset_sha256=teacher.source_asset_sha256,
+            source_qualification_key=batch.source_qualification_key,
+            original_rgba_sha256=source_surface_tensor_sha256(batch.rgba),
+            original_camera_sha256=source_surface_tensor_sha256(
+                batch.camera_features
+            ),
+            combined_generation_checkpoint_sha256=
+                batch.product_generation_checkpoint_sha256,
+        )
+        if (self.product_open_pin_vertex_weight>0 and pin_loss is None
+            and not self.allow_sparse_qualified_source_batches):
+            raise ValueError("RSS_VNEXT_OPEN_PIN_VERTEX_ENABLED_NO_SOURCE")
         component = (
             self._component_udf_objective_v1(batch,state)
             if self.component_udf_enabled
@@ -3403,6 +3444,8 @@ class RSSvNextStructuralTrainer:
             joint_total=joint_total+axis_mira.total
         if anchor_loss is not None:
             joint_total=joint_total+self.product_anchor_face_weight*anchor_loss
+        if pin_loss is not None:
+            joint_total=joint_total+self.product_open_pin_vertex_weight*pin_loss
         if semantic.total is not None:
             joint_total=joint_total+semantic.total
         if rgb_loss is not None:
@@ -3453,6 +3496,8 @@ class RSSvNextStructuralTrainer:
                 axis_mira.eligible_pose_faces if axis_mira.dynamic is not None else 0
             ),
             anchor_face_correspondence_loss=anchor_loss,
+            product_open_pin_vertex_loss=pin_loss,
+            eligible_open_pin_vertex_labels=n_pin_labels,
             eligible_anchor_held_faces=anchor_held,
             eligible_anchor_holder_faces=anchor_holder,
             eligible_anchor_negative_faces=anchor_negative,

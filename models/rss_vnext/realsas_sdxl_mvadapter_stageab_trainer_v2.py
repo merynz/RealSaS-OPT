@@ -162,6 +162,9 @@ class SourceSDXLStageABOptimizerV2:
                 require_pinned_official_mvadapter_schedule_v2(noise_scheduler)
             )
         self.source_manifest_sha256=source_manifest_sha256
+        # Common pilot loader checks this exact name for cohort ownership;
+        # without it A/B silently bypass the shared TRAIN-only manifest gate.
+        self.dataset_manifest_sha256=source_manifest_sha256
         self.pretrained_source_sha256=pretrained_source_sha256
         self.source_vae_sha256=source_vae_sha256
         self.pretrained_mv_adapter_sha256=pretrained_mv_adapter_sha256

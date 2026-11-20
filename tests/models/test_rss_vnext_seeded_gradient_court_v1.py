@@ -169,3 +169,17 @@ def test_multitask_router_extended_properties_in_mandatory_source_gate(case):
         test_rss_vnext_product_multitask_gradient_control_v1 as cases,
     )
     getattr(cases, case)()
+
+
+@pytest.mark.parametrize("test_name", (
+    "test_canonical_surface_appearance_stays_stable_under_pose_depth_translation",
+    "test_posed_mstar_raster_backpropagates_to_geometry_and_graphics",
+    "test_independently_admitted_pose_raster_loss_is_differentiable",
+    "test_pose_teacher_tampering_or_invented_motion_is_rejected",
+))
+def test_qualified_native_mstar_pose_raster_in_required_model_ci(
+    monkeypatch, test_name,
+):
+    # The mandatory model source gate runs this file; no uncollected new test.
+    from tests.models import test_rss_vnext_product_mstar_pose_graphics_v1 as court
+    getattr(court, test_name)(monkeypatch)

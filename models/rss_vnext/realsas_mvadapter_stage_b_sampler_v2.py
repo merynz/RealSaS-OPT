@@ -255,7 +255,7 @@ def sample_stage_b_paired_rgb_normal_v2(
     latent=torch.randn(
         (b,2,6,4,h//8,w//8),
         generator=generator,device=canonical_rgba.device,
-        dtype=ref.dtype,
+        dtype=next(pipe.unet.parameters()).dtype,
     )
     pipe.scheduler.set_timesteps(steps,device=canonical_rgba.device)
     latent*=float(pipe.scheduler.init_noise_sigma)

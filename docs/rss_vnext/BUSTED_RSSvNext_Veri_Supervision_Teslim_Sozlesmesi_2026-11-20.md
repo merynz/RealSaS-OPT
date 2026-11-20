@@ -287,6 +287,18 @@ Bu alan **yalnız** eğitimde `product_native_layer_clearance_weight>0` etkinse 
 
 Kod/sözleşme: [native clearance learner](https://github.com/merynz/RealSaS-OPT/blob/main/models/rss_vnext/product_native_layer_clearance_v1.py), [güvenlik/öğretim notu](https://github.com/merynz/RealSaS-OPT/blob/main/docs/research/RSS_VNEXT_SOURCE_NATIVE_BODY_GARMENT_CLEARANCE_20261120.md).
 
+## 14. Koşullu teacher — Tek kontrol müdahalesiyle kanat/pelerin hareket bağımsızlığı (2026-11-20)
+
+Bu veri gereksinimi **yalnız** `product_native_control_intervention_weight > 0` ise vardır. Bir asset'te native kaynak kontrol müdahalesi bulunmuyorsa `UNKNOWN` kalır; sıfır hareket, yanlış skin veya `NO_ATTACHMENT` öğretmeni uydurulmaz.
+
+- Kaynak rig'de kaydedilmiş **tek ve bağımsız artist control** olayının `source_control_event_sha256` değeri; `SOURCE_BRANCH_ONLY` veya `SOURCE_HOST_ONLY` kapsamı, orijinal `baseline_pose_index` ve `intervention_pose_index`. `source_pose_matrices [1,P,J,4,4]` içindeki skin-matrix joint farkları, **tek kontrol etkinleştirildi** iddiasını kendi başına doğrulamaz; ayrı source-authored event ledger şarttır.
+- `changed_skin_joint_matrix_mask [J]` gerçek joint-matrix farklılığından doğrulanır. Final M* adresindeki kaynak destekli `responding_vertex_ids [K]` (gerçekte hareket etmiş) ve `protected_vertex_ids [Q]` (gerçekte sabit kalmış) ayrı, kesişimsiz ve yalnız source-native face/barycentric transport ile elde edilmiş olmalı. Student'ın en yakın bone/vertex seçimi teacher olamaz.
+- Tüm seçilmiş vertex'ler için iki native pozda da `source_pose_mask` desteği; kaynakta yanıltıcı/eksik izleme varsa ABSTAIN. Rest ve iki pozun `source_candidate_posed` koordinatları, ilgili `source_pose_matrices`, native transport SHA ve son M* topology SHA eşleşmeli.
+- Trusted launcher registry, orijinal 2 RGBA SHA, generator checkpoint SHA, dataset/source rights, `source_control_event_sha256`, scope, pair indeksleri ve pose/mask/changed joint/active–protected vertex ID SHA değerlerini bağımsız saklar; `source_authored_exactly_one_control_changed=True` ve `source_response_observed_independently_of_student=True` kayıtlarını kaynak doğrulamasından üretir, model tahmininden değil.
+- Bu teacher, **kinematik hareket yayılımı** ve bağımsızlık öğretir. Kıyafet pin'i, wing material, strut/membrane sınıfı, saklı doku, XPBD rijitliği veya fizik/contact proof üretmez; kaynakça bilinmeyen alanı doldurmak için kullanılamaz.
+
+Makine sözleşmesi: `SourceNativeControlInterventionTeacherV1`, `qualified_native_control_intervention_loss_v1()`; teknik açıklama [Native Control Intervention Trainer](https://github.com/merynz/RealSaS-OPT/blob/main/docs/research/RSS_VNEXT_NATIVE_CONTROL_INTERVENTION_TRAINER_20261120.md). Eğitimde kabul edilen örneklerin maskeleri ve kayıpları, Trainer `source_supervision_requirements_v1()` ve Gradient Court raporunda denetlenmelidir.
+
 ---
 
 **Devir cümlesi:** *Öğretmen paketlerimiz, modeli doğru cevaba zorla götüren gizli input değildir; kaynakta gerçekten ölçülmüş cevapları, aynı tek puppet'ın geometri–rig–skin–Graphics ilişkilerini öğrenebilmesi ve bağımsız doğrulayabilmesi için kayıpsız, maskeli ve adresli sunar.*

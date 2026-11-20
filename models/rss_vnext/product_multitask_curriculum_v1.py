@@ -32,6 +32,7 @@ class ProductSeededCurriculumV1:
         anchor_face_weight: float,
         mstar_pose_raster_weight: float = 0.,
         native_layer_clearance_weight: float = 0.,
+        native_control_intervention_weight: float = 0.,
     ) -> None:
         if self.stage not in STAGES:
             raise ValueError("RSS_VNEXT_CURRICULUM_STAGE_INVALID")
@@ -44,6 +45,11 @@ class ProductSeededCurriculumV1:
             or axis_mira_weights.source_skin <= 0
         ):
             raise ValueError("RSS_VNEXT_CURRICULUM_LAYER_CLEARANCE_REQUIRES_NATIVE_POSE")
+        if native_control_intervention_weight > 0 and (
+            not seeded_mode or axis_mira_weights.posed_surface <= 0
+            or axis_mira_weights.source_skin <= 0
+        ):
+            raise ValueError("RSS_VNEXT_CURRICULUM_CONTROL_INTERVENTION_NEEDS_NATIVE_POSES")
         if self.stage == "COMPATIBILITY_UNSCHEDULED":
             return
         if not seeded_mode:
@@ -91,6 +97,7 @@ class ProductSeededCurriculumV1:
         component_udf_weight: float, anchor_face_weight: float,
         mstar_pose_raster_weight: float = 0.,
         native_layer_clearance_weight: float = 0.,
+        native_control_intervention_weight: float = 0.,
     ) -> dict[str, Mapping[str, str]]:
         """Loss->foundry witness; source observable != generated hypothesis.
 
@@ -156,6 +163,11 @@ class ProductSeededCurriculumV1:
                 "authority": "SOURCE_NATIVE_POSE_ZBUFFER_RGB_ALPHA_CAMERA_AND_MSTAR_ADDRESS",
                 "purpose": "Canonical-material first-hit M* posed raster; no teacher RGB into H",
             }
+        if native_control_intervention_weight > 0:
+            result["source_native_one_control_intervention"] = {
+                "authority": "SOURCE_AUTHORED_ONE_CONTROL_BASELINE_AND_RESPONSE_POSES",
+                "purpose": "Verified changed joints, responding/protected final M* vertices, no motion leakage",
+            }
         if native_layer_clearance_weight > 0:
             result["source_native_garment_body_pose_clearance"] = {
                 "authority": "SOURCE_OUTWARD_SIGNED_BODY_NATIVE_BARYCENTRIC_POSE_PAIRS",
@@ -199,13 +211,16 @@ class ProductSeededCurriculumV1:
     def compiler_acceptance_gaps(
         self, *, mstar_pose_raster_weight: float = 0.,
         native_layer_clearance_weight: float = 0.,
+        native_control_intervention_weight: float = 0.,
     ) -> tuple[str, ...]:
         """Not extra source truths. Do not silently train what cannot be known."""
         return (
             ("POSED_MSTAR_STAGE3_TEACHER_FORCED_NOT_POST_XPBD_OR_FREE_RUNNING"
              if mstar_pose_raster_weight > 0 else
              "PRODUCT_MSTAR_STAGE3_NATIVE_MOVING_RGBA_RASTER_NOT_CONNECTED"),
-            "UNSEEN_TWO_SOURCE_FREE_RUNNING_MSTAR_AXIS_MIRA_NOT_QUALIFIED",
+            ("CONTROL_INTERVENTION_TEACHER_FORCED_NOT_UNSEEN_FREE_RUNNING"
+             if native_control_intervention_weight>0 else
+             "UNSEEN_TWO_SOURCE_FREE_RUNNING_MSTAR_AXIS_MIRA_NOT_QUALIFIED"),
             ("SOURCE_NATIVE_GARMENT_CLEARANCE_TEACHER_FORCED_NOT_XPBD_CONTACT"
              if native_layer_clearance_weight>0 else
              "GARMENT_BODY_CLEARANCE_AND_POST_PHYSICS_RASTER_NOT_QUALIFIED"),

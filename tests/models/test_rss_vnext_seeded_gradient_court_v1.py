@@ -234,3 +234,27 @@ def test_legacy_untyped_seeded_layer_penetration_teacher_is_not_implicitly_accep
     )
     with pytest.raises(ValueError,match="LEGACY_LAYER_PENETRATION_TEACHER_RETIRED"):
         _validate_source_teacher(forbidden)
+
+
+@pytest.mark.parametrize("test_name", (
+    "test_matching_source_branch_only_pose_has_zero_response_loss",
+    "test_missed_wing_response_and_body_skin_bleeding_backpropagate_independently",
+    "test_source_author_control_receipt_and_changed_joint_mask_are_not_inferred",
+    "test_unverified_source_response_and_unknown_vertex_pose_abstain",
+    "test_intervention_loss_is_eighth_distinct_training_family",
+    "test_native_intervention_backpropagates_into_actual_mira_lbs_skin_weights",
+))
+def test_qualified_native_control_response_in_required_model_source_gate(
+    test_name,
+):
+    from tests.models import test_rss_vnext_native_control_intervention_v1 as court
+    getattr(court,test_name)()
+
+
+def test_control_intervention_launch_policy_and_resume_on_live_seeded_trainer(
+    monkeypatch, tmp_path,
+):
+    from tests.models import test_rss_vnext_native_control_intervention_v1 as court
+    court.test_product_seeded_trainer_exposes_conditional_truth_and_pins_resume(
+        monkeypatch, tmp_path,
+    )

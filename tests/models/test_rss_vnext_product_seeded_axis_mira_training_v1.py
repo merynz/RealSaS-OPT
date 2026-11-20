@@ -52,7 +52,8 @@ def _rig_case(monkeypatch):
     def make(*,weights=None,registry_override=None,native_skin_registry=None,
              anchor_weight=0.,anchor_registry=None,sparse=False,
              semantic_weights=None,role_registry=None,
-             graphics_weight=0.,graphics_registry=None):
+             graphics_weight=0.,graphics_registry=None,
+             control_weight=0.,control_registry=None):
         if weights is None:
             weights=ProductSeededAXISMIRAWeightsV1(axis_program=1.)
         return RSSvNextStructuralTrainer(
@@ -83,6 +84,8 @@ def _rig_case(monkeypatch):
             } if semantic_weights is not None else {}),
             product_graphics_rgb_weight=graphics_weight,
             trusted_graphics_rgb_registry=graphics_registry,
+            product_native_control_intervention_weight=control_weight,
+            trusted_product_native_control_intervention_registry=control_registry,
         )
     return net,batch,make,receipt,key
 

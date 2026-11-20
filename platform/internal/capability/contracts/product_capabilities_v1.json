@@ -563,7 +563,18 @@
         "raw_mesh_uv_texture_atlas_replay_required": true,
         "input_raw_native_preview_artifact_type": "RealSaS.RSSvNextNativeInteractivePuppetPreview",
         "input_raw_native_preview_schema_version": "v1",
-        "raw_native_preview_independent_replay_required": true
+        "raw_native_preview_independent_replay_required": true,
+        "input_native_user_edit_revision_artifact_type": "RealSaS.RSSvNextCanonicalUserEditRevision",
+        "input_native_user_edit_revision_schema_version": "v1",
+        "input_native_user_edit_preview_artifact_type": "RealSaS.RSSvNextEditedGraphicsPreview",
+        "input_native_user_edit_preview_schema_version": "v1",
+        "input_native_user_edit_raster_artifact_type": "RealSaS.RSSvNextCanonicalUserEditNativeRasterBundle",
+        "input_native_user_edit_raster_schema_version": "v1",
+        "input_native_user_edit_court_artifact_type": "RealSaS.RSSvNextCanonicalUserEditNativeExecutionCourt",
+        "input_native_user_edit_court_schema_version": "v1",
+        "native_user_edit_four_artifact_set_optional_but_atomic": true,
+        "native_user_edit_independent_replay_host_only": true,
+        "native_user_edit_sample_cannot_mint_product_revision": true
       }
     }
   }

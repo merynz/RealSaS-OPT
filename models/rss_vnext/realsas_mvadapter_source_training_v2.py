@@ -41,6 +41,7 @@ class MVAdapterSourceStageBBatchV2:
     alpha: Tensor                # B,6,1,H,W — independent source alpha
     valid: Tensor                # B,6,1,H,W — qualified pixels, NOT fake masks
     plucker_controls: Tensor     # B,6,6,H,W — actual same six virtual cameras
+    target_cameras: Tensor       # B,6,13 authoritative RSS v1 virtual bank
     prompt_embeds: Tensor        # B,T,2048 — frozen native text encoder outputs
     pooled_text_embeds: Tensor   # B,1280 — frozen native text encoder output
     time_ids: Tensor             # B,6 SDXL actual 6 scalar time/size ids
@@ -59,6 +60,7 @@ class MVAdapterSourceStageBBatchV2:
             or self.alpha.shape!=(b,6,1,h,w)
             or self.valid.shape!=(b,6,1,h,w)
             or self.plucker_controls.shape!=(b,6,6,h,w)
+            or self.target_cameras.shape!=(b,6,13)
             or self.prompt_embeds.ndim!=3
             or self.prompt_embeds.shape[0]!=b
             or self.prompt_embeds.shape[-1]!=2048
@@ -71,8 +73,8 @@ class MVAdapterSourceStageBBatchV2:
             raise ValueError("RSS_VNEXT_MVADAPTER_STAGE_B_SOURCE_RENDER_ABI")
         tensors=(
             source,self.rgb,self.normal_encoded_rgb,self.alpha,self.valid,
-            self.plucker_controls,self.prompt_embeds,self.pooled_text_embeds,
-            self.time_ids,
+            self.plucker_controls,self.target_cameras,
+            self.prompt_embeds,self.pooled_text_embeds,self.time_ids,
         )
         if any(
             not torch.is_floating_point(t) or t.device!=source.device
@@ -83,6 +85,16 @@ class MVAdapterSourceStageBBatchV2:
             self.plucker_controls,
         )) or not bool((self.valid>0).any()):
             raise ValueError("RSS_VNEXT_MVADAPTER_STAGE_B_PIXELS_OR_SOURCE_NONFINITE")
+        from .realsas_mvadapter_camera_bridge_v2 import (
+            mv_adapter_controls_from_13d_virtual_cameras_v2,
+        )
+        actual=mv_adapter_controls_from_13d_virtual_cameras_v2(
+            self.target_cameras,height=h,width=w,
+        )
+        if not torch.allclose(
+            self.plucker_controls,actual,atol=1e-6,rtol=0,
+        ):
+            raise ValueError("RSS_VNEXT_MVADAPTER_STAGE_B_CAMERA_CONTROL_MISMATCH")
 
 
 @dataclass

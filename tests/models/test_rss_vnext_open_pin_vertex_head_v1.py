@@ -83,7 +83,8 @@ def _case():
         "physical_material_or_xpbd_authority":False,
     }
     ledger={"native-open-pin":receipt}
-    def train(*, labels=teacher,output=out, registry=ledger):
+    def train(*, labels=teacher,output=out, registry=ledger,
+              faces=source_faces,face_mask=source_face_mask):
         return source_native_open_pin_vertex_loss_v1(
             output=output,teacher=labels,
             admission_key="native-open-pin",
@@ -92,8 +93,8 @@ def _case():
             candidate_mstar_topology_address_sha256="8"*64,
             source_asset_sha256="a"*64,
             source_qualification_key="source-native-open-sheet",
-            source_anchor_face_targets=source_faces,
-            source_anchor_face_mask=source_face_mask,
+            source_anchor_face_targets=faces,
+            source_anchor_face_mask=face_mask,
             original_rgba_sha256="5"*64,
             original_camera_sha256="6"*64,
             combined_generation_checkpoint_sha256="7"*64,
@@ -258,3 +259,18 @@ def test_real_seeded_pin_head_policy_never_invents_labels_and_is_checkpoint_pinn
         make(weights=teacher,sparse=True,anchor_weight=1.,
              anchor_registry=anchor_registry,
              pin_weight=.5).objective(batch)
+
+
+def test_native_open_pin_held_component_cannot_change_without_source_reindex():
+    _,_,_,mesh,out,teacher,ledger,train=_case()
+    with pytest.raises(ValueError,match="HELD_COMPONENT_DRIFT"):
+        train(faces=torch.tensor([[1,0]],dtype=torch.long))
+    with pytest.raises(ValueError,match="HELD_HOLDER_REQUIRED"):
+        train(face_mask=torch.tensor([[True,False]],dtype=torch.bool))
+    # Even a fabricated registry with self-consistent source face hashes
+    # cannot promote a student OPEN garment vertex belonging to the holder.
+    swapped=torch.tensor([[1,0]],dtype=torch.long)
+    forged={"native-open-pin":dict(ledger["native-open-pin"])}
+    forged["native-open-pin"]["source_anchor_face_targets_sha256"]=_digest_tensor(swapped)
+    with pytest.raises(ValueError,match="HELD_COMPONENT_DRIFT"):
+        train(faces=swapped,registry=forged)

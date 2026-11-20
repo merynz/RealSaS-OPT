@@ -213,10 +213,11 @@ def sample_trained_stage_a_canonical_v2(
     prompt=prompt_embeds.repeat_interleave(2,dim=0)
     pooled=pooled_text_embeds.repeat_interleave(2,dim=0)
     tids=time_ids.repeat_interleave(2,dim=0)
+    unet_dtype=next(unet.parameters()).dtype
     generator=torch.Generator(device=observed_tokens.device).manual_seed(seed)
     latents=torch.randn(
         b*2,4,height//8,width//8,generator=generator,
-        device=observed_tokens.device,dtype=context.dtype,
+        device=observed_tokens.device,dtype=next(unet.parameters()).dtype,
     )
     scheduler.set_timesteps(steps,device=observed_tokens.device)
     latents*=float(scheduler.init_noise_sigma)
@@ -224,8 +225,9 @@ def sample_trained_stage_a_canonical_v2(
         noisy=scheduler.scale_model_input(latents,t)
         noise=predict_sdxl_unet_noise_from_two_images_v1(
             unet=unet,noisy_latents=noisy,timestep=t,
-            text_context=prompt,paired_image_context=context,
-            pooled_text_embedding=pooled,time_ids=tids,
+            text_context=prompt.to(unet_dtype),
+            paired_image_context=context.to(unet_dtype),
+            pooled_text_embedding=pooled.to(unet_dtype),time_ids=tids,
         )
         latents=scheduler.step(
             noise,t,latents,return_dict=True,

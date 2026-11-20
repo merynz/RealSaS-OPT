@@ -225,10 +225,10 @@ def prepare_product_gradient_route_v1(
     back to the exact weighted sum if first-order *total* descent is lost.
     """
     policy.validate()
-    if not policy.enabled or global_step % policy.every_n_steps:
-        return None
     if type(global_step) is not int or global_step < 0:
         raise ValueError("RSS_VNEXT_MULTITASK_GLOBAL_STEP_INVALID")
+    if not policy.enabled or global_step % policy.every_n_steps:
+        return None
     if not set(task_losses).issubset(FAMILIES):
         raise ValueError("RSS_VNEXT_MULTITASK_UNKNOWN_LOSS_FAMILY")
     active = [

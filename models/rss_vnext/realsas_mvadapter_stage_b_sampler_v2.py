@@ -47,6 +47,7 @@ class MVAdapterPairedTaskCheckpointV2:
     checkpoint_sha256:str
     pretrained_base_unet_sha256:str
     pretrained_mv_adapter_sha256:str
+    training_noise_schedule_sha256:str
     vae_checkpoint_sha256:str
     qualified_corpus_sha256:str
     trained_steps:int
@@ -62,6 +63,7 @@ class MVAdapterPairedTaskCheckpointV2:
             or any(not _sha(v) for v in (
                 self.checkpoint_sha256,self.pretrained_base_unet_sha256,
                 self.pretrained_mv_adapter_sha256,
+                self.training_noise_schedule_sha256,
                 self.vae_checkpoint_sha256,self.qualified_corpus_sha256,
             ))
             or self.teacher_scope!="SOURCE_3D_RENDERED_NOT_GENERATED_TEACHER"
@@ -90,6 +92,8 @@ def load_exact_stage_b_task_checkpoint_v2(
             !=receipt.pretrained_base_unet_sha256
         or data.get("pretrained_mv_adapter_sha256")
             !=receipt.pretrained_mv_adapter_sha256
+        or data.get("training_noise_schedule_sha256")
+            !=receipt.training_noise_schedule_sha256
         or data.get("vae_checkpoint_sha256")!=receipt.vae_checkpoint_sha256
         or getattr(pipe.vae,"_rss_vnext_vae_ancestor_sha256",None)
             !=receipt.vae_checkpoint_sha256
@@ -127,7 +131,7 @@ def write_stage_b_task_weights_v2(
     task_heads:MVAdapterRGBNormalTaskHeadsV2,
     trained_steps:int,pretrained_base_unet_sha256:str,
     pretrained_mv_adapter_sha256:str,vae_checkpoint_sha256:str,
-    qualified_corpus_sha256:str,
+    training_noise_schedule_sha256:str,qualified_corpus_sha256:str,
 )->MVAdapterPairedTaskCheckpointV2:
     """Weights-only output after REAL optimizer steps; no ModelRelease claim.
 
@@ -138,7 +142,8 @@ def write_stage_b_task_weights_v2(
         type(trained_steps) is not int or trained_steps<=0
         or any(not _sha(x) for x in (
             pretrained_base_unet_sha256,pretrained_mv_adapter_sha256,
-            vae_checkpoint_sha256,qualified_corpus_sha256,
+            vae_checkpoint_sha256,training_noise_schedule_sha256,
+            qualified_corpus_sha256,
         ))
     ):
         raise ValueError("RSS_VNEXT_MVADAPTER_STAGE_B_UNTRAINED_SAVE_FORBIDDEN")
@@ -155,6 +160,7 @@ def write_stage_b_task_weights_v2(
         "pretrained_base_unet_sha256":pretrained_base_unet_sha256,
         "pretrained_mv_adapter_sha256":pretrained_mv_adapter_sha256,
         "vae_checkpoint_sha256":vae_checkpoint_sha256,
+        "training_noise_schedule_sha256":training_noise_schedule_sha256,
         "qualified_corpus_sha256":qualified_corpus_sha256,
         "mv_ref_adapter":native,
         "cond_encoder":{
@@ -186,6 +192,7 @@ def write_stage_b_task_weights_v2(
         pretrained_base_unet_sha256=pretrained_base_unet_sha256,
         pretrained_mv_adapter_sha256=pretrained_mv_adapter_sha256,
         vae_checkpoint_sha256=vae_checkpoint_sha256,
+        training_noise_schedule_sha256=training_noise_schedule_sha256,
         qualified_corpus_sha256=qualified_corpus_sha256,
         trained_steps=trained_steps,
     )
@@ -218,6 +225,11 @@ def sample_stage_b_paired_rgb_normal_v2(
     hypotheses, never native teachers.
     """
     receipt.validate()
+    from .realsas_mvadapter_shift_snr_training_v2 import (
+        schedule_alphas_sha256_v1,
+    )
+    if schedule_alphas_sha256_v1(pipe.scheduler)!=receipt.training_noise_schedule_sha256:
+        raise RuntimeError("RSS_VNEXT_MVADAPTER_STAGE_B_INFERENCE_NOISE_SCHEDULE_DRIFT")
     if (
         getattr(pipe.vae,"_rss_vnext_vae_ancestor_sha256",None)
             !=receipt.vae_checkpoint_sha256

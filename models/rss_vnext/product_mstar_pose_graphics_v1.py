@@ -265,7 +265,7 @@ def render_posed_indexed_mstar_v1(
         face_index = rast[..., 3].long() - 1
         if not bool((face_index >= 0).any()):
             raise RuntimeError("RSS_VNEXT_MSTAR_POSE_RASTER_NO_VISIBLE_SOURCE_SURFACE")
-        role = face_role_prob[face_index.clamp_min(0)].unsqueeze(0) * coverage
+        role = face_role_prob[face_index.clamp_min(0)] * coverage
         rgba = torch.cat((color * coverage, coverage), dim=-1)
         smooth = raster_backend.antialias(rgba, rast, clip, tri).clamp(0., 1.)
         alpha = smooth[..., 3:4]

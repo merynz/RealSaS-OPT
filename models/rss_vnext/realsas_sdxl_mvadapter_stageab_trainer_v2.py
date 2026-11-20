@@ -67,9 +67,27 @@ def _param_grad_audit(groups:dict[str,tuple[nn.Parameter,...]])->dict[str,float]
     return results
 
 
-def _optimizer_binding(groups:dict[str,tuple[nn.Parameter,...]])->str:
-    counts={name:len(params) for name,params in groups.items()}
-    return sha256(json.dumps(counts,sort_keys=True,
+def _optimizer_binding(
+    groups:dict[str,tuple[nn.Parameter,...]],
+    named_parameters:dict[int,str],
+)->str:
+    # Exact stage ABI, not just tensor *counts*: AdamW moment state follows
+    # the registered parameter ORDER and tensor shape. Equal-size aliases
+    # or a reordered LoRA adapter must never silently load old moments.
+    ordered={}
+    for group,params in groups.items():
+        ordered[group]=[]
+        for p in params:
+            name=named_parameters.get(id(p))
+            if not name:
+                raise RuntimeError("RSS_VNEXT_STAGE_AB_UNNAMED_OPTIMIZER_PARAMETER")
+            ordered[group].append({
+                "parameter":name,
+                "shape":list(p.shape),
+                "dtype":str(p.dtype),
+                "requires_grad":bool(p.requires_grad),
+            })
+    return sha256(json.dumps(ordered,sort_keys=True,
                               separators=(",",":")).encode()).hexdigest()
 
 
@@ -208,7 +226,23 @@ class SourceSDXLStageABOptimizerV2:
                 1.,(tick+1)/warmup_steps
             ) if warmup_steps else 1.,
         )
-        self.optimizer_binding=_optimizer_binding(self.groups)
+        prefixes=[("unet.",self.unet)]
+        if self.stage=="A_CANONICAL_SDXL":
+            prefixes.extend((
+                ("paired_conditioner.",self.conditioner),
+                ("canonical_alpha.",self.alpha),
+            ))
+        else:
+            prefixes.extend((
+                ("native_camera_encoder.",self.pipeline.cond_encoder),
+                ("rgb_normal_heads.",self.heads),
+            ))
+        exact_names={
+            id(p):prefix+name
+            for prefix,module in prefixes
+            for name,p in module.named_parameters()
+        }
+        self.optimizer_binding=_optimizer_binding(self.groups,exact_names)
         self.device=next(self.unet.parameters()).device
         self.autocast_dtype=(torch.bfloat16 if amp_dtype=="BF16"
                              else torch.float16)

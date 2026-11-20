@@ -186,7 +186,24 @@ def test_phase_order_and_byte_qualified_gpu_validation(admitted,tmp_path):
     wrong=replace(receipt,stage="B_PAIRED_RGB_NORMAL_MVADAPTER",
                   previous_stage_weights_sha256=receipt.output_checkpoint_sha256,
                   input_weights_sha256=sha("wrong-input"))
-    with pytest.raises(RuntimeError,match="INPUT_CHECKPOINT_DRIFT"):
+    # B starts with its own pretrained MV-Adapter (not A UNet weights).
+    # The dependency on A is independently pinned above.
+    bval=tmp_path/"val-b.json"
+    bval.write_text(json.dumps({
+        "stage":"B_PAIRED_RGB_NORMAL_MVADAPTER",
+        "cohort_sha256":cohort.cohort_sha256,
+        "evaluation_split":"VAL",
+        "status":"PASS","val_examples":30,
+        "gradient_audit_sha256":sha("gradient-audit"),
+    }))
+    b_receipt=replace(
+        wrong,validation_report_path=str(bval),
+        validation_report_sha256=sha256(bval.read_bytes()).hexdigest(),
+    )
+    stage_b=loaded.advance(b_receipt,cohort=cohort)
+    assert stage_b.next_stage=="C_SLRM"
+    # An incorrect stage B validation report still fails.
+    with pytest.raises(RuntimeError,match="REAL_GPU_OR_VALIDATION_MISSING"):
         loaded.advance(wrong,cohort=cohort)
     gpu.write_text(json.dumps({"device_type":"cpu","status":"PASS"}))
     with pytest.raises(RuntimeError,match="ARTIFACT_BYTES_DRIFT"):

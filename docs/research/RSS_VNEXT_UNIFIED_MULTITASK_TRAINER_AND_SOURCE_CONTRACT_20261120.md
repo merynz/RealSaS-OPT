@@ -53,10 +53,11 @@ R = lambda_joint_ray * source_3d_ray_rgb_alpha_semantic
 K = product_axis_mira.total + lambda_anchor * source_native_anchor
 V = lambda_posed_mstar * native_Mstar_posed_RGB_alpha_roles_depth
 C = lambda_native_clearance * native_body_face_garment_vertex_gap
-L_total = G + S + A + R + K + V + C (unqualified teachers are UNKNOWN)
+I = lambda_control * native_one_control_response_and_isolation
+L_total = G + S + A + R + K + V + C + I (unqualified teachers are UNKNOWN)
 ```
 
-The seven-family aggregate split deliberately separates cross-head Joint Render, posed M* raster and native garment clearance from source first-hit RGB and uses **the exact product loss tensors**; none of the AXIS/MIRA or semantic sublosses is counted twice. `admitted_product_task_losses_v1` rejects a changed scalar decomposition; `PreparedProductGradientRouteV1.apply_after_backward` independently verifies that the full **selected shared-owner** gradient from `L_total.backward()` equals the sum of the family probes before modifying a single parameter.
+The eight-family aggregate split deliberately separates cross-head Joint Render, posed M* raster and native garment clearance from source first-hit RGB and uses **the exact product loss tensors**; none of the AXIS/MIRA or semantic sublosses is counted twice. `admitted_product_task_losses_v1` rejects a changed scalar decomposition; `PreparedProductGradientRouteV1.apply_after_backward` independently verifies that the full **selected shared-owner** gradient from `L_total.backward()` equals the sum of the family probes before modifying a single parameter.
 
 This audit is stronger than simply noting that a module has a non-null `.grad`, but is still **not** a quality/gradient-benefit claim on real sources.
 
@@ -98,7 +99,8 @@ The policy checks **objective eligibility**, not merely that someone assigned a 
 - as enabled: component UDF for open surfaces; true original patch axes and source 3D semantic roles/co-region; original visible RGB first-hit and qualified source 3D RGB/alpha ray stack;
 - as enabled: exact AXIS native hierarchy/joint order, source-native M* face-barycentric skin, source joint-to-chain map and vertex validity, source-authored anchor/constraint intervention;
 - for **posed** losses only: source-native pose transforms, matched M* posed vertices, qualified pose mask, true strain/fold targets;
-- optionally: native source **posed M* RGB/alpha/role/depth camera render** with immutable raster-source binding, and source-certified outward body face + native garment-vertex barycentric pairs and valid masks for garment/body gap; neither is a source for inferred XPBD material.
+- optionally: native source **posed M* RGB/alpha/role/depth camera render** with immutable raster-source binding, and source-certified outward body face + native garment-vertex barycentric pairs and valid masks for garment/body gap; neither is a source for inferred XPBD material;
+- optionally: independently authored single-control intervention baseline/response native poses with changed world-joint mask and responding/protected M* vertex IDs; a static vertex does not imply NO_ATTACHMENT, and no joint matrix delta alone verifies an artist's single-control intent.
 
 Every teacher needs asset lineage and licensed-truth provenance; `UNKNOWN` is masked, **never interpreted as a negative or physical class**. The inventory is *conditional*, not a claim that every licensed asset has all teacher families.
 
@@ -109,7 +111,7 @@ These are **real product acceptance gaps**, not to be papered over by adding los
 1. **Native M* Graphics Stage3 training:** the **optional source-qualified posed M* raster objective is now connected to the seeded trainer** (PR #632), using the same AXIS/MIRA-deformed indexed M* and Compiler-compatible canonical vertex logits. It remains teacher-forced under a native source pose; GPU execution, unseen independent motion, alpha-compositing beyond opaque first hit and post-XPBD native C++ parity are **not yet qualified**.
 2. **Garment not stuck to body:** a **source-native signed gap supervision candidate now exists** (PR #633), but only for a certified outward body shell, independently indexed body-face/garment-vertex pairs and valid native source poses on the same M*. It is not a whole-body collision detector or source-backed XPBD material. Unsupported assets remain UNKNOWN; runtime still needs authored/default XPBD policy or ABSTAIN.
 3. **Cape movement:** canonical Mechanics kinematics first, then declared XPBD Physics, then Graphics post-Physics native 2D. Need real source-driven anchors, cloth boundaries and measured collision/contact/pose-time pixel witnesses when claiming correctness. A synthetic cape preview and an available solver do not prove this for unknown characters.
-4. **Free-running two-original input:** teacher-forced M* / AXIS / MIRA training is not the same as predicted-geometry+predicted-rig+predicted-skin quality. Evaluate rollout on unseen morphology and source-independent artist motion. Training generated six-view views are conditioning hypotheses, not GT.
+4. **Free-running two-original input:** source-authored single-control response/isolation loss is now connected as an optional eighth task (PR #634), but teacher-forced M* / AXIS / MIRA training is not the same as predicted-geometry+predicted-rig+predicted-skin quality. Evaluate rollout on unseen morphology and source-independent artist motion. Training generated six-view views are conditioning hypotheses, not GT.
 5. **ProductProof:** source rights, native renderer parity, independent source appearance/visibility and edited .rss close/reopen remain independently gated. A compile stage returning PASS is not an admissible ProductRevision.
 
 The five remaining acceptance gates are included as explicit non-authority diagnostics in the code-generated handoff; their exact status changes with activated loss policies. They require separate engineering / measured evidence before training can be declared final. Do not make them compulsory *learned* targets without source truth or a compiler contract.

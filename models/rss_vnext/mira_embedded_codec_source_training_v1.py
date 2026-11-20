@@ -805,6 +805,32 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
                 self._audit_codec_task_gradients(result)
             ))
         result.loss.backward()
+        # The deployed point-query decoder is an essential D-stage owner,
+        # not an optional auxiliary head. Detect an unconnected trainable
+        # branch BEFORE any AdamW moment or model update is allowed.
+        required=("mira.codec.",)
+        if self.skin_decoder_mode=="POINT_QUERY_CROSS_ATTENTION":
+            required+=("mira.spatial_decoder.",)
+        for prefix in required:
+            grads=[
+                p.grad for name,p in self.model.named_parameters()
+                if name in self._trainable_mira_names
+                and name.startswith(prefix)
+            ]
+            if not grads or not any(g is not None for g in grads):
+                raise RuntimeError(
+                    "RSS_VNEXT_MIRA_CODEC_REQUIRED_TRAINABLE_GRADIENT_MISSING:"
+                    +prefix
+                )
+            if any(
+                g is not None
+                and (g.is_sparse or not bool(torch.isfinite(g).all()))
+                for g in grads
+            ):
+                raise RuntimeError(
+                    "RSS_VNEXT_MIRA_CODEC_REQUIRED_TRAINABLE_GRADIENT_NONFINITE:"
+                    +prefix
+                )
         torch.nn.utils.clip_grad_norm_(
             (p for name, p in self.model.named_parameters()
              if name in self._trainable_mira_names),

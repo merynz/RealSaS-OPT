@@ -190,7 +190,8 @@ def mv_adapter_stage_b_loss_v2(
     cameras=source.plucker_controls[:,None].expand(-1,2,-1,-1,-1,-1)
     pred=native_mv_adapter_rgb_normal_denoise_v2(
         pipe=pipe,task_heads=task_heads,
-        noisy_latents=noisy,timesteps=timesteps,
+        noisy_latents=noisy.to(dtype=next(pipe.unet.parameters()).dtype),
+        timesteps=timesteps,
         cache=cache,prompt_embeds=source.prompt_embeds,
         pooled_text_embeds=source.pooled_text_embeds,
         time_ids=source.time_ids,

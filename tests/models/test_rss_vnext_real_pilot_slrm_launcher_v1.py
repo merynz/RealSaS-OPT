@@ -28,6 +28,7 @@ from models.rss_vnext.realsas_joint_slrm_render_v1 import (
 )
 from models.rss_vnext.realsas_slrm_training_driver_v1 import (
     RealSaSSLRMBatchV1, RealSaSSLRMTrainingLossWeightsV1,
+    RealSaSSLRMTrainerV1,
 )
 
 
@@ -226,3 +227,35 @@ def test_c_resume_binding_rejects_changed_b_and_phase_plan(tmp_path):
     checkpoint.write_text("modified checkpoint")
     with pytest.raises(ValueError, match="RESUME_PROVENANCE_DRIFT"):
         bound.load_resume_checkpoint(checkpoint)
+
+def test_slrm_owner_gradient_gate_runs_before_optimizer_step():
+    # Directly exercise the real trainer train_step without fabricating
+    # a source-authoritative 3D training batch for its heavy objective.
+    model = nn.Module()
+    model.iris = nn.Linear(1, 1)
+    model.unrelated = nn.Linear(1, 1)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.1)
+    trainer = object.__new__(RealSaSSLRMTrainerV1)
+    trainer.model = model
+    trainer.optimizer = optimizer
+    trainer.global_step = 0
+    trainer.clip_gradient_norm = 1.
+    trainer.required_gradient_prefixes = ("iris.",)
+    trainer._assert_optimizer_ownership = lambda: None
+    trainer.objective = lambda batch: {
+        "total": model.unrelated.weight.square().sum()
+    }
+    old = model.unrelated.weight.detach().clone()
+    with pytest.raises(RuntimeError, match="REQUIRED_OWNER_GRADIENT_MISSING"):
+        trainer.train_step(None)
+    assert trainer.global_step == 0
+    assert not optimizer.state
+    assert torch.equal(model.unrelated.weight, old)
+
+    trainer.objective = lambda batch: {
+        "total": (model.unrelated.weight.square().sum()
+                  + model.iris.weight.square().sum())
+    }
+    trainer.train_step(None)
+    assert trainer.global_step == 1
+    assert not torch.equal(model.unrelated.weight, old)

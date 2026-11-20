@@ -512,6 +512,7 @@ class RSSvNextStructuralTrainer:
         gradient_court_policy: RSSvNextGradientCourtPolicyV1 = RSSvNextGradientCourtPolicyV1(),
         product_gradient_route_policy: ProductMultitaskGradientPolicyV1 = ProductMultitaskGradientPolicyV1(),
         product_curriculum: ProductSeededCurriculumV1 = ProductSeededCurriculumV1(),
+        product_seeded_owner_policy: 'ProductSeededPhaseOwnerPolicyV1 | None' = None,
         phase_contract: RSSvNextStructuralTrainingPhaseContractV1 | None = None,
         axis_skin_code_warmup: RSSvNextAxisSkinCodeWarmupV1 = RSSvNextAxisSkinCodeWarmupV1(),
         scene_conditioning_policy: str = "RESEARCH_CALIBRATED_TWO_VIEW",
@@ -706,6 +707,15 @@ class RSSvNextStructuralTrainer:
                 and trusted_product_mstar_pose_raster_registry)
         ):
             raise ValueError("RSS_VNEXT_PRODUCT_MSTAR_POSE_RASTER_PHASE_POLICY")
+        from .product_seeded_phase_ownership_v1 import ProductSeededPhaseOwnerPolicyV1
+        if product_seeded_owner_policy is not None:
+            if (
+                type(product_seeded_owner_policy) is not ProductSeededPhaseOwnerPolicyV1
+                or not seeded_mode
+                or product_seeded_owner_policy.stage != product_curriculum.stage
+            ):
+                raise ValueError('RSS_VNEXT_PRODUCT_PHASE_OWNER_CURRICULUM_MISMATCH')
+            product_seeded_owner_policy.assert_active_trainable_owners(model)
         product_curriculum.validate(
             seeded_mode=seeded_mode,
             semantic_weights=product_semantic_weights,
@@ -975,6 +985,7 @@ class RSSvNextStructuralTrainer:
         self.gradient_court_policy = gradient_court_policy
         self.product_gradient_route_policy = product_gradient_route_policy
         self.product_curriculum = product_curriculum
+        self.product_seeded_owner_policy = product_seeded_owner_policy
         self.phase_contract = phase_contract
         self.axis_skin_code_warmup = axis_skin_code_warmup
         # Training/inference mesh ABI is versioned and CHECKPOINT-BOUND.
@@ -1072,6 +1083,8 @@ class RSSvNextStructuralTrainer:
                if product_gradient_route_policy.enabled else {}),
             **({"product_curriculum": asdict(product_curriculum)}
                if product_curriculum.stage != "COMPATIBILITY_UNSCHEDULED" else {}),
+            **({"product_seeded_owner_policy": asdict(product_seeded_owner_policy)}
+               if product_seeded_owner_policy is not None else {}),
             **({"phase_contract": asdict(phase_contract)} if phase_contract is not None else {}),
             **({"axis_skin_code_warmup": asdict(axis_skin_code_warmup)} if axis_skin_code_warmup.enabled else {}),
         }, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf8")).hexdigest()
@@ -3826,6 +3839,8 @@ class RSSvNextStructuralTrainer:
                     )
         if self.phase_contract is not None:
             self.phase_contract.assert_required_gradients(self.model)
+        if self.product_seeded_owner_policy is not None:
+            self.product_seeded_owner_policy.assert_gradient_owners_after_backward(self.model)
         grad_norm = nn.utils.clip_grad_norm_(
             (p for p in self.model.parameters() if p.requires_grad),
             (

@@ -299,6 +299,18 @@ Bu veri gereksinimi **yalnız** `product_native_control_intervention_weight > 0`
 
 Makine sözleşmesi: `SourceNativeControlInterventionTeacherV1`, `qualified_native_control_intervention_loss_v1()`; teknik açıklama [Native Control Intervention Trainer](https://github.com/merynz/RealSaS-OPT/blob/main/docs/research/RSS_VNEXT_NATIVE_CONTROL_INTERVENTION_TRAINER_20261120.md). Eğitimde kabul edilen örneklerin maskeleri ve kayıpları, Trainer `source_supervision_requirements_v1()` ve Gradient Court raporunda denetlenmelidir.
 
+## 15. Koşullu teacher — OPEN hem pin vertex hedefleri (2026-11-20)
+
+**Yalnız** `product_open_pin_vertex_weight > 0` ve kaynak-native hem/pin/host-only müdahale kanıtı varsa: `SourceNativeOpenPinVertexTargetV1`. Bu, source-negative yokken 0 etiket üreten bir SAM3 maskesi veya kaynak kesitine en yakın vertex değildir.
+
+- Son indeksli TESSA M* için `pin_targets [A,V]` ve `known_mask [A,V]` boolean; A = kaynak AXIS `ANCHOR` sayısı (yalnız SOCKET parent kontrol), V = exact final M* vertex sayısı. Bilinmeyen her vertex için `known_mask=False`. Kaynakta gerçek pin'e ait pozitifler yalnız **OPEN sınır vertex'leri** olabilir; her etiketli anchor için en az bir source-pozitif gerekir; 8 üzerinde pin bu v1 head tarafından reddedilir.
+- Orijinal native açık hem sınırı ve pin vertex kimliklerinin reindex/transport kanıtları: `native_open_hem_sha256`, `native_pin_witness_sha256`, `source_mstar_transport_sha256`; bağlantı host-only kaynak müdahalesi için `heldout_host_only_intervention_sha256`. Face/barycentric ve C++/Compiler yeniden indekslerinin kimliği korunmalıdır.
+- Trusted Foundry launcher registry: `QUALIFIED_SOURCE_NATIVE_OPEN_PIN_VERTEX_REINDEX`, `source_asset_sha256`, `dataset_manifest_sha256`, iki özgün RGBA ve kamera SHA, altı üretilmiş görünümün yalnız koşullama olduğunu gösteren generator checkpoint SHA, AXIS causal sequence digest, final M* topology address, native hem/pin/known mask SHA'ları, independent host intervention ve kaynak→M* vertex transport.
+- Bu teacher için katmanlı/açık mesh gereksinimi gerçek. Kapalı veya open boundary olmayan asset'ler bu loss'u **öğretmez**; o asset'lerde Geometry/AXIS/MIRA/Graphics eğitimi devam edebilir (`allow_sparse_qualified_source_batches=True`).
+- Modelin pin vertex olasılıkları **yalnız UNQUALIFIED öneridir**; `source_witness_claimed=False`, `executable_xpbd_claimed=False`. Pin vertex bulunması, fiziksel host chain, kaynak contact, cloth material, runtime policy, post-XPBD Graphics veya otomatik aktive edilmiş XPBD programı demek değildir.
+
+Makine kodu: `models/rss_vnext/product_open_pin_vertex_head_v1.py`, `models/rss_vnext/training_engine.py`. Öğretim koşullarını aktif loss ağırlıklarıyla `trainer.source_supervision_requirements_v1()` gösterir. Yan yana eğitilecek `product_anchor_face_weight > 0` source-qualified directed HELD/HOLDER face evidence şarttır.
+
 ---
 
 **Devir cümlesi:** *Öğretmen paketlerimiz, modeli doğru cevaba zorla götüren gizli input değildir; kaynakta gerçekten ölçülmüş cevapları, aynı tek puppet'ın geometri–rig–skin–Graphics ilişkilerini öğrenebilmesi ve bağımsız doğrulayabilmesi için kayıpsız, maskeli ve adresli sunar.*

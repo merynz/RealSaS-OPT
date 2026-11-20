@@ -75,7 +75,7 @@ def native_product_case(tmp_path_factory):
         ref=cas.put_bytes(raw)
         return {**ref,"artifact_type":kind,"schema_version":"v1"}
     extra=[
-        cas.put(court,COURT_TYPE,"v1"),
+        _ref(json.dumps(court.to_dict(),sort_keys=True,separators=(",",":")).encode(),COURT_TYPE),
         _ref(raster,RASTER_TYPE),
         _ref(revision_bytes,EDIT_TYPE),
         _ref(preview_bytes,PREVIEW_TYPE),
@@ -162,7 +162,7 @@ def test_rehashed_productpass_claim_or_tampered_native_raster_is_not_independent
     cas,base,extra,court,replayer=native_product_case
     forged=replace(court,product_release_admission=True,court_hash="")
     forged=replace(forged,court_hash=native_user_edit_court_hash_v1(forged))
-    ref=cas.put(forged,COURT_TYPE,"v1")
+    ref={**cas.put_bytes(json.dumps(forged.to_dict(),sort_keys=True,separators=(",",":")).encode()),"artifact_type":COURT_TYPE,"schema_version":"v1"}
     request={
         **base,
         "input_artifacts":base["input_artifacts"]+

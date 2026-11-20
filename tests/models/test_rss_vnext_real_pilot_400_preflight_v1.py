@@ -287,6 +287,7 @@ class TinyProduct(nn.Module):
         self.axis=nn.Linear(2,2)
         self.mira=nn.Module()
         self.mira.codec=nn.Linear(2,2)
+        self.mira.spatial_decoder=nn.Linear(2,2)
         self.mira.skin=nn.Linear(2,2)
     def forward(self,x):
         return (self.iris(x)+self.tessa_seeded_head(x)
@@ -300,6 +301,9 @@ def test_structural_phase_ownership_freezes_vision_and_embedded_codec():
     assert "iris.weight" in names and "graphics.weight" in names
     assert not any(name.startswith("vision.") for name in names)
     assert not any(name.startswith("mira.codec.") for name in names)
+    assert not any(name.startswith("mira.spatial_decoder.") for name in names)
+    assert not model.mira.spatial_decoder.weight.requires_grad
+    frozen_spatial=model.mira.spatial_decoder.weight.detach().clone()
     opt=torch.optim.AdamW(
         [p for p in model.parameters() if p.requires_grad],lr=1e-4,
     )
@@ -307,6 +311,7 @@ def test_structural_phase_ownership_freezes_vision_and_embedded_codec():
     model(torch.randn(2,2)).backward()
     policy.assert_gradient_owners_after_backward(model)
     opt.step()
+    assert torch.equal(model.mira.spatial_decoder.weight,frozen_spatial)
     with pytest.raises(ValueError,match="MOMENTS_NOT_FRESH"):
         policy.assert_qualified_optimizer(model,opt)
 
@@ -321,3 +326,15 @@ def test_bad_gradient_route_and_stage_mismatch_fail_closed():
         phase.assert_gradient_owners_after_backward(model)
     with pytest.raises(ValueError,match="OWNER_POLICY_INVALID"):
         replace(phase,allowed_prefixes=("iris.",)).validate()
+
+def test_every_e_phase_protects_both_fsq_and_deployed_point_query_decoder():
+    for stage in PHASES:
+        model=TinyProduct()
+        owner=ProductSeededPhaseOwnerPolicyV1.standard(stage)
+        owner.activate_before_optimizer_v1(model)
+        assert not model.mira.codec.weight.requires_grad
+        assert not model.mira.spatial_decoder.weight.requires_grad
+        assert not model.vision.weight.requires_grad
+    owner=ProductSeededPhaseOwnerPolicyV1.standard("FULL_SHARED_H_FINETUNE")
+    with pytest.raises(ValueError,match="OWNER_POLICY_INVALID"):
+        replace(owner,protected_prefixes=("vision.","mira.codec.")).validate()

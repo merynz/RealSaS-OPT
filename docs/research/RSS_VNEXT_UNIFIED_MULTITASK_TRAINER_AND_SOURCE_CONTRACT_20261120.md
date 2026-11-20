@@ -47,13 +47,14 @@ The active trainer constructs the aggregate objective from *admitted* sources on
 ```text
 G = seeded_tessa.total + lambda_component_udf * qualified_component_udf.total
 S = product_semantic.total                   (only if source-valid)
-A = lambda_visible_rgb * first_hit_rgb
-  + lambda_joint_ray * source_3d_ray_rgb_alpha
+A = lambda_visible_rgb * first_hit_rgb       (Graphics source-visible task)
+R = lambda_joint_ray * source_3d_ray_rgb_alpha_semantic
+    (cross-head Joint Render: Geometry density + Semantic + Graphics)
 K = product_axis_mira.total + lambda_anchor * source_native_anchor
-L_total = G + S + A + K (missing qualified families are absent, not negative)
+L_total = G + S + A + R + K (absent qualified families are UNKNOWN, not negatives)
 ```
 
-The aggregate split is deliberately done on **the exact product loss tensors**; none of the AXIS/MIRA or semantic sublosses is counted twice. `admitted_product_task_losses_v1` rejects a changed scalar decomposition; `PreparedProductGradientRouteV1.apply_after_backward` independently verifies that the full **selected shared-owner** gradient from `L_total.backward()` equals the sum of the family probes before modifying a single parameter.
+The five-family aggregate split deliberately separates the cross-head Joint Render term from source first-hit RGB and uses **the exact product loss tensors**; none of the AXIS/MIRA or semantic sublosses is counted twice. `admitted_product_task_losses_v1` rejects a changed scalar decomposition; `PreparedProductGradientRouteV1.apply_after_backward` independently verifies that the full **selected shared-owner** gradient from `L_total.backward()` equals the sum of the family probes before modifying a single parameter.
 
 This audit is stronger than simply noting that a module has a non-null `.grad`, but is still **not** a quality/gradient-benefit claim on real sources.
 

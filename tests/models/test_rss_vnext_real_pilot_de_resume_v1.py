@@ -213,9 +213,16 @@ def test_codec_resume_finishes_remaining_only_and_seals_d_to_e(monkeypatch,tmp_p
         export_real_pilot_embedded_codec_handoff_v1(
             restored,path=tmp_path/"final.pt",
         )
+    with pytest.raises(ValueError,match="RESUME_REQUIRES_CHECKPOINT"):
+        execute_real_pilot_embedded_codec_phase_v1(
+            restored,examples=(),source_index={},
+            cohort=SimpleNamespace(cohort_sha256=COHORT),
+            resume_sampler_cursor=20,
+        )
     report=execute_real_pilot_embedded_codec_phase_v1(
         restored,examples=(),source_index={},
         cohort=SimpleNamespace(cohort_sha256=COHORT),
+        resume_sampler_cursor=21,
     )
     assert calls==[2] and report[0]["step"]==5
     assert export_real_pilot_embedded_codec_handoff_v1(
@@ -272,9 +279,16 @@ def test_structural_resume_remaining_only_and_finished_handoff(monkeypatch,tmp_p
         export_real_pilot_structural_e_handoff_v1(
             restored,path=tmp_path/"next-e.pt",
         )
+    with pytest.raises(ValueError,match="RESUME_EXPECTS_CHECKPOINT"):
+        execute_real_pilot_structural_e_phase_v1(
+            restored,examples=(),source_index={},
+            cohort=SimpleNamespace(cohort_sha256=COHORT),
+            resume_sampler_cursor=10,
+        )
     report=execute_real_pilot_structural_e_phase_v1(
         restored,examples=(),source_index={},
         cohort=SimpleNamespace(cohort_sha256=COHORT),
+        resume_sampler_cursor=11,
     )
     assert calls==[3] and report[0]["step"]==7
     assert export_real_pilot_structural_e_handoff_v1(

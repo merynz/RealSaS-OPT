@@ -33,6 +33,9 @@ from .product_seeded_phase_ownership_v1 import (
     PREFIXES_GEOMETRY, PREFIXES_SEMANTIC_GRAPHICS,
 )
 from .realsas_joint_slrm_render_v1 import STAGE_1, STAGE_2, STAGE_3
+from .realsas_sdxl_mvadapter_construction_v2 import (
+    two_stage_sdxl_mv_binding_v2,
+)
 from .realsas_slrm_training_driver_v1 import (
     REALSAS_SIX_VIEW_TRAINING_PROFILE,
     RealSaSSLRMBatchV1, RealSaSSLRMTrainerV1,
@@ -102,12 +105,15 @@ class _ProvenanceBoundSLRMTrainerV1:
 
     def __init__(
         self, trainer: RealSaSSLRMTrainerV1, *,
-        plan: PilotSLRMPhasePlanV1, b_checkpoint_sha256: str,
-        cohort_sha256: str,
+        plan: PilotSLRMPhasePlanV1,
+        a_checkpoint_sha256: str, b_checkpoint_sha256: str,
+        pose_program_sha256: str, cohort_sha256: str,
     ) -> None:
         self.trainer = trainer
         self.plan = plan
+        self.a_checkpoint_sha256 = a_checkpoint_sha256
         self.b_checkpoint_sha256 = b_checkpoint_sha256
+        self.pose_program_sha256 = pose_program_sha256
         self.dataset_manifest_sha256 = cohort_sha256
         self._resume_attested = False
 
@@ -122,7 +128,12 @@ class _ProvenanceBoundSLRMTrainerV1:
         if (
             type(batch) is not RealSaSSLRMBatchV1
             or batch.original_observed_view_count != 2
-            or batch.generating_checkpoint_sha256 != self.b_checkpoint_sha256
+            or batch.generating_checkpoint_sha256 != two_stage_sdxl_mv_binding_v2(
+                stage_a_checkpoint_sha256=self.a_checkpoint_sha256,
+                stage_b_checkpoint_sha256=self.b_checkpoint_sha256,
+                source_binding_sha256=batch.source_binding_sha256,
+                pose_program_sha256=self.pose_program_sha256,
+            )
             or batch.source_3d_render_target.stage
                 != self.plan.required_stage(before)
         ):
@@ -156,7 +167,9 @@ class _ProvenanceBoundSLRMTrainerV1:
             "schema": "RealSaS.RSSvNext.PilotSLRMResume.v1",
             "checkpoint_sha256": _file_digest(file),
             "cohort_sha256": self.dataset_manifest_sha256,
+            "trained_a_task_weights_sha256": self.a_checkpoint_sha256,
             "trained_b_task_weights_sha256": self.b_checkpoint_sha256,
+            "canonical_pose_program_sha256": self.pose_program_sha256,
             "c_phase_plan_sha256": self.plan.digest,
             "step": self.global_step,
             "sampler_cursor": sampler_cursor,
@@ -189,7 +202,9 @@ class _ProvenanceBoundSLRMTrainerV1:
             or data.get("schema") != "RealSaS.RSSvNext.PilotSLRMResume.v1"
             or data.get("checkpoint_sha256") != _file_digest(file)
             or data.get("cohort_sha256") != self.dataset_manifest_sha256
+            or data.get("trained_a_task_weights_sha256") != self.a_checkpoint_sha256
             or data.get("trained_b_task_weights_sha256") != self.b_checkpoint_sha256
+            or data.get("canonical_pose_program_sha256") != self.pose_program_sha256
             or data.get("c_phase_plan_sha256") != self.plan.digest
             or type(data.get("step")) is not int
             or not 0 <= data["step"] <= self.plan.total_steps
@@ -209,7 +224,9 @@ class PreparedPilotSLRMPhaseV1:
     trainer: _ProvenanceBoundSLRMTrainerV1
     plan: PilotSLRMPhasePlanV1
     source_cohort_sha256: str
+    trained_a_checkpoint_sha256: str
     trained_b_checkpoint_sha256: str
+    pose_program_sha256: str
     optimizer_binding_sha256: str
 
 
@@ -218,7 +235,9 @@ def build_real_pilot_slrm_phase_v1(
     model: RSSvNextUnifiedCharacterModel,
     ledger: PilotLedgerV1,
     cohort: RealPilotCohortReceiptV1,
+    a_task_weights_path: str | Path,
     b_task_weights_path: str | Path,
+    pose_program_sha256: str,
     plan: PilotSLRMPhasePlanV1,
     trusted_source_3d_render_registry: Mapping[str, Mapping[str, object]],
     trusted_original_observed_ray_registry:
@@ -235,11 +254,29 @@ def build_real_pilot_slrm_phase_v1(
         or ledger.next_stage != "C_SLRM"
         or not ledger.completed
         or ledger.completed[-1].stage != "B_PAIRED_RGB_NORMAL_MVADAPTER"
+        or len(ledger.completed) != 2
+        or ledger.completed[0].stage != "A_CANONICAL_SDXL"
         or not trusted_source_3d_render_registry
         or type(weights) is not RealSaSSLRMTrainingLossWeightsV1
     ):
         raise ValueError("RSS_VNEXT_PILOT_SLRM_B_NOT_ADMITTED")
-    b = ledger.completed[-1]
+    a, b = ledger.completed
+    # B and A are distinct pretrained/task weights. The V2 generation
+    # receipt is a four-part construction pin, not the raw B SHA.
+    two_stage_sdxl_mv_binding_v2(
+        stage_a_checkpoint_sha256=a.output_checkpoint_sha256,
+        stage_b_checkpoint_sha256=b.output_checkpoint_sha256,
+        source_binding_sha256="0" * 64,
+        pose_program_sha256=pose_program_sha256,
+    )
+    a_source = Path(a_task_weights_path).expanduser()
+    a_expected = Path(a.output_checkpoint_path).expanduser()
+    if (
+        a_source.is_symlink() or not a_source.is_file()
+        or a_source.resolve() != a_expected.resolve()
+        or _file_digest(a_source) != a.output_checkpoint_sha256
+    ):
+        raise ValueError("RSS_VNEXT_PILOT_SLRM_A_CHECKPOINT_BYTES_DRIFT")
     source = Path(b_task_weights_path).expanduser()
     expected = Path(b.output_checkpoint_path).expanduser()
     if (
@@ -294,11 +331,15 @@ def build_real_pilot_slrm_phase_v1(
     return PreparedPilotSLRMPhaseV1(
         trainer=_ProvenanceBoundSLRMTrainerV1(
             trainer, plan=plan,
+            a_checkpoint_sha256=a.output_checkpoint_sha256,
             b_checkpoint_sha256=b.output_checkpoint_sha256,
+            pose_program_sha256=pose_program_sha256,
             cohort_sha256=cohort.cohort_sha256,
         ),
         plan=plan, source_cohort_sha256=cohort.cohort_sha256,
+        trained_a_checkpoint_sha256=a.output_checkpoint_sha256,
         trained_b_checkpoint_sha256=b.output_checkpoint_sha256,
+        pose_program_sha256=pose_program_sha256,
         optimizer_binding_sha256=binding,
     )
 

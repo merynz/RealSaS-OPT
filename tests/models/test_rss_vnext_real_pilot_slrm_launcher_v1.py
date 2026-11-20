@@ -20,12 +20,29 @@ from models.rss_vnext.product_real_pilot_execution_v1 import (
 from models.rss_vnext.product_real_pilot_cohort_v1 import (
     RealPilotCohortReceiptV1, SCHEMA as COHORT_SCHEMA,
 )
+from models.rss_vnext.realsas_sdxl_mvadapter_construction_v2 import (
+    two_stage_sdxl_mv_binding_v2,
+)
 from models.rss_vnext.realsas_joint_slrm_render_v1 import (
     STAGE_1, STAGE_2, STAGE_3,
 )
 from models.rss_vnext.realsas_slrm_training_driver_v1 import (
     RealSaSSLRMBatchV1, RealSaSSLRMTrainingLossWeightsV1,
 )
+
+
+A_SHA = "1" * 64
+B_SHA = "b" * 64
+POSE_SHA = "d" * 64
+
+
+def generation_pin(source_sha="c" * 64):
+    return two_stage_sdxl_mv_binding_v2(
+        stage_a_checkpoint_sha256=A_SHA,
+        stage_b_checkpoint_sha256=B_SHA,
+        source_binding_sha256=source_sha,
+        pose_program_sha256=POSE_SHA,
+    )
 
 
 def plan():
@@ -69,7 +86,9 @@ def test_c_must_have_real_completed_b_before_model_or_optimizer_created():
     with pytest.raises(ValueError, match="B_NOT_ADMITTED"):
         build_real_pilot_slrm_phase_v1(
             model=None, ledger=ledger, cohort=cohort,
+            a_task_weights_path="/tmp/nonexistent-a.safetensors",
             b_task_weights_path="/tmp/nonexistent-b.safetensors",
+            pose_program_sha256=POSE_SHA,
             plan=plan(),
             trusted_source_3d_render_registry={"not": "a source"},
             weights=RealSaSSLRMTrainingLossWeightsV1(),
@@ -113,19 +132,20 @@ def _batch(stage, b_hash):
 def test_slrm_provenance_and_order_rejected_before_optimizer_step():
     fake = _FakeSLRM()
     bound = _ProvenanceBoundSLRMTrainerV1(
-        fake, plan=plan(), b_checkpoint_sha256="b" * 64,
+        fake, plan=plan(), a_checkpoint_sha256=A_SHA,
+        b_checkpoint_sha256=B_SHA, pose_program_sha256=POSE_SHA,
         cohort_sha256="a" * 64,
     )
     with pytest.raises(ValueError, match="B_PROVENANCE_OR_STAGE_DRIFT"):
         bound.train_step(_batch(STAGE_1, "f" * 64))
     with pytest.raises(ValueError, match="B_PROVENANCE_OR_STAGE_DRIFT"):
-        bound.train_step(_batch(STAGE_3, "b" * 64))
+        bound.train_step(_batch(STAGE_3, generation_pin()))
     assert fake.called == 0
     for stage in (STAGE_1, STAGE_1, STAGE_2, STAGE_2, STAGE_3):
-        bound.train_step(_batch(stage, "b" * 64))
+        bound.train_step(_batch(stage, generation_pin()))
     assert fake.global_step == 5
     with pytest.raises(RuntimeError, match="UNSCHEDULED_STEP"):
-        bound.train_step(_batch(STAGE_3, "b" * 64))
+        bound.train_step(_batch(STAGE_3, generation_pin()))
 
 
 def test_slrm_shared_h_reachability_is_not_optional():
@@ -137,11 +157,12 @@ def test_slrm_shared_h_reachability_is_not_optional():
         return result
     fake.train_step = disconnected
     bound = _ProvenanceBoundSLRMTrainerV1(
-        fake, plan=plan(), b_checkpoint_sha256="b" * 64,
+        fake, plan=plan(), a_checkpoint_sha256=A_SHA,
+        b_checkpoint_sha256=B_SHA, pose_program_sha256=POSE_SHA,
         cohort_sha256="a" * 64,
     )
     with pytest.raises(RuntimeError, match="SHARED_H_GRADIENT_MISSING"):
-        bound.train_step(_batch(STAGE_1, "b" * 64))
+        bound.train_step(_batch(STAGE_1, generation_pin()))
 
 def test_c_to_d_handoff_rejects_partial_phase_and_allows_finished_phase(tmp_path):
     fake = _FakeSLRM()
@@ -151,13 +172,14 @@ def test_c_to_d_handoff_rejects_partial_phase_and_allows_finished_phase(tmp_path
         return "sealed-c-d-test"
     fake.export_phase_handoff = export
     bound = _ProvenanceBoundSLRMTrainerV1(
-        fake, plan=plan(), b_checkpoint_sha256="b" * 64,
+        fake, plan=plan(), a_checkpoint_sha256=A_SHA,
+        b_checkpoint_sha256=B_SHA, pose_program_sha256=POSE_SHA,
         cohort_sha256="a" * 64,
     )
     with pytest.raises(RuntimeError, match="INCOMPLETE_C_TO_D_HANDOFF"):
         bound.export_phase_handoff(tmp_path / "c-d.pt")
     for stage in (STAGE_1, STAGE_1, STAGE_2, STAGE_2, STAGE_3):
-        bound.train_step(_batch(stage, "b" * 64))
+        bound.train_step(_batch(stage, generation_pin()))
     assert bound.export_phase_handoff(tmp_path / "c-d.pt") == "sealed-c-d-test"
 
 
@@ -174,22 +196,25 @@ def test_c_resume_binding_rejects_changed_b_and_phase_plan(tmp_path):
     fake.save_checkpoint = save
     fake.load_checkpoint = load
     bound = _ProvenanceBoundSLRMTrainerV1(
-        fake, plan=plan(), b_checkpoint_sha256="b" * 64,
+        fake, plan=plan(), a_checkpoint_sha256=A_SHA,
+        b_checkpoint_sha256=B_SHA, pose_program_sha256=POSE_SHA,
         cohort_sha256="a" * 64,
     )
-    bound.train_step(_batch(STAGE_1, "b" * 64))
+    bound.train_step(_batch(STAGE_1, generation_pin()))
     checkpoint = tmp_path / "source-c-resume.pt"
     bound.save_resume_checkpoint(checkpoint, sampler_cursor=7)
 
     mismatched_b = _ProvenanceBoundSLRMTrainerV1(
-        fake, plan=plan(), b_checkpoint_sha256="f" * 64,
+        fake, plan=plan(), a_checkpoint_sha256=A_SHA,
+        b_checkpoint_sha256="f" * 64, pose_program_sha256=POSE_SHA,
         cohort_sha256="a" * 64,
     )
     with pytest.raises(ValueError, match="RESUME_PROVENANCE_DRIFT"):
         mismatched_b.load_resume_checkpoint(checkpoint)
     mismatched_schedule = _ProvenanceBoundSLRMTrainerV1(
         fake, plan=replace(plan(), nerf_single_layer_steps=3),
-        b_checkpoint_sha256="b" * 64, cohort_sha256="a" * 64,
+        a_checkpoint_sha256=A_SHA, b_checkpoint_sha256=B_SHA,
+        pose_program_sha256=POSE_SHA, cohort_sha256="a" * 64,
     )
     with pytest.raises(ValueError, match="RESUME_PROVENANCE_DRIFT"):
         mismatched_schedule.load_resume_checkpoint(checkpoint)

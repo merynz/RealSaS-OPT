@@ -42,7 +42,10 @@ PREFIXES_MECHANICS=(
     "anchor_face_correspondence.","open_pin_vertex.","articulation_prior.",
 )
 PREFIXES_POSED=("dynamic_refine.",)
-PROTECTED=("vision.","mira.codec.")
+# POINT_QUERY_CROSS_ATTENTION deploys MIRA's spatial decoder after the
+# frozen FSQ encoder. Protect BOTH branches; otherwise E silently
+# fine-tunes D's actual trained skin decoder while claiming codec freeze.
+PROTECTED=("vision.","mira.codec.","mira.spatial_decoder.")
 PHASES={
     "MSTAR_GEOMETRY_BOOTSTRAP":PREFIXES_GEOMETRY,
     "IRIS_GEOMETRY_SLR_GRAPHICS":

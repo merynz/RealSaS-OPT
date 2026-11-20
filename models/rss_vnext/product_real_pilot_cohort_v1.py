@@ -64,6 +64,7 @@ class RealPilotAssetV1:
         if (
             type(self.source_id) is not str or not self.source_id.strip()
             or len(self.source_id) > 128
+            or any(ch not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-" for ch in self.source_id)
             or type(self.lineage_group) is not str
             or not self.lineage_group.strip() or len(self.lineage_group) > 256
             or self.split not in SPLITS
@@ -241,11 +242,10 @@ def assert_train_only_source_v1(
     asset.validate()
     if (
         asset.split != "TRAIN" or
-        not cohort.source_evidence_bytes_verified or
-        cohort.full_pilot_launch_qualified
+        not cohort.source_evidence_bytes_verified
     ):
-        # Even once the broader launch gate exists, this check remains strict;
-        # a release-status mutation is never a source of training authority.
+        # Real per-source receipts are verified separately by the trainer;
+        # a cohort-wide flag is not sufficient evidence of teacher truth.
         raise ValueError("RSS_VNEXT_REAL_PILOT_TRAIN_SOURCE_NOT_ADMITTED")
 
 

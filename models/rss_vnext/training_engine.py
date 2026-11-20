@@ -651,6 +651,20 @@ class RSSvNextStructuralTrainer:
         product_axis_mira_weights.validate()
         product_mstar_pose_raster_loss_weights.validate()
         if (
+            type(product_open_pin_vertex_weight) not in (int,float)
+            or not math.isfinite(product_open_pin_vertex_weight)
+            or product_open_pin_vertex_weight < 0
+            or (product_open_pin_vertex_weight > 0 and (
+                not seeded_mode or not product_axis_mira_weights.enabled
+                or product_anchor_face_weight <= 0
+                or axis_training_policy != "PRODUCT_MESH_MATCHED_REQUIRED"
+                or not trusted_product_open_pin_vertex_registry
+            ))
+            or (product_open_pin_vertex_weight == 0 and
+                trusted_product_open_pin_vertex_registry)
+        ):
+            raise ValueError("RSS_VNEXT_OPEN_PIN_VERTEX_PHASE_POLICY")
+        if (
             type(product_native_control_intervention_weight) not in (int,float)
             or not math.isfinite(product_native_control_intervention_weight)
             or product_native_control_intervention_weight < 0
@@ -703,6 +717,7 @@ class RSSvNextStructuralTrainer:
             mstar_pose_raster_weight=product_mstar_pose_raster_weight,
             native_layer_clearance_weight=product_native_layer_clearance_weight,
             native_control_intervention_weight=product_native_control_intervention_weight,
+            open_pin_vertex_weight=product_open_pin_vertex_weight,
         )
         if product_axis_mira_weights.chain_skin>0 and not trusted_chain_teacher_registry:
             raise ValueError("RSS_VNEXT_CHAIN_SKIN_REQUIRES_SOURCE_NATIVE_REGISTRY")
@@ -826,6 +841,19 @@ class RSSvNextStructuralTrainer:
         self.product_native_layer_clearance_weight = float(product_native_layer_clearance_weight)
         self.product_native_control_intervention_weight = float(
             product_native_control_intervention_weight
+        )
+        self.product_open_pin_vertex_weight = float(product_open_pin_vertex_weight)
+        pin_snapshot={str(k):dict(v) for k,v in
+                      (trusted_product_open_pin_vertex_registry or {}).items()}
+        self.trusted_product_open_pin_vertex_registry = MappingProxyType({
+            k:MappingProxyType(v) for k,v in pin_snapshot.items()
+        })
+        self.open_pin_vertex_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                pin_snapshot,sort_keys=True,separators=(",",":"),
+                allow_nan=False,
+            ).encode("utf8")).hexdigest()
+            if self.product_open_pin_vertex_weight>0 else ""
         )
         control_snapshot = {
             str(k):dict(v) for k,v in
@@ -997,6 +1025,12 @@ class RSSvNextStructuralTrainer:
                 "seeded_anchor_native_mstar_address_required":True,
                 "source_anchor_missing_is_unknown_not_negative":True,
             } if self.product_anchor_face_weight>0 else {}),
+            **({
+                "product_open_pin_vertex_weight":self.product_open_pin_vertex_weight,
+                "open_pin_vertex_registry_sha256":self.open_pin_vertex_registry_sha256,
+                "pin_vertex_source_is_open_hem_native_host_intervention_only":True,
+                "neural_pin_is_not_authorized_xpbd_activation":True,
+            } if self.product_open_pin_vertex_weight>0 else {}),
             **({
                 "product_native_control_intervention_weight":self.product_native_control_intervention_weight,
                 "native_control_intervention_registry_sha256":self.native_control_intervention_registry_sha256,

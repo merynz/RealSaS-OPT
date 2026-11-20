@@ -120,6 +120,14 @@ def test_control_generation_requires_explicit_compiler_capabilities():
     cam[:, :, 3] = cam[:, :, 7] = cam[:, :, 11] = cam[:, :, 12] = 1
     # This guard runs BEFORE structural topology generation and ensures that
     # a model-only caller cannot claim runtime control support.
+    with pytest.raises(ValueError, match="OPEN_PIN_RESEARCH_REQUIRES_CONTROLS"):
+        model.propose_teacher_free(
+            images, cam, emit_unqualified_open_pin_research_candidate=True,
+        )
+    with pytest.raises(ValueError, match="OPEN_PIN_RESEARCH_REQUIRES_CONTROLS"):
+        model.propose_teacher_free(
+            images, cam, emit_unqualified_open_pin_research_candidate=1,
+        )
     with pytest.raises(ValueError, match="RIG_REQUIRES_COMPILER_CAPABILITIES"):
         model.propose_teacher_free(images, cam, generate_controls=True)
     with pytest.raises(ValueError, match="UNUSED_COMPILER_CAPABILITIES"):

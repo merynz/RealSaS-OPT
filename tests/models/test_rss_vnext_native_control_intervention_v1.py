@@ -191,3 +191,44 @@ def test_native_intervention_backpropagates_into_actual_mira_lbs_skin_weights():
     assert torch.isfinite(skin_logits.grad).all()
     assert bool((skin_logits.grad[0,:3].abs()>0).any())
     assert bool((skin_logits.grad[0,3:].abs()>0).any())
+
+
+def test_product_seeded_trainer_exposes_conditional_truth_and_pins_resume(
+    monkeypatch, tmp_path,
+):
+    """The actual seeded model/optimizer accepts policy, not fabricated pose."""
+    from models.rss_vnext.product_axis_mira_seeded_training_v1 import (
+        ProductSeededAXISMIRAWeightsV1,
+    )
+    from tests.models.test_rss_vnext_product_seeded_axis_mira_training_v1 import (
+        _rig_case,
+    )
+    net,batch,make,*_=_rig_case(monkeypatch)
+    weights=ProductSeededAXISMIRAWeightsV1(
+        axis_program=1.,source_skin=1.,posed_surface=1.,
+    )
+    registry={"native-control":{
+        "schema":SCHEMA,
+        "admission_status":"QUALIFIED_SOURCE_NATIVE_ONE_CONTROL_INTERVENTION",
+    }}
+    trainer=make(weights=weights,control_weight=.5,control_registry=registry)
+    manifest=trainer.source_supervision_requirements_v1()
+    assert "source_native_one_control_intervention" in (
+        manifest["loss_required_source_families"]
+    )
+    assert manifest["product_proof_ready"] is False
+    assert manifest["model_release_ready"] is False
+    path=tmp_path/"native-control-policy.pt"
+    trainer.save_checkpoint(path,sampler_cursor=4)
+    assert make(
+        weights=weights,control_weight=.5,control_registry=registry,
+    ).load_checkpoint(path)==4
+    with pytest.raises(ValueError,match="OBJECTIVE_POLICY_DRIFT"):
+        make(weights=weights,control_weight=.6,
+             control_registry=registry).load_checkpoint(path)
+    with pytest.raises(ValueError,match="CONTROL_INTERVENTION_PHASE_POLICY"):
+        make(weights=weights,control_weight=.5)
+    # This fixture has an AXIS program but NO independently registered
+    # source-native skin/pose. We MUST fail before inventing a control event.
+    with pytest.raises(ValueError,match="AXIS_SOURCE_FACE_REQUIRED|AXIS_NATIVE_POSE_REQUIRED"):
+        trainer.objective(batch)

@@ -33,7 +33,7 @@ def _case():
         source_control_event_sha256="b"*64,
         source_scope="SOURCE_BRANCH_ONLY",
         baseline_pose_index=0,intervention_pose_index=1,
-        changed_world_joint_mask=torch.tensor([True,False]),
+        changed_skin_joint_matrix_mask=torch.tensor([True,False]),
         responding_vertex_ids=torch.tensor([3,4,5],dtype=torch.long),
         protected_vertex_ids=torch.tensor([0,1,2],dtype=torch.long),
     )
@@ -53,8 +53,8 @@ def _case():
         "source_posed_sha256":_digest(source),
         "source_pose_mask_sha256":_digest(source_mask),
         "source_pose_matrices_sha256":_digest(mats),
-        "changed_world_joint_mask_sha256":
-            _digest(teacher.changed_world_joint_mask),
+        "changed_skin_joint_matrix_mask_sha256":
+            _digest(teacher.changed_skin_joint_matrix_mask),
         "responding_vertex_ids_sha256":
             _digest(teacher.responding_vertex_ids),
         "protected_vertex_ids_sha256":
@@ -124,7 +124,7 @@ def test_source_author_control_receipt_and_changed_joint_mask_are_not_inferred()
     corrupted["intervention"]["source_authored_exactly_one_control_changed"]=False
     with pytest.raises(ValueError,match="RECEIPT_DRIFT"):
         evaluate(reg=corrupted)
-    changed=replace(t,changed_world_joint_mask=torch.tensor([False,True]))
+    changed=replace(t,changed_skin_joint_matrix_mask=torch.tensor([False,True]))
     with pytest.raises(ValueError,match="JOINT_WITNESS"):
         evaluate(t=changed)
     changed=replace(t,responding_vertex_ids=torch.tensor([0,4,5]))

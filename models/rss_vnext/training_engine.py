@@ -3422,6 +3422,9 @@ class RSSvNextStructuralTrainer:
         if result.realsas_joint_slrm_loss is not None or not self.allow_sparse_qualified_source_batches:
             add("joint_source_rays",result.realsas_joint_slrm_loss,
                 self.product_joint_ray_weight)
+        if result.product_mstar_pose_raster_loss is not None or not self.allow_sparse_qualified_source_batches:
+            add("posed_mstar_native_raster",result.product_mstar_pose_raster_loss,
+                self.product_mstar_pose_raster_weight)
         if not admitted:
             raise RuntimeError("RSS_VNEXT_SEEDED_GRADIENT_AUDIT_NO_LIVE_OBJECTIVE")
         report = audit_rss_vnext_gradient_interference_v1(
@@ -3471,6 +3474,7 @@ class RSSvNextStructuralTrainer:
                 graphics_rgb_weight=self.product_graphics_rgb_weight,
                 graphics_joint_ray_weight=self.product_joint_ray_weight,
                 anchor_face_weight=self.product_anchor_face_weight,
+                mstar_pose_raster_weight=self.product_mstar_pose_raster_weight,
             )
             route = prepare_product_gradient_route_v1(
                 named_parameters=tuple(self.model.named_parameters()),
@@ -3497,6 +3501,7 @@ class RSSvNextStructuralTrainer:
             if (
                 result.graphics_source_rgb_loss is not None
                 or result.realsas_joint_slrm_loss is not None
+                or result.product_mstar_pose_raster_loss is not None
             ):
                 required.append(("GRAPHICS",self.model.graphics))
             if result.graphics_source_rgb_loss is not None:
@@ -3504,6 +3509,10 @@ class RSSvNextStructuralTrainer:
                     ("SOURCE_RGB_VIEW_CORE",self.model.constructed_view_renderer.core),
                     ("SOURCE_RGB_VIEW_HEAD",self.model.constructed_view_renderer.rgb),
                 ))
+            if result.product_mstar_pose_raster_parts is not None and (
+                "role" in result.product_mstar_pose_raster_parts
+            ):
+                required.append(("POSED_MSTAR_ROLE",self.model.presentation_role_head))
             if result.anchor_face_correspondence_loss is not None:
                 required.append(("ANCHOR_FACE",self.model.anchor_face_correspondence))
             if result.product_axis_mira_loss is not None:
@@ -3566,10 +3575,13 @@ class RSSvNextStructuralTrainer:
                     graphics_joint_ray_weight=self.product_joint_ray_weight,
                     component_udf_weight=self.component_udf_weight,
                     anchor_face_weight=self.product_anchor_face_weight,
+                    mstar_pose_raster_weight=self.product_mstar_pose_raster_weight,
                 )
             ),
             "compiler_acceptance_gaps": list(
-                self.product_curriculum.compiler_acceptance_gaps()
+                self.product_curriculum.compiler_acceptance_gaps(
+                    mstar_pose_raster_weight=self.product_mstar_pose_raster_weight,
+                )
             ),
             "model_release_ready": False,
             "product_proof_ready": False,

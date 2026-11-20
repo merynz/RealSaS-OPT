@@ -228,12 +228,23 @@ def render_posed_indexed_mstar_v1(
         posed_sample, _ = raster_backend.interpolate(posed[None], rast, tri)
         normal_sample, _ = raster_backend.interpolate(normals[None], rast, tri)
         coverage = (rast[..., 3:4] > 0).to(dtype=rest.dtype)
+        # Only visible first-hit pixels own material samples. A dense
+        # H(x) query over millions of background pixels would waste GPU
+        # activations (and backprop memory) without changing a single pixel.
+        # index_copy remains differentiable through the sampled rest XYZ.
         positions = rest_sample.reshape(1, height * width, 3)
+        visible_indices = (
+            (rast[..., 3] > 0).reshape(-1)
+            .nonzero(as_tuple=False).reshape(-1)
+        )
+        if not len(visible_indices):
+            raise RuntimeError("RSS_VNEXT_MSTAR_POSE_RASTER_NO_VISIBLE_SOURCE_SURFACE")
+        sampled = positions.index_select(1, visible_indices)
         colors, roles = [], []
-        for start in range(0, height * width, query_chunk):
+        for start in range(0, sampled.shape[1], query_chunk):
             h = iris.query(
                 scene_triplanes,
-                positions[:, start:start+query_chunk].to(scene_triplanes.dtype),
+                sampled[:, start:start+query_chunk].to(scene_triplanes.dtype),
             )["H"]
             rgba_logits = graphics_head(h)
             role_logits = role_head(h)
@@ -241,10 +252,17 @@ def render_posed_indexed_mstar_v1(
                 raise RuntimeError("RSS_VNEXT_MSTAR_POSE_GRAPHICS_HEAD_ABI")
             colors.append(torch.sigmoid(rgba_logits[..., :3].float()))
             roles.append(torch.softmax(role_logits.float(), dim=-1))
-        color = torch.cat(colors, dim=1).reshape(1, height, width, 3)
-        role = torch.cat(roles, dim=1).reshape(
-            1, height, width, -1
-        )
+        visible_rgb = torch.cat(colors, dim=1)
+        visible_role = torch.cat(roles, dim=1)
+        # Explicit zero background; one predicted first-hit owner per pixel.
+        color = visible_rgb.new_zeros((1, height*width, 3)).index_copy(
+            1, visible_indices, visible_rgb,
+        ).reshape(1, height, width, 3)
+        role = visible_role.new_zeros(
+            (1, height*width, visible_role.shape[-1])
+        ).index_copy(
+            1, visible_indices, visible_role,
+        ).reshape(1, height, width, -1)
         rgba = torch.cat((color * coverage, coverage), dim=-1)
         smooth = raster_backend.antialias(rgba, rast, clip, tri).clamp(0., 1.)
         alpha = smooth[..., 3:4]

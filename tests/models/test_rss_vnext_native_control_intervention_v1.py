@@ -23,7 +23,6 @@ def _case():
         [0.,0.,.4],[1.,0.,.4],[0.,1.,.4],
     ]])
     source = rest[:,None].repeat(1,2,1,1)
-    source[0,1,3:,:,] if False else None
     source[0,1,3:,0] += .35  # independently authored wing-only response
     source_mask = torch.ones((1,2,6),dtype=torch.bool)
     mats=torch.eye(4)[None,None,None].repeat(1,2,2,1,1)

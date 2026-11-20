@@ -11,6 +11,12 @@ from models.rss_vnext.training_engine import (
     source_surface_tensor_sha256,
 )
 from models.rss_vnext.training_seeded_tessa_v1 import SeededTESSALossWeightsV1
+from models.rss_vnext.product_multitask_gradient_control_v1 import (
+    ProductMultitaskGradientPolicyV1,
+)
+from models.rss_vnext.product_multitask_curriculum_v1 import (
+    ProductSeededCurriculumV1,
+)
 from models.rss_vnext.realsas_joint_slrm_render_v1 import (
     STAGE_1,STAGE_2,RealSaSJointTargetV1,
 )
@@ -125,7 +131,9 @@ def _appearance(monkeypatch):
         realsas_joint_teacher_admission_key=ray_key,
     )
     def make(*,rgb_weight=.6,ray_weight=.7,
-             graphics_registry=rgb_registry,joint_registry_override=None):
+             graphics_registry=rgb_registry,joint_registry_override=None,
+             gradient_route_policy=ProductMultitaskGradientPolicyV1(),
+             curriculum=ProductSeededCurriculumV1()):
         opt=torch.optim.AdamW(net.parameters(),lr=1.e-3)
         return RSSvNextStructuralTrainer(
             net,opt,dataset_manifest_sha256="f"*64,
@@ -147,6 +155,8 @@ def _appearance(monkeypatch):
             ),
             product_graphics_rgb_weight=rgb_weight,
             product_joint_ray_weight=ray_weight,
+            product_gradient_route_policy=gradient_route_policy,
+            product_curriculum=curriculum,
         )
     return net,with_rgb,make,rgb_registry,joint_registry
 

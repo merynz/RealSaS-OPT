@@ -241,6 +241,7 @@ def compile_rss_vnext_canonical_user_edit_revision_v1(
     mesh_vertex_position_edits:Mapping[str,tuple[float,float,float]]|None=None,
     joint_rest_position_edits:Mapping[str,tuple[float,float,float]]|None=None,
     skin_weight_edits:Mapping[str,Mapping[str,float]]|None=None,
+    pin_only_authoring_shell:bool=False,
 ) -> tuple[bytes,dict]:
     base=reopen_rss_vnext_native_preview_package_v1(source_rss_path)
     data=source_rss_path.read_bytes()
@@ -248,8 +249,12 @@ def compile_rss_vnext_canonical_user_edit_revision_v1(
     mesh_edits=dict(mesh_vertex_position_edits or {})
     rest_edits=dict(joint_rest_position_edits or {})
     weight_edits=dict(skin_weight_edits or {})
-    if not (mesh_edits or rest_edits or weight_edits):
+    if type(pin_only_authoring_shell) is not bool:
+        raise ValueError("RSS_AUTHORING_REVISION_PIN_SHELL_POLICY")
+    if not (mesh_edits or rest_edits or weight_edits) and not pin_only_authoring_shell:
         raise ValueError("RSS_AUTHORING_REVISION_NO_EDIT")
+    if pin_only_authoring_shell and (mesh_edits or rest_edits or weight_edits):
+        raise ValueError("RSS_AUTHORING_REVISION_PIN_SHELL_MIXED_EDIT")
     mesh=_edited_mesh(base["mesh"],mesh_edits,base_sha)
     rig=_edited_rig(base["rig"],mesh,rest_edits,base_sha)
     skin=_edited_skin(base["skin"],mesh,rig,weight_edits,base_sha)
@@ -291,6 +296,10 @@ def compile_rss_vnext_canonical_user_edit_revision_v1(
         "product_revision_minted":False,
         "product_release_admission":False,
     }
+    if pin_only_authoring_shell:
+        # An immutable Mesh/Rig/Skin parent for a subsequent EXPLICIT user pin
+        # approval. On its own this shell carries zero activation authority.
+        edit_receipt["pin_only_authoring_shell"]=True
     edit_receipt["authoring_revision_id"]=content_sha256(edit_receipt)
     entries=OrderedDict([
         ("mesh.json",_json(mesh.to_dict())),
@@ -324,7 +333,8 @@ def reopen_rss_vnext_canonical_user_edit_revision_v1(
     if revision_path.stat().st_size>MAX_BYTES:
         raise RuntimeError("RSS_AUTHORING_REOPEN_ARCHIVE_BUDGET")
     entries=read_rss_v2(revision_path)
-    if set(entries)!=REQUIRED:
+    has_pin_approval="editor_open_pin.json" in entries
+    if set(entries)!=(REQUIRED|({"editor_open_pin.json"} if has_pin_approval else set())):
         raise RuntimeError("RSS_AUTHORING_REOPEN_ENTRY_SET")
     try:
         manifest=dict(row.split("=",1)
@@ -360,6 +370,24 @@ def reopen_rss_vnext_canonical_user_edit_revision_v1(
         or manifest.get("authority")!=AUTHORITY
         or manifest.get("product_revision_minted")!="0"
         or manifest.get("graphics_uv_binding_qualified")!="0"
+        or (
+            has_pin_approval and (
+                manifest.get("sha256:editor_open_pin.json")
+                    !=_sha(entries["editor_open_pin.json"])
+                or not manifest.get("pin_revision_id")
+            )
+        )
+        or (
+            not has_pin_approval and (
+                "sha256:editor_open_pin.json" in manifest
+                or "pin_revision_id" in manifest
+            )
+        )
+        or (
+            receipt.get("pin_only_authoring_shell",False) is True
+            and any(actual_scope.values())
+        )
+        or receipt.get("pin_only_authoring_shell",False) not in (True,False)
         or receipt.get("schema")!=SCHEMA
         or receipt.get("authority")!=AUTHORITY
         or receipt.get("base_rss_sha256")!=base_sha
@@ -441,8 +469,25 @@ def reopen_rss_vnext_canonical_user_edit_revision_v1(
         or fresh_pose_hashes!=receipt.get("mechanics_pose_hashes")
     ):
         raise RuntimeError("RSS_AUTHORING_REOPEN_INDEPENDENT_LBS_REPLAY_DRIFT")
+    pin_approval=None
+    if has_pin_approval:
+        from .rss_vnext_editor_open_pin_revision_v1 import (
+            validate_persisted_editor_open_pin_record_v1,
+        )
+        try:
+            pin_payload=json.loads(entries["editor_open_pin.json"])
+        except (ValueError,UnicodeDecodeError,TypeError) as exc:
+            raise RuntimeError("RSS_AUTHORING_REOPEN_PIN_TYPED_PAYLOAD") from exc
+        if manifest["pin_revision_id"]!=pin_payload.get("pin_revision_id"):
+            raise RuntimeError("RSS_AUTHORING_REOPEN_PIN_MANIFEST_DRIFT")
+        pin_approval=validate_persisted_editor_open_pin_record_v1(
+            payload=pin_payload,
+            authoring_revision_id=receipt["authoring_revision_id"],
+            mesh=mesh,rig=rig,skin=skin,
+        )
     return {
         "source_preview":base,
+        "editor_open_pin":pin_approval,
         "authoring_revision_id":receipt["authoring_revision_id"],
         "mesh":mesh,"rig":rig,"skin":skin,
         "pose_bytes":fresh_pose,

@@ -242,6 +242,7 @@ def test_legacy_untyped_seeded_layer_penetration_teacher_is_not_implicitly_accep
     "test_source_author_control_receipt_and_changed_joint_mask_are_not_inferred",
     "test_unverified_source_response_and_unknown_vertex_pose_abstain",
     "test_intervention_loss_is_eighth_distinct_training_family",
+    "test_native_intervention_backpropagates_into_actual_mira_lbs_skin_weights",
 ))
 def test_qualified_native_control_response_in_required_model_source_gate(
     test_name,

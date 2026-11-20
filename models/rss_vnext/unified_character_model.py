@@ -33,6 +33,7 @@ from .animation_ready_mesh import (
 )
 from .tessa_incremental_decode_v1 import decode_next_token_v1
 from .attachment_face_correspondence_v1 import RSSvNextSocketFaceCorrespondenceHeadV1
+from .product_open_pin_vertex_head_v1 import OpenPinVertexHeadV1
 from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefinementConfig
 from .semantic_structure import RSSvNextGenericRegionStructure
 from .early_semantic_field import RSSvNextEarlySemanticField
@@ -562,6 +563,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         self.anchor_face_correspondence = RSSvNextSocketFaceCorrespondenceHeadV1(
             field_width=h, axis_width=cfg.control_hidden_dim,
             region_slots=cfg.region_slots, hidden_width=cfg.relation_width,
+        )
+        self.open_pin_vertex = OpenPinVertexHeadV1(
+            field_width=h, axis_width=cfg.control_hidden_dim,
+            hidden_width=cfg.relation_width,
         )
         self.mira = RSSvNextSkinCoupler(cfg)
         self.mesh_bridge = RSSvNextAnimationReadyMesh(self.iris, cfg.tessa)
@@ -1668,6 +1673,9 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                     if self.cfg.typed_region_relation_policy=="RESEARCH_SOURCE_QUALIFIED"
                     else None
                 ),
+            )
+            result["open_pin_vertex_candidate"] = self.open_pin_vertex(
+                mesh=mesh,axis_hidden=control_out["hidden"],axis_sequence=seq,
             )
             if bool((seq.kind_ids == int(RigTokenKindV6.SKIN_CODE)).any()):
                 mechanics_h = (

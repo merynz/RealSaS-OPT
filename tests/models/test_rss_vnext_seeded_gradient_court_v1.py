@@ -249,3 +249,12 @@ def test_qualified_native_control_response_in_required_model_source_gate(
 ):
     from tests.models import test_rss_vnext_native_control_intervention_v1 as court
     getattr(court,test_name)()
+
+
+def test_control_intervention_launch_policy_and_resume_on_live_seeded_trainer(
+    monkeypatch, tmp_path,
+):
+    from tests.models import test_rss_vnext_native_control_intervention_v1 as court
+    court.test_product_seeded_trainer_exposes_conditional_truth_and_pins_resume(
+        monkeypatch, tmp_path,
+    )

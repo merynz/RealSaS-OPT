@@ -146,7 +146,7 @@ def test_source_graphics_seeded_trainer_routes_same_H_without_stealing_truth(
     result=routed.train_step(batch)
     report=result.product_gradient_route_report
     assert report is not None
-    assert set(report["active_shared_task_families"])=={"GEOMETRY","GRAPHICS"}
+    assert set(report["active_shared_task_families"])=={"GEOMETRY","GRAPHICS","JOINT_RENDER"}
     assert report["independent_source_truth_inferred"] is False
     assert report["product_release_qualified"] is False
     assert result.total_loss.isfinite()

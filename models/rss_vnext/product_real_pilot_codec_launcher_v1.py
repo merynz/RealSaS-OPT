@@ -17,7 +17,7 @@ import math
 
 import torch
 
-from .contracts import architecture_digest
+from .training_engine import architecture_digest
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 from .training_phase_handoff_v1 import (
     import_rss_vnext_training_phase_handoff_v1,

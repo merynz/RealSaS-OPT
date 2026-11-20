@@ -216,8 +216,10 @@ def test_train_runner_never_uses_validation_or_unseen_examples(admitted):
         dataset_manifest_sha256=cohort.cohort_sha256
         def __init__(self):
             self.calls=0
+            self.step=0
         def train_step(self,batch):
             self.calls+=1
+            self.step+=1
             return type("Loss",(),{"total_loss":torch.tensor(float(batch))})()
     runner=Trainer()
     source_index={a.source_id:a for a in assets}
@@ -233,6 +235,38 @@ def test_train_runner_never_uses_validation_or_unseen_examples(admitted):
     )
     assert runner.calls==2
     assert len(results)==2
+    assert [r["step"] for r in results]==[1,2]
+    with pytest.raises(ValueError,match="SOURCE_INDEX_COHORT_DRIFT"):
+        run_source_qualified_pilot_updates_v1(
+            trainer=runner,staged_examples=train,cohort=cohort,
+            source_index={**source_index,assets[0].source_id:replace(
+                assets[0],lineage_group="fabricated-family",
+            )},max_steps=1,
+        )
+    with pytest.raises(ValueError,match="300_TO_400"):
+        run_source_qualified_pilot_updates_v1(
+            trainer=runner,staged_examples=train,cohort=cohort,
+            source_index={a.source_id:a for a in assets[:2]},max_steps=1,
+        )
+    class NoCounter:
+        dataset_manifest_sha256=cohort.cohort_sha256
+        def train_step(self,batch):
+            return {"total":torch.tensor(1.)}
+    with pytest.raises(ValueError,match="PROGRESS_COUNTER_REQUIRED"):
+        run_source_qualified_pilot_updates_v1(
+            trainer=NoCounter(),staged_examples=train,source_index=source_index,
+            cohort=cohort,max_steps=1,
+        )
+    class SilentCounter:
+        dataset_manifest_sha256=cohort.cohort_sha256
+        step=0
+        def train_step(self,batch):
+            return {"total":torch.tensor(1.)}
+    with pytest.raises(RuntimeError,match="OPTIMIZER_STEP_NOT_RECORDED"):
+        run_source_qualified_pilot_updates_v1(
+            trainer=SilentCounter(),staged_examples=train,source_index=source_index,
+            cohort=cohort,max_steps=1,
+        )
     with pytest.raises(ValueError,match="TRAIN_SOURCE_NOT_ADMITTED"):
         run_source_qualified_pilot_updates_v1(
             trainer=runner,staged_examples=[

@@ -10,7 +10,7 @@ from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import (
     CanonicalMeshIR,CanonicalMeshVertexIR,canonical_mesh_lineage_hash_v1,
 )
 from compiler.realsas_compiler_core.canonical_rig_ir_v2 import (
-    canonical_rig_lineage_hash_v2,
+    CanonicalRigChainIRV2,canonical_rig_lineage_hash_v2,
 )
 from compiler.realsas_compiler_core.canonical_skin_ir_v2 import (
     CanonicalSkinIRV2,CanonicalSkinRowIRV2,canonical_skin_lineage_hash_v2,
@@ -151,3 +151,36 @@ def test_cross_component_pin_body_or_no_face_abstains_not_fabricates_xpbd():
     assert _preview(
         mesh,canonical,rig,skin,none,pin,
     )[0].state=="ABSTAIN_NO_DIRECTED_FACE_PAIR"
+
+
+def test_open_cloth_pins_do_not_require_skin_to_holder_chain():
+    """A pinned cape can have its own auxiliary LBS chain before XPBD."""
+    mesh,canonical,rig,skin,face,pin=_canonical()
+    # The HOLDER face uses body J0/K0. HELD cape pin vertices use
+    # independent J1/K1. Their attachment is physical, not an LBS claim.
+    old=rig.chains[0]
+    rig=replace(
+        rig,
+        chains=(
+            replace(old,canonical_joint_ids=("J0",)),
+            CanonicalRigChainIRV2(
+                "K1",("J1","J2"),"GENERIC_KINEMATIC_CHAIN","PK1",
+            ),
+        ),
+        constraints=(),
+        rig_lineage_hash="",
+    )
+    rig=replace(rig,rig_lineage_hash=canonical_rig_lineage_hash_v2(rig))
+    rows=tuple(
+        replace(row,influences=(("J1",1.),))
+        if row.canonical_mesh_vertex_id in ("MV:0","MV:1")
+        else row
+        for row in skin.rows
+    )
+    skin=replace(skin,rows=rows,skin_lineage_hash="")
+    skin=replace(skin,skin_lineage_hash=canonical_skin_lineage_hash_v2(skin))
+    record=_preview(mesh,canonical,rig,skin,face,pin)[0]
+    assert record.state=="REVIEW_READY_NEURAL_PIN_AND_HOST_HYPOTHESIS"
+    assert record.suggested_host_chain_id=="K0"
+    assert record.candidate_pin_vertex_ids==("MV:0","MV:1")
+    assert not record.compiler_xpbd_activation_qualified

@@ -184,6 +184,17 @@ func (ProductProofProvider) Capabilities(context.Context) ([]Descriptor, error) 
 	metadata["input_raw_native_preview_artifact_type"] = "RealSaS.RSSvNextNativeInteractivePuppetPreview"
 	metadata["input_raw_native_preview_schema_version"] = "v1"
 	metadata["raw_native_preview_independent_replay_required"] = true
+	metadata["input_native_user_edit_revision_artifact_type"] = "RealSaS.RSSvNextCanonicalUserEditRevision"
+	metadata["input_native_user_edit_revision_schema_version"] = "v1"
+	metadata["input_native_user_edit_preview_artifact_type"] = "RealSaS.RSSvNextEditedGraphicsPreview"
+	metadata["input_native_user_edit_preview_schema_version"] = "v1"
+	metadata["input_native_user_edit_raster_artifact_type"] = "RealSaS.RSSvNextCanonicalUserEditNativeRasterBundle"
+	metadata["input_native_user_edit_raster_schema_version"] = "v1"
+	metadata["input_native_user_edit_court_artifact_type"] = "RealSaS.RSSvNextCanonicalUserEditNativeExecutionCourt"
+	metadata["input_native_user_edit_court_schema_version"] = "v1"
+	metadata["native_user_edit_four_artifact_set_optional_but_atomic"] = true
+	metadata["native_user_edit_independent_replay_host_only"] = true
+	metadata["native_user_edit_sample_cannot_mint_product_revision"] = true
 	metadata["input_mechanics_intervention_artifact_type"] = "RealSaS.MechanicsInterventionCourt"
 	metadata["input_mechanics_intervention_schema_version"] = "v1"
 	metadata["mechanics_intervention_required"] = true

@@ -272,9 +272,17 @@ def load_official_pretrained_i2mv_stage_b_v1(
     schedule_mod = _verified_upstream_module(
         "mvadapter.schedulers.scheduling_shift_snr", pin=pin,
     )
+    # Preserve the UNMODIFIED pretrained schedule config. The B training
+    # runner must construct its one authoritative DDPM ShiftSNR schedule
+    # from these original betas, not double-shift an inference scheduler.
+    from diffusers import DDPMScheduler
+    pipe._rss_vnext_unshifted_scheduler_config=dict(pipe.scheduler.config)
+    raw_ddpm=DDPMScheduler.from_config(
+        pipe._rss_vnext_unshifted_scheduler_config,
+    )
     pipe.scheduler = schedule_mod.ShiftSNRScheduler.from_scheduler(
-        pipe.scheduler, shift_mode="interpolated", shift_scale=8.0,
-        scheduler_class=None,
+        raw_ddpm, shift_mode="interpolated", shift_scale=8.0,
+        scheduler_class=DDPMScheduler,
     )
     pipe.init_custom_adapter(num_views=6)
     pipe.load_custom_adapter(

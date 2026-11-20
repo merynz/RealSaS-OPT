@@ -227,12 +227,18 @@ def execute_real_pilot_embedded_codec_phase_v1(
     examples:Iterable[RealPilotTrainingEnvelopeV1],
     source_index:Mapping[str,RealPilotAssetV1],
     cohort:RealPilotCohortReceiptV1,
+    resume_sampler_cursor:int|None=None,
 )->list[dict[str,object]]:
     current=phase.trainer.step
     if (
         phase.source_cohort_sha256!=cohort.cohort_sha256
         or not 0<=current<phase.plan.optimizer_steps
-        or (current>0 and phase.verified_resume_step!=current)
+        or (current>0 and (
+            phase.verified_resume_step!=current
+            or type(resume_sampler_cursor) is not int
+            or resume_sampler_cursor!=phase.verified_resume_cursor
+        ))
+        or (current==0 and resume_sampler_cursor not in (None,0))
     ):
         raise ValueError("RSS_VNEXT_PILOT_CODEC_RESUME_REQUIRES_CHECKPOINT")
     results=run_source_qualified_pilot_updates_v1(

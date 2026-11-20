@@ -91,6 +91,7 @@ class SourceSDXLStageABOptimizerV2:
         noise_scheduler:Any,
         source_manifest_sha256:str,
         pretrained_source_sha256:str,
+        source_vae_sha256:str,
         pretrained_mv_adapter_sha256:str|None=None,
         conditioner:RSSvNextTwoImageConditionerV1|None=None,
         task_a_alpha:SDXLCanonicalAlphaHeadV2|None=None,
@@ -103,6 +104,9 @@ class SourceSDXLStageABOptimizerV2:
             stage not in ("A_CANONICAL_SDXL","B_PAIRED_RGB_NORMAL_MVADAPTER")
             or not _sha(source_manifest_sha256)
             or not _sha(pretrained_source_sha256)
+            or not _sha(source_vae_sha256)
+            or getattr(vae,"_rss_vnext_vae_ancestor_sha256",None)
+                !=source_vae_sha256
             or (stage=="B_PAIRED_RGB_NORMAL_MVADAPTER"
                 and not _sha(pretrained_mv_adapter_sha256))
             or (stage=="A_CANONICAL_SDXL"
@@ -121,6 +125,7 @@ class SourceSDXLStageABOptimizerV2:
         self.noise_scheduler=noise_scheduler
         self.source_manifest_sha256=source_manifest_sha256
         self.pretrained_source_sha256=pretrained_source_sha256
+        self.source_vae_sha256=source_vae_sha256
         self.pretrained_mv_adapter_sha256=pretrained_mv_adapter_sha256
         self.conditioner=conditioner
         self.alpha=task_a_alpha
@@ -262,6 +267,7 @@ class SourceSDXLStageABOptimizerV2:
                 path,unet=self.unet,conditioner=self.conditioner,
                 alpha_head=self.alpha,trained_steps=self.step,
                 pretrained_unet_sha256=self.pretrained_source_sha256,
+                vae_checkpoint_sha256=self.source_vae_sha256,
                 qualified_corpus_sha256=self.source_manifest_sha256,
             )
         from .realsas_mvadapter_stage_b_sampler_v2 import (
@@ -272,6 +278,7 @@ class SourceSDXLStageABOptimizerV2:
             trained_steps=self.step,
             pretrained_base_unet_sha256=self.pretrained_source_sha256,
             pretrained_mv_adapter_sha256=self.pretrained_mv_adapter_sha256,
+            vae_checkpoint_sha256=self.source_vae_sha256,
             qualified_corpus_sha256=self.source_manifest_sha256,
         )
 
@@ -284,6 +291,7 @@ class SourceSDXLStageABOptimizerV2:
             "source_manifest_sha256":self.source_manifest_sha256,
             "pretrained_source_sha256":self.pretrained_source_sha256,
             "pretrained_mv_adapter_sha256":self.pretrained_mv_adapter_sha256,
+            "source_vae_sha256":self.source_vae_sha256,
             "optimizer_binding":self.optimizer_binding,
             "unet_trainable":{n:p.detach().cpu().contiguous()
                                for n,p in self.unet.named_parameters()
@@ -330,6 +338,7 @@ class SourceSDXLStageABOptimizerV2:
                 !=self.pretrained_source_sha256
             or data.get("pretrained_mv_adapter_sha256")
                 !=self.pretrained_mv_adapter_sha256
+            or data.get("source_vae_sha256")!=self.source_vae_sha256
             or data.get("optimizer_binding")!=self.optimizer_binding
             or type(data.get("step")) is not int
             or data["step"]<1

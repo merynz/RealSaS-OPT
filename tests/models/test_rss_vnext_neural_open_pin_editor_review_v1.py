@@ -186,3 +186,28 @@ def test_open_cloth_pins_do_not_require_skin_to_holder_chain():
     assert record.candidate_pin_vertex_ids==("MV:0","MV:1")
     assert record.requires_host_pin_binding_repair
     assert not record.compiler_xpbd_activation_qualified
+
+
+def test_neural_review_adapter_has_no_authority_promotion():
+    from models.rss_vnext.product_neural_open_pin_editor_review_v1 import (
+        lower_open_pin_neural_review_to_editor_candidate_v1,
+    )
+    from compiler.realsas_compiler_core.mechanics_editor_open_pin_approval_v1 import (
+        EditorOpenPinNeuralReviewV1,
+    )
+    mesh,canonical,rig,skin,face,pin=_canonical()
+    record=_preview(mesh,canonical,rig,skin,face,pin)[0]
+    candidate=lower_open_pin_neural_review_to_editor_candidate_v1(
+        record,rig=rig,skin=skin,
+    )
+    assert type(candidate) is EditorOpenPinNeuralReviewV1
+    assert candidate.review_hash
+    assert candidate.source_pin_qualified is False
+    assert candidate.compiler_xpbd_activation_qualified is False
+    assert candidate.canonical_mesh_lineage_hash==canonical.mesh_lineage_hash
+    assert candidate.canonical_rig_lineage_hash==rig.rig_lineage_hash
+    assert candidate.canonical_skin_lineage_hash==skin.skin_lineage_hash
+    with pytest.raises(ValueError,match="NOT_LOWERABLE"):
+        lower_open_pin_neural_review_to_editor_candidate_v1(
+            replace(record,source_pin_qualified=True),rig=rig,skin=skin,
+        )

@@ -57,6 +57,7 @@ jobs:
             tests/compiler/test_mechanics_xpbd_product_bridge_v1.py \
             tests/compiler/test_mechanics_xpbd_surface_v1.py \
             tests/compiler/test_mechanics_xpbd_surface_editor_v1.py \
+            tests/compiler/test_mechanics_editor_open_pin_approval_v1.py \
             tests/compiler/test_mechanics_xpbd_surface_self_contact_v1.py \
             tests/compiler/test_mechanics_xpbd_contact_friction_v1.py \
             tests/compiler/test_mechanics_xpbd_body_mesh_contact_v1.py

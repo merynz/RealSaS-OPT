@@ -226,7 +226,54 @@ def propose_open_pin_canonical_editor_review_v1(
     return tuple(output)
 
 
+def lower_open_pin_neural_review_to_editor_candidate_v1(
+    record:OpenPinCanonicalEditorReviewV1,
+    *, rig:CanonicalRigIRV2,skin:CanonicalSkinIRV2,
+):
+    """Lower review-only model output; do not create an approval or XPBD.
+
+    The Compiler-facing DTO is independent of torch/model inference and is
+    sealed to the canonical Rig/Skin lineage of this exact review.
+    """
+    from compiler.realsas_compiler_core.mechanics_editor_open_pin_approval_v1 import (
+        EditorOpenPinNeuralReviewV1,REVIEW_STATES,
+    )
+    if (
+        type(record) is not OpenPinCanonicalEditorReviewV1
+        or record.state not in REVIEW_STATES
+        or record.authority != "NEURAL_REVIEW_ONLY_NOT_SOURCE_OR_COMPILER_AUTHORITY"
+        or record.source_pin_qualified is not False
+        or record.compiler_xpbd_activation_qualified is not False
+        or record.inferred_physical_parameters is not False
+        or record.held_canonical_face is None
+        or record.holder_canonical_face is None
+        or not record.candidate_pin_vertex_ids
+        or record.candidate_component_id is None
+        or record.suggested_host_chain_id is None
+        or rig.mesh_lineage_hash != record.canonical_mesh_lineage_hash
+        or skin.mesh_lineage_hash != record.canonical_mesh_lineage_hash
+        or skin.deform_structure_hash != rig.deform_structure_hash
+        or rig.rig_lineage_hash != canonical_rig_lineage_hash_v2(rig)
+        or skin.skin_lineage_hash != canonical_skin_lineage_hash_v2(skin)
+    ):
+        raise ValueError("RSS_VNEXT_PIN_EDITOR_REVIEW_NOT_LOWERABLE")
+    return EditorOpenPinNeuralReviewV1(
+        anchor_event_index=record.anchor_event_index,
+        source_mstar_topology_digest=record.source_mstar_topology_digest,
+        canonical_mesh_lineage_hash=record.canonical_mesh_lineage_hash,
+        canonical_rig_lineage_hash=rig.rig_lineage_hash,
+        canonical_skin_lineage_hash=skin.skin_lineage_hash,
+        held_canonical_face=record.held_canonical_face,
+        holder_canonical_face=record.holder_canonical_face,
+        candidate_pin_vertex_ids=record.candidate_pin_vertex_ids,
+        candidate_component_id=record.candidate_component_id,
+        suggested_host_chain_id=record.suggested_host_chain_id,
+        state=record.state,
+    ).sealed()
+
+
 __all__=[
     "OpenPinCanonicalEditorReviewV1",
     "propose_open_pin_canonical_editor_review_v1",
+    "lower_open_pin_neural_review_to_editor_candidate_v1",
 ]

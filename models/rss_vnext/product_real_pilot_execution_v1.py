@@ -320,6 +320,13 @@ def run_source_qualified_pilot_updates_v1(
         ):
             raise ValueError("RSS_VNEXT_PILOT_BATCH_ASSET_BINDING_DRIFT")
         assert_train_only_source_v1(item,cohort)
+        # An admitted TRAIN envelope can otherwise wrap an unrelated
+        # source-qualified validation batch. Every actual trainer must resolve
+        # its immutable batch receipt key into THIS source asset SHA.
+        verifier=getattr(trainer,"assert_pilot_batch_source_asset_v1",None)
+        if not callable(verifier):
+            raise RuntimeError("RSS_VNEXT_PILOT_BATCH_SOURCE_IDENTITY_VERIFIER_REQUIRED")
+        verifier(envelope.batch,item.source_asset_sha256)
         previous_step=getattr(trainer,"global_step",getattr(trainer,"step",None))
         if previous_step!=current_step:
             raise RuntimeError("RSS_VNEXT_PILOT_TRAINER_EXTERNAL_STEP_DRIFT")

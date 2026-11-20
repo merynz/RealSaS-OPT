@@ -75,7 +75,7 @@ def qualify_stageab_training_source_v2(
         raise ValueError("RSS_VNEXT_STAGE_AB_TRUTH_REGISTRY_POLICY")
     key=getattr(batch,"source_render_qualification_key",None)
     receipt=trusted_source_registry.get(key)
-    if type(receipt) not in (dict,):
+    if not isinstance(receipt, Mapping):
         raise ValueError("RSS_VNEXT_STAGE_AB_SOURCE_TRUTH_NOT_REGISTERED")
     required={
         "schema":SCHEMA,"admission_status":AUTHORITY,
@@ -98,7 +98,7 @@ def qualify_stageab_training_source_v2(
     ):
         raise ValueError("RSS_VNEXT_STAGE_AB_NATIVE_TEACHER_RECEIPT_DRIFT")
     return sha256(json.dumps(
-        receipt,sort_keys=True,separators=(",",":"),
+        dict(receipt),sort_keys=True,separators=(",",":"),
         allow_nan=False,
     ).encode()).hexdigest()
 

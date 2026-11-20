@@ -15,7 +15,8 @@ No data split is selected/modified and no training starts on import.
 from dataclasses import dataclass
 from hashlib import sha256
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
+from types import MappingProxyType
 import json
 import math
 import os
@@ -92,6 +93,7 @@ class SourceSDXLStageABOptimizerV2:
         source_manifest_sha256:str,
         pretrained_source_sha256:str,
         source_vae_sha256:str,
+        trusted_source_registry:Mapping[str,Mapping[str,Any]],
         pretrained_mv_adapter_sha256:str|None=None,
         conditioner:RSSvNextTwoImageConditionerV1|None=None,
         task_a_alpha:SDXLCanonicalAlphaHeadV2|None=None,
@@ -119,6 +121,16 @@ class SourceSDXLStageABOptimizerV2:
             or not isinstance(vae,nn.Module)
         ):
             raise ValueError("RSS_VNEXT_STAGE_AB_OPTIMIZER_CONTRACT_INVALID")
+        from .realsas_stageab_source_court_v2 import (
+            digest_stageab_registry_v2,
+        )
+        self.trusted_source_registry=MappingProxyType({
+            str(k):MappingProxyType(dict(v))
+            for k,v in trusted_source_registry.items()
+        })
+        self.source_registry_sha256=digest_stageab_registry_v2(
+            trusted_source_registry
+        )
         self.stage=stage
         self.unet=unet
         self.vae=vae
@@ -215,6 +227,14 @@ class SourceSDXLStageABOptimizerV2:
             if type(batch) is not MVAdapterSourceStageBBatchV2:
                 raise TypeError("RSS_VNEXT_STAGE_AB_WRONG_B_BATCH")
             batch.validate()
+        from .realsas_stageab_source_court_v2 import (
+            qualify_stageab_training_source_v2,
+        )
+        qualify_stageab_training_source_v2(
+            stage=self.stage,batch=batch,
+            dataset_manifest_sha256=self.source_manifest_sha256,
+            trusted_source_registry=self.trusted_source_registry,
+        )
         self.unet.train()
         if self.conditioner is not None:self.conditioner.train()
         if self.alpha is not None:self.alpha.train()
@@ -301,6 +321,7 @@ class SourceSDXLStageABOptimizerV2:
             "pretrained_source_sha256":self.pretrained_source_sha256,
             "pretrained_mv_adapter_sha256":self.pretrained_mv_adapter_sha256,
             "source_vae_sha256":self.source_vae_sha256,
+            "source_registry_sha256":self.source_registry_sha256,
             "training_noise_schedule_sha256":self.training_noise_schedule_sha256,
             "optimizer_binding":self.optimizer_binding,
             "unet_trainable":{n:p.detach().cpu().contiguous()
@@ -349,6 +370,7 @@ class SourceSDXLStageABOptimizerV2:
             or data.get("pretrained_mv_adapter_sha256")
                 !=self.pretrained_mv_adapter_sha256
             or data.get("source_vae_sha256")!=self.source_vae_sha256
+            or data.get("source_registry_sha256")!=self.source_registry_sha256
             or data.get("training_noise_schedule_sha256")
                 !=self.training_noise_schedule_sha256
             or data.get("optimizer_binding")!=self.optimizer_binding

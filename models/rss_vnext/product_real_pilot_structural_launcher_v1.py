@@ -88,6 +88,29 @@ class PreparedPilotStructuralPhaseV1:
     verified_resume_cursor:int=0
 
 
+def activate_real_pilot_e_training_mode_v1(model:RSSvNextUnifiedCharacterModel)->None:
+    """D's codec-first trainer uses model.eval; E MUST reactivate shared H.
+
+    Frozen vision, FSQ codec and point-query skin decoder stay in eval mode
+    to prevent dropout/batch-stat mutation. AXIS/MIRA active heads, Graphics,
+    IRIS and seeded TESSA are allowed to train in their selected E phase.
+    """
+    if not isinstance(model,torch.nn.Module):
+        raise TypeError("RSS_VNEXT_PILOT_E_TRAIN_MODE_MODEL_REQUIRED")
+    model.train()
+    for module in (
+        model.vision,
+        model.mira.codec,
+        model.mira.spatial_decoder,
+    ):
+        module.eval()
+    if (
+        not model.training or model.vision.training
+        or model.mira.codec.training or model.mira.spatial_decoder.training
+    ):
+        raise RuntimeError("RSS_VNEXT_PILOT_E_FROZEN_EVAL_MODE_DRIFT")
+
+
 def build_real_pilot_structural_e_phase_v1(
     *,model:RSSvNextUnifiedCharacterModel,
     cohort:RealPilotCohortReceiptV1,
@@ -140,6 +163,7 @@ def build_real_pilot_structural_e_phase_v1(
         raise ValueError("RSS_VNEXT_PILOT_E_PHASE_RESERVED_TRAINER_FIELD")
     owner=ProductSeededPhaseOwnerPolicyV1.standard(plan.stage)
     owner.activate_before_optimizer_v1(model)
+    activate_real_pilot_e_training_mode_v1(model)
     optimizer=torch.optim.AdamW(
         [p for p in model.parameters() if p.requires_grad],
         lr=float(plan.learning_rate),betas=(.9,.999),
@@ -275,6 +299,7 @@ def execute_real_pilot_structural_e_phase_v1(
 
 __all__=[
     "TRAINING_PROFILE","STAGE_KINDS",
+    "activate_real_pilot_e_training_mode_v1",
     "PilotStructuralEPhasePlanV1",
     "PreparedPilotStructuralPhaseV1",
     "build_real_pilot_structural_e_phase_v1",

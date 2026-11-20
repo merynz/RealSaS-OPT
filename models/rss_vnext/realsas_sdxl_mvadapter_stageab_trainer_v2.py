@@ -37,6 +37,9 @@ from .realsas_mvadapter_dual_reference_v2 import (
 from .realsas_mvadapter_source_training_v2 import (
     MVAdapterSourceStageBBatchV2,mv_adapter_stage_b_loss_v2,
 )
+from .realsas_mvadapter_guidance_policy_v1 import (
+    OfficialMVAdapterGuidancePolicyV1,
+)
 
 SCHEMA="RealSaS.RSSvNext.PairedSDXLMVAdapterTrainingState.v2"
 
@@ -139,6 +142,24 @@ class SourceSDXLStageABOptimizerV2:
             or not isinstance(vae,nn.Module)
         ):
             raise ValueError("RSS_VNEXT_STAGE_AB_OPTIMIZER_CONTRACT_INVALID")
+        # A strong checkpoint is not proven by a SHA-shaped constructor
+        # argument. It must be a loaded, verified in-memory ancestor.
+        if (
+            getattr(unet,"_rss_vnext_pretrained_sdxl_unet_sha256",None)
+                !=pretrained_source_sha256
+            or (
+                stage=="B_PAIRED_RGB_NORMAL_MVADAPTER"
+                and (
+                    getattr(mv_pipeline,
+                        "_rss_vnext_pretrained_sdxl_unet_sha256",None)
+                        !=pretrained_source_sha256
+                    or getattr(mv_pipeline,
+                        "_rss_vnext_pretrained_mv_adapter_sha256",None)
+                        !=pretrained_mv_adapter_sha256
+                )
+            )
+        ):
+            raise RuntimeError("RSS_VNEXT_STAGE_AB_VERIFIED_PRETRAINED_ANCESTRY_REQUIRED")
         from .realsas_stageab_source_court_v2 import (
             digest_stageab_registry_v2,
         )
@@ -154,6 +175,14 @@ class SourceSDXLStageABOptimizerV2:
         self.vae=vae
         self.noise_scheduler=noise_scheduler
         self.training_noise_schedule_sha256=None
+        self.guidance_policy=(
+            OfficialMVAdapterGuidancePolicyV1()
+            if stage=="B_PAIRED_RGB_NORMAL_MVADAPTER" else None
+        )
+        self.guidance_policy_sha256=(
+            self.guidance_policy.digest
+            if self.guidance_policy is not None else None
+        )
         if stage=="B_PAIRED_RGB_NORMAL_MVADAPTER":
             from .realsas_mvadapter_shift_snr_training_v2 import (
                 require_pinned_official_mvadapter_schedule_v2,
@@ -294,6 +323,7 @@ class SourceSDXLStageABOptimizerV2:
                 output=mv_adapter_stage_b_loss_v2(
                     pipe=self.pipeline,task_heads=self.heads,
                     source=batch,noise_scheduler=self.noise_scheduler,
+                    guidance_policy=self.guidance_policy,
                 )
                 normal=output.normal_epsilon_loss
         if not bool(torch.isfinite(output.total_loss).all()):
@@ -344,6 +374,7 @@ class SourceSDXLStageABOptimizerV2:
             pretrained_base_unet_sha256=self.pretrained_source_sha256,
             pretrained_mv_adapter_sha256=self.pretrained_mv_adapter_sha256,
             training_noise_schedule_sha256=self.training_noise_schedule_sha256,
+            guidance_policy_sha256=self.guidance_policy_sha256,
             vae_checkpoint_sha256=self.source_vae_sha256,
             qualified_corpus_sha256=self.source_manifest_sha256,
         )
@@ -360,6 +391,7 @@ class SourceSDXLStageABOptimizerV2:
             "source_vae_sha256":self.source_vae_sha256,
             "source_registry_sha256":self.source_registry_sha256,
             "training_noise_schedule_sha256":self.training_noise_schedule_sha256,
+            "guidance_policy_sha256":self.guidance_policy_sha256,
             "optimizer_binding":self.optimizer_binding,
             "unet_trainable":{n:p.detach().cpu().contiguous()
                                for n,p in self.unet.named_parameters()
@@ -410,6 +442,8 @@ class SourceSDXLStageABOptimizerV2:
             or data.get("source_registry_sha256")!=self.source_registry_sha256
             or data.get("training_noise_schedule_sha256")
                 !=self.training_noise_schedule_sha256
+            or data.get("guidance_policy_sha256")
+                !=self.guidance_policy_sha256
             or data.get("optimizer_binding")!=self.optimizer_binding
             or type(data.get("step")) is not int
             or data["step"]<1

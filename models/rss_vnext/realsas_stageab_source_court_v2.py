@@ -54,6 +54,8 @@ def source_stageab_tensor_digests_v2(stage:str,batch:Any)->dict[str,str]:
         (
             "canonical_rgba","rgb","normal_encoded_rgb",
             "alpha","valid","target_cameras","plucker_controls",
+            "prompt_embeds","pooled_text_embeds",
+            "empty_prompt_embeds","empty_pooled_text_embeds",
         )
     )
     return {

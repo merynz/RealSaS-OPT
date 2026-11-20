@@ -160,6 +160,8 @@ def test_paired_stage_a_supervision_reaches_lora_conditioner_and_alpha():
         canonical_pose_queries=torch.zeros(1,2,4),
         prompt_embeds=torch.zeros(1,2,2048),
         pooled_text_embeds=torch.zeros(1,1280),
+        empty_prompt_embeds=torch.zeros(1,2,2048),
+        empty_pooled_text_embeds=torch.zeros(1,1280),
         time_ids=torch.zeros(1,6),
         source_render_qualification_key="fixture-not-real-source",
     )
@@ -193,6 +195,8 @@ def test_native_dual_reference_stage_b_source_loss_and_rgb_normal_alpha():
         plucker_controls=control,target_cameras=six,
         prompt_embeds=torch.zeros(1,2,2048),
         pooled_text_embeds=torch.zeros(1,1280),
+        empty_prompt_embeds=torch.zeros(1,2,2048),
+        empty_pooled_text_embeds=torch.zeros(1,1280),
         time_ids=torch.zeros(1,6),
         source_render_qualification_key="fixture-not-source",
     )
@@ -225,6 +229,8 @@ def test_stage_b_camera_target_cannot_use_another_virtual_bank():
         plucker_controls=control,target_cameras=six.flip(1),
         prompt_embeds=torch.zeros(1,2,2048),
         pooled_text_embeds=torch.zeros(1,1280),
+        empty_prompt_embeds=torch.zeros(1,2,2048),
+        empty_pooled_text_embeds=torch.zeros(1,1280),
         time_ids=torch.zeros(1,6),
         source_render_qualification_key="fixture-not-source",
     )

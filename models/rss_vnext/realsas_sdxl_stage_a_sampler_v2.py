@@ -138,6 +138,8 @@ def load_exact_stage_a_task_weights_v2(
     alpha_head:SDXLCanonicalAlphaHeadV2,receipt:SDXLCanonicalTaskWeightsV2,
 )->None:
     receipt.validate()
+    if getattr(unet,"_rss_vnext_pretrained_sdxl_unet_sha256",None)!=receipt.pretrained_unet_sha256:
+        raise RuntimeError("RSS_VNEXT_SDXL_STAGE_A_VERIFIED_BASE_UNET_REQUIRED")
     data=torch.load(receipt.checkpoint_path,map_location="cpu",weights_only=True)
     if (
         type(data) is not dict or data.get("schema")!=SCHEMA

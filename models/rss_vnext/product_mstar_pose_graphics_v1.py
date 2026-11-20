@@ -3,8 +3,8 @@ from __future__ import annotations
 """Source-verified, posed TESSA M* -> 2D Graphics/SLR training bridge.
 
 Pose-space geometry controls first-hit visibility, silhouette, normals, depth.
-Canonical/rest-surface positions control RGB and role sampling from ONE H(x):
-material appearance does not 'swim' with world coordinates under LBS motion.
+Canonical/rest-space M* VERTEX Graphics logits control UV RGB/roles from ONE H(x):
+material appearance does not 'swim' with world coordinates under LBS motion.\nRGB uses Compiler-parity barycentric LOGIT blend then sigmoid; source roles\nuse per-face mean of vertex softmax, never hidden pixel H(x) samples.
 The source camera/pose/2D targets are LOSS-ONLY and are never observations.
 
 CPU BUSTED raster is a bounded differentiable correctness reference, not
@@ -203,6 +203,32 @@ def render_posed_indexed_mstar_v1(
     rest = rest_xyz[0].float()
     posed = posed_xyz[0].float()
     normals = vertex_normals_v1(posed, faces).float()
+    # Compiler's canonical Graphics UV ABI is vertex logits -> face
+    # barycentric LOGIT interpolation -> sigmoid, NOT independent per-pixel
+    # H(x) evaluation and NOT barycentric interpolation of sigmoid RGB.
+    # It consumes the exact vertex logits emitted by mesh_bridge.forward_seeded.
+    graphics_chunks, role_chunks = [], []
+    for start in range(0, rest.shape[0], query_chunk):
+        h = iris.query(
+            scene_triplanes,
+            rest[None, start:start+query_chunk].to(scene_triplanes.dtype),
+        )["H"]
+        graphics_logits = graphics_head(h)
+        semantic_logits = role_head(h)
+        if (
+            graphics_logits.ndim != 3 or graphics_logits.shape[-1] != 5
+            or semantic_logits.ndim != 3
+            or not 2 <= semantic_logits.shape[-1] <= 16
+            or graphics_logits.shape[:2] != semantic_logits.shape[:2]
+        ):
+            raise RuntimeError("RSS_VNEXT_MSTAR_POSE_GRAPHICS_HEAD_ABI")
+        graphics_chunks.append(graphics_logits.float())
+        role_chunks.append(semantic_logits.float())
+    vertex_logits = torch.cat(graphics_chunks, dim=1)
+    vertex_role_prob = torch.softmax(torch.cat(role_chunks, dim=1), dim=-1)
+    # Compiler atlas uses the mean vertex softmax per face (independent of
+    # the RGB texel barycentric location), not softmax of a logit mixture.
+    face_role_prob = vertex_role_prob[0, faces].mean(dim=1)
     per_view = []
     for vi in range(cameras.shape[1]):
         camera = cameras[0, vi].float()
@@ -222,47 +248,24 @@ def render_posed_indexed_mstar_v1(
         rast, _ = raster_backend.rasterize(
             context, clip, tri, resolution=(height, width),
         )
-        # Interpolate CANONICAL material coordinates using POSED silhouette.
-        # Rendering world-space H(posed_xyz) would cause texture swimming.
-        rest_sample, _ = raster_backend.interpolate(rest[None], rast, tri)
+        # The face is selected from posed geometry, while the vertex
+        # Graphics/SLR attributes are evaluated once at canonical rest XYZ.
+        # This precisely matches the current Compiler's vertex-logit atlas
+        # source; no separately hallucinated per-pixel H source or art mesh.
         posed_sample, _ = raster_backend.interpolate(posed[None], rast, tri)
         normal_sample, _ = raster_backend.interpolate(normals[None], rast, tri)
-        coverage = (rast[..., 3:4] > 0).to(dtype=rest.dtype)
-        # Only visible first-hit pixels own material samples. A dense
-        # H(x) query over millions of background pixels would waste GPU
-        # activations (and backprop memory) without changing a single pixel.
-        # index_copy remains differentiable through the sampled rest XYZ.
-        positions = rest_sample.reshape(1, height * width, 3)
-        visible_indices = (
-            (rast[..., 3] > 0).reshape(-1)
-            .nonzero(as_tuple=False).reshape(-1)
+        interpolated_logits, _ = raster_backend.interpolate(
+            vertex_logits, rast, tri,
         )
-        if not len(visible_indices):
+        coverage = (rast[..., 3:4] > 0).to(dtype=rest.dtype)
+        # Compiler: sigmoid(linear barycentric mix of source vertex logits).
+        # The first-hit/coverage decision is non-differentiable, but visible
+        # barycentrics, surface pose and color logits retain gradient paths.
+        color = torch.sigmoid(interpolated_logits[..., :3]) * coverage
+        face_index = rast[..., 3].long() - 1
+        if not bool((face_index >= 0).any()):
             raise RuntimeError("RSS_VNEXT_MSTAR_POSE_RASTER_NO_VISIBLE_SOURCE_SURFACE")
-        sampled = positions.index_select(1, visible_indices)
-        colors, roles = [], []
-        for start in range(0, sampled.shape[1], query_chunk):
-            h = iris.query(
-                scene_triplanes,
-                sampled[:, start:start+query_chunk].to(scene_triplanes.dtype),
-            )["H"]
-            rgba_logits = graphics_head(h)
-            role_logits = role_head(h)
-            if rgba_logits.shape[-1] != 5 or role_logits.shape[-1] < 2:
-                raise RuntimeError("RSS_VNEXT_MSTAR_POSE_GRAPHICS_HEAD_ABI")
-            colors.append(torch.sigmoid(rgba_logits[..., :3].float()))
-            roles.append(torch.softmax(role_logits.float(), dim=-1))
-        visible_rgb = torch.cat(colors, dim=1)
-        visible_role = torch.cat(roles, dim=1)
-        # Explicit zero background; one predicted first-hit owner per pixel.
-        color = visible_rgb.new_zeros((1, height*width, 3)).index_copy(
-            1, visible_indices, visible_rgb,
-        ).reshape(1, height, width, 3)
-        role = visible_role.new_zeros(
-            (1, height*width, visible_role.shape[-1])
-        ).index_copy(
-            1, visible_indices, visible_role,
-        ).reshape(1, height, width, -1)
+        role = face_role_prob[face_index.clamp_min(0)].unsqueeze(0) * coverage
         rgba = torch.cat((color * coverage, coverage), dim=-1)
         smooth = raster_backend.antialias(rgba, rast, clip, tri).clamp(0., 1.)
         alpha = smooth[..., 3:4]

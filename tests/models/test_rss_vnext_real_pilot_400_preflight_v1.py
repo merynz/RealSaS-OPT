@@ -119,7 +119,7 @@ def test_duplicate_and_lineage_leaks_rejected(admitted):
     with pytest.raises(ValueError,match="LINEAGE_LEAK"):
         qualify_real_pilot_cohort_v1((*assets[:298],replace(
             assets[-2],lineage_group=assets[0].lineage_group,),assets[-1],
-        )))
+        ))
     with pytest.raises(ValueError,match="DUPLICATE_SOURCE_OR_IMAGE"):
         qualify_real_pilot_cohort_v1((*assets[:299],replace(
             assets[-1],original_front_sha256=assets[0].original_front_sha256,

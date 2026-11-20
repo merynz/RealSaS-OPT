@@ -183,12 +183,13 @@ def propose_open_pin_canonical_editor_review_v1(
                 ranked=sorted(scores.items(),key=lambda kv:(-kv[1],kv[0]))
                 top=ranked[0]
                 runner=ranked[1][1] if len(ranked)>1 else 0.
-                supported=all(
-                    sum(skin_by_vid[ids[i]].get(j,0.)
-                        for j in chains[top[0]])>.05
-                    for i in pin_ids
-                )
-                if top[1]<.55 or top[1]-runner<.15 or not supported:
+                # Physical OPEN pin attachment is not LBS influence on the
+                # HELD cloth. An independently rigged/simulated cape may
+                # correctly have zero skin weight on the HOLDER chain.
+                # The candidate host chain is scored only from the actual
+                # HOLDER surface; attachment still requires editor/Mechanics
+                # approval and cannot activate XPBD here.
+                if top[1]<.55 or top[1]-runner<.15:
                     reason="ABSTAIN_HOST_CHAIN_SKIN_NOT_SEPARABLE"
                 else:
                     reason="REVIEW_READY_NEURAL_PIN_AND_HOST_HYPOTHESIS"

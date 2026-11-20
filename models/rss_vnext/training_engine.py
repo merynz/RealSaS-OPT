@@ -2740,6 +2740,10 @@ class RSSvNextStructuralTrainer:
                 "product_native_layer_clearance_teacher",
                 "product_native_layer_clearance_admission_key",
             } if self.product_native_layer_clearance_weight>0 else set()),
+            *({
+                "product_native_control_intervention_teacher",
+                "product_native_control_intervention_admission_key",
+            } if self.product_native_control_intervention_weight>0 else set()),
         }
         unexpected = []
         for name, value in vars(batch).items():
@@ -3166,6 +3170,38 @@ class RSSvNextStructuralTrainer:
             and not self.allow_sparse_qualified_source_batches
         ):
             raise ValueError("RSS_VNEXT_NATIVE_LAYER_CLEARANCE_ENABLED_NO_SOURCE")
+        # Source-authored branch-only / host-only actual interventions teach
+        # differential response and isolation, never a guessed wing/cape tag.
+        control_loss,control_parts,n_control_vertices = (
+            qualified_native_control_intervention_loss_v1(
+                predicted_posed=axis_mira.predicted_posed_vertices,
+                source_posed=teacher.source_candidate_posed,
+                source_pose_mask=teacher.source_pose_mask,
+                source_pose_matrices=teacher.source_pose_matrices,
+                teacher=batch.product_native_control_intervention_teacher,
+                admission_key=batch.product_native_control_intervention_admission_key,
+                trusted_registry=self.trusted_product_native_control_intervention_registry,
+                dataset_manifest_sha256=self.dataset_manifest_sha256,
+                mstar_address_sha256=seeded_mstar_teacher_address_sha256_v1(
+                    mesh.seeded_surface,
+                ),
+                native_pose_transport_sha256=(
+                    teacher.native_pose_transport.receipt_sha256()
+                    if teacher.native_pose_transport is not None else ""
+                ),
+                source_asset_sha256=teacher.source_asset_sha256,
+                source_qualification_key=batch.source_qualification_key,
+                observed_rgba_sha256=source_surface_tensor_sha256(batch.rgba),
+                generation_checkpoint_sha256=batch.product_generation_checkpoint_sha256,
+                tensor_digest=source_surface_tensor_sha256,
+            )
+        )
+        if (
+            self.product_native_control_intervention_weight>0
+            and control_loss is None
+            and not self.allow_sparse_qualified_source_batches
+        ):
+            raise ValueError("RSS_VNEXT_CONTROL_INTERVENTION_ENABLED_NO_SOURCE")
         # Same forward carrier, same final indexed M* and source-qualified AXIS
         # sequence as the production skin/rig objective above. The loss is
         # conditional: unlabeled assets are UNKNOWN, not negative examples.
@@ -3340,6 +3376,11 @@ class RSSvNextStructuralTrainer:
                 joint_total
                 +self.product_native_layer_clearance_weight*clearance_loss
             )
+        if control_loss is not None:
+            joint_total=(
+                joint_total
+                +self.product_native_control_intervention_weight*control_loss
+            )
         return RSSvNextTrainingResult(
             total_loss=joint_total,
             topology_loss=None,motion_preference_loss=None,
@@ -3382,6 +3423,9 @@ class RSSvNextStructuralTrainer:
             product_native_layer_clearance_loss=clearance_loss,
             product_native_layer_clearance_parts=clearance_parts,
             eligible_native_layer_clearance_pose_pairs=n_clearance_pairs,
+            product_native_control_intervention_loss=control_loss,
+            product_native_control_intervention_parts=control_parts,
+            eligible_native_control_intervention_vertices=n_control_vertices,
             product_graphics_joint_loss_parts=ray_parts,
             product_semantic_loss=semantic.total,
             product_semantic_loss_parts={

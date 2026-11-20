@@ -327,7 +327,7 @@ def run_source_qualified_pilot_updates_v1(
         current_step=getattr(trainer,"global_step",getattr(trainer,"step",None))
         if type(current_step) is not int or current_step!=previous_step+1:
             raise RuntimeError("RSS_VNEXT_PILOT_TRAINER_OPTIMIZER_STEP_NOT_RECORDED")
-        scalar=
+        scalar=(
             result.get("total_loss",result.get("loss",result.get("total")))
             if isinstance(result,dict) else
             getattr(result,"total_loss",getattr(result,"loss",None))

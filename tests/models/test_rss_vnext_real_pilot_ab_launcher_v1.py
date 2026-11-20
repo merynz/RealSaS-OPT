@@ -196,9 +196,13 @@ def test_ab_restart_refuses_plan_pretrained_or_checkpoint_drift(tmp_path):
     )
     assert (restored.trainer.step,restored.verified_resume_step,
             restored.verified_resume_cursor)==(3,3,13)
+    independent_fresh=build_real_pilot_ab_phase_v1(
+        trainer=fake_ab(plan.stage),plan=plan,
+        cohort=cohort(),ledger=empty_ledger(),
+    )
     with pytest.raises(ValueError,match="PROVENANCE_DRIFT"):
         load_real_pilot_ab_resume_v1(
-            replace(fresh,plan=replace(plan,warmup_steps=3)),
+            replace(independent_fresh,plan=replace(plan,warmup_steps=3)),
             checkpoint_path=ckpt,
         )
     altered=build_real_pilot_ab_phase_v1(

@@ -45,3 +45,6 @@ A sparse/missing source family never becomes an invented negative. Enabled pose 
 5. Source-backed product proof and edits: a synthetic training loss does not mint an admitted ProductRevision.
 
 References: StdGEN (CVPR2025) released S-LRM inference code; TailorRig (2026) rig/skin/deformation concept, not a verified training-code transplant; the local first-party realsas_flexicubes_mesh_render_v1 and compiled PyTorch3D adapter; the single TESSA indexed M* and native-face pose transport contracts.
+
+
+CUDA probe: PYTHONPATH=. python tools/research/rss_vnext_posed_mstar_cuda_qualification_v1.py --report /tmp/posed_mstar_cuda_receipt.json\n

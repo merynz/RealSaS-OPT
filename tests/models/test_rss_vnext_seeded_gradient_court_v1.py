@@ -270,3 +270,12 @@ def test_control_intervention_launch_policy_and_resume_on_live_seeded_trainer(
 def test_source_native_open_pin_head_in_required_model_ci(test_name):
     from tests.models import test_rss_vnext_open_pin_vertex_head_v1 as court
     getattr(court,test_name)()
+
+
+def test_open_pin_source_checkpoint_and_sparse_truth_on_live_seeded_trainer(
+    monkeypatch,tmp_path,
+):
+    from tests.models import test_rss_vnext_open_pin_vertex_head_v1 as court
+    court.test_real_seeded_pin_head_policy_never_invents_labels_and_is_checkpoint_pinned(
+        monkeypatch,tmp_path,
+    )

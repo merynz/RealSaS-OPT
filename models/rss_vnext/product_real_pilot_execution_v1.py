@@ -19,7 +19,7 @@ import tempfile
 
 from .product_real_pilot_cohort_v1 import (
     RealPilotAssetV1, RealPilotCohortReceiptV1,
-    assert_train_only_source_v1,
+    assert_train_only_source_v1,qualify_real_pilot_cohort_v1,
 )
 
 SCHEMA = "RealSaS.RSSvNext.Real400PilotPhaseLedger.v1"
@@ -292,6 +292,28 @@ def run_source_qualified_pilot_updates_v1(
         raise ValueError("RSS_VNEXT_PILOT_TRAINER_MANIFEST_IDENTITY_DRIFT")
     if not source_index:
         raise ValueError("RSS_VNEXT_PILOT_TRAIN_SOURCE_INDEX_MISSING")
+    # A qualified cohort hash commits to ALL source identities, originals,
+    # license/native/render receipts, lineage groups and user split labels.
+    # A caller-provided item marked TRAIN alone is not proof of membership.
+    # Require complete canonical membership before a SINGLE optimizer update.
+    if (
+        len(source_index)!=cohort.total_assets
+        or any(
+            type(k) is not str or type(item) is not RealPilotAssetV1
+            or k!=item.source_id
+            for k,item in source_index.items()
+        )
+    ):
+        raise ValueError("RSS_VNEXT_PILOT_SOURCE_INDEX_NOT_THE_SEALED_COHORT")
+    replay=qualify_real_pilot_cohort_v1(tuple(source_index.values()))
+    if (
+        replay.cohort_sha256!=cohort.cohort_sha256
+        or replay.total_assets!=cohort.total_assets
+        or replay.train_assets!=cohort.train_assets
+        or replay.val_assets!=cohort.val_assets
+        or replay.unseen_test_assets!=cohort.unseen_test_assets
+    ):
+        raise ValueError("RSS_VNEXT_PILOT_SOURCE_INDEX_NOT_THE_SEALED_COHORT")
     reports=[]
     for envelope in staged_examples:
         if len(reports)>=max_steps:

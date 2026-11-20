@@ -230,6 +230,11 @@ def attach_pinned_sdxl_lora_unet_v1(
         r=binding.lora_rank, lora_alpha=binding.lora_rank,
         target_modules=list(_LORA_TARGETS), init_lora_weights=True,
     ))
+    # This identity is minted only after the real local SDXL checkpoint
+    # bytes were verified, never by passing a SHA-looking string to trainer.
+    unet._rss_vnext_pretrained_sdxl_unet_sha256=(
+        binding.unet_checkpoint_sha256
+    )
     return unet
 
 

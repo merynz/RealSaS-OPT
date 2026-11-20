@@ -89,6 +89,7 @@ def construct_two_source_sdxl_mv_puppet_v2(
     stage_b_receipt:MVAdapterPairedTaskCheckpointV2,
     canonical_pose_queries:Tensor,
     prompt_embeds:Tensor,pooled_text_embeds:Tensor,time_ids:Tensor,
+    empty_prompt_embeds:Tensor,empty_pooled_text_embeds:Tensor,
     image_size:int,stage_a_steps:int,stage_b_steps:int,
     stage_a_seed:int,stage_b_seed:int,
     flexicubes_extractor:Any,
@@ -154,6 +155,8 @@ def construct_two_source_sdxl_mv_puppet_v2(
         receipt=stage_b_receipt,canonical_rgba=canonical.rgba,
         plucker_controls=plucker,prompt_embeds=prompt_embeds,
         pooled_text_embeds=pooled_text_embeds,time_ids=time_ids,
+        empty_prompt_embeds=empty_prompt_embeds,
+        empty_pooled_text_embeds=empty_pooled_text_embeds,
         steps=stage_b_steps,seed=stage_b_seed,
     )
     if (

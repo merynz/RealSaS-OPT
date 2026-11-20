@@ -17,6 +17,12 @@ import torch
 from torch import Tensor, nn
 import torch.nn.functional as F
 
+from .realsas_mvadapter_guidance_policy_v1 import (
+    OfficialMVAdapterGuidancePolicyV1,
+    draw_official_mvadapter_dropout_v1,
+    select_official_mvadapter_conditions_v1,
+)
+
 from .realsas_mvadapter_dual_reference_v2 import (
     MVAdapterRGBNormalTaskHeadsV2,
     capture_native_two_reference_cache_v2,
@@ -44,6 +50,8 @@ class MVAdapterSourceStageBBatchV2:
     target_cameras: Tensor       # B,6,13 authoritative RSS v1 virtual bank
     prompt_embeds: Tensor        # B,T,2048 — frozen native text encoder outputs
     pooled_text_embeds: Tensor   # B,1280 — frozen native text encoder output
+    empty_prompt_embeds: Tensor   # B,T,2048 — pinned empty native text encoders
+    empty_pooled_text_embeds: Tensor # B,1280 — pinned empty pooled text
     time_ids: Tensor             # B,6 SDXL actual 6 scalar time/size ids
     source_render_qualification_key: str
     evidence_authority: str = AUTHORITY
@@ -65,6 +73,8 @@ class MVAdapterSourceStageBBatchV2:
             or self.prompt_embeds.shape[0]!=b
             or self.prompt_embeds.shape[-1]!=2048
             or self.pooled_text_embeds.shape!=(b,1280)
+            or self.empty_prompt_embeds.shape!=self.prompt_embeds.shape
+            or self.empty_pooled_text_embeds.shape!=(b,1280)
             or self.time_ids.shape!=(b,6)
             or type(self.source_render_qualification_key) is not str
             or not self.source_render_qualification_key
@@ -74,7 +84,9 @@ class MVAdapterSourceStageBBatchV2:
         tensors=(
             source,self.rgb,self.normal_encoded_rgb,self.alpha,self.valid,
             self.plucker_controls,self.target_cameras,
-            self.prompt_embeds,self.pooled_text_embeds,self.time_ids,
+            self.prompt_embeds,self.pooled_text_embeds,
+            self.empty_prompt_embeds,self.empty_pooled_text_embeds,
+            self.time_ids,
         )
         if any(
             not torch.is_floating_point(t) or t.device!=source.device
@@ -105,6 +117,9 @@ class MVAdapterPairedStageBLossV2:
     alpha_loss: Tensor
     active_rgb_pixels: int
     active_normal_pixels: int
+    prompt_dropped_subjects: int = 0
+    reference_dropped_subjects: int = 0
+    joint_dropped_subjects: int = 0
 
 
 @torch.no_grad()
@@ -130,6 +145,9 @@ def mv_adapter_stage_b_loss_v2(
     noise:Tensor|None=None,
     timesteps:Tensor|None=None,
     alpha_weight:float=.1,
+    guidance_policy:OfficialMVAdapterGuidancePolicyV1=(
+        OfficialMVAdapterGuidancePolicyV1()
+    ),
 )->MVAdapterPairedStageBLossV2:
     """True source-rendered epsilon+normal+alpha, real native MV attention.
 
@@ -138,6 +156,7 @@ def mv_adapter_stage_b_loss_v2(
     normal groups can use different noise draws but share the *same camera*.
     """
     source.validate()
+    guidance_policy.validate()
     if (
         type(task_heads) is not MVAdapterRGBNormalTaskHeadsV2
         or type(alpha_weight) not in (int,float)
@@ -147,6 +166,20 @@ def mv_adapter_stage_b_loss_v2(
         raise ValueError("RSS_VNEXT_MVADAPTER_STAGE_B_TRAINING_POLICY")
     b=source.canonical_rgba.shape[0]
     h,w=source.canonical_rgba.shape[-2:]
+    # Upstream encodes the reference UNet with the SAME prompt dropout mask
+    # used by target denoising. Dropping the target text but encoding
+    # reference keys with positive text would silently leak the prompt.
+    dropped=draw_official_mvadapter_dropout_v1(
+        b,device=source.canonical_rgba.device,policy=guidance_policy,
+    )
+    reference_prompt=torch.where(
+        dropped.prompt[:,None,None],
+        source.empty_prompt_embeds,source.prompt_embeds,
+    )
+    reference_pooled=torch.where(
+        dropped.prompt[:,None],
+        source.empty_pooled_text_embeds,source.pooled_text_embeds,
+    )
     # Official reference preprocessing (gray under transparent source).
     rgba=source.canonical_rgba
     canonical_rgb=rgba[:,:,:3]*rgba[:,:,3:4]+.5*(1.-rgba[:,:,3:4])
@@ -155,8 +188,8 @@ def mv_adapter_stage_b_loss_v2(
     ).reshape(b,2,4,h//8,w//8)
     cache=capture_native_two_reference_cache_v2(
         unet=pipe.unet,canonical_latents=ref_latents,
-        prompt_embeds=source.prompt_embeds,
-        pooled_text_embeds=source.pooled_text_embeds,
+        prompt_embeds=reference_prompt,
+        pooled_text_embeds=reference_pooled,
         time_ids=source.time_ids,modalities=2,
     )
     target=torch.stack(
@@ -187,13 +220,23 @@ def mv_adapter_stage_b_loss_v2(
         noise.reshape(b*12,4,h//8,w//8),
         timesteps.reshape(b*12),
     ).reshape_as(clean)
+    # Official I2MV dropout is one decision per *source identity*, shared
+    # by all six cameras and RGB/normal channels. Empty text is a genuine
+    # frozen SDXL empty-prompt encoding, NOT a zero-valued text surrogate.
+    text,pooled,conditioned_cache=select_official_mvadapter_conditions_v1(
+        conditional_prompt=source.prompt_embeds,
+        conditional_pooled=source.pooled_text_embeds,
+        empty_prompt=source.empty_prompt_embeds,
+        empty_pooled=source.empty_pooled_text_embeds,
+        reference_cache=cache,dropout=dropped,
+    )
     cameras=source.plucker_controls[:,None].expand(-1,2,-1,-1,-1,-1)
     pred=native_mv_adapter_rgb_normal_denoise_v2(
         pipe=pipe,task_heads=task_heads,
         noisy_latents=noisy.to(dtype=next(pipe.unet.parameters()).dtype),
         timesteps=timesteps,
-        cache=cache,prompt_embeds=source.prompt_embeds,
-        pooled_text_embeds=source.pooled_text_embeds,
+        cache=conditioned_cache,prompt_embeds=text,
+        pooled_text_embeds=pooled,
         time_ids=source.time_ids,
         control_plucker=cameras,
     )
@@ -237,6 +280,9 @@ def mv_adapter_stage_b_loss_v2(
         normal_epsilon_loss=normal,alpha_loss=alpha,
         active_rgb_pixels=int((source.valid>0).sum()),
         active_normal_pixels=int((source.valid>0).sum()),
+        prompt_dropped_subjects=int(dropped.prompt.sum()),
+        reference_dropped_subjects=int(dropped.reference.sum()),
+        joint_dropped_subjects=int(dropped.joint.sum()),
     )
 
 

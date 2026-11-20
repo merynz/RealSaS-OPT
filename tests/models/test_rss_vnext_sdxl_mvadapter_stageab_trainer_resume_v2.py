@@ -72,7 +72,9 @@ def _stage_a():
         source_dim=8,pose_dim=4,hidden_dim=16,output_dim=2048,
         queries=2,heads=4,
     )
-    return FakeSDXLUnet(),conditioner,SDXLCanonicalAlphaHeadV2()
+    unet=FakeSDXLUnet()
+    unet._rss_vnext_pretrained_sdxl_unet_sha256="b"*64
+    return unet,conditioner,SDXLCanonicalAlphaHeadV2()
 
 
 def _batch_a():
@@ -110,11 +112,17 @@ def _official_test_scheduler():
 def _stage_b():
     vae=VAE()
     vae._rss_vnext_vae_ancestor_sha256="d"*64
-    return (
-        SimpleNamespace(unet=FakeMVUnet(),cond_encoder=FakeControl(),
-                        vae=vae,scheduler=_official_test_scheduler()),
-        MVAdapterRGBNormalTaskHeadsV2(),
+    # Synthetic regression witness only; production identity is minted
+    # exclusively after SHA-verified upstream adapter tensor replay.
+    unet=FakeMVUnet()
+    unet._rss_vnext_pretrained_sdxl_unet_sha256="b"*64
+    pipe=SimpleNamespace(
+        unet=unet,cond_encoder=FakeControl(),
+        vae=vae,scheduler=_official_test_scheduler(),
+        _rss_vnext_pretrained_sdxl_unet_sha256="b"*64,
+        _rss_vnext_pretrained_mv_adapter_sha256="c"*64,
     )
+    return pipe,MVAdapterRGBNormalTaskHeadsV2()
 
 
 def _batch_b():
@@ -129,7 +137,10 @@ def _batch_b():
         alpha=torch.rand(1,6,1,64,64),
         valid=torch.ones(1,6,1,64,64),
         target_cameras=six,plucker_controls=control,
-        prompt_embeds=prompt,pooled_text_embeds=pooled,time_ids=timeids,
+        prompt_embeds=prompt,pooled_text_embeds=pooled,
+        empty_prompt_embeds=torch.zeros_like(prompt),
+        empty_pooled_text_embeds=torch.zeros_like(pooled),
+        time_ids=timeids,
         source_render_qualification_key="synthetic-regression",
     )
 
@@ -203,7 +214,7 @@ def test_stage_a_task_fit_checkpoint_resume_and_two_canonical_sampler(tmp_path):
     assert resumed.step==1
 
 
-def test_stage_b_task_fit_exact_native_weights_and_six_rgb_normals(tmp_path):
+def test_stage_b_task_fit_exact_native_weights_and_six_rgb_normals(tmp_path,monkeypatch):
     torch.manual_seed(31)
     pipeline,heads=_stage_b()
     batch=_batch_b()
@@ -233,13 +244,43 @@ def test_stage_b_task_fit_exact_native_weights_and_six_rgb_normals(tmp_path):
     load_exact_stage_b_task_checkpoint_v2(
         pipe=other,task_heads=other_heads,receipt=receipt,
     )
+    from models.rss_vnext import (
+        realsas_mvadapter_stage_b_sampler_v2 as sampler_module,
+    )
+    actual_denoise=sampler_module.native_mv_adapter_rgb_normal_denoise_v2
+    condition_receipts=[]
+    def spy_native_denoiser(**kwargs):
+        condition_receipts.append({
+            "empty_reference":all(
+                not bool(v.abs().any())
+                for v in kwargs["cache"].features.values()
+            ),
+            "view_count":kwargs["cache"].num_views,
+            "modality_count":kwargs["cache"].modalities,
+        })
+        return actual_denoise(**kwargs)
+    monkeypatch.setattr(
+        sampler_module,"native_mv_adapter_rgb_normal_denoise_v2",
+        spy_native_denoiser,
+    )
     sampled=sample_stage_b_paired_rgb_normal_v2(
         pipe=other,task_heads=other_heads,receipt=receipt,
         canonical_rgba=batch.canonical_rgba,
         plucker_controls=batch.plucker_controls,
         prompt_embeds=batch.prompt_embeds,
         pooled_text_embeds=batch.pooled_text_embeds,
-        time_ids=batch.time_ids,steps=2,seed=7,
+        time_ids=batch.time_ids,
+        empty_prompt_embeds=batch.empty_prompt_embeds,
+        empty_pooled_text_embeds=batch.empty_pooled_text_embeds,
+        steps=2,seed=7,
+    )
+    assert len(condition_receipts)==4 # 2 denoise steps * unconditional+conditional
+    assert [r["empty_reference"] for r in condition_receipts]==[
+        True,False,True,False,
+    ]
+    assert all(
+        r["view_count"]==6 and r["modality_count"]==2
+        for r in condition_receipts
     )
     assert sampled.rgba.shape==(1,6,4,64,64)
     assert sampled.normals.shape==(1,6,3,64,64)
@@ -253,7 +294,10 @@ def test_stage_b_task_fit_exact_native_weights_and_six_rgb_normals(tmp_path):
             plucker_controls=batch.plucker_controls,
             prompt_embeds=batch.prompt_embeds,
             pooled_text_embeds=batch.pooled_text_embeds,
-            time_ids=batch.time_ids,steps=2,seed=7,
+            time_ids=batch.time_ids,
+        empty_prompt_embeds=batch.empty_prompt_embeds,
+        empty_pooled_text_embeds=batch.empty_pooled_text_embeds,
+        steps=2,seed=7,
         )
     other2,heads2=_stage_b()
     restored=SourceSDXLStageABOptimizerV2(
@@ -298,3 +342,48 @@ def test_independent_source_truth_must_match_actual_loss_tensor_bytes():
             dataset_manifest_sha256="a"*64,
             trusted_source_registry={},
         )
+
+def test_native_reference_unet_uses_same_dropped_text_as_guided_target(monkeypatch):
+    from dataclasses import replace
+    from models.rss_vnext import (
+        realsas_mvadapter_source_training_v2 as training,
+    )
+    from models.rss_vnext.realsas_mvadapter_guidance_policy_v1 import (
+        MVAdapterSubjectDropoutV1,
+    )
+    pipe,heads=_stage_b()
+    source=_batch_b()
+    source=replace(
+        source,
+        prompt_embeds=torch.ones_like(source.prompt_embeds)*3,
+        pooled_text_embeds=torch.ones_like(source.pooled_text_embeds)*4,
+    )
+    actual_capture=training.capture_native_two_reference_cache_v2
+    seen=[]
+    def capture(**kwargs):
+        seen.append((
+            kwargs["prompt_embeds"].detach().clone(),
+            kwargs["pooled_text_embeds"].detach().clone(),
+        ))
+        return actual_capture(**kwargs)
+    monkeypatch.setattr(
+        training,"capture_native_two_reference_cache_v2",capture,
+    )
+    monkeypatch.setattr(
+        training,"draw_official_mvadapter_dropout_v1",
+        lambda *args,**kwargs: MVAdapterSubjectDropoutV1(
+            prompt=torch.tensor([True]),
+            reference=torch.tensor([False]),
+            joint=torch.tensor([False]),
+        ),
+    )
+    result=training.mv_adapter_stage_b_loss_v2(
+        pipe=pipe,task_heads=heads,source=source,
+        noise_scheduler=_official_test_scheduler(),
+    )
+    assert torch.isfinite(result.total_loss)
+    assert len(seen)==1
+    assert torch.equal(seen[0][0],source.empty_prompt_embeds)
+    assert torch.equal(seen[0][1],source.empty_pooled_text_embeds)
+    assert result.prompt_dropped_subjects==1
+    assert result.reference_dropped_subjects==0

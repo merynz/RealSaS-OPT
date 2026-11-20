@@ -107,6 +107,9 @@ def load_official_mvadapter_fp16_stable_vae_v1(
     ):
         raise RuntimeError("RSS_VNEXT_MVADAPTER_VAE_LOADED_ARCH_DRIFT")
     vae=vae.to(device=device,dtype=dtype).eval()
+    # Replacing the pretrained pipeline VAE otherwise drops its prior
+    # enable_vae_slicing() setting and spikes 12-image RGB/normal decode VRAM.
+    vae.enable_slicing()
     vae.requires_grad_(False)
     vae._rss_vnext_vae_ancestor_sha256=pin.checkpoint_sha256
     return vae

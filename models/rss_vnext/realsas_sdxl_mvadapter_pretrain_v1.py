@@ -337,6 +337,11 @@ def load_official_pretrained_i2mv_stage_b_v1(
     )
     pipe.to(device=device, dtype=dtype)
     pipe.cond_encoder.to(device=device, dtype=dtype)
+    # Trust the pair only after upstream strict=False transfer has been
+    # independently checked against EVERY native attention/camera tensor.
+    pipe._rss_vnext_pretrained_sdxl_unet_sha256=pin.base_unet_sha256
+    pipe._rss_vnext_pretrained_mv_adapter_sha256=pin.adapter_weight_sha256
+    pipe.unet._rss_vnext_pretrained_sdxl_unet_sha256=pin.base_unet_sha256
     pipe.enable_vae_slicing()
     pipe.unet.eval()
     return pipe

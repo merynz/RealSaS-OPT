@@ -23,6 +23,10 @@ from .realsas_mvadapter_dual_reference_v2 import (
     capture_native_two_reference_cache_v2,
     native_mv_adapter_rgb_normal_denoise_v2,
 )
+from .realsas_mvadapter_guidance_policy_v1 import (
+    OfficialMVAdapterGuidancePolicyV1,
+    zero_native_mvadapter_reference_cache_v1,
+)
 
 SCHEMA="RealSaS.RSSvNext.MVAdapterPairedTaskCheckpoint.v2"
 
@@ -48,6 +52,7 @@ class MVAdapterPairedTaskCheckpointV2:
     pretrained_base_unet_sha256:str
     pretrained_mv_adapter_sha256:str
     training_noise_schedule_sha256:str
+    guidance_policy_sha256:str
     vae_checkpoint_sha256:str
     qualified_corpus_sha256:str
     trained_steps:int
@@ -64,6 +69,7 @@ class MVAdapterPairedTaskCheckpointV2:
                 self.checkpoint_sha256,self.pretrained_base_unet_sha256,
                 self.pretrained_mv_adapter_sha256,
                 self.training_noise_schedule_sha256,
+                self.guidance_policy_sha256,
                 self.vae_checkpoint_sha256,self.qualified_corpus_sha256,
             ))
             or self.teacher_scope!="SOURCE_3D_RENDERED_NOT_GENERATED_TEACHER"
@@ -84,6 +90,15 @@ def load_exact_stage_b_task_checkpoint_v2(
 ) -> None:
     """Load only exact trained _mv/_ref/cond_encoder/head tensors, no pickle code."""
     receipt.validate()
+    if (
+        getattr(pipe.unet,"_rss_vnext_pretrained_sdxl_unet_sha256",None)
+            !=receipt.pretrained_base_unet_sha256
+        or getattr(pipe,"_rss_vnext_pretrained_sdxl_unet_sha256",None)
+            !=receipt.pretrained_base_unet_sha256
+        or getattr(pipe,"_rss_vnext_pretrained_mv_adapter_sha256",None)
+            !=receipt.pretrained_mv_adapter_sha256
+    ):
+        raise RuntimeError("RSS_VNEXT_MVADAPTER_STAGE_B_VERIFIED_ANCESTOR_REQUIRED")
     data=torch.load(receipt.checkpoint_file,map_location="cpu",weights_only=True)
     if (
         type(data) is not dict or data.get("schema")!=SCHEMA
@@ -94,6 +109,7 @@ def load_exact_stage_b_task_checkpoint_v2(
             !=receipt.pretrained_mv_adapter_sha256
         or data.get("training_noise_schedule_sha256")
             !=receipt.training_noise_schedule_sha256
+        or data.get("guidance_policy_sha256")!=receipt.guidance_policy_sha256
         or data.get("vae_checkpoint_sha256")!=receipt.vae_checkpoint_sha256
         or getattr(pipe.vae,"_rss_vnext_vae_ancestor_sha256",None)
             !=receipt.vae_checkpoint_sha256
@@ -131,7 +147,8 @@ def write_stage_b_task_weights_v2(
     task_heads:MVAdapterRGBNormalTaskHeadsV2,
     trained_steps:int,pretrained_base_unet_sha256:str,
     pretrained_mv_adapter_sha256:str,vae_checkpoint_sha256:str,
-    training_noise_schedule_sha256:str,qualified_corpus_sha256:str,
+    training_noise_schedule_sha256:str,
+    guidance_policy_sha256:str,qualified_corpus_sha256:str,
 )->MVAdapterPairedTaskCheckpointV2:
     """Weights-only output after REAL optimizer steps; no ModelRelease claim.
 
@@ -143,7 +160,7 @@ def write_stage_b_task_weights_v2(
         or any(not _sha(x) for x in (
             pretrained_base_unet_sha256,pretrained_mv_adapter_sha256,
             vae_checkpoint_sha256,training_noise_schedule_sha256,
-            qualified_corpus_sha256,
+            guidance_policy_sha256,qualified_corpus_sha256,
         ))
     ):
         raise ValueError("RSS_VNEXT_MVADAPTER_STAGE_B_UNTRAINED_SAVE_FORBIDDEN")
@@ -161,6 +178,7 @@ def write_stage_b_task_weights_v2(
         "pretrained_mv_adapter_sha256":pretrained_mv_adapter_sha256,
         "vae_checkpoint_sha256":vae_checkpoint_sha256,
         "training_noise_schedule_sha256":training_noise_schedule_sha256,
+        "guidance_policy_sha256":guidance_policy_sha256,
         "qualified_corpus_sha256":qualified_corpus_sha256,
         "mv_ref_adapter":native,
         "cond_encoder":{
@@ -193,6 +211,7 @@ def write_stage_b_task_weights_v2(
         pretrained_mv_adapter_sha256=pretrained_mv_adapter_sha256,
         vae_checkpoint_sha256=vae_checkpoint_sha256,
         training_noise_schedule_sha256=training_noise_schedule_sha256,
+        guidance_policy_sha256=guidance_policy_sha256,
         qualified_corpus_sha256=qualified_corpus_sha256,
         trained_steps=trained_steps,
     )
@@ -216,6 +235,7 @@ def sample_stage_b_paired_rgb_normal_v2(
     receipt:MVAdapterPairedTaskCheckpointV2,
     canonical_rgba:Tensor,plucker_controls:Tensor,
     prompt_embeds:Tensor,pooled_text_embeds:Tensor,time_ids:Tensor,
+    empty_prompt_embeds:Tensor,empty_pooled_text_embeds:Tensor,
     steps:int,seed:int,
 ) -> MVAdapterPairedGeneratedSceneV2:
     """Native paired MV-Adapter inference, with separately learned alpha.
@@ -225,6 +245,9 @@ def sample_stage_b_paired_rgb_normal_v2(
     hypotheses, never native teachers.
     """
     receipt.validate()
+    guidance=OfficialMVAdapterGuidancePolicyV1()
+    if receipt.guidance_policy_sha256!=guidance.digest:
+        raise RuntimeError("RSS_VNEXT_MVADAPTER_STAGE_B_GUIDANCE_POLICY_DRIFT")
     from .realsas_mvadapter_shift_snr_training_v2 import (
         schedule_alphas_sha256_v1,
     )
@@ -255,6 +278,8 @@ def sample_stage_b_paired_rgb_normal_v2(
         or plucker_controls.shape!=(b,6,6,h,w)
         or prompt_embeds.shape[0]!=b
         or pooled_text_embeds.shape!=(b,1280)
+        or empty_prompt_embeds.shape!=prompt_embeds.shape
+        or empty_pooled_text_embeds.shape!=(b,1280)
         or time_ids.shape!=(b,6)
     ):
         raise ValueError("RSS_VNEXT_MVADAPTER_STAGE_B_INFERENCE_CAMERA_ABI")
@@ -282,6 +307,7 @@ def sample_stage_b_paired_rgb_normal_v2(
     pipe.scheduler.set_timesteps(steps,device=canonical_rgba.device)
     latent*=float(pipe.scheduler.init_noise_sigma)
     controls=plucker_controls[:,None].expand(-1,2,-1,-1,-1,-1)
+    no_reference_cache=zero_native_mvadapter_reference_cache_v1(cache)
     for timestep in pipe.scheduler.timesteps:
         input_latents=pipe.scheduler.scale_model_input(
             latent.reshape(b*12,4,h//8,w//8),timestep,
@@ -290,12 +316,25 @@ def sample_stage_b_paired_rgb_normal_v2(
             (b,2,6),int(timestep),device=canonical_rgba.device,
             dtype=torch.long,
         )
-        prediction=native_mv_adapter_rgb_normal_denoise_v2(
+        # Exact upstream classifier-free guidance: unconditional text is
+        # the frozen SDXL EMPTY prompt embedding, and reference K/V is
+        # separately zeroed. No invented zero token or random image prior.
+        negative=native_mv_adapter_rgb_normal_denoise_v2(
+            pipe=pipe,task_heads=task_heads,
+            noisy_latents=input_latents,timesteps=t,
+            cache=no_reference_cache,prompt_embeds=empty_prompt_embeds,
+            pooled_text_embeds=empty_pooled_text_embeds,time_ids=time_ids,
+            control_plucker=controls,
+        )
+        conditional=native_mv_adapter_rgb_normal_denoise_v2(
             pipe=pipe,task_heads=task_heads,
             noisy_latents=input_latents,timesteps=t,
             cache=cache,prompt_embeds=prompt_embeds,
             pooled_text_embeds=pooled_text_embeds,time_ids=time_ids,
             control_plucker=controls,
+        )
+        prediction=negative+guidance.inference_guidance_scale*(
+            conditional-negative
         )
         next_latents=pipe.scheduler.step(
             prediction.reshape(b*12,4,h//8,w//8),

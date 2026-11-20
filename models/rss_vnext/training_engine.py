@@ -3354,6 +3354,8 @@ class RSSvNextStructuralTrainer:
             )
         pin_loss,n_pin_labels=source_native_open_pin_vertex_loss_v1(
             output=pin_out,teacher=batch.product_open_pin_vertex_target,
+            source_anchor_face_targets=batch.source_anchor_face_targets,
+            source_anchor_face_mask=batch.source_anchor_face_mask,
             admission_key=batch.product_open_pin_vertex_admission_key,
             trusted_registry=self.trusted_product_open_pin_vertex_registry,
             dataset_manifest_sha256=self.dataset_manifest_sha256,

@@ -117,7 +117,7 @@ def test_nonindependent_or_stale_source_native_pair_receipt_is_refused():
     with pytest.raises(ValueError,match="RECEIPT_DRIFT"):
         run(rows=forged)
     with pytest.raises(ValueError,match="RECEIPT_DRIFT"):
-        run(t=replace(pair,body_face_ids=torch.tensor([1,1])))
+        run(t=replace(pair,body_face_barycentric=pair.body_face_barycentric.roll(1,dims=1)))
     bad=replace(pair,garment_vertex_ids=torch.tensor([0,4]))
     with pytest.raises(ValueError,match="COMPONENT_COLLAPSE"):
         run(t=bad)

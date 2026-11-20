@@ -3700,6 +3700,9 @@ class RSSvNextStructuralTrainer:
         if result.product_native_control_intervention_loss is not None or not self.allow_sparse_qualified_source_batches:
             add("source_native_control_intervention",result.product_native_control_intervention_loss,
                 self.product_native_control_intervention_weight)
+        if result.product_open_pin_vertex_loss is not None or not self.allow_sparse_qualified_source_batches:
+            add("source_native_open_pin_vertex",result.product_open_pin_vertex_loss,
+                self.product_open_pin_vertex_weight)
         if not admitted:
             raise RuntimeError("RSS_VNEXT_SEEDED_GRADIENT_AUDIT_NO_LIVE_OBJECTIVE")
         report = audit_rss_vnext_gradient_interference_v1(
@@ -3752,6 +3755,7 @@ class RSSvNextStructuralTrainer:
                 mstar_pose_raster_weight=self.product_mstar_pose_raster_weight,
                 native_layer_clearance_weight=self.product_native_layer_clearance_weight,
                 native_control_intervention_weight=self.product_native_control_intervention_weight,
+                open_pin_vertex_weight=self.product_open_pin_vertex_weight,
             )
             route = prepare_product_gradient_route_v1(
                 named_parameters=tuple(self.model.named_parameters()),
@@ -3855,6 +3859,7 @@ class RSSvNextStructuralTrainer:
                     mstar_pose_raster_weight=self.product_mstar_pose_raster_weight,
                     native_layer_clearance_weight=self.product_native_layer_clearance_weight,
                     native_control_intervention_weight=self.product_native_control_intervention_weight,
+                    open_pin_vertex_weight=self.product_open_pin_vertex_weight,
                 )
             ),
             "compiler_acceptance_gaps": list(
@@ -3862,6 +3867,7 @@ class RSSvNextStructuralTrainer:
                     mstar_pose_raster_weight=self.product_mstar_pose_raster_weight,
                     native_layer_clearance_weight=self.product_native_layer_clearance_weight,
                     native_control_intervention_weight=self.product_native_control_intervention_weight,
+                    open_pin_vertex_weight=self.product_open_pin_vertex_weight,
                 )
             ),
             "model_release_ready": False,
@@ -3955,6 +3961,8 @@ class RSSvNextStructuralTrainer:
             "graphics_rgb_registry_sha256": self.graphics_rgb_registry_sha256,
             "source_field_registry_sha256": self.source_field_registry_sha256,
             "realsas_joint_registry_sha256": self.realsas_joint_registry_sha256,
+            **({"open_pin_vertex_registry_sha256":self.open_pin_vertex_registry_sha256}
+               if self.product_open_pin_vertex_weight>0 else {}),
             **({"native_control_intervention_registry_sha256":
                 self.native_control_intervention_registry_sha256}
                if self.product_native_control_intervention_weight>0 else {}),
@@ -4004,6 +4012,10 @@ class RSSvNextStructuralTrainer:
                 != self.seeded_tessa_driver.policy_sha256
         ):
             raise ValueError("RSS_VNEXT_TRAIN_SEEDED_CHECKPOINT_REGISTRY_OR_PHASE_DRIFT")
+        if self.product_open_pin_vertex_weight>0 and (
+            data.get("open_pin_vertex_registry_sha256") != self.open_pin_vertex_registry_sha256
+        ):
+            raise ValueError("RSS_VNEXT_OPEN_PIN_VERTEX_CHECKPOINT_SOURCE_DRIFT")
         if self.product_native_control_intervention_weight>0 and (
             data.get("native_control_intervention_registry_sha256") !=
             self.native_control_intervention_registry_sha256

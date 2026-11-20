@@ -246,6 +246,46 @@ def load_pinned_sdxl_stage_a_unet_v1(
     )
 
 
+def verify_official_mvadapter_weight_transfer_v2(
+    *,pipe:Any,checkpoint_file:str|Path,
+)->dict[str,int]:
+    """Upstream loads custom adapter with strict=False; prove each native
+    attention and camera-encoder tensor actually received checkpoint bytes.
+    A valid safetensors file alone does not prove any learned weights loaded.
+    """
+    import torch
+    from safetensors import safe_open
+    path=Path(checkpoint_file).expanduser().resolve()
+    if not path.is_file() or path.suffix!=".safetensors":
+        raise RuntimeError("RSS_VNEXT_MVADAPTER_CHECKPOINT_FILE_MISSING")
+    unet=dict(pipe.unet.state_dict())
+    camera=dict(pipe.cond_encoder.state_dict())
+    attn={k:v for k,v in unet.items() if "_mv" in k or "_ref" in k}
+    if not attn or not camera or (set(attn)&set(camera)):
+        raise RuntimeError("RSS_VNEXT_MVADAPTER_NATIVE_TRAINED_KEYS_MISSING")
+    with safe_open(str(path),framework="pt",device="cpu") as weights:
+        keys=set(weights.keys())
+        required=set(attn)|set(camera)
+        if not required.issubset(keys):
+            raise RuntimeError("RSS_VNEXT_MVADAPTER_PRETRAINED_KEY_MISMATCH")
+        for name,existing in (*attn.items(),*camera.items()):
+            expected=weights.get_tensor(name)
+            if (
+                expected.shape!=existing.shape
+                or not torch.equal(
+                    expected.to(dtype=existing.dtype,device="cpu"),
+                    existing.detach().cpu(),
+                )
+            ):
+                raise RuntimeError(
+                    "RSS_VNEXT_MVADAPTER_PRETRAINED_WEIGHT_TRANSFER_DRIFT:"+name
+                )
+    return {
+        "native_attention_tensors":len(attn),
+        "camera_encoder_tensors":len(camera),
+    }
+
+
 def load_official_pretrained_i2mv_stage_b_v1(
     pin: StrongSDXLMVAdapterPinV1, *, device: str, dtype: Any,
 ):
@@ -288,6 +328,12 @@ def load_official_pretrained_i2mv_stage_b_v1(
     pipe.load_custom_adapter(
         str(Path(pin.adapter_snapshot_dir).expanduser().resolve()),
         weight_name=ADAPTER_WEIGHT,
+    )
+    # Upstream uses strict=False. Verify every TRAINED attention and
+    # camera-encoder weight was actually copied before any dtype conversion.
+    verify_official_mvadapter_weight_transfer_v2(
+        pipe=pipe,
+        checkpoint_file=Path(pin.adapter_snapshot_dir)/ADAPTER_WEIGHT,
     )
     pipe.to(device=device, dtype=dtype)
     pipe.cond_encoder.to(device=device, dtype=dtype)
@@ -435,7 +481,9 @@ __all__ = [
     "SCHEMA", "BASE_REPO", "BASE_LICENSE", "ADAPTER_REPO",
     "ADAPTER_LICENSE", "ADAPTER_WEIGHT", "AUTHORITY",
     "StrongSDXLMVAdapterPinV1", "pinned_source_tree_sha256_v1",
-    "verify_strong_pretrained_snapshots_v1", "load_pinned_sdxl_stage_a_unet_v1",
+    "verify_strong_pretrained_snapshots_v1",
+    "verify_official_mvadapter_weight_transfer_v2",
+    "load_pinned_sdxl_stage_a_unet_v1",
     "load_official_pretrained_i2mv_stage_b_v1",
     "run_official_pretrained_six_rgb_v1",
     "assert_pretrained_is_not_final_stage_ab_v1",

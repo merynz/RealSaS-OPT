@@ -15,6 +15,7 @@ from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import (
     canonical_mesh_lineage_hash_v1,
 )
 from compiler.realsas_compiler_core.canonical_rig_ir_v2 import (
+    CanonicalRigChainIRV2,_hash_deform_structure,_hash_control_program,
     canonical_rig_lineage_hash_v2,
 )
 from compiler.realsas_compiler_core.canonical_skin_ir_v2 import (
@@ -80,7 +81,19 @@ def _two_component_native_preview(tmp_path):
         ),mesh_lineage_hash="",
     )
     new_mesh=replace(new_mesh,mesh_lineage_hash=canonical_mesh_lineage_hash_v1(new_mesh))
-    new_rig=replace(rig,mesh_lineage_hash=new_mesh.mesh_lineage_hash,rig_lineage_hash="")
+    root=rig.joints[0].canonical_joint_id
+    chains=rig.chains or (
+        CanonicalRigChainIRV2(
+            "K:TEST_OPEN_PIN_HOST",(root,),"GENERIC_KINEMATIC_CHAIN",
+            "TEST_ONLY_NOT_SOURCE_QUALIFIED",
+        ),
+    )
+    new_rig=replace(
+        rig,mesh_lineage_hash=new_mesh.mesh_lineage_hash,chains=chains,
+        deform_structure_hash="",control_program_hash="",rig_lineage_hash="",
+    )
+    new_rig=replace(new_rig,deform_structure_hash=_hash_deform_structure(new_rig))
+    new_rig=replace(new_rig,control_program_hash=_hash_control_program(new_rig))
     new_rig=replace(new_rig,rig_lineage_hash=canonical_rig_lineage_hash_v2(new_rig))
     root=rig.joints[0].canonical_joint_id
     rows=tuple(

@@ -3674,6 +3674,11 @@ class RSSvNextStructuralTrainer:
             "graphics_rgb_registry_sha256": self.graphics_rgb_registry_sha256,
             "source_field_registry_sha256": self.source_field_registry_sha256,
             "realsas_joint_registry_sha256": self.realsas_joint_registry_sha256,
+            **({
+                "pose_raster_registry_sha256":self.pose_raster_registry_sha256,
+                "pose_raster_backend_id":self.pose_raster_backend_id,
+                "pose_raster_device_type":self.pose_raster_device_type,
+            } if self.product_mstar_pose_raster_weight>0 else {}),
             "global_step": self.global_step,
             "sampler_cursor": int(sampler_cursor),
             "model": self.model.state_dict(),
@@ -3712,6 +3717,12 @@ class RSSvNextStructuralTrainer:
                 != self.seeded_tessa_driver.policy_sha256
         ):
             raise ValueError("RSS_VNEXT_TRAIN_SEEDED_CHECKPOINT_REGISTRY_OR_PHASE_DRIFT")
+        if self.product_mstar_pose_raster_weight>0 and (
+            data.get("pose_raster_registry_sha256")!=self.pose_raster_registry_sha256
+            or data.get("pose_raster_backend_id")!=self.pose_raster_backend_id
+            or data.get("pose_raster_device_type")!=self.pose_raster_device_type
+        ):
+            raise ValueError("RSS_VNEXT_MSTAR_POSE_RASTER_CHECKPOINT_REGISTRY_OR_BACKEND_DRIFT")
         if self.component_udf_enabled and (
             data.get("component_udf_registry_sha256")
                 != self.component_udf_registry_sha256

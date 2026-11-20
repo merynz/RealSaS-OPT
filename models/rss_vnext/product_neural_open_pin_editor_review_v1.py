@@ -47,6 +47,7 @@ class OpenPinCanonicalEditorReviewV1:
     source_pin_qualified:bool=False
     compiler_xpbd_activation_qualified:bool=False
     inferred_physical_parameters:bool=False
+    requires_host_pin_binding_repair:bool=False
 
 
 def propose_open_pin_canonical_editor_review_v1(
@@ -139,6 +140,7 @@ def propose_open_pin_canonical_editor_review_v1(
         selected=()
         component=None
         host=None
+        needs_binding_repair=False
         held_face=canonical.faces[held] if held is not None else None
         holder_face=canonical.faces[holder] if holder is not None else None
         if held is None or holder is None:
@@ -183,16 +185,26 @@ def propose_open_pin_canonical_editor_review_v1(
                 ranked=sorted(scores.items(),key=lambda kv:(-kv[1],kv[0]))
                 top=ranked[0]
                 runner=ranked[1][1] if len(ranked)>1 else 0.
-                # Physical OPEN pin attachment is not LBS influence on the
-                # HELD cloth. An independently rigged/simulated cape may
-                # correctly have zero skin weight on the HOLDER chain.
-                # The candidate host chain is scored only from the actual
-                # HOLDER surface; attachment still requires editor/Mechanics
-                # approval and cannot activate XPBD here.
+                # An independently rigged garment is legitimate. But the
+                # CURRENT executable source-qualified XPBD v1 court demands
+                # that every pinned vertex receive actual host-chain skin
+                # support. Do not discard a useful review candidate, yet
+                # NEVER mark it ready for the existing Compiler path without
+                # that host-pin binding. This is a guided-repair request.
+                supported=all(
+                    any(j in chains[top[0]] and w>0.
+                        for j,w in skin_by_vid[ids[i]].items())
+                    for i in pin_ids
+                )
                 if top[1]<.55 or top[1]-runner<.15:
                     reason="ABSTAIN_HOST_CHAIN_SKIN_NOT_SEPARABLE"
                 else:
-                    reason="REVIEW_READY_NEURAL_PIN_AND_HOST_HYPOTHESIS"
+                    needs_binding_repair=not supported
+                    reason=(
+                        "REVIEW_NEEDS_EXPLICIT_HOST_PIN_BINDING_REPAIR"
+                        if needs_binding_repair else
+                        "REVIEW_READY_NEURAL_PIN_AND_HOST_HYPOTHESIS"
+                    )
                     component=next(
                         v.component_id for v in canonical.vertices
                         if v.canonical_mesh_vertex_id==ids[pin_ids[0]]
@@ -209,6 +221,7 @@ def propose_open_pin_canonical_editor_review_v1(
             candidate_component_id=component,
             suggested_host_chain_id=host,
             state=reason,
+            requires_host_pin_binding_repair=needs_binding_repair,
         ))
     return tuple(output)
 

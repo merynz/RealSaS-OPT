@@ -105,7 +105,8 @@ def native_layer_clearance_objective_v1(
     source_pose_mask: Tensor | None, teacher: SourceNativeLayerClearanceTeacherV1 | None,
     admission_key: str, trusted_registry: Mapping[str, Mapping[str, object]],
     dataset_manifest_sha256: str, native_pose_transport_sha256: str,
-    mstar_address_sha256: str, tensor_digest,
+    mstar_address_sha256: str, source_asset_sha256: str,
+    source_qualification_key: str, tensor_digest,
 ) -> tuple[Tensor | None, dict[str, Tensor] | None, int]:
     if teacher is None and not admission_key:
         return None, None, 0
@@ -116,8 +117,12 @@ def native_layer_clearance_objective_v1(
         or not isinstance(source_pose_mask, Tensor)
         or not isinstance(trusted_registry, Mapping)
         or type(admission_key) is not str or not admission_key
-        or not len(native_pose_transport_sha256) == 64
-        or not len(mstar_address_sha256) == 64
+        or not isinstance(native_pose_transport_sha256, str)
+        or not isinstance(mstar_address_sha256, str)
+        or any(len(v) != 64 or any(c not in "0123456789abcdef" for c in v)
+               for v in (native_pose_transport_sha256, mstar_address_sha256))
+        or teacher.source_asset_sha256 != source_asset_sha256
+        or teacher.source_qualification_key != source_qualification_key
     ):
         raise ValueError("RSS_VNEXT_NATIVE_LAYER_CLEARANCE_POSE_AND_REGISTRY_REQUIRED")
     if predicted_posed.shape != source_native_posed.shape:
@@ -126,10 +131,6 @@ def native_layer_clearance_objective_v1(
         mesh=mesh, source_native_posed=source_native_posed,
         source_pose_mask=source_pose_mask,
     )
-    if teacher.source_asset_sha256 != mesh.seeded_surface.source_asset_sha256 if False else False:
-        # Deliberately no source ID on the neural mesh. The caller's
-        # registered source-native teacher is the authoritative identity.
-        raise AssertionError("unreachable")
     expected = {
         "schema": SCHEMA,
         "admission_status": "QUALIFIED_SOURCE_NATIVE_BODY_GARMENT_CLEARANCE",
@@ -161,9 +162,9 @@ def native_layer_clearance_objective_v1(
     ids = teacher.garment_vertex_ids
     body_faces = mesh.faces[teacher.body_face_ids]
     bary = teacher.body_face_barycentric.to(source_native_posed.dtype)
-    source_tri = source_native_posed[0, :, body_faces, :]  # [P,K,3,3]
+    source_tri = source_native_posed.detach()[0, :, body_faces, :]  # [P,K,3,3]
     source_body = (source_tri * bary[None, :, :, None]).sum(-2)
-    source_garment = source_native_posed[0, :, ids, :]
+    source_garment = source_native_posed.detach()[0, :, ids, :]
     n = torch.cross(
         source_tri[..., 1, :] - source_tri[..., 0, :],
         source_tri[..., 2, :] - source_tri[..., 0, :],
@@ -173,7 +174,7 @@ def native_layer_clearance_objective_v1(
     valid = teacher.qualified_pose_pair_mask[0]
     if bool((n_norm[..., 0][valid] < 1e-8).any()):
         raise ValueError("RSS_VNEXT_NATIVE_LAYER_CLEARANCE_SOURCE_NORMAL_DEGENERATE")
-    source_normal = n / n_norm.clamp_min(1e-8)
+    source_normal = (n / n_norm.clamp_min(1e-8)).detach()
     # Source signed gap, measured by independent source body outward winding.
     gap_source = (
         (source_garment - source_body) * source_normal

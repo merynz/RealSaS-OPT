@@ -78,8 +78,10 @@ def _receipt_dict(*,review,command,prepared,authoring_revision_id:str):
         "schema":SCHEMA,
         "authority":AUTHORITY,
         "authoring_revision_id":authoring_revision_id,
-        "review":asdict(review),
-        "command":asdict(command),
+        # Canonical JSON converts dataclass tuples to JSON arrays before
+        # in-memory validation; reopen sees the same wire representation.
+        "review":json.loads(_json(asdict(review))),
+        "command":json.loads(_json(asdict(command))),
         "prepared_domain_hash":prepared.domain.domain_hash,
         "prepared_canonical_open_hem_sha256":prepared.canonical_open_hem_sha256,
         "prepared_qualification_receipt_sha256":prepared.approval_receipt_sha256,

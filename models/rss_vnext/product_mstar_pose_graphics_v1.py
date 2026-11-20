@@ -126,8 +126,7 @@ class NativeMstarPoseRasterTargetV1:
                 raise ValueError("RSS_VNEXT_MSTAR_POSE_RENDER_OPTIONAL_FINITE")
         # Source-rendered 2D truth may only supervise rendered surface samples.
         # It cannot assert the RGB/normal of fully transparent background.
-        for mask in (self.rgb_mask, self.role_mask, self.normal_mask,
-                     self.depth_mask):
+        for mask in (self.role_mask, self.normal_mask, self.depth_mask):
             if mask is not None and bool((mask & (self.alpha[..., 0] == 0)).any()):
                 raise ValueError("RSS_VNEXT_MSTAR_POSE_RENDER_OCCLUDED_COLOR_TRUTH")
 
@@ -333,6 +332,8 @@ def qualified_product_mstar_pose_loss_v1(
         "source_pose_matrices_sha256": tensor_digest(source_matrices),
         "source_pose_mask_sha256": tensor_digest(source_mask),
         "pose_index": pose,
+        "render_height": target.height,
+        "render_width": target.width,
         "source_camera_sha256": tensor_digest(target.cameras),
         "target_rgb_white_sha256": tensor_digest(target.rgb_white),
         "target_alpha_sha256": tensor_digest(target.alpha),

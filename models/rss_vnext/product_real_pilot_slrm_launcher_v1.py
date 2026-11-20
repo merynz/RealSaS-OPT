@@ -12,7 +12,11 @@ optimizer carry learning through C1 -> C2 -> C3. The resulting C trainer can
 export its full unified-model weights to the existing D handoff importer.
 """
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+from hashlib import sha256
+import json
+import os
+import tempfile
 from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping
 import math
@@ -69,6 +73,12 @@ class PilotSLRMPhasePlanV1:
             raise ValueError("RSS_VNEXT_PILOT_SLRM_PHASE_PLAN_INVALID")
 
     @property
+    def digest(self) -> str:
+        self.validate()
+        return sha256(json.dumps(asdict(self), sort_keys=True,
+                                  separators=(",", ":")).encode()).hexdigest()
+
+    @property
     def stage_steps(self) -> tuple[int, int, int]:
         return (self.nerf_single_layer_steps, self.nerf_outside_in_steps,
                 self.flexicubes_multilayer_steps)
@@ -99,6 +109,7 @@ class _ProvenanceBoundSLRMTrainerV1:
         self.plan = plan
         self.b_checkpoint_sha256 = b_checkpoint_sha256
         self.dataset_manifest_sha256 = cohort_sha256
+        self._resume_attested = False
 
     @property
     def global_step(self) -> int:
@@ -128,6 +139,69 @@ class _ProvenanceBoundSLRMTrainerV1:
         ):
             raise RuntimeError("RSS_VNEXT_PILOT_SLRM_SHARED_H_GRADIENT_MISSING")
         return result
+
+
+    def export_phase_handoff(self, path: str | Path):
+        """Only the finished three-stage C model may seed D's fresh optimizer."""
+        if self.global_step != self.plan.total_steps:
+            raise RuntimeError("RSS_VNEXT_PILOT_SLRM_INCOMPLETE_C_TO_D_HANDOFF")
+        return self.trainer.export_phase_handoff(path, target_kind="MIRA_CODEC")
+
+    def save_resume_checkpoint(self, path: str | Path, *, sampler_cursor: int) -> None:
+        """Seal the C subphase schedule and trained-B identity beside model/AdamW."""
+        file = Path(path)
+        file.parent.mkdir(parents=True, exist_ok=True)
+        self.trainer.save_checkpoint(file, sampler_cursor=sampler_cursor)
+        policy = {
+            "schema": "RealSaS.RSSvNext.PilotSLRMResume.v1",
+            "checkpoint_sha256": _file_digest(file),
+            "cohort_sha256": self.dataset_manifest_sha256,
+            "trained_b_task_weights_sha256": self.b_checkpoint_sha256,
+            "c_phase_plan_sha256": self.plan.digest,
+            "step": self.global_step,
+            "sampler_cursor": sampler_cursor,
+        }
+        sidecar = Path(str(file) + ".pilot.json")
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=file.parent,
+            prefix="rss-slrm-policy-", suffix=".json", delete=False,
+        ) as stream:
+            tmp = Path(stream.name)
+            json.dump(policy, stream, sort_keys=True)
+            stream.flush()
+            os.fsync(stream.fileno())
+        try:
+            os.replace(tmp, sidecar)
+        finally:
+            tmp.unlink(missing_ok=True)
+
+    def load_resume_checkpoint(self, path: str | Path) -> int:
+        file = Path(path)
+        sidecar = Path(str(file) + ".pilot.json")
+        if (
+            file.is_symlink() or sidecar.is_symlink()
+            or not file.is_file() or not sidecar.is_file()
+        ):
+            raise ValueError("RSS_VNEXT_PILOT_SLRM_RESUME_FILES_MISSING")
+        data = json.loads(sidecar.read_text())
+        if (
+            type(data) is not dict
+            or data.get("schema") != "RealSaS.RSSvNext.PilotSLRMResume.v1"
+            or data.get("checkpoint_sha256") != _file_digest(file)
+            or data.get("cohort_sha256") != self.dataset_manifest_sha256
+            or data.get("trained_b_task_weights_sha256") != self.b_checkpoint_sha256
+            or data.get("c_phase_plan_sha256") != self.plan.digest
+            or type(data.get("step")) is not int
+            or not 0 <= data["step"] <= self.plan.total_steps
+            or type(data.get("sampler_cursor")) is not int
+            or data["sampler_cursor"] < 0
+        ):
+            raise ValueError("RSS_VNEXT_PILOT_SLRM_RESUME_PROVENANCE_DRIFT")
+        cursor = self.trainer.load_checkpoint(file)
+        if cursor != data["sampler_cursor"] or self.global_step != data["step"]:
+            raise ValueError("RSS_VNEXT_PILOT_SLRM_RESUME_PROGRESS_DRIFT")
+        self._resume_attested = True
+        return cursor
 
 
 @dataclass(frozen=True)
@@ -237,13 +311,16 @@ def execute_real_pilot_slrm_phase_v1(
 ) -> list[dict[str, object]]:
     if (
         phase.source_cohort_sha256 != cohort.cohort_sha256
-        or phase.trainer.global_step != 0
+        or (phase.trainer.global_step != 0
+            and not phase.trainer._resume_attested)
+        or phase.trainer.global_step >= phase.plan.total_steps
     ):
         raise ValueError("RSS_VNEXT_PILOT_SLRM_RESUME_REQUIRES_CHECKPOINT")
+    remaining = phase.plan.total_steps - phase.trainer.global_step
     result = run_source_qualified_pilot_updates_v1(
         trainer=phase.trainer, staged_examples=examples,
         source_index=source_index, cohort=cohort,
-        max_steps=phase.plan.total_steps,
+        max_steps=remaining,
     )
     if phase.trainer.global_step != phase.plan.total_steps:
         raise RuntimeError("RSS_VNEXT_PILOT_SLRM_PHASE_PROGRESS_DRIFT")

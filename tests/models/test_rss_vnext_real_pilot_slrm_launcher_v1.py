@@ -3,6 +3,7 @@ from __future__ import annotations
 """Only synthetic policy fixtures; never counted as real-source GPU training."""
 
 from dataclasses import replace
+import json
 from types import SimpleNamespace
 
 import pytest
@@ -141,3 +142,62 @@ def test_slrm_shared_h_reachability_is_not_optional():
     )
     with pytest.raises(RuntimeError, match="SHARED_H_GRADIENT_MISSING"):
         bound.train_step(_batch(STAGE_1, "b" * 64))
+
+def test_c_to_d_handoff_rejects_partial_phase_and_allows_finished_phase(tmp_path):
+    fake = _FakeSLRM()
+    def export(path, *, target_kind):
+        assert target_kind == "MIRA_CODEC"
+        fake.last_export = str(path)
+        return "sealed-c-d-test"
+    fake.export_phase_handoff = export
+    bound = _ProvenanceBoundSLRMTrainerV1(
+        fake, plan=plan(), b_checkpoint_sha256="b" * 64,
+        cohort_sha256="a" * 64,
+    )
+    with pytest.raises(RuntimeError, match="INCOMPLETE_C_TO_D_HANDOFF"):
+        bound.export_phase_handoff(tmp_path / "c-d.pt")
+    for stage in (STAGE_1, STAGE_1, STAGE_2, STAGE_2, STAGE_3):
+        bound.train_step(_batch(stage, "b" * 64))
+    assert bound.export_phase_handoff(tmp_path / "c-d.pt") == "sealed-c-d-test"
+
+
+def test_c_resume_binding_rejects_changed_b_and_phase_plan(tmp_path):
+    fake = _FakeSLRM()
+    def save(path, *, sampler_cursor):
+        path.write_text(json.dumps({
+            "step": fake.global_step, "cursor": sampler_cursor,
+        }))
+    def load(path):
+        value = json.loads(path.read_text())
+        fake.global_step = value["step"]
+        return value["cursor"]
+    fake.save_checkpoint = save
+    fake.load_checkpoint = load
+    bound = _ProvenanceBoundSLRMTrainerV1(
+        fake, plan=plan(), b_checkpoint_sha256="b" * 64,
+        cohort_sha256="a" * 64,
+    )
+    bound.train_step(_batch(STAGE_1, "b" * 64))
+    checkpoint = tmp_path / "source-c-resume.pt"
+    bound.save_resume_checkpoint(checkpoint, sampler_cursor=7)
+
+    mismatched_b = _ProvenanceBoundSLRMTrainerV1(
+        fake, plan=plan(), b_checkpoint_sha256="f" * 64,
+        cohort_sha256="a" * 64,
+    )
+    with pytest.raises(ValueError, match="RESUME_PROVENANCE_DRIFT"):
+        mismatched_b.load_resume_checkpoint(checkpoint)
+    mismatched_schedule = _ProvenanceBoundSLRMTrainerV1(
+        fake, plan=replace(plan(), nerf_single_layer_steps=3),
+        b_checkpoint_sha256="b" * 64, cohort_sha256="a" * 64,
+    )
+    with pytest.raises(ValueError, match="RESUME_PROVENANCE_DRIFT"):
+        mismatched_schedule.load_resume_checkpoint(checkpoint)
+
+    fake.global_step = 0
+    assert bound.load_resume_checkpoint(checkpoint) == 7
+    assert bound.global_step == 1
+    assert bound._resume_attested
+    checkpoint.write_text("modified checkpoint")
+    with pytest.raises(ValueError, match="RESUME_PROVENANCE_DRIFT"):
+        bound.load_resume_checkpoint(checkpoint)

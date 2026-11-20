@@ -28,6 +28,7 @@ from .product_real_pilot_cohort_v1 import (
 from .product_real_pilot_execution_v1 import (
     PilotLedgerV1, RealPilotTrainingEnvelopeV1,
     _file_digest, run_source_qualified_pilot_updates_v1,
+    requalify_pilot_ledger_artifacts_v1,
 )
 from .product_real_pilot_resume_v1 import pilot_phase_plan_sha256_v1
 from .realsas_sdxl_mvadapter_stageab_trainer_v2 import (
@@ -128,6 +129,7 @@ def build_real_pilot_ab_phase_v1(
         or not _sha(trainer.source_registry_sha256)
     ):
         raise ValueError("RSS_VNEXT_PILOT_AB_PHASE_TRAINER_NOT_ADMITTED")
+    requalify_pilot_ledger_artifacts_v1(ledger,cohort=cohort)
     previous = None
     if plan.stage == _A:
         if ledger.completed or prior_a_task_weights_path is not None:

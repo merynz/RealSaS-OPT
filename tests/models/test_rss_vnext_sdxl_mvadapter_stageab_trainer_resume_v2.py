@@ -150,6 +150,7 @@ def test_stage_a_task_fit_checkpoint_resume_and_two_canonical_sampler(tmp_path):
         conditioner=conditioner,task_a_alpha=head,
         warmup_steps=2,
     )
+    assert optimizer.dataset_manifest_sha256=="a"*64
     first=optimizer.train_step(batch)
     assert first.step==1
     assert set(first.gradient_norms)=={

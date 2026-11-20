@@ -54,6 +54,23 @@ def synthetic_a_ledger(tmp_path):
     source=tmp_path/"trained-a.pt"
     source.write_bytes(b"synthetic task A file - never release")
     digest=sha256(source.read_bytes()).hexdigest()
+    validation=tmp_path/"a-val.json"
+    validation.write_text(json.dumps({
+        "stage":"A_CANONICAL_SDXL",
+        "cohort_sha256":COHORT,
+        "evaluation_split":"VAL",
+        "status":"PASS",
+        "val_examples":20,
+        "gradient_audit_sha256":"4"*64,
+    }))
+    gpu=tmp_path/"a-gpu.json"
+    gpu.write_text(json.dumps({
+        "device_type":"cuda",
+        "device_name":"synthetic-not-a-gpu",
+        "amp_dtype":"BF16",
+        "peak_allocated_mib":1024.,
+        "status":"PASS",
+    }))
     r=PilotCompletedStageV1(
         stage="A_CANONICAL_SDXL",cohort_sha256=COHORT,
         input_weights_sha256=BASE,
@@ -62,10 +79,10 @@ def synthetic_a_ledger(tmp_path):
         output_checkpoint_sha256=digest,
         objective_policy_sha256="1"*64,
         optimizer_ownership_sha256=OWNER,
-        validation_report_path="/not/production/val.json",
-        validation_report_sha256="2"*64,
-        gpu_evidence_path="/not/production/gpu.json",
-        gpu_evidence_sha256="3"*64,
+        validation_report_path=str(validation),
+        validation_report_sha256=sha256(validation.read_bytes()).hexdigest(),
+        gpu_evidence_path=str(gpu),
+        gpu_evidence_sha256=sha256(gpu.read_bytes()).hexdigest(),
         audited_gradient_report_sha256="4"*64,
         trained_steps=1,trained_examples=260,val_examples=20,
         gpu_device_name="synthetic-not-a-gpu",
@@ -152,7 +169,7 @@ def test_stage_b_requires_real_a_task_file_bytes(tmp_path):
     )
     assert stage_b.previous_stage_task_sha256==ledger.completed[0].output_checkpoint_sha256
     a.write_bytes(b"changed A bytes")
-    with pytest.raises(ValueError,match="A_TASK_BYTES_DRIFT"):
+    with pytest.raises(RuntimeError,match="ARTIFACT_BYTES_DRIFT"):
         build_real_pilot_ab_phase_v1(
             trainer=fake_ab(b_plan.stage),plan=b_plan,
             cohort=cohort(),ledger=ledger,prior_a_task_weights_path=a,
@@ -244,3 +261,21 @@ def test_ab_execute_exact_resume_cursor_and_release_only_at_budget(monkeypatch,t
     assert export_real_pilot_ab_trained_task_weights_v1(
         recovered,output_path=tmp_path/"trained-a.pt",
     )["step"]==5
+
+def test_stage_b_rechecks_prior_a_validation_and_gpu_bytes(tmp_path):
+    b_plan=PilotABPhasePlanV1(
+        "B_PAIRED_RGB_NORMAL_MVADAPTER",5,5e-5,warmup_steps=2,
+    )
+    ledger,a=synthetic_a_ledger(tmp_path)
+    validation=Path(ledger.completed[0].validation_report_path)
+    gpu=Path(ledger.completed[0].gpu_evidence_path)
+    for target in (validation,gpu):
+        original=target.read_bytes()
+        target.write_bytes(original+b"\n")
+        with pytest.raises(RuntimeError,match="ARTIFACT_BYTES_DRIFT"):
+            build_real_pilot_ab_phase_v1(
+                trainer=fake_ab(b_plan.stage),plan=b_plan,
+                cohort=cohort(),ledger=ledger,
+                prior_a_task_weights_path=a,
+            )
+        target.write_bytes(original)

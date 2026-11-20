@@ -51,10 +51,12 @@ A = lambda_visible_rgb * first_hit_rgb       (Graphics source-visible task)
 R = lambda_joint_ray * source_3d_ray_rgb_alpha_semantic
     (cross-head Joint Render: Geometry density + Semantic + Graphics)
 K = product_axis_mira.total + lambda_anchor * source_native_anchor
-L_total = G + S + A + R + K (absent qualified families are UNKNOWN, not negatives)
+V = lambda_posed_mstar * native_Mstar_posed_RGB_alpha_roles_depth
+C = lambda_native_clearance * native_body_face_garment_vertex_gap
+L_total = G + S + A + R + K + V + C (unqualified teachers are UNKNOWN)
 ```
 
-The five-family aggregate split deliberately separates the cross-head Joint Render term from source first-hit RGB and uses **the exact product loss tensors**; none of the AXIS/MIRA or semantic sublosses is counted twice. `admitted_product_task_losses_v1` rejects a changed scalar decomposition; `PreparedProductGradientRouteV1.apply_after_backward` independently verifies that the full **selected shared-owner** gradient from `L_total.backward()` equals the sum of the family probes before modifying a single parameter.
+The seven-family aggregate split deliberately separates cross-head Joint Render, posed M* raster and native garment clearance from source first-hit RGB and uses **the exact product loss tensors**; none of the AXIS/MIRA or semantic sublosses is counted twice. `admitted_product_task_losses_v1` rejects a changed scalar decomposition; `PreparedProductGradientRouteV1.apply_after_backward` independently verifies that the full **selected shared-owner** gradient from `L_total.backward()` equals the sum of the family probes before modifying a single parameter.
 
 This audit is stronger than simply noting that a module has a non-null `.grad`, but is still **not** a quality/gradient-benefit claim on real sources.
 
@@ -95,7 +97,8 @@ The policy checks **objective eligibility**, not merely that someone assigned a 
 - always: provenance, rights, original two RGBA bytes, pinned generator hypotheses, exact seeded M* source normal/face/barycentric evidence;
 - as enabled: component UDF for open surfaces; true original patch axes and source 3D semantic roles/co-region; original visible RGB first-hit and qualified source 3D RGB/alpha ray stack;
 - as enabled: exact AXIS native hierarchy/joint order, source-native M* face-barycentric skin, source joint-to-chain map and vertex validity, source-authored anchor/constraint intervention;
-- for **posed** losses only: source-native pose transforms, matched M* posed vertices, qualified pose mask, true strain/fold targets.
+- for **posed** losses only: source-native pose transforms, matched M* posed vertices, qualified pose mask, true strain/fold targets;
+- optionally: native source **posed M* RGB/alpha/role/depth camera render** with immutable raster-source binding, and source-certified outward body face + native garment-vertex barycentric pairs and valid masks for garment/body gap; neither is a source for inferred XPBD material.
 
 Every teacher needs asset lineage and licensed-truth provenance; `UNKNOWN` is masked, **never interpreted as a negative or physical class**. The inventory is *conditional*, not a claim that every licensed asset has all teacher families.
 
@@ -103,13 +106,13 @@ Every teacher needs asset lineage and licensed-truth provenance; `UNKNOWN` is ma
 
 These are **real product acceptance gaps**, not to be papered over by adding loss weights:
 
-1. **Native M* Graphics Stage3 training:** current S-LRM trainer has a PyTorch3D/FlexiCubes witness raster stage, and seeded trainer has volume/ray appearance and source RGB losses. However a **differentiable, final indexed M*** **post-pose 2D RGB/alpha/visibility** source-trained objective is **not yet connected inside the active seeded product training profile**. A stationary RGB sample is not that objective.
-2. **Garment not stuck to body:** source 3D SLR layer roles, separate garment shell/component and true open boundaries need to survive into the one canonical M*. Native skin/chain teachers provide deformation. They do NOT by themselves teach cloth clearance, pin seams or physical material. A garment–body gap/penetration loss requires exact pose-aligned source surface/support. If no source 3D collision proof exists, the Compiler must choose explicit authored/default XPBD policy or **ABSTAIN**; no semantic-material invention.
+1. **Native M* Graphics Stage3 training:** the **optional source-qualified posed M* raster objective is now connected to the seeded trainer** (PR #632), using the same AXIS/MIRA-deformed indexed M* and Compiler-compatible canonical vertex logits. It remains teacher-forced under a native source pose; GPU execution, unseen independent motion, alpha-compositing beyond opaque first hit and post-XPBD native C++ parity are **not yet qualified**.
+2. **Garment not stuck to body:** a **source-native signed gap supervision candidate now exists** (PR #633), but only for a certified outward body shell, independently indexed body-face/garment-vertex pairs and valid native source poses on the same M*. It is not a whole-body collision detector or source-backed XPBD material. Unsupported assets remain UNKNOWN; runtime still needs authored/default XPBD policy or ABSTAIN.
 3. **Cape movement:** canonical Mechanics kinematics first, then declared XPBD Physics, then Graphics post-Physics native 2D. Need real source-driven anchors, cloth boundaries and measured collision/contact/pose-time pixel witnesses when claiming correctness. A synthetic cape preview and an available solver do not prove this for unknown characters.
 4. **Free-running two-original input:** teacher-forced M* / AXIS / MIRA training is not the same as predicted-geometry+predicted-rig+predicted-skin quality. Evaluate rollout on unseen morphology and source-independent artist motion. Training generated six-view views are conditioning hypotheses, not GT.
 5. **ProductProof:** source rights, native renderer parity, independent source appearance/visibility and edited .rss close/reopen remain independently gated. A compile stage returning PASS is not an admissible ProductRevision.
 
-The last five failures are included as explicit non-authority diagnostics in the code-generated handoff. They require separate engineering / measured evidence before training can be declared final. Do not make them compulsory *learned* targets without source truth or a compiler contract.
+The five remaining acceptance gates are included as explicit non-authority diagnostics in the code-generated handoff; their exact status changes with activated loss policies. They require separate engineering / measured evidence before training can be declared final. Do not make them compulsory *learned* targets without source truth or a compiler contract.
 
 ## Acceptance test plan (not yet empirical validation)
 

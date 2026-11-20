@@ -205,10 +205,17 @@ def _validate_source_teacher(t: SeededTESSASourceTeacherV1) -> None:
                     atol=1e-5,rtol=0,
                 ))):
             raise ValueError("RSS_VNEXT_TESSA_SOURCE_POSE_DOMAIN")
-    if (t.source_layer_penetration_target is None) != (
-        t.source_layer_penetration_mask is None
+    # These historical untyped arrays have no source-face, outward-body,
+    # M* address, pose or licensing receipt. The only admitted clearance
+    # learner is the separately registered source-native typed pair court.
+    # Never silently consume or ignore an attractive-but-unaudited label.
+    if (
+        t.source_layer_penetration_target is not None
+        or t.source_layer_penetration_mask is not None
     ):
-        raise ValueError("RSS_VNEXT_TESSA_SOURCE_LAYER_INCOMPLETE")
+        raise ValueError(
+            "RSS_VNEXT_TESSA_LEGACY_LAYER_PENETRATION_TEACHER_RETIRED"
+        )
 
 
 def _boundary_vertices(faces: Tensor, verts: Tensor) -> Tensor:

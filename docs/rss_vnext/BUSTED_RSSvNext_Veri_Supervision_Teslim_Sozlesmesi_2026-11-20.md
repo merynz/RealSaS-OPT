@@ -273,6 +273,20 @@ Eğitimde posed triangle ilk-hit raster, **pose-space vertex konumunu** görün�
 
 Kaynak kod: [posed M* Graphics teacher](https://github.com/merynz/RealSaS-OPT/blob/main/models/rss_vnext/product_mstar_pose_graphics_v1.py), [trainer](https://github.com/merynz/RealSaS-OPT/blob/main/models/rss_vnext/training_engine.py) ve [teknik kapsam/sınırlar](https://github.com/merynz/RealSaS-OPT/blob/main/docs/research/RSS_VNEXT_PRODUCT_POSED_MSTAR_GRAPHICS_TRAINING_20261120.md). Aktif loss–teacher gereksinimleri, sabit liste yerine trainer'ın `source_supervision_requirements_v1()` çıktısından da doğrulanmalıdır.
 
+## 13. Koşullu teacher — Kaynak-native gövde–giysi açıklığı
+
+Bu alan **yalnız** eğitimde `product_native_layer_clearance_weight>0` etkinse gereklidir. Kaynakta kanıtı bulunmayan her asset için `UNAVAILABLE/UNKNOWN` korunur; o asset'i dataset'ten silmek gerekmez.
+
+- Final M\* indekslerine independently reindex edilmiş `garment_vertex_ids [K]`, `body_face_ids [K]`, `body_face_barycentric [K,3]`. Öğrencinin tahmin ettiği en yakın gövde yüzünü teacher yapmak **yasak**.
+- Gerçek native kaynak pozlarının `[1,P,V,3]` yüzey yer değiştirmeleri, source-native AXIS joint order/pose transport ve her eşleşmeye ait `qualified_pose_pair_mask [1,P,K]`. Eşleşmenin iki tarafındaki tüm vertex'lerin source pose desteği zorunlu.
+- Kaynak gövde referansı için **kapalı ve dışa yönlendirilmiş** face winding sertifikası; açık pelerinden SDF işareti istenmez. Kaynakta penetrasyon veya çift taraflı belirsiz yön varsa label reddedilir.
+- Trusted launcher registry: source asset/license/dataset SHA, candidate M\* topology address, native transport receipt, posed source bytes ve pair ID+bary+mask SHA; `source_native_body_face_winding_outward_certified`, `source_body_shell_signed_solid_verified`, `source_native_pair_correspondence_verified`, `physical_material_or_xpbd_authority=False`.
+- Bu veriler **gövde–giysi posedyüzey açıklığı** öğretir. Kumaş malzeme sertliği, sürtünme, pin, temas cevabı, XPBD zaman integrasyonu veya fiziksel proof olarak kullanılamaz. Kaynak hareket doğru olsa bile ürün runtime'ında ayrıca mekanik/Graphics doğrulama gerekir.
+
+**Eski alanlar yasaktır:** `SeededTESSASourceTeacherV1.source_layer_penetration_target/mask` adres/poz/kaynak kanıtı olmadan tüketilmiyordu; artık trainer bu belirsiz alanların doldurulmasını reddeder. Yeni typed native clearance teacher kullanılmalıdır.
+
+Kod/sözleşme: [native clearance learner](https://github.com/merynz/RealSaS-OPT/blob/main/models/rss_vnext/product_native_layer_clearance_v1.py), [güvenlik/öğretim notu](https://github.com/merynz/RealSaS-OPT/blob/main/docs/research/RSS_VNEXT_SOURCE_NATIVE_BODY_GARMENT_CLEARANCE_20261120.md).
+
 ---
 
 **Devir cümlesi:** *Öğretmen paketlerimiz, modeli doğru cevaba zorla götüren gizli input değildir; kaynakta gerçekten ölçülmüş cevapları, aynı tek puppet'ın geometri–rig–skin–Graphics ilişkilerini öğrenebilmesi ve bağımsız doğrulayabilmesi için kayıpsız, maskeli ve adresli sunar.*

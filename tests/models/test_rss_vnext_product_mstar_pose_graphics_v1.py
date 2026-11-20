@@ -212,3 +212,71 @@ def test_pose_teacher_tampering_or_invented_motion_is_rejected(monkeypatch):
         ))
     with pytest.raises(ValueError, match="OPTIONAL_PAIR"):
         run(t=replace(target, normal_xyz=torch.zeros(1,256,3)))
+
+
+def test_2d_mstar_color_and_role_interpolation_matches_compiler_vertex_logit_abi(
+    monkeypatch,
+):
+    """Compiler UV: barycentric average of vertex LOGITS, then sigmoid.
+
+    Semantic role sublayer: mean vertex softmax per face, NOT softmax of
+    interpolated logits. These two ABI invariants are independently checked
+    against the native first-hit raster, preventing trainer-vs-Compiler drift.
+    """
+    from models.rss_vnext.busted_raster_backend_v1 import BustedTorchRasterV1
+
+    model, _, state, rest, faces, cameras = _pose_case(monkeypatch)
+    posed = rest + torch.tensor([0.025, -0.01, 0.04])
+    renderer = render_posed_indexed_mstar_v1(
+        rest_xyz=rest, posed_xyz=posed, faces=faces,
+        scene_triplanes=state.scene_triplanes, iris=model.iris,
+        graphics_head=model.graphics, role_head=model.presentation_role_head,
+        cameras=cameras, height=16, width=16,
+    )
+    # Compiler consumes the exact same final M* vertex graphics logits.
+    with torch.no_grad():
+        h = model.iris.query(state.scene_triplanes, rest)["H"]
+        logits = model.graphics(h)[0].float()
+        role_logits = model.presentation_role_head(h)[0].float()
+        vertex_role_probs = torch.softmax(role_logits, dim=-1)
+    camera = cameras[0, 0].float()
+    xyz = posed[0].float()
+    delta = xyz - camera[None, :3]
+    right = (delta @ camera[3:6]) / camera[12]
+    up = (delta @ camera[6:9]) / camera[12]
+    forward = delta @ camera[9:12]
+    low = forward.min() - .05
+    high = forward.max() + .05
+    clip = torch.stack((
+        right, up, (forward-low)*2/(high-low)-1,
+        torch.ones_like(right),
+    ), dim=-1)[None]
+    raster, _ = BustedTorchRasterV1.rasterize(
+        BustedTorchRasterV1.RasterizeCudaContext(),
+        clip, faces.to(torch.int32), (16, 16),
+    )
+    ids = raster[0, ..., 3].long() - 1
+    coverage = ids >= 0
+    # The Blender / UV compiler operates in per-face barycentric texel
+    # coordinates, which the first-hit raster reports as w0,w1,w2.
+    face_logit = logits[faces[ids.clamp_min(0)]]
+    w0, w1 = raster[0, ..., 0:1], raster[0, ..., 1:2]
+    mixed_logits = (
+        face_logit[..., 0, :]*w0
+        + face_logit[..., 1, :]*w1
+        + face_logit[..., 2, :]*(1.-w0-w1)
+    )
+    face_mean_role = vertex_role_probs[faces].mean(dim=1)
+    role_expect = (
+        face_mean_role[ids.clamp_min(0)]*coverage[...,None]
+    ).flip(dims=(0,)).reshape(1, 256, -1)
+    # Native raster AA multiplies predicted RGB once by edge coverage.
+    base_color = torch.sigmoid(mixed_logits[..., :3])*coverage[...,None]
+    alpha = raster[0, ..., 2:3] * coverage[...,None]
+    rgb_expect = (base_color*alpha + 1. - alpha).flip(dims=(0,)).reshape(1,256,3)
+    torch.testing.assert_close(
+        renderer.rgb_white, rgb_expect, rtol=1e-5, atol=1e-6,
+    )
+    torch.testing.assert_close(
+        renderer.roles, role_expect, rtol=1e-5, atol=1e-6,
+    )

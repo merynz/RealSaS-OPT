@@ -387,3 +387,40 @@ def test_native_reference_unet_uses_same_dropped_text_as_guided_target(monkeypat
     assert torch.equal(seen[0][1],source.empty_pooled_text_embeds)
     assert result.prompt_dropped_subjects==1
     assert result.reference_dropped_subjects==0
+
+def test_stage_a_resume_rejects_changed_warmup_lr_and_amp(tmp_path):
+    # Same source/trainer topology but different LambdaLR closure MUST NOT
+    # resume the already-trained AdamW state at another learning rate.
+    torch.manual_seed(109)
+    batch=_batch_a()
+    vae=VAE()
+    vae._rss_vnext_vae_ancestor_sha256="d"*64
+    def make(*,warmup_steps=2,lr=5e-5,amp_dtype="BF16"):
+        unet,conditioner,alpha=_stage_a()
+        return SourceSDXLStageABOptimizerV2(
+            stage="A_CANONICAL_SDXL",
+            unet=unet,vae=vae,noise_scheduler=Scheduler(),
+            source_manifest_sha256="a"*64,
+            pretrained_source_sha256="b"*64,
+            source_vae_sha256="d"*64,
+            trusted_source_registry=_source_registry(
+                "A_CANONICAL_SDXL",batch,
+            ),
+            conditioner=conditioner,task_a_alpha=alpha,
+            warmup_steps=warmup_steps,lr=lr,amp_dtype=amp_dtype,
+        )
+    trained=make()
+    trained.train_step(batch)
+    checkpoint=tmp_path/"a-resume.pt"
+    trained.save_resume_checkpoint(checkpoint)
+    good=make()
+    good.load_resume_checkpoint(checkpoint)
+    assert good.step==1
+    for policy in (
+        {"warmup_steps":3},
+        {"lr":1e-4},
+        {"amp_dtype":"FP16"},
+    ):
+        invalid=make(**policy)
+        with pytest.raises(RuntimeError,match="RESUME_IDENTITY_DRIFT"):
+            invalid.load_resume_checkpoint(checkpoint)

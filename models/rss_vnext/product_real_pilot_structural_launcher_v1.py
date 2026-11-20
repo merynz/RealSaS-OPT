@@ -31,6 +31,7 @@ from .product_real_pilot_cohort_v1 import (
 from .product_real_pilot_execution_v1 import (
     STAGES, PilotLedgerV1, RealPilotTrainingEnvelopeV1,
     run_source_qualified_pilot_updates_v1, _file_digest,
+    requalify_pilot_ledger_artifacts_v1,
 )
 from .product_seeded_phase_ownership_v1 import (
     ProductSeededPhaseOwnerPolicyV1, PHASES,
@@ -140,6 +141,7 @@ def build_real_pilot_structural_e_phase_v1(
         or not ledger.completed
     ):
         raise ValueError("RSS_VNEXT_PILOT_E_PHASE_LAUNCH_NOT_ADMITTED")
+    requalify_pilot_ledger_artifacts_v1(ledger,cohort=cohort)
     prior=ledger.completed[-1]
     if prior.stage not in STAGE_KINDS:
         raise ValueError("RSS_VNEXT_PILOT_E_PHASE_PREVIOUS_STAGE_NOT_READY")

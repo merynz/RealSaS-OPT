@@ -327,6 +327,14 @@ def run_source_qualified_pilot_updates_v1(
         ):
             raise ValueError("RSS_VNEXT_PILOT_BATCH_ASSET_BINDING_DRIFT")
         assert_train_only_source_v1(item,cohort)
+        # Trainers with a one-receipt-per-subject loss ABI (e.g. diffusion
+        # A/B) must additionally bind the trusted teacher receipt and
+        # effective batch size to THIS exact TRAIN source before gradients.
+        source_hook=getattr(trainer,"assert_batch_source_identity",None)
+        if source_hook is not None:
+            if not callable(source_hook):
+                raise RuntimeError("RSS_VNEXT_PILOT_SOURCE_BATCH_HOOK_INVALID")
+            source_hook(envelope)
         result=trainer.train_step(envelope.batch)
         scalar=(
             result.get("total_loss",result.get("loss",result.get("total")))

@@ -2635,6 +2635,10 @@ class RSSvNextStructuralTrainer:
                 "realsas_joint_keep_roles","realsas_joint_target",
                 "realsas_joint_teacher_admission_key",
             } if self.product_joint_ray_weight>0 else set()),
+            *({
+                "product_mstar_pose_render_target",
+                "product_mstar_pose_render_admission_key",
+            } if self.product_mstar_pose_raster_weight>0 else set()),
         }
         unexpected = []
         for name, value in vars(batch).items():
@@ -3005,6 +3009,34 @@ class RSSvNextStructuralTrainer:
             axis_sequence_digest=axis_teacher_sequence_sha256_v6,
             frozen_codec_digest=frozen_mira_codec_state_sha256_v6,
         )
+        # The independently source-rendered 2D target is applied to the
+        # STUDENT'S AXIS/MIRA-deformed SAME M*, not a second FC cosmetic mesh.
+        # Its native pose transport was authenticated by axis_mira above.
+        if self.product_mstar_pose_raster_weight>0 and (
+            next(self.model.parameters()).device.type != self.pose_raster_device_type
+        ):
+            raise RuntimeError("RSS_VNEXT_MSTAR_POSE_RASTER_DEVICE_DRIFT")
+        pose_raster_loss,pose_raster_parts,n_pose_pixels = (
+            qualified_product_mstar_pose_loss_v1(
+                model=self.model,state=state,mesh=mesh,
+                predicted_posed_xyz=axis_mira.predicted_posed_vertices,
+                batch=batch,seeded_teacher=teacher,
+                target=batch.product_mstar_pose_render_target,
+                admission_key=batch.product_mstar_pose_render_admission_key,
+                trusted_registry=self.trusted_product_mstar_pose_raster_registry,
+                dataset_manifest_sha256=self.dataset_manifest_sha256,
+                loss_weights=self.product_mstar_pose_raster_loss_weights,
+                tensor_digest=source_surface_tensor_sha256,
+                axis_sequence_digest=axis_teacher_sequence_sha256_v6,
+                seeded_mstar_address_digest=seeded_mstar_teacher_address_sha256_v1,
+            )
+        )
+        if (
+            self.product_mstar_pose_raster_weight>0
+            and pose_raster_loss is None
+            and not self.allow_sparse_qualified_source_batches
+        ):
+            raise ValueError("RSS_VNEXT_MSTAR_POSE_RENDER_ENABLED_NO_SOURCE")
         # Same forward carrier, same final indexed M* and source-qualified AXIS
         # sequence as the production skin/rig objective above. The loss is
         # conditional: unlabeled assets are UNKNOWN, not negative examples.
@@ -3169,6 +3201,11 @@ class RSSvNextStructuralTrainer:
             joint_total=joint_total+self.product_graphics_rgb_weight*rgb_loss
         if ray_loss is not None:
             joint_total=joint_total+self.product_joint_ray_weight*ray_loss
+        if pose_raster_loss is not None:
+            joint_total=(
+                joint_total
+                +self.product_mstar_pose_raster_weight*pose_raster_loss
+            )
         return RSSvNextTrainingResult(
             total_loss=joint_total,
             topology_loss=None,motion_preference_loss=None,
@@ -3205,6 +3242,9 @@ class RSSvNextStructuralTrainer:
             eligible_graphics_source_rgb_queries=n_rgb,
             realsas_joint_slrm_loss=ray_loss,
             eligible_realsas_joint_rays=n_rays,
+            product_mstar_pose_raster_loss=pose_raster_loss,
+            product_mstar_pose_raster_parts=pose_raster_parts,
+            eligible_mstar_pose_raster_pixels=n_pose_pixels,
             product_graphics_joint_loss_parts=ray_parts,
             product_semantic_loss=semantic.total,
             product_semantic_loss_parts={

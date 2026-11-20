@@ -217,7 +217,10 @@ class _StageABGradientRecorder:
         else:
             first=getattr(batch,"canonical_rgba",None)
         key=getattr(batch,"source_render_qualification_key",None)
-        receipt=self.trainer.trusted_source_registry.get(key)
+        receipt=(
+            self.trainer.trusted_source_registry.get(key)
+            if type(key) is str and key else None
+        )
         if (
             not isinstance(first,Tensor)
             or first.ndim<2

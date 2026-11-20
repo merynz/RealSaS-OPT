@@ -16,7 +16,7 @@ import torch
 from torch import Tensor, nn
 
 SCHEMA = "RealSaS.RSSvNext.ProductMultitaskGradientRouting.v1"
-MODES = frozenset({"WEIGHTED_SUM", "BOUNDED_SHARED_PCGRAD"})
+MODES = frozenset({"WEIGHTED_SUM", "BOUNDED_SHARED_PCGRAD", "BOUNDED_SHARED_CAGRAD_K"})
 FAMILIES = ("GEOMETRY", "SEMANTIC", "GRAPHICS", "JOINT_RENDER", "MECHANICS", "POSED_MSTAR_RENDER", "POSED_LAYER_CLEARANCE", "CONTROL_INTERVENTION", "OPEN_PIN_SUPPORT")
 # Ownership is explicit. Introducing additional owners requires code review.
 SHARED_OWNERS = (
@@ -35,6 +35,8 @@ class ProductMultitaskGradientPolicyV1:
     max_candidate_norm_ratio: float = 1.25
     max_shared_elements: int = 24_000_000
     max_dense_probe_bytes: int = 768 * 1024 * 1024
+    cagrad_conflict_aversion: float = 0.5
+    cagrad_solver_maxiter: int = 150
 
     def validate(self) -> None:
         if (
@@ -48,6 +50,11 @@ class ProductMultitaskGradientPolicyV1:
             or self.max_shared_elements < 1
             or type(self.max_dense_probe_bytes) is not int
             or self.max_dense_probe_bytes < 1024
+            or type(self.cagrad_solver_maxiter) is not int
+            or not 20 <= self.cagrad_solver_maxiter <= 500
+            or type(self.cagrad_conflict_aversion) not in (int, float)
+            or not math.isfinite(self.cagrad_conflict_aversion)
+            or not 0.0 <= self.cagrad_conflict_aversion < 1.0
             or any(
                 type(v) not in (float, int) or not math.isfinite(v)
                 for v in (self.projection_strength, self.max_candidate_norm_ratio)
@@ -263,10 +270,10 @@ def prepare_product_gradient_route_v1(
 ) -> PreparedProductGradientRouteV1 | None:
     """Probe ACTUAL qualified objective graph; default never alters update.
 
-    The deterministic pair projection is an explicitly named PCGrad-inspired
-    candidate. It is NOT the original randomized PCGrad implementation and
-    is NOT a general CAGrad/MGDA solver. The step is bounded, and it falls
-    back to the exact weighted sum if first-order *total* descent is lost.
+    PCGrad-inspired deterministic pair projection and an explicitly selected
+    K-task CAGrad official-style dual are opt-in candidates, never default.
+    Neither proves held-out improvement. The step is bounded and falls back
+    to weighted sum if first-order *total* descent is lost.
     """
     policy.validate()
     if type(global_step) is not int or global_step < 0:
@@ -324,7 +331,29 @@ def prepare_product_gradient_route_v1(
                 conflicting.append((a, b))
     candidate = base.clone()
     applied = False
-    if conflicting:
+    cagrad_diagnostics = None
+    if policy.mode == "BOUNDED_SHARED_CAGRAD_K" and (
+        policy.cagrad_conflict_aversion > 0
+        and bool(torch.linalg.vector_norm(base) > 0)
+    ):
+        from .product_cagrad_k_task_v1 import k_task_admitted_shared_cagrad_v1
+        cagrad = k_task_admitted_shared_cagrad_v1(
+            live, c=policy.cagrad_conflict_aversion,
+            solver_maxiter=policy.cagrad_solver_maxiter,
+        )
+        proposed = cagrad.candidate
+        cagrad_diagnostics = {
+            "solver": "CAGRAD_K_TASK_SLSQP_OFFICIAL_DUAL_OBJECTIVE",
+            "c": cagrad.c, "mixture_weights": list(cagrad.mixture_weights),
+            "solver_iterations": cagrad.solver_iterations,
+            "simplex_objective": cagrad.simplex_objective,
+            "first_order_total_dot": cagrad.first_order_total_dot,
+        }
+        candidate = (
+            (1-policy.projection_strength)*base
+            + policy.projection_strength*proposed
+        )
+    elif policy.mode == "BOUNDED_SHARED_PCGRAD" and conflicting:
         # Task-private gradients remain untouched. Route the entire named
         # shared-owner vector (not biased sampled parameter fragments).
         projected = []
@@ -345,19 +374,21 @@ def prepare_product_gradient_route_v1(
             (1 - policy.projection_strength) * base
             + policy.projection_strength * proposed
         )
-        base_norm = torch.linalg.vector_norm(base)
-        candidate_norm = torch.linalg.vector_norm(candidate)
-        if bool(candidate_norm > policy.max_candidate_norm_ratio * base_norm):
-            candidate = candidate * (
-                policy.max_candidate_norm_ratio * base_norm
-                / candidate_norm.clamp_min(1e-30)
-            )
-        if not bool(torch.isfinite(candidate).all()) or (
-            bool(base_norm > zero)
-            and bool(torch.dot(candidate, base) <= zero)
-        ):
-            candidate = base.clone()
-        applied = not bool(torch.equal(candidate, base))
+    base_norm = torch.linalg.vector_norm(base)
+    candidate_norm = torch.linalg.vector_norm(candidate)
+    if bool(candidate_norm > policy.max_candidate_norm_ratio * base_norm):
+        candidate = candidate * (
+            policy.max_candidate_norm_ratio * base_norm
+            / candidate_norm.clamp_min(1e-30)
+        )
+    # The total source-weighted first-order objective MUST remain descending.
+    # This is not a claim of per-task descent or AdamW post-step improvement.
+    if not bool(torch.isfinite(candidate).all()) or (
+        bool(base_norm > zero)
+        and bool(torch.dot(candidate, base) <= zero)
+    ):
+        candidate = base.clone()
+    applied = not bool(torch.equal(candidate, base))
     baseline_norm = float(torch.linalg.vector_norm(base).item())
     report = {
         "schema": SCHEMA,
@@ -366,6 +397,7 @@ def prepare_product_gradient_route_v1(
         "active_shared_task_families": list(names),
         "conflicting_task_pairs": [list(x) for x in conflicting],
         "projection_applied": applied,
+        "cagrad_diagnostics": cagrad_diagnostics,
         "baseline_shared_gradient_norm": baseline_norm,
         "candidate_shared_gradient_norm":
             float(torch.linalg.vector_norm(candidate).item()),

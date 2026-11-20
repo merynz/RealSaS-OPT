@@ -47,6 +47,7 @@ class MVAdapterPairedTaskCheckpointV2:
     checkpoint_sha256:str
     pretrained_base_unet_sha256:str
     pretrained_mv_adapter_sha256:str
+    vae_checkpoint_sha256:str
     qualified_corpus_sha256:str
     trained_steps:int
     teacher_scope:str="SOURCE_3D_RENDERED_NOT_GENERATED_TEACHER"
@@ -60,7 +61,8 @@ class MVAdapterPairedTaskCheckpointV2:
             self.schema!=SCHEMA
             or any(not _sha(v) for v in (
                 self.checkpoint_sha256,self.pretrained_base_unet_sha256,
-                self.pretrained_mv_adapter_sha256,self.qualified_corpus_sha256,
+                self.pretrained_mv_adapter_sha256,
+                self.vae_checkpoint_sha256,self.qualified_corpus_sha256,
             ))
             or self.teacher_scope!="SOURCE_3D_RENDERED_NOT_GENERATED_TEACHER"
             or type(self.trained_steps) is not int or self.trained_steps<=0
@@ -88,6 +90,9 @@ def load_exact_stage_b_task_checkpoint_v2(
             !=receipt.pretrained_base_unet_sha256
         or data.get("pretrained_mv_adapter_sha256")
             !=receipt.pretrained_mv_adapter_sha256
+        or data.get("vae_checkpoint_sha256")!=receipt.vae_checkpoint_sha256
+        or getattr(pipe.vae,"_rss_vnext_vae_ancestor_sha256",None)
+            !=receipt.vae_checkpoint_sha256
         or data.get("qualified_corpus_sha256")!=receipt.qualified_corpus_sha256
         or type(data.get("mv_ref_adapter")) is not dict
         or type(data.get("cond_encoder")) is not dict
@@ -121,7 +126,8 @@ def write_stage_b_task_weights_v2(
     path:str|Path,*,pipe:Any,
     task_heads:MVAdapterRGBNormalTaskHeadsV2,
     trained_steps:int,pretrained_base_unet_sha256:str,
-    pretrained_mv_adapter_sha256:str,qualified_corpus_sha256:str,
+    pretrained_mv_adapter_sha256:str,vae_checkpoint_sha256:str,
+    qualified_corpus_sha256:str,
 )->MVAdapterPairedTaskCheckpointV2:
     """Weights-only output after REAL optimizer steps; no ModelRelease claim.
 
@@ -132,7 +138,7 @@ def write_stage_b_task_weights_v2(
         type(trained_steps) is not int or trained_steps<=0
         or any(not _sha(x) for x in (
             pretrained_base_unet_sha256,pretrained_mv_adapter_sha256,
-            qualified_corpus_sha256,
+            vae_checkpoint_sha256,qualified_corpus_sha256,
         ))
     ):
         raise ValueError("RSS_VNEXT_MVADAPTER_STAGE_B_UNTRAINED_SAVE_FORBIDDEN")
@@ -148,6 +154,7 @@ def write_stage_b_task_weights_v2(
         "trained_steps":trained_steps,
         "pretrained_base_unet_sha256":pretrained_base_unet_sha256,
         "pretrained_mv_adapter_sha256":pretrained_mv_adapter_sha256,
+        "vae_checkpoint_sha256":vae_checkpoint_sha256,
         "qualified_corpus_sha256":qualified_corpus_sha256,
         "mv_ref_adapter":native,
         "cond_encoder":{
@@ -178,6 +185,7 @@ def write_stage_b_task_weights_v2(
         checkpoint_sha256=_file_sha(dest),
         pretrained_base_unet_sha256=pretrained_base_unet_sha256,
         pretrained_mv_adapter_sha256=pretrained_mv_adapter_sha256,
+        vae_checkpoint_sha256=vae_checkpoint_sha256,
         qualified_corpus_sha256=qualified_corpus_sha256,
         trained_steps=trained_steps,
     )
@@ -211,7 +219,9 @@ def sample_stage_b_paired_rgb_normal_v2(
     """
     receipt.validate()
     if (
-        getattr(pipe,"_rss_vnext_stage_b_checkpoint_sha256",None)
+        getattr(pipe.vae,"_rss_vnext_vae_ancestor_sha256",None)
+            !=receipt.vae_checkpoint_sha256
+        or getattr(pipe,"_rss_vnext_stage_b_checkpoint_sha256",None)
         !=receipt.checkpoint_sha256
         or getattr(task_heads,"_rss_vnext_stage_b_checkpoint_sha256",None)
         !=receipt.checkpoint_sha256

@@ -283,6 +283,8 @@ Bu alan **yalnız** eğitimde `product_native_layer_clearance_weight>0` etkinse 
 - Trusted launcher registry: source asset/license/dataset SHA, candidate M\* topology address, native transport receipt, posed source bytes ve pair ID+bary+mask SHA; `source_native_body_face_winding_outward_certified`, `source_body_shell_signed_solid_verified`, `source_native_pair_correspondence_verified`, `physical_material_or_xpbd_authority=False`.
 - Bu veriler **gövde–giysi posedyüzey açıklığı** öğretir. Kumaş malzeme sertliği, sürtünme, pin, temas cevabı, XPBD zaman integrasyonu veya fiziksel proof olarak kullanılamaz. Kaynak hareket doğru olsa bile ürün runtime'ında ayrıca mekanik/Graphics doğrulama gerekir.
 
+**Eski alanlar yasaktır:** `SeededTESSASourceTeacherV1.source_layer_penetration_target/mask` adres/poz/kaynak kanıtı olmadan tüketilmiyordu; artık trainer bu belirsiz alanların doldurulmasını reddeder. Yeni typed native clearance teacher kullanılmalıdır.
+
 Kod/sözleşme: [native clearance learner](https://github.com/merynz/RealSaS-OPT/blob/main/models/rss_vnext/product_native_layer_clearance_v1.py), [güvenlik/öğretim notu](https://github.com/merynz/RealSaS-OPT/blob/main/docs/research/RSS_VNEXT_SOURCE_NATIVE_BODY_GARMENT_CLEARANCE_20261120.md).
 
 ---

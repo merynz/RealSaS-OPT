@@ -715,7 +715,7 @@ class RSSvNextStructuralTrainer:
                 or product_seeded_owner_policy.stage != product_curriculum.stage
             ):
                 raise ValueError('RSS_VNEXT_PRODUCT_PHASE_OWNER_CURRICULUM_MISMATCH')
-            product_seeded_owner_policy.assert_active_trainable_owners(model)
+            product_seeded_owner_policy.assert_qualified_optimizer(model,optimizer)
         product_curriculum.validate(
             seeded_mode=seeded_mode,
             semantic_weights=product_semantic_weights,

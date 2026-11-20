@@ -15,8 +15,12 @@ import torch
 from compiler.realsas_compiler_core.canonical_mesh_ir_v1 import (
     CanonicalMeshIR,canonical_mesh_lineage_hash_v1,validate_canonical_mesh_domain_v1,
 )
-from compiler.realsas_compiler_core.canonical_rig_ir_v2 import CanonicalRigIRV2
-from compiler.realsas_compiler_core.canonical_skin_ir_v2 import CanonicalSkinIRV2
+from compiler.realsas_compiler_core.canonical_rig_ir_v2 import (
+    CanonicalRigIRV2,canonical_rig_lineage_hash_v2,
+)
+from compiler.realsas_compiler_core.canonical_skin_ir_v2 import (
+    CanonicalSkinIRV2,canonical_skin_lineage_hash_v2,
+)
 from .animation_ready_mesh import RSSvNextStructuralMeshCandidate
 from .attachment_face_correspondence_v1 import (
     RSSvNextSocketFaceNeuralOutputV1,
@@ -24,6 +28,7 @@ from .attachment_face_correspondence_v1 import (
 )
 from .product_open_pin_vertex_head_v1 import (
     OpenPinVertexNeuralOutputV1,propose_open_pin_vertex_indices_v1,
+    open_hem_boundary_mask_v1,
 )
 
 
@@ -63,6 +68,10 @@ def propose_open_pin_canonical_editor_review_v1(
         canonical.mesh_lineage_hash!=canonical_mesh_lineage_hash_v1(canonical)
         or canonical.metadata.get("authority")!="COMPILER_CANONICAL_MESH"
         or rig.mesh_lineage_hash!=canonical.mesh_lineage_hash
+        or rig.rig_lineage_hash!=canonical_rig_lineage_hash_v2(rig)
+        or rig.metadata.get("authority")!="COMPILER_CANONICAL_RIG"
+        or skin.skin_lineage_hash!=canonical_skin_lineage_hash_v2(skin)
+        or skin.metadata.get("authority")!="COMPILER_CANONICAL_SKIN"
         or skin.mesh_lineage_hash!=canonical.mesh_lineage_hash
         or skin.deform_structure_hash!=rig.deform_structure_hash
         or face_output.mesh_topology_digest!=mesh_topology_digest_v1(student)
@@ -74,10 +83,7 @@ def propose_open_pin_canonical_editor_review_v1(
         or not torch.equal(face_output.face_component_ids,
                            student.face_component_ids)
         or not torch.equal(pin_output.open_boundary_mask,
-                           __import__(
-                               "models.rss_vnext.product_open_pin_vertex_head_v1",
-                               fromlist=["open_hem_boundary_mask_v1"],
-                           ).open_hem_boundary_mask_v1(student))
+                           open_hem_boundary_mask_v1(student))
         or type(max_pinned_fraction) not in (int,float)
         or not math.isfinite(max_pinned_fraction)
         or not 0<max_pinned_fraction<1.

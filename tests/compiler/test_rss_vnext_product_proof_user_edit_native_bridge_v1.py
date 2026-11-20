@@ -210,3 +210,31 @@ def test_host_echo_and_foreign_original_preview_never_qualify_edit(
     }
     with pytest.raises(Exception):
         _proof(cas,request,trusted_native_edit_replayer=replayer)
+
+
+def test_native_face_owner_abi_accepts_production_mesh_above_4096_faces():
+    import numpy as np
+    from compiler.rss_vnext.workers.rss_vnext_canonical_edit_native_execution_replay_v1 import (
+        _pack, reopen_native_edited_puppet_rasters_v1,
+    )
+    def rows():
+        return {
+            "rgba":np.zeros((16,16,4),dtype=np.uint8),
+            "owners":np.full((16,16),-1,dtype="<i4"),
+            "authority":np.zeros((16,16),dtype=np.uint8),
+            "unknown":np.zeros((16,16),dtype=np.uint8),
+        }
+    original=rows()
+    edited=rows()
+    edited["owners"][3,5]=65_536
+    edited["authority"][3,5]=2
+    edited["rgba"][3,5]=[120,20,10,255]
+    binary=_pack(original,edited,16)
+    decoded=reopen_native_edited_puppet_rasters_v1(
+        binary,resolution=16,face_count=65_537,
+    )
+    assert decoded["edited_front_face_i32"][3,5]==65_536
+    with pytest.raises(QualificationError,match="FACE_OWNER"):
+        reopen_native_edited_puppet_rasters_v1(
+            binary,resolution=16,face_count=65_536,
+        )

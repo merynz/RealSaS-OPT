@@ -125,6 +125,7 @@ def test_loader_calls_official_pipeline_and_genuine_adapter_slots(tmp_path, monk
             return cls()
 
         def __init__(self):
+            self.scheduler = object()
             self.unet = FakeModule()
             self.unet.config = SimpleNamespace(
                 in_channels=4, out_channels=4, cross_attention_dim=2048,
@@ -144,16 +145,26 @@ def test_loader_calls_official_pipeline_and_genuine_adapter_slots(tmp_path, monk
         def enable_vae_slicing(self):
             record.append(("enable_vae_slicing", None))
 
-    monkeypatch.setattr(
-        m, "_verified_upstream_module",
-        lambda *_args, **_kwargs: SimpleNamespace(
-            MVAdapterI2MVSDXLPipeline=FakePipe,
-        ),
-    )
+    class FakeShift:
+        @staticmethod
+        def from_scheduler(_scheduler, **kwargs):
+            record.append(("shift_snr", kwargs))
+            return object()
+
+    def modules(name, **_kwargs):
+        if name == "mvadapter.schedulers.scheduling_shift_snr":
+            return SimpleNamespace(ShiftSNRScheduler=FakeShift)
+        return SimpleNamespace(MVAdapterI2MVSDXLPipeline=FakePipe)
+
+    monkeypatch.setattr(m, "_verified_upstream_module", modules)
     loaded = m.load_official_pretrained_i2mv_stage_b_v1(
         pin, device="cpu", dtype="float32",
     )
     assert isinstance(loaded, FakePipe)
+    assert ("shift_snr", {
+        "shift_mode":"interpolated", "shift_scale":8.0,
+        "scheduler_class":None,
+    }) in record
     assert ("init_custom_adapter", {"num_views": 6}) in record
     assert any(k == "load_custom_adapter"
                and v[1] == {"weight_name": m.ADAPTER_WEIGHT}

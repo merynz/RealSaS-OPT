@@ -150,3 +150,22 @@ def test_source_graphics_seeded_trainer_routes_same_H_without_stealing_truth(
     assert report["independent_source_truth_inferred"] is False
     assert report["product_release_qualified"] is False
     assert result.total_loss.isfinite()
+
+
+@pytest.mark.parametrize("case", [
+    "test_partition_counts_source_qualified_groups_once",
+    "test_partition_rejects_missing_teacher_and_false_total",
+    "test_conflict_projection_changes_only_shared_gradients_and_preserves_total_descent",
+    "test_no_conflict_exactly_preserves_vanilla_weighted_sum",
+    "test_sparse_single_qualified_family_does_not_invent_negative_teacher",
+    "test_wrong_gradient_partition_aborts_before_optimizer_mutation",
+    "test_memory_cap_and_nonproduct_scope_fail_closed",
+    "test_routing_cadence_and_vanilla_default_do_not_probe_graph",
+])
+def test_multitask_router_extended_properties_in_mandatory_source_gate(case):
+    # Source court's explicit CI command runs this file, so the independent
+    # pure-router regressions must also execute, not merely exist in-tree.
+    from tests.models import (
+        test_rss_vnext_product_multitask_gradient_control_v1 as cases,
+    )
+    getattr(cases, case)()

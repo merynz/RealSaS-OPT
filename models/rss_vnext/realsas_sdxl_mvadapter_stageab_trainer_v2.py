@@ -202,6 +202,11 @@ class SourceSDXLStageABOptimizerV2:
         self.pipeline=mv_pipeline
         self.heads=task_b_heads
         self.amp_dtype=amp_dtype
+        # LambdaLR closures are not restored by scheduler.state_dict().
+        # A different warmup duration would silently change the learning
+        # trajectory even if model, AdamW state and parameter ABI agree.
+        self.base_learning_rate=float(lr)
+        self.warmup_steps=warmup_steps
         self.step=0
         self.vae.requires_grad_(False)
         self.vae.eval()
@@ -419,6 +424,9 @@ class SourceSDXLStageABOptimizerV2:
             "training_noise_schedule_sha256":self.training_noise_schedule_sha256,
             "guidance_policy_sha256":self.guidance_policy_sha256,
             "optimizer_binding":self.optimizer_binding,
+            "base_learning_rate":self.base_learning_rate,
+            "warmup_steps":self.warmup_steps,
+            "amp_dtype":self.amp_dtype,
             "unet_trainable":{n:p.detach().cpu().contiguous()
                                for n,p in self.unet.named_parameters()
                                if p.requires_grad},
@@ -471,6 +479,9 @@ class SourceSDXLStageABOptimizerV2:
             or data.get("guidance_policy_sha256")
                 !=self.guidance_policy_sha256
             or data.get("optimizer_binding")!=self.optimizer_binding
+            or data.get("base_learning_rate")!=self.base_learning_rate
+            or data.get("warmup_steps")!=self.warmup_steps
+            or data.get("amp_dtype")!=self.amp_dtype
             or type(data.get("step")) is not int
             or data["step"]<1
         ):

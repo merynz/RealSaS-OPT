@@ -17,7 +17,7 @@ from torch import Tensor, nn
 
 SCHEMA = "RealSaS.RSSvNext.ProductMultitaskGradientRouting.v1"
 MODES = frozenset({"WEIGHTED_SUM", "BOUNDED_SHARED_PCGRAD"})
-FAMILIES = ("GEOMETRY", "SEMANTIC", "GRAPHICS", "JOINT_RENDER", "MECHANICS", "POSED_MSTAR_RENDER", "POSED_LAYER_CLEARANCE", "CONTROL_INTERVENTION")
+FAMILIES = ("GEOMETRY", "SEMANTIC", "GRAPHICS", "JOINT_RENDER", "MECHANICS", "POSED_MSTAR_RENDER", "POSED_LAYER_CLEARANCE", "CONTROL_INTERVENTION", "OPEN_PIN_SUPPORT")
 # Ownership is explicit. Introducing additional owners requires code review.
 SHARED_OWNERS = (
     "iris.scene.",
@@ -71,6 +71,7 @@ def admitted_product_task_losses_v1(
     mstar_pose_raster_weight: float = 0.,
     native_layer_clearance_weight: float = 0.,
     native_control_intervention_weight: float = 0.,
+    open_pin_vertex_weight: float = 0.,
 ) -> dict[str, Tensor]:
     """Partition EXACTLY the qualified product total; never duplicate a subloss.
 
@@ -90,7 +91,7 @@ def admitted_product_task_losses_v1(
             component_udf_weight, graphics_rgb_weight,
             graphics_joint_ray_weight, anchor_face_weight,
             mstar_pose_raster_weight, native_layer_clearance_weight,
-            native_control_intervention_weight,
+            native_control_intervention_weight, open_pin_vertex_weight,
         )
     ):
         raise ValueError("RSS_VNEXT_MULTITASK_LOSS_WEIGHTS_INVALID")
@@ -161,6 +162,14 @@ def admitted_product_task_losses_v1(
             raise RuntimeError("RSS_VNEXT_MULTITASK_UNWEIGHTED_CONTROL_INTERVENTION")
         groups["CONTROL_INTERVENTION"] = native_control_intervention_weight * checked(
             control_loss,"source_native_control_intervention",
+        )
+
+    pin_loss = getattr(result,"product_open_pin_vertex_loss",None)
+    if pin_loss is not None:
+        if open_pin_vertex_weight <= 0:
+            raise RuntimeError("RSS_VNEXT_MULTITASK_UNWEIGHTED_OPEN_PIN")
+        groups["OPEN_PIN_SUPPORT"] = open_pin_vertex_weight * checked(
+            pin_loss,"source_native_open_pin_vertex",
         )
 
     mechanical = []

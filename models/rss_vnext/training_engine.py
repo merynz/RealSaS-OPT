@@ -3512,6 +3512,9 @@ class RSSvNextStructuralTrainer:
         if result.product_mstar_pose_raster_loss is not None or not self.allow_sparse_qualified_source_batches:
             add("posed_mstar_native_raster",result.product_mstar_pose_raster_loss,
                 self.product_mstar_pose_raster_weight)
+        if result.product_native_layer_clearance_loss is not None or not self.allow_sparse_qualified_source_batches:
+            add("source_native_layer_clearance",result.product_native_layer_clearance_loss,
+                self.product_native_layer_clearance_weight)
         if not admitted:
             raise RuntimeError("RSS_VNEXT_SEEDED_GRADIENT_AUDIT_NO_LIVE_OBJECTIVE")
         report = audit_rss_vnext_gradient_interference_v1(
@@ -3562,6 +3565,7 @@ class RSSvNextStructuralTrainer:
                 graphics_joint_ray_weight=self.product_joint_ray_weight,
                 anchor_face_weight=self.product_anchor_face_weight,
                 mstar_pose_raster_weight=self.product_mstar_pose_raster_weight,
+                native_layer_clearance_weight=self.product_native_layer_clearance_weight,
             )
             route = prepare_product_gradient_route_v1(
                 named_parameters=tuple(self.model.named_parameters()),
@@ -3663,11 +3667,13 @@ class RSSvNextStructuralTrainer:
                     component_udf_weight=self.component_udf_weight,
                     anchor_face_weight=self.product_anchor_face_weight,
                     mstar_pose_raster_weight=self.product_mstar_pose_raster_weight,
+                    native_layer_clearance_weight=self.product_native_layer_clearance_weight,
                 )
             ),
             "compiler_acceptance_gaps": list(
                 self.product_curriculum.compiler_acceptance_gaps(
                     mstar_pose_raster_weight=self.product_mstar_pose_raster_weight,
+                    native_layer_clearance_weight=self.product_native_layer_clearance_weight,
                 )
             ),
             "model_release_ready": False,
@@ -3761,6 +3767,9 @@ class RSSvNextStructuralTrainer:
             "graphics_rgb_registry_sha256": self.graphics_rgb_registry_sha256,
             "source_field_registry_sha256": self.source_field_registry_sha256,
             "realsas_joint_registry_sha256": self.realsas_joint_registry_sha256,
+            **({"native_layer_clearance_registry_sha256":
+                self.native_layer_clearance_registry_sha256}
+               if self.product_native_layer_clearance_weight>0 else {}),
             **({
                 "pose_raster_registry_sha256":self.pose_raster_registry_sha256,
                 "pose_raster_backend_id":self.pose_raster_backend_id,
@@ -3804,6 +3813,11 @@ class RSSvNextStructuralTrainer:
                 != self.seeded_tessa_driver.policy_sha256
         ):
             raise ValueError("RSS_VNEXT_TRAIN_SEEDED_CHECKPOINT_REGISTRY_OR_PHASE_DRIFT")
+        if self.product_native_layer_clearance_weight>0 and (
+            data.get("native_layer_clearance_registry_sha256") !=
+            self.native_layer_clearance_registry_sha256
+        ):
+            raise ValueError("RSS_VNEXT_NATIVE_LAYER_CLEARANCE_CHECKPOINT_REGISTRY_DRIFT")
         if self.product_mstar_pose_raster_weight>0 and (
             data.get("pose_raster_registry_sha256")!=self.pose_raster_registry_sha256
             or data.get("pose_raster_backend_id")!=self.pose_raster_backend_id

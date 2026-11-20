@@ -53,7 +53,8 @@ def _rig_case(monkeypatch):
              anchor_weight=0.,anchor_registry=None,sparse=False,
              semantic_weights=None,role_registry=None,
              graphics_weight=0.,graphics_registry=None,
-             control_weight=0.,control_registry=None):
+             control_weight=0.,control_registry=None,
+             pin_weight=0.,pin_registry=None):
         if weights is None:
             weights=ProductSeededAXISMIRAWeightsV1(axis_program=1.)
         return RSSvNextStructuralTrainer(
@@ -86,6 +87,8 @@ def _rig_case(monkeypatch):
             trusted_graphics_rgb_registry=graphics_registry,
             product_native_control_intervention_weight=control_weight,
             trusted_product_native_control_intervention_registry=control_registry,
+            product_open_pin_vertex_weight=pin_weight,
+            trusted_product_open_pin_vertex_registry=pin_registry,
         )
     return net,batch,make,receipt,key
 

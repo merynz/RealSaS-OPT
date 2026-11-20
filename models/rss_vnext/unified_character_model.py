@@ -33,6 +33,7 @@ from .animation_ready_mesh import (
 )
 from .tessa_incremental_decode_v1 import decode_next_token_v1
 from .attachment_face_correspondence_v1 import RSSvNextSocketFaceCorrespondenceHeadV1
+from .product_open_pin_vertex_head_v1 import OpenPinVertexHeadV1
 from .dynamic_refinement import RSSvNextDynamicRefinement, RSSvNextDynamicRefinementConfig
 from .semantic_structure import RSSvNextGenericRegionStructure
 from .early_semantic_field import RSSvNextEarlySemanticField
@@ -562,6 +563,10 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         self.anchor_face_correspondence = RSSvNextSocketFaceCorrespondenceHeadV1(
             field_width=h, axis_width=cfg.control_hidden_dim,
             region_slots=cfg.region_slots, hidden_width=cfg.relation_width,
+        )
+        self.open_pin_vertex = OpenPinVertexHeadV1(
+            field_width=h, axis_width=cfg.control_hidden_dim,
+            hidden_width=cfg.relation_width,
         )
         self.mira = RSSvNextSkinCoupler(cfg)
         self.mesh_bridge = RSSvNextAnimationReadyMesh(self.iris, cfg.tessa)
@@ -1396,6 +1401,7 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         flexicubes_layers: tuple[RSSvNextSemanticLayerSpec,...] | None = None,
         flexicubes_sparse_resolution: tuple[int,int,int] | None = None,
         hybrid_open_policy: ProductHybridOpenM0PolicyV1 | None = None,
+        emit_unqualified_open_pin_research_candidate: bool = False,
     ) -> dict:
         """Free-running constrained topology and mechanical proposal.
 
@@ -1405,6 +1411,12 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
         """
         if self.training:
             raise RuntimeError("RSS_VNEXT_TEACHER_FREE_REQUIRES_EVAL")
+        # Default OFF: newly initialized/open-pin-untrained weights must not
+        # silently become product-facing candidate evidence. Explicit opt-in
+        # below is RESEARCH ONLY, never release or solver admission.
+        if (type(emit_unqualified_open_pin_research_candidate) is not bool
+            or (emit_unqualified_open_pin_research_candidate and not generate_controls)):
+            raise ValueError("RSS_VNEXT_OPEN_PIN_RESEARCH_REQUIRES_CONTROLS")
         if camera_features is None and generate_controls and (
             generated_rgba is None or generated_cameras is None
             or generated_normals is None or generation_checkpoint_sha256 is None
@@ -1669,6 +1681,15 @@ class RSSvNextUnifiedCharacterModel(nn.Module):
                     else None
                 ),
             )
+            if emit_unqualified_open_pin_research_candidate:
+                # Explicit diagnostic only. Even a non-empty candidate does
+                # not assert trained/calibrated pin support or XPBD authority.
+                result["open_pin_vertex_candidate"] = self.open_pin_vertex(
+                    mesh=mesh,axis_hidden=control_out["hidden"],axis_sequence=seq,
+                )
+                result["open_pin_vertex_authority"] = (
+                    "UNQUALIFIED_RESEARCH_ONLY_NOT_PRODUCT_RELEASE"
+                )
             if bool((seq.kind_ids == int(RigTokenKindV6.SKIN_CODE)).any()):
                 mechanics_h = (
                     mesh.mechanics_local_features

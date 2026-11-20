@@ -258,3 +258,37 @@ def test_control_intervention_launch_policy_and_resume_on_live_seeded_trainer(
     court.test_product_seeded_trainer_exposes_conditional_truth_and_pins_resume(
         monkeypatch, tmp_path,
     )
+
+
+@pytest.mark.parametrize("test_name",(
+    "test_open_hem_vertex_head_has_true_indexed_candidates_and_gradients",
+    "test_native_source_pin_receipt_tamper_and_unknown_labels_rejected",
+    "test_native_open_pin_held_component_cannot_change_without_source_reindex",
+    "test_editor_pin_proposal_is_never_physics_approval",
+    "test_open_hem_boundary_excludes_manifold_interior_and_rejects_mixed_component",
+    "test_ninth_pin_support_family_matches_exact_weighted_total",
+))
+def test_source_native_open_pin_head_in_required_model_ci(test_name):
+    from tests.models import test_rss_vnext_open_pin_vertex_head_v1 as court
+    getattr(court,test_name)()
+
+
+def test_open_pin_source_checkpoint_and_sparse_truth_on_live_seeded_trainer(
+    monkeypatch,tmp_path,
+):
+    from tests.models import test_rss_vnext_open_pin_vertex_head_v1 as court
+    court.test_real_seeded_pin_head_policy_never_invents_labels_and_is_checkpoint_pinned(
+        monkeypatch,tmp_path,
+    )
+
+
+@pytest.mark.parametrize("test_name",(
+    "test_neural_open_pins_become_reviewable_canonical_ids_not_solver_authority",
+    "test_exact_mstar_geometry_face_and_parent_hash_cannot_be_silently_rebound",
+    "test_cross_component_pin_body_or_no_face_abstains_not_fabricates_xpbd",
+))
+def test_neural_open_pin_editor_preview_uses_exact_compiler_mstar_identity(
+    test_name,
+):
+    from tests.models import test_rss_vnext_neural_open_pin_editor_review_v1 as court
+    getattr(court,test_name)()

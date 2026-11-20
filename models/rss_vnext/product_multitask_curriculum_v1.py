@@ -33,6 +33,7 @@ class ProductSeededCurriculumV1:
         mstar_pose_raster_weight: float = 0.,
         native_layer_clearance_weight: float = 0.,
         native_control_intervention_weight: float = 0.,
+        open_pin_vertex_weight: float = 0.,
     ) -> None:
         if self.stage not in STAGES:
             raise ValueError("RSS_VNEXT_CURRICULUM_STAGE_INVALID")
@@ -50,6 +51,11 @@ class ProductSeededCurriculumV1:
             or axis_mira_weights.source_skin <= 0
         ):
             raise ValueError("RSS_VNEXT_CURRICULUM_CONTROL_INTERVENTION_NEEDS_NATIVE_POSES")
+        if open_pin_vertex_weight > 0 and (
+            not seeded_mode or not axis_mira_weights.enabled
+            or anchor_face_weight <= 0
+        ):
+            raise ValueError("RSS_VNEXT_CURRICULUM_OPEN_PIN_NEEDS_SOURCE_ANCHOR")
         if self.stage == "COMPATIBILITY_UNSCHEDULED":
             return
         if not seeded_mode:
@@ -98,6 +104,7 @@ class ProductSeededCurriculumV1:
         mstar_pose_raster_weight: float = 0.,
         native_layer_clearance_weight: float = 0.,
         native_control_intervention_weight: float = 0.,
+        open_pin_vertex_weight: float = 0.,
     ) -> dict[str, Mapping[str, str]]:
         """Loss->foundry witness; source observable != generated hypothesis.
 
@@ -163,6 +170,11 @@ class ProductSeededCurriculumV1:
                 "authority": "SOURCE_NATIVE_POSE_ZBUFFER_RGB_ALPHA_CAMERA_AND_MSTAR_ADDRESS",
                 "purpose": "Canonical-material first-hit M* posed raster; no teacher RGB into H",
             }
+        if open_pin_vertex_weight > 0:
+            result["source_native_open_hem_pin_vertices"] = {
+                "authority": "INDEPENDENT_NATIVE_OPEN_HEM_PINS_WITH_HOST_INTERVENTION",
+                "purpose": "Per-vertex M* pin support; no model-nearest labels or automatic XPBD",
+            }
         if native_control_intervention_weight > 0:
             result["source_native_one_control_intervention"] = {
                 "authority": "SOURCE_AUTHORED_ONE_CONTROL_BASELINE_AND_RESPONSE_POSES",
@@ -212,6 +224,7 @@ class ProductSeededCurriculumV1:
         self, *, mstar_pose_raster_weight: float = 0.,
         native_layer_clearance_weight: float = 0.,
         native_control_intervention_weight: float = 0.,
+        open_pin_vertex_weight: float = 0.,
     ) -> tuple[str, ...]:
         """Not extra source truths. Do not silently train what cannot be known."""
         return (

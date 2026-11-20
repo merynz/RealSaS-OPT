@@ -187,7 +187,7 @@ def reopen_native_edited_puppet_rasters_v1(
     if (
         type(binary) is not bytes or len(binary)>MAX_BUNDLE_BYTES
         or type(resolution) is not int or not 16 <= resolution <= 2048
-        or type(face_count) is not int or not 1 <= face_count <= 4096
+        or type(face_count) is not int or not 1 <= face_count <= 2**31 - 1
         or not binary.startswith(MAGIC)
     ):
         raise QualificationError("RSS_EDIT_CPP_BUNDLE_MAGIC_OR_BUDGET")

@@ -29,6 +29,9 @@ from .training_optimizer_ownership_v1 import qualify_rss_vnext_optimizer_ownersh
 SCHEMA = "RealSaS.RSSvNext.TrainingPhaseHandoff.v1"
 TRANSITIONS = frozenset({
     ("SLRM", "STRUCTURAL"),
+    # Preserve the learned same-H S-LRM state BEFORE fitting the embedded
+    # codec, then carry the full reconstruction state into structural.
+    ("SLRM", "MIRA_CODEC"),
     ("MIRA_CODEC", "STRUCTURAL"),
     ("STRUCTURAL", "STRUCTURAL"),
 })

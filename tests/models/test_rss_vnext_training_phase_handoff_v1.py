@@ -128,7 +128,7 @@ def test_handoff_refuses_dirty_destination_optimizer_and_unsupported_transition(
     with pytest.raises(ValueError, match="DESTINATION_OPTIMIZER_NOT_FRESH"):
         _import(path, target, target_opt, receipt)
     with pytest.raises(ValueError, match="TRANSITION_NOT_ALLOWED"):
-        _export(path, source, source_opt, target="MIRA_CODEC")
+        _export(path, source, source_opt, source="STRUCTURAL", target="MIRA_CODEC")
     with pytest.raises(ValueError, match="SOURCE_POLICY_INVALID"):
         _export(path, source, source_opt, step=0)
 
@@ -184,3 +184,38 @@ def test_structural_phase_transition_restarts_optimizer_and_binds_resume_origin(
     )
     assert independent.load_checkpoint(resume_path) == 4
     assert independent.global_step == 1
+
+def test_slrm_to_mira_codec_to_structural_preserves_earlier_h_and_fresh_optimizer(tmp_path):
+    """Macro C -> D -> E transports ONE reconstruction state, never moments."""
+    source = nn.Linear(4, 2)
+    source_opt = torch.optim.AdamW(source.parameters(), lr=1e-3)
+    source(torch.randn(3, 4)).square().sum().backward()
+    source_opt.step()
+    slrm_to_codec = tmp_path / "slrm-to-codec.pt"
+    c = _export(slrm_to_codec, source, source_opt,
+                source="SLRM", target="MIRA_CODEC")
+    codec_model = nn.Linear(4, 2)
+    codec_optimizer = torch.optim.AdamW(codec_model.parameters(), lr=5e-4)
+    accepted = import_rss_vnext_training_phase_handoff_v1(
+        slrm_to_codec, model=codec_model, optimizer=codec_optimizer,
+        target_kind="MIRA_CODEC", expected_source_kind="SLRM",
+        expected_source_objective_policy_sha256=c.source_objective_policy_sha256,
+        expected_source_optimizer_binding_sha256=c.source_optimizer_binding_sha256,
+        dataset_manifest_sha256=CORPUS, architecture_id="test-model",
+        architecture_digest=ARCH,
+    )
+    assert accepted.model_state_sha256 == c.model_state_sha256
+    assert all(torch.equal(a,b) for a,b in zip(source.parameters(),codec_model.parameters()))
+    assert not codec_optimizer.state
+    # A changed codec later contributes to the SAME final model state.
+    codec_model(torch.randn(3,4)).square().sum().backward()
+    codec_optimizer.step()
+    codec_to_structural=tmp_path/"codec-to-structural.pt"
+    d=_export(codec_to_structural,codec_model,codec_optimizer,
+              source="MIRA_CODEC",target="STRUCTURAL")
+    final=nn.Linear(4,2)
+    final_optimizer=torch.optim.AdamW(final.parameters(),lr=1e-4)
+    actual=_import(codec_to_structural,final,final_optimizer,d)
+    assert actual.source_kind=="MIRA_CODEC"
+    assert all(torch.equal(a,b) for a,b in zip(codec_model.parameters(),final.parameters()))
+    assert not final_optimizer.state

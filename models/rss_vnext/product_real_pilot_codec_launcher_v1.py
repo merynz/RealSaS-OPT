@@ -10,13 +10,18 @@ starts a fresh optimizer. Source 3D truth is loss-only, never model input.
 No asset selection, no synthetic rig labels and no work at import time.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 import math
 
 import torch
 
+from .product_real_pilot_resume_v1 import (
+    PilotDEPhaseResumeIdentityV1,
+    pilot_phase_plan_sha256_v1, read_pilot_de_resume_v1,
+    write_pilot_de_resume_v1,
+)
 from .training_engine import architecture_digest
 from .unified_character_model import RSSvNextUnifiedCharacterModel
 from .training_phase_handoff_v1 import (
@@ -63,6 +68,8 @@ class PreparedPilotCodecPhaseV1:
     plan:PilotEmbeddedCodecPlanV1
     prior_source_model_sha256:str
     source_cohort_sha256:str
+    verified_resume_step:int|None=None
+    verified_resume_cursor:int=0
 
 
 def build_real_pilot_embedded_codec_phase_v1(
@@ -157,21 +164,81 @@ def build_real_pilot_embedded_codec_phase_v1(
     )
 
 
+def _codec_pilot_resume_identity_v1(
+    phase:PreparedPilotCodecPhaseV1,
+)->PilotDEPhaseResumeIdentityV1:
+    return PilotDEPhaseResumeIdentityV1(
+        stage="D_EMBEDDED_MIRA_CODEC",
+        cohort_sha256=phase.source_cohort_sha256,
+        plan_sha256=pilot_phase_plan_sha256_v1(phase.plan),
+        incoming_model_state_sha256=phase.prior_source_model_sha256,
+        optimizer_binding_sha256=phase.trainer.optimizer_ownership.binding_sha256,
+        objective_policy_sha256=phase.trainer.phase_objective_policy_sha256,
+    )
+
+
+def save_real_pilot_embedded_codec_resume_v1(
+    phase:PreparedPilotCodecPhaseV1,
+    *,checkpoint_path:str|Path,sampler_cursor:int,
+)->Path:
+    """Persist real codec optimizer/RNG, plus immutable pilot schedule receipt."""
+    current=phase.trainer.step
+    if not 0<=current<=phase.plan.optimizer_steps:
+        raise RuntimeError("RSS_VNEXT_PILOT_CODEC_RESUME_PROGRESS_INVALID")
+    identity=_codec_pilot_resume_identity_v1(phase)
+    identity.validate()
+    phase.trainer.save_checkpoint(checkpoint_path)
+    return write_pilot_de_resume_v1(
+        checkpoint_path,identity=identity,step=current,
+        sampler_cursor=sampler_cursor,
+    )
+
+
+def load_real_pilot_embedded_codec_resume_v1(
+    phase:PreparedPilotCodecPhaseV1,
+    *,checkpoint_path:str|Path,
+)->PreparedPilotCodecPhaseV1:
+    """Verify sidecar & upstream C lineage BEFORE touching D's trainable state."""
+    if phase.trainer.step!=0 or phase.trainer.optimizer.state:
+        raise RuntimeError("RSS_VNEXT_PILOT_CODEC_RESUME_DESTINATION_NOT_FRESH")
+    target,cursor=read_pilot_de_resume_v1(
+        checkpoint_path,identity=_codec_pilot_resume_identity_v1(phase),
+        max_steps=phase.plan.optimizer_steps,
+    )
+    phase.trainer.load_checkpoint(checkpoint_path)
+    if phase.trainer.step!=target:
+        raise RuntimeError("RSS_VNEXT_PILOT_CODEC_RESUME_STEP_DRIFT")
+    return replace(
+        phase,verified_resume_step=target,verified_resume_cursor=cursor,
+    )
+
+
+def export_real_pilot_embedded_codec_handoff_v1(
+    phase:PreparedPilotCodecPhaseV1, *,path:str|Path,
+):
+    """D -> E cannot happen until all planned D optimizer updates finished."""
+    if phase.trainer.step!=phase.plan.optimizer_steps:
+        raise RuntimeError("RSS_VNEXT_PILOT_CODEC_UNFINISHED_D_TO_E")
+    return phase.trainer.export_phase_handoff(path)
+
+
 def execute_real_pilot_embedded_codec_phase_v1(
     phase:PreparedPilotCodecPhaseV1,*,
     examples:Iterable[RealPilotTrainingEnvelopeV1],
     source_index:Mapping[str,RealPilotAssetV1],
     cohort:RealPilotCohortReceiptV1,
 )->list[dict[str,object]]:
+    current=phase.trainer.step
     if (
         phase.source_cohort_sha256!=cohort.cohort_sha256
-        or phase.trainer.step!=0
+        or not 0<=current<phase.plan.optimizer_steps
+        or (current>0 and phase.verified_resume_step!=current)
     ):
         raise ValueError("RSS_VNEXT_PILOT_CODEC_RESUME_REQUIRES_CHECKPOINT")
     results=run_source_qualified_pilot_updates_v1(
         trainer=phase.trainer,staged_examples=examples,
         source_index=source_index,cohort=cohort,
-        max_steps=phase.plan.optimizer_steps,
+        max_steps=phase.plan.optimizer_steps-current,
     )
     if phase.trainer.step!=phase.plan.optimizer_steps:
         raise RuntimeError("RSS_VNEXT_PILOT_CODEC_OPTIMIZER_STEP_DRIFT")
@@ -182,4 +249,7 @@ __all__=[
     "PilotEmbeddedCodecPlanV1","PreparedPilotCodecPhaseV1",
     "build_real_pilot_embedded_codec_phase_v1",
     "execute_real_pilot_embedded_codec_phase_v1",
+    "save_real_pilot_embedded_codec_resume_v1",
+    "load_real_pilot_embedded_codec_resume_v1",
+    "export_real_pilot_embedded_codec_handoff_v1",
 ]

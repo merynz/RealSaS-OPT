@@ -281,6 +281,102 @@ def load_official_pretrained_i2mv_stage_b_v1(
     return pipe
 
 
+
+def run_official_pretrained_six_rgb_v1(
+    pin: StrongSDXLMVAdapterPinV1, *,
+    reference_canonical_png: str | Path,
+    prompt: str,
+    device: str = "cuda",
+    dtype: Any = None,
+    seed: int = 0,
+    inference_steps: int = 50,
+    image_size: int = 768,
+) -> tuple[tuple[Any, ...], dict[str, Any]]:
+    """Full-strength six-view reference inference using actual upstream weights.
+
+    This is NOT BUSTED Stage B E2E: the upstream checkpoint consumes ONE
+    canonical image and outputs six RGB views, not two canonical images plus
+    trained RGB/normal heads.  It is a diagnostic of real pretrained capability.
+    """
+    if (
+        type(prompt) is not str or not prompt.strip()
+        or type(device) is not str or not device
+        or type(seed) is not int or not 0 <= seed < 2**63
+        or type(inference_steps) is not int or not 1 <= inference_steps <= 100
+        or image_size not in (768, 1024)
+    ):
+        raise ValueError("RSS_VNEXT_PRETRAINED_I2MV_EXECUTION_POLICY")
+    import torch
+    from PIL import Image
+
+    if dtype is None:
+        dtype = torch.float16 if device.startswith("cuda") else torch.float32
+    source = Path(reference_canonical_png).expanduser()
+    if not source.is_file() or source.suffix.lower() != ".png":
+        raise ValueError("RSS_VNEXT_PRETRAINED_CANONICAL_REFERENCE_REQUIRED")
+    with Image.open(source) as file:
+        original = file.convert("RGBA")
+        white = Image.new("RGBA", original.size, (255, 255, 255, 255))
+        white.alpha_composite(original)
+        reference = white.convert("RGB").resize(
+            (image_size, image_size), resample=Image.Resampling.LANCZOS,
+        )
+    pipe = load_official_pretrained_i2mv_stage_b_v1(
+        pin, device=device, dtype=dtype,
+    )
+    camera_lib = _verified_upstream_module(
+        "mvadapter.utils.mesh_utils", pin=pin,
+    )
+    geometry_lib = _verified_upstream_module(
+        "mvadapter.utils.geometry", pin=pin,
+    )
+    angles = (0, 45, 90, 180, 270, 315)
+    cameras = camera_lib.get_orthogonal_camera(
+        elevation_deg=[0] * 6,
+        distance=[1.8] * 6,
+        left=-0.55, right=0.55, bottom=-0.55, top=0.55,
+        azimuth_deg=[x - 90 for x in angles],
+        device=device,
+    )
+    plucker = geometry_lib.get_plucker_embeds_from_cameras_ortho(
+        cameras.c2w, [1.1] * 6, image_size,
+    )
+    controls = ((plucker + 1.0) / 2.0).clamp(0, 1)
+    result = pipe(
+        prompt,
+        height=image_size, width=image_size,
+        num_inference_steps=inference_steps,
+        guidance_scale=3.0,
+        num_images_per_prompt=6,
+        control_image=controls,
+        control_conditioning_scale=1.0,
+        reference_image=reference,
+        reference_conditioning_scale=1.0,
+        generator=torch.Generator(device=device).manual_seed(seed),
+    )
+    images = tuple(result.images)
+    if len(images) != 6 or any(
+        not isinstance(im, Image.Image)
+        or im.size != (image_size, image_size)
+        for im in images
+    ):
+        raise RuntimeError("RSS_VNEXT_PRETRAINED_I2MV_VIEW_COUNT_OR_SIZE_DRIFT")
+    return images, {
+        "schema": SCHEMA,
+        "authority": AUTHORITY,
+        "model_weights_sha256": pin.adapter_weight_sha256,
+        "reference_is_single_canonical_image": True,
+        "six_rgb_images": True,
+        "six_trained_normal_images": False,
+        "two_original_inputs_conditioned": False,
+        "source_or_product_truth": False,
+        "product_release_qualified": False,
+        "azimuth_deg": list(angles),
+        "seed": seed,
+        "image_size": image_size,
+    }
+
+
 def assert_pretrained_is_not_final_stage_ab_v1(
     *, canonical_trained_for_two_sources: bool,
     multiview_trained_for_two_sources: bool,
@@ -308,5 +404,6 @@ __all__ = [
     "StrongSDXLMVAdapterPinV1", "pinned_source_tree_sha256_v1",
     "verify_strong_pretrained_snapshots_v1", "load_pinned_sdxl_stage_a_unet_v1",
     "load_official_pretrained_i2mv_stage_b_v1",
+    "run_official_pretrained_six_rgb_v1",
     "assert_pretrained_is_not_final_stage_ab_v1",
 ]

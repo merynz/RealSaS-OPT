@@ -125,7 +125,7 @@ def test_loader_calls_official_pipeline_and_genuine_adapter_slots(tmp_path, monk
             return cls()
 
         def __init__(self):
-            self.scheduler = object()
+            self.scheduler = SimpleNamespace(config={"beta_start":0.00085})
             self.unet = FakeModule()
             self.unet.config = SimpleNamespace(
                 in_channels=4, out_channels=4, cross_attention_dim=2048,
@@ -156,15 +156,32 @@ def test_loader_calls_official_pipeline_and_genuine_adapter_slots(tmp_path, monk
             return SimpleNamespace(ShiftSNRScheduler=FakeShift)
         return SimpleNamespace(MVAdapterI2MVSDXLPipeline=FakePipe)
 
+    class FakeDDPM:
+        @classmethod
+        def from_config(cls, config):
+            record.append(("ddpm_from_unshifted_base", dict(config)))
+            return SimpleNamespace(config=dict(config))
+
+    import sys
+    monkeypatch.setitem(
+        sys.modules,"diffusers",
+        SimpleNamespace(DDPMScheduler=FakeDDPM),
+    )
     monkeypatch.setattr(m, "_verified_upstream_module", modules)
+    monkeypatch.setattr(
+        m,"verify_official_mvadapter_weight_transfer_v2",
+        lambda **kwargs: record.append(("trained_byte_transfer_verified",kwargs)),
+    )
     loaded = m.load_official_pretrained_i2mv_stage_b_v1(
         pin, device="cpu", dtype="float32",
     )
     assert isinstance(loaded, FakePipe)
     assert ("shift_snr", {
         "shift_mode":"interpolated", "shift_scale":8.0,
-        "scheduler_class":None,
+        "scheduler_class":FakeDDPM,
     }) in record
+    assert ("ddpm_from_unshifted_base",{"beta_start":0.00085}) in record
+    assert any(k=="trained_byte_transfer_verified" for k,v in record)
     assert ("init_custom_adapter", {"num_views": 6}) in record
     assert any(k == "load_custom_adapter"
                and v[1] == {"weight_name": m.ADAPTER_WEIGHT}
@@ -188,4 +205,49 @@ def test_reference_loader_cannot_promote_to_trained_paired_stage_ab():
             canonical_trained_for_two_sources=1,
             multiview_trained_for_two_sources=False,
             multiview_trained_for_rgb_and_normals=False,
+        )
+
+
+def test_official_trained_mv_attention_replay_is_not_silent_non_strict(tmp_path):
+    import torch
+    from torch import nn
+    from safetensors.torch import save_file
+
+    class TinyUnet(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.q_mv=nn.Parameter(torch.tensor([.125,.25]))
+            self.k_ref=nn.Parameter(torch.tensor([.625]))
+
+    class TinyCamera(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.camera_weight=nn.Parameter(torch.tensor([.875]))
+
+    unet=TinyUnet()
+    cond_encoder=TinyCamera()
+    pipe=SimpleNamespace(unet=unet,cond_encoder=cond_encoder)
+    saved={
+        **{k:v.detach().clone() for k,v in unet.state_dict().items()},
+        **{k:v.detach().clone() for k,v in cond_encoder.state_dict().items()},
+    }
+    ckpt=tmp_path/"adapter.safetensors"
+    save_file(saved,str(ckpt))
+    proof=m.verify_official_mvadapter_weight_transfer_v2(
+        pipe=pipe,checkpoint_file=ckpt,
+    )
+    assert proof=={"native_attention_tensors":2,"camera_encoder_tensors":1}
+    with torch.no_grad():
+        unet.k_ref.add_(.125)
+    with pytest.raises(RuntimeError,match="WEIGHT_TRANSFER_DRIFT"):
+        m.verify_official_mvadapter_weight_transfer_v2(
+            pipe=pipe,checkpoint_file=ckpt,
+        )
+    with torch.no_grad():
+        unet.k_ref.sub_(.125)
+    missing=tmp_path/"incomplete.safetensors"
+    save_file({"q_mv":saved["q_mv"],"camera_weight":saved["camera_weight"]},str(missing))
+    with pytest.raises(RuntimeError,match="PRETRAINED_KEY_MISMATCH"):
+        m.verify_official_mvadapter_weight_transfer_v2(
+            pipe=pipe,checkpoint_file=missing,
         )

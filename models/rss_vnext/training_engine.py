@@ -150,6 +150,10 @@ class RSSvNextStructuralTrainingBatch:
     product_multiview_checkpoint_sha256: str = ""
     product_generation_checkpoint_sha256: str = ""
     product_conditioning_admission_key: str = ""
+    # Defaults to exact legacy V1 binder for compatibility. V2 requires
+    # native SDXL/MV adapter task checkpoints + canonical pose program hash.
+    product_generation_abi: str = "V1_LATENT_ROW"
+    product_pose_program_sha256: str = ""
     topology_teacher_tokens: Tensor | None = None
     topology_valid_mask: Tensor | None = None
     source_topology_admission_key: str = ""
@@ -1386,6 +1390,25 @@ class RSSvNextStructuralTrainer:
             )
             if not torch.allclose(cameras, fixed, atol=1.e-6, rtol=0):
                 raise ValueError("RSS_VNEXT_TRAIN_GENERATOR_CAMERA_CONTRACT_DRIFT")
+            if batch.product_generation_abi not in (
+                "V1_LATENT_ROW","V2_SDXL_MVADAPTER",
+            ):
+                raise ValueError("RSS_VNEXT_TRAIN_GENERATOR_ABI_UNKNOWN")
+            if (
+                batch.product_generation_abi=="V1_LATENT_ROW"
+                and batch.product_pose_program_sha256
+            ):
+                raise ValueError("RSS_VNEXT_TRAIN_GENERATOR_V1_POSE_PIN_UNEXPECTED")
+            if (
+                batch.product_generation_abi=="V2_SDXL_MVADAPTER"
+                and (
+                    type(batch.product_pose_program_sha256) is not str
+                    or len(batch.product_pose_program_sha256)!=64
+                    or any(c not in "0123456789abcdef"
+                           for c in batch.product_pose_program_sha256)
+                )
+            ):
+                raise ValueError("RSS_VNEXT_TRAIN_GENERATOR_V2_POSE_PIN_REQUIRED")
             expected = {
                 "admission_status": "PINNED_GENERATOR_OUTPUT_NOT_SOURCE_TEACHER",
                 "dataset_manifest_sha256": self.dataset_manifest_sha256,
@@ -1401,6 +1424,13 @@ class RSSvNextStructuralTrainer:
                 "combined_generation_checkpoint_sha256": batch.product_generation_checkpoint_sha256,
                 "generated_views_are_observed_source": False,
             }
+            if batch.product_generation_abi=="V2_SDXL_MVADAPTER":
+                expected.update({
+                    "generator_abi":
+                        "RealSaS.RSSvNext.SDXLMVAdapterPairedConstruction.v2",
+                    "canonical_pose_program_sha256":
+                        batch.product_pose_program_sha256,
+                })
             if any(type(v) is not str or len(v) != 64 or any(
                 c not in "0123456789abcdef" for c in v
             ) for v in (
@@ -1410,14 +1440,25 @@ class RSSvNextStructuralTrainer:
                 batch.product_generation_checkpoint_sha256,
             )):
                 raise ValueError("RSS_VNEXT_TRAIN_GENERATOR_CHECKPOINT_SHA_DOMAIN")
-            from .realsas_two_source_construction_v1 import (
-                paired_generation_binding_sha256_v1,
-            )
-            expected_binding = paired_generation_binding_sha256_v1(
-                canonical_checkpoint_sha256=batch.product_canonical_checkpoint_sha256,
-                multiview_checkpoint_sha256=batch.product_multiview_checkpoint_sha256,
-                source_binding_sha256=batch.product_source_binding_sha256,
-            )
+            if batch.product_generation_abi=="V2_SDXL_MVADAPTER":
+                from .realsas_sdxl_mvadapter_construction_v2 import (
+                    two_stage_sdxl_mv_binding_v2,
+                )
+                expected_binding = two_stage_sdxl_mv_binding_v2(
+                    stage_a_checkpoint_sha256=batch.product_canonical_checkpoint_sha256,
+                    stage_b_checkpoint_sha256=batch.product_multiview_checkpoint_sha256,
+                    source_binding_sha256=batch.product_source_binding_sha256,
+                    pose_program_sha256=batch.product_pose_program_sha256,
+                )
+            else:
+                from .realsas_two_source_construction_v1 import (
+                    paired_generation_binding_sha256_v1,
+                )
+                expected_binding = paired_generation_binding_sha256_v1(
+                    canonical_checkpoint_sha256=batch.product_canonical_checkpoint_sha256,
+                    multiview_checkpoint_sha256=batch.product_multiview_checkpoint_sha256,
+                    source_binding_sha256=batch.product_source_binding_sha256,
+                )
             if expected_binding != batch.product_generation_checkpoint_sha256:
                 raise ValueError("RSS_VNEXT_TRAIN_GENERATOR_BINDING_RECOMPUTE_DRIFT")
             receipt = self.trusted_generated_conditioning_registry.get(
@@ -2630,6 +2671,9 @@ class RSSvNextStructuralTrainer:
             "product_multiview_checkpoint_sha256",
             "product_generation_checkpoint_sha256",
             "product_conditioning_admission_key",
+            # Generator ABI metadata is validated in objective() before this
+            # source-only UDF whitelist; it is not a teacher input.
+            "product_generation_abi","product_pose_program_sha256",
             "component_udf_source_teacher",
             "source_qualification_key","admission_status",
         }
@@ -2732,6 +2776,7 @@ class RSSvNextStructuralTrainer:
             "product_multiview_checkpoint_sha256",
             "product_generation_checkpoint_sha256",
             "product_conditioning_admission_key",
+            "product_generation_abi","product_pose_program_sha256",
             "flexicubes_extractor", "flexicubes_layer",
             "flexicubes_layers", "flexicubes_signed_layer_admission_keys",
             *({"product_hybrid_open_source_admission_key"}

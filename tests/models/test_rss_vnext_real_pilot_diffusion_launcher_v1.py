@@ -134,3 +134,28 @@ def test_pilot_policy_does_not_fabricate_gpu_or_val_acceptance():
     ):
         with pytest.raises(ValueError,match="EXECUTION_PLAN_INVALID"):
             broken.validate()
+
+
+def test_pilot_stage_ab_receipt_cannot_hide_another_subject_or_wrong_asset():
+    from models.rss_vnext.product_real_pilot_diffusion_launcher_v1 import (
+        _StageABGradientRecorder,
+    )
+    from models.rss_vnext.product_real_pilot_execution_v1 import (
+        RealPilotTrainingEnvelopeV1,
+    )
+    cohort=_verified_cohort()
+    phase=_build(cohort,_ledger(cohort))
+    runner=_StageABGradientRecorder(phase.trainer)
+    batch=_batch_a()
+    okay=RealPilotTrainingEnvelopeV1("contract-source","a"*64,batch)
+    runner.assert_batch_source_identity(okay)
+    with pytest.raises(ValueError,match="PER_ASSET_TEACHER_IDENTITY_DRIFT"):
+        runner.assert_batch_source_identity(replace(
+            okay,source_asset_sha256="c"*64,
+        ))
+    wrong_batch=replace(
+        batch,source_tokens=batch.source_tokens.repeat(2,1,1,1),
+    )
+    with pytest.raises(ValueError,match="PER_ASSET_TEACHER_IDENTITY_DRIFT"):
+        runner.assert_batch_source_identity(replace(okay,batch=wrong_batch))
+    assert phase.trainer.step==0

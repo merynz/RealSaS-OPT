@@ -34,7 +34,8 @@ def fixture_assets(tmp_path, n=300):
     root=tmp_path/"receipts"
     for i in range(n):
         aid="SK190" if i==n-1 else f"P{i:04d}"
-        split=("TRAIN" if i < int(.8*n)
+        # A synthetic example of *user-authored* split input: Pieta is TRAIN.
+        split=("TRAIN" if i == n-1 or i < int(.8*n)
                else "VAL" if i < int(.9*n) else "UNSEEN_TEST")
         asset_sha=sha("mesh:"+aid)
         teacher=tuple(sorted(REQUIRED_CORE))
@@ -75,19 +76,20 @@ def admitted(tmp_path):
     return assets,root,verified
 
 
-def test_300_400_subjects_require_strict_unseen_and_pieta_is_holdout(admitted):
+def test_300_400_subjects_respect_user_split_and_allow_pieta_in_train(admitted):
     assets,root,receipt=admitted
     assert receipt.total_assets==300
     assert (receipt.train_assets,receipt.val_assets,
-            receipt.unseen_test_assets)==(240,30,30)
-    assert receipt.unseen_holdout_source_id=="SK190"
+            receipt.unseen_test_assets)==(241,30,29)
+    assert assets[-1].source_id=="SK190" and assets[-1].split=="TRAIN"
     assert receipt.source_evidence_bytes_verified
     assert not receipt.full_pilot_launch_qualified
     assert_train_only_source_v1(assets[0],receipt)
-    for item in (assets[250],assets[-1]):
+    assert_train_only_source_v1(assets[-1],receipt)
+    for item in (assets[250],assets[-2]):
         with pytest.raises(ValueError,match="TRAIN_SOURCE_NOT_ADMITTED"):
             assert_train_only_source_v1(item,receipt)
-    assert receipt.teacher_family_coverage_train["NATIVE_MESH"]==240
+    assert receipt.teacher_family_coverage_train["NATIVE_MESH"]==241
 
 
 def test_300_is_minimum_and_license_noai_core_truth_cannot_be_invented(admitted):
@@ -102,16 +104,21 @@ def test_300_is_minimum_and_license_noai_core_truth_cannot_be_invented(admitted)
     ):
         with pytest.raises(ValueError,match="SOURCE_LICENSE_NATIVE"):
             qualify_real_pilot_cohort_v1((updated,*assets[1:]))
-    with pytest.raises(ValueError,match="PIETA_MUST_BE_UNSEEN"):
-        qualify_real_pilot_cohort_v1((*assets[:-1],
-                                       replace(assets[-1],split="TRAIN")))
+    # Arbitrary user-authored split proportions are accepted; no 80/10/10 rule.
+    manual=tuple(replace(a,split=("TRAIN" if i<285 else
+                                    "VAL" if i<295 else "UNSEEN_TEST"))
+                 for i,a in enumerate(assets))
+    result=qualify_real_pilot_cohort_v1(manual)
+    assert (result.train_assets,result.val_assets,result.unseen_test_assets)==(285,10,5)
+    with pytest.raises(ValueError,match="SPLIT_REQUIRED_NONEMPTY"):
+        qualify_real_pilot_cohort_v1(tuple(replace(a,split="TRAIN") for a in assets))
 
 
 def test_duplicate_and_lineage_leaks_rejected(admitted):
     assets,root,receipt=admitted
     with pytest.raises(ValueError,match="LINEAGE_LEAK"):
-        qualify_real_pilot_cohort_v1((*assets[:299],replace(
-            assets[-1],lineage_group=assets[0].lineage_group,
+        qualify_real_pilot_cohort_v1((*assets[:298],replace(
+            assets[-2],lineage_group=assets[0].lineage_group,),assets[-1],
         )))
     with pytest.raises(ValueError,match="DUPLICATE_SOURCE_OR_IMAGE"):
         qualify_real_pilot_cohort_v1((*assets[:299],replace(
@@ -213,7 +220,7 @@ def test_train_runner_never_uses_validation_or_unseen_examples(admitted):
         run_source_qualified_pilot_updates_v1(
             trainer=runner,staged_examples=[
                 RealPilotTrainingEnvelopeV1(
-                    assets[-1].source_id,assets[-1].source_asset_sha256,1.,
+                    assets[-2].source_id,assets[-2].source_asset_sha256,1.,
                 ),
             ],source_index=source_index,cohort=cohort,max_steps=1,
         )

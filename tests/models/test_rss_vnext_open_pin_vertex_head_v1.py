@@ -51,6 +51,8 @@ def _case():
         source_mstar_transport_sha256="4"*64,
         pin_targets=target,known_mask=known,
     )
+    source_faces=torch.tensor([[0,1]],dtype=torch.long)
+    source_face_mask=torch.ones((1,2),dtype=torch.bool)
     receipt={
         "admission_status":"QUALIFIED_SOURCE_NATIVE_OPEN_PIN_VERTEX_REINDEX",
         "schema":TEACHER_SCHEMA,
@@ -63,6 +65,9 @@ def _case():
         "candidate_mstar_topology_address_sha256":"8"*64,
         "mesh_topology_digest":out.mesh_topology_digest,
         "axis_sequence_digest":out.axis_sequence_digest,
+        "source_anchor_face_targets_sha256":_digest_tensor(source_faces),
+        "source_anchor_face_mask_sha256":_digest_tensor(source_face_mask),
+        "source_held_holder_are_distinct_components":True,
         "native_open_hem_sha256":teacher.native_open_hem_sha256,
         "native_pin_witness_sha256":teacher.native_pin_witness_sha256,
         "heldout_host_only_intervention_sha256":
@@ -87,6 +92,8 @@ def _case():
             candidate_mstar_topology_address_sha256="8"*64,
             source_asset_sha256="a"*64,
             source_qualification_key="source-native-open-sheet",
+            source_anchor_face_targets=source_faces,
+            source_anchor_face_mask=source_face_mask,
             original_rgba_sha256="5"*64,
             original_camera_sha256="6"*64,
             combined_generation_checkpoint_sha256="7"*64,
@@ -133,6 +140,7 @@ def test_native_source_pin_receipt_tamper_and_unknown_labels_rejected():
         dataset_manifest_sha256="f"*64,
         candidate_mstar_topology_address_sha256="8"*64,
         source_asset_sha256="a"*64,source_qualification_key="x",
+        source_anchor_face_targets=None,source_anchor_face_mask=None,
         original_rgba_sha256="5"*64,original_camera_sha256="6"*64,
         combined_generation_checkpoint_sha256="7"*64,
     )==(None,0)

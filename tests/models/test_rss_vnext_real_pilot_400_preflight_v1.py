@@ -243,6 +243,37 @@ def test_train_runner_never_uses_validation_or_unseen_examples(admitted):
         )
 
 
+def test_train_runner_rejects_cohort_index_substitution_before_gradients(admitted):
+    assets,root,cohort=admitted
+    class Trap:
+        dataset_manifest_sha256=cohort.cohort_sha256
+        calls=0
+        def train_step(self,batch):
+            self.calls+=1
+            raise RuntimeError("OPTIMIZER_SHOULD_NEVER_BE_REACHED")
+    trainer=Trap()
+    source_index={a.source_id:a for a in assets}
+    envelope=RealPilotTrainingEnvelopeV1(
+        assets[0].source_id,assets[0].source_asset_sha256,1.,
+    )
+    substitutes=[
+        {k:v for k,v in source_index.items() if k!=assets[-1].source_id},
+        {**source_index,assets[250].source_id:replace(
+            assets[250],split="TRAIN",
+        )},
+        {**source_index,assets[0].source_id:replace(
+            assets[0],native_receipt_sha256=sha("tampered-native"),
+        )},
+    ]
+    for rogue in substitutes:
+        with pytest.raises(ValueError,match="SOURCE_INDEX_NOT_THE_SEALED_COHORT"):
+            run_source_qualified_pilot_updates_v1(
+                trainer=trainer,staged_examples=(envelope,),
+                source_index=rogue,cohort=cohort,max_steps=1,
+            )
+    assert trainer.calls==0
+
+
 class TinyProduct(nn.Module):
     def __init__(self):
         super().__init__()

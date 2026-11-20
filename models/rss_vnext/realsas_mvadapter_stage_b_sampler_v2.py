@@ -112,6 +112,9 @@ def load_exact_stage_b_task_checkpoint_v2(
     pipe.unet.eval()
     pipe.cond_encoder.eval()
     task_heads.eval()
+    # Only the exact weights-loaded pipeline is admitted for sampling.
+    pipe._rss_vnext_stage_b_checkpoint_sha256=receipt.checkpoint_sha256
+    task_heads._rss_vnext_stage_b_checkpoint_sha256=receipt.checkpoint_sha256
 
 
 def write_stage_b_task_weights_v2(
@@ -184,7 +187,7 @@ def write_stage_b_task_weights_v2(
 class MVAdapterPairedGeneratedSceneV2:
     rgba:Tensor           # B,6,4,H,W, generated not observed
     normals:Tensor        # B,6,3,H,W, generated vector [-1,1]
-    source_original_count:int
+    canonical_reference_count:int
     constructed_view_count:int
     trained_checkpoint_sha256:str
     observation_authority:bool=False
@@ -207,6 +210,15 @@ def sample_stage_b_paired_rgb_normal_v2(
     hypotheses, never native teachers.
     """
     receipt.validate()
+    if (
+        getattr(pipe,"_rss_vnext_stage_b_checkpoint_sha256",None)
+        !=receipt.checkpoint_sha256
+        or getattr(task_heads,"_rss_vnext_stage_b_checkpoint_sha256",None)
+        !=receipt.checkpoint_sha256
+        or pipe.unet.training or pipe.cond_encoder.training
+        or task_heads.training
+    ):
+        raise RuntimeError("RSS_VNEXT_MVADAPTER_STAGE_B_EXACT_TASK_WEIGHTS_NOT_LOADED")
     if (
         canonical_rgba.ndim!=5 or canonical_rgba.shape[1:3]!=(2,4)
         or not 1<=steps<=100 or not 0<=seed<2**63
@@ -278,7 +290,7 @@ def sample_stage_b_paired_rgb_normal_v2(
     images=(decoded+1.)*.5
     rgb=images[:,0].clamp(0,1)
     normal=images[:,1].clamp(0,1)*2.-1.
-    normal=normal/F.normalize(normal,dim=2).norm(dim=2,keepdim=True).clamp_min(1.e-6)
+    normal=normal/normal.norm(dim=2,keepdim=True).clamp_min(1.e-6)
     alpha=task_heads.alpha_logits(
         latent[:,0].reshape(b*6,4,h//8,w//8),(h,w),
     ).sigmoid().reshape(b,6,1,h,w)
@@ -287,7 +299,7 @@ def sample_stage_b_paired_rgb_normal_v2(
         raise RuntimeError("RSS_VNEXT_MVADAPTER_STAGE_B_GENERATED_SCENE_NONFINITE")
     return MVAdapterPairedGeneratedSceneV2(
         rgba=rgba,normals=normal,
-        source_original_count=2,constructed_view_count=VIEWS,
+        canonical_reference_count=2,constructed_view_count=VIEWS,
         trained_checkpoint_sha256=receipt.checkpoint_sha256,
     )
 

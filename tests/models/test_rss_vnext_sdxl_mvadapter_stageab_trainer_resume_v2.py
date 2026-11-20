@@ -71,9 +71,11 @@ def _batch_a():
 
 
 def _stage_b():
+    vae=VAE()
+    vae._rss_vnext_vae_ancestor_sha256="d"*64
     return (
         SimpleNamespace(unet=FakeMVUnet(),cond_encoder=FakeControl(),
-                        vae=VAE(),scheduler=Scheduler()),
+                        vae=vae,scheduler=Scheduler()),
         MVAdapterRGBNormalTaskHeadsV2(),
     )
 
@@ -99,11 +101,13 @@ def test_stage_a_task_fit_checkpoint_resume_and_two_canonical_sampler(tmp_path):
     torch.manual_seed(30)
     unet,conditioner,head=_stage_a()
     vae=VAE()
+    vae._rss_vnext_vae_ancestor_sha256="d"*64
     optimizer=SourceSDXLStageABOptimizerV2(
         stage="A_CANONICAL_SDXL",unet=unet,vae=vae,
         noise_scheduler=Scheduler(),
         source_manifest_sha256="a"*64,
         pretrained_source_sha256="b"*64,
+        source_vae_sha256="d"*64,
         conditioner=conditioner,task_a_alpha=head,
         warmup_steps=2,
     )
@@ -149,9 +153,10 @@ def test_stage_a_task_fit_checkpoint_resume_and_two_canonical_sampler(tmp_path):
         )
     new_u,new_c,new_h=_stage_a()
     resumed=SourceSDXLStageABOptimizerV2(
-        stage="A_CANONICAL_SDXL",unet=new_u,vae=VAE(),
+        stage="A_CANONICAL_SDXL",unet=new_u,vae=vae,
         noise_scheduler=Scheduler(),
         source_manifest_sha256="a"*64,pretrained_source_sha256="b"*64,
+        source_vae_sha256="d"*64,
         conditioner=new_c,task_a_alpha=new_h,warmup_steps=2,
     )
     resumed.load_resume_checkpoint(resume)
@@ -167,6 +172,7 @@ def test_stage_b_task_fit_exact_native_weights_and_six_rgb_normals(tmp_path):
         noise_scheduler=Scheduler(),
         source_manifest_sha256="a"*64,
         pretrained_source_sha256="b"*64,
+        source_vae_sha256="d"*64,
         pretrained_mv_adapter_sha256="c"*64,
         mv_pipeline=pipeline,task_b_heads=heads,
         warmup_steps=2,

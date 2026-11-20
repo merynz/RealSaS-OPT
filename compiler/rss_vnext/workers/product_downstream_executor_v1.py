@@ -1081,6 +1081,7 @@ def _reopen_unpromoted_source_pose_graphics_courts_v1(
 def execute_proof_capability_v1(
     request: dict[str, Any], *, read_object: Callable, put_bytes: Callable,
     trusted_source_native_pixel_replayer: Callable | None = None,
+    trusted_native_edit_replayer: Callable | None = None,
 ) -> dict[str, Any]:
     _require(request, "product.proof", PROOF_CONTRACT)
     # A structurally valid canonical tuple is not independent source proof,
@@ -1115,6 +1116,11 @@ def execute_proof_capability_v1(
     metadata = request.get("capability_metadata") or {}
     if "trusted_source_native_pixel_replayer" in metadata:
         raise RuntimeError("PRODUCT_PROOF_TRUSTED_GRAPHICS_REPLAYER_HOST_ONLY")
+    if (
+        "trusted_native_edit_replayer" in metadata
+        or "trusted_native_edit_replayer" in request
+    ):
+        raise RuntimeError("PRODUCT_PROOF_TRUSTED_EDIT_REPLAYER_HOST_ONLY")
     require_runtime = metadata.get("runtime_graphics_required", False)
     if type(require_runtime) is not bool:
         raise RuntimeError("PRODUCT_PROOF_RUNTIME_GRAPHICS_POLICY_TYPE")
@@ -1168,6 +1174,18 @@ def execute_proof_capability_v1(
         compiled=compiled,motion=motion,
         trusted_source_native_pixel_replayer=trusted_source_native_pixel_replayer,
     )
+    from .rss_vnext_product_edit_native_evidence_bridge_v1 import (
+        reopen_product_proof_user_edit_native_evidence_v1,
+    )
+    native_user_edit = reopen_product_proof_user_edit_native_evidence_v1(
+        request, read_object,
+        canonical_mesh=mesh, canonical_rig=rig, canonical_skin=skin,
+        expected_original_native_preview_sha256=(
+            raw_replay["native_interactive_preview_cas_sha256"]
+            if raw_replay is not None else None
+        ),
+        trusted_native_edit_replayer=trusted_native_edit_replayer,
+    )
     # This court has rechecked the whole present canonical graph and pose
     # authority. ProductPASS still requires independent source pixels/rays,
     # native parity, time-varying collision/contact and edit consequences.
@@ -1215,6 +1233,10 @@ def execute_proof_capability_v1(
             source_pose_graphics["independently_raw_positive_frame_count"]
         ),
         "source_contact_independent_witness_present": False,
+        "independent_native_user_edit_evidence": native_user_edit,
+        "native_user_edit_independent_sample_present": bool(
+            native_user_edit["independently_native_replayed_edit_frame_count"]
+        ),
         "missing_independent_witnesses": list(missing),
         "product_pass_authority": False,
         "product_revision_minted": False,

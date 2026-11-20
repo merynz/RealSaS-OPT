@@ -125,16 +125,17 @@ def capture_native_two_reference_cache_v2(
     ):
         raise ValueError("RSS_VNEXT_MVADAPTER_DUAL_REF_SOURCE_ABI_INVALID")
     b = canonical_latents.shape[0]
+    unet_dtype=next(unet.parameters()).dtype
     native: dict[str, Tensor] = {}
     timesteps = torch.zeros(
         b*2, device=canonical_latents.device, dtype=torch.long,
     )
     unet(
-        canonical_latents.reshape(b*2,*canonical_latents.shape[2:]),
+        canonical_latents.reshape(b*2,*canonical_latents.shape[2:]).to(unet_dtype),
         timesteps,
-        encoder_hidden_states=prompt_embeds.repeat_interleave(2,dim=0),
+        encoder_hidden_states=prompt_embeds.repeat_interleave(2,dim=0).to(unet_dtype),
         added_cond_kwargs={
-            "text_embeds":pooled_text_embeds.repeat_interleave(2,dim=0),
+            "text_embeds":pooled_text_embeds.repeat_interleave(2,dim=0).to(unet_dtype),
             "time_ids":time_ids.repeat_interleave(2,dim=0),
         },
         cross_attention_kwargs={
@@ -256,7 +257,7 @@ def native_mv_adapter_rgb_normal_denoise_v2(
     target_context=task_heads.context_for_modalities(
         prompt_embeds,modalities=m,
     )
-    pooled=pooled_text_embeds.repeat_interleave(m*VIEWS,dim=0)
+    pooled=pooled_text_embeds.repeat_interleave(m*VIEWS,dim=0).to(latent.dtype)
     times=time_ids.repeat_interleave(m*VIEWS,dim=0)
     down=pipe.cond_encoder(controls.to(dtype=latent.dtype))
     output=pipe.unet(

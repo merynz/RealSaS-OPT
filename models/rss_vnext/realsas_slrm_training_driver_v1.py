@@ -146,6 +146,7 @@ class RealSaSSLRMTrainerV1:
         weights: RealSaSSLRMTrainingLossWeightsV1 = RealSaSSLRMTrainingLossWeightsV1(),
         clip_gradient_norm: float=1.,
         input_profile: str=REALSAS_SIX_VIEW_TRAINING_PROFILE,
+        required_gradient_prefixes: tuple[str, ...] = (),
     ) -> None:
         weights.validate()
         if input_profile not in (
@@ -156,6 +157,14 @@ class RealSaSSLRMTrainerV1:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_TRAINER_CONFIG")
         if clip_gradient_norm<=0:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_GRAD_CLIP_INVALID")
+        if (
+            type(required_gradient_prefixes) is not tuple
+            or len(set(required_gradient_prefixes)) != len(required_gradient_prefixes)
+            or any(type(p) is not str or not p.endswith(".")
+                   for p in required_gradient_prefixes)
+        ):
+            raise ValueError("RSS_VNEXT_REALSAS_SLRM_REQUIRED_GRADIENT_POLICY_INVALID")
+        self.required_gradient_prefixes = required_gradient_prefixes
         self.model=model;self.optimizer=optimizer;self.weights=weights
         # Same architecture identity as the structural trainer. An S-LRM
         # checkpoint with the same tensor SHAPES but different semantics may
@@ -209,6 +218,7 @@ class RealSaSSLRMTrainerV1:
             raise ValueError("RSS_VNEXT_REALSAS_SLRM_ORIGINAL_SOURCE_REGISTRY_REQUIRED")
         self.policy_sha256=sha256(json.dumps(
             {"weights":asdict(weights),"input_profile":input_profile,
+             "required_gradient_prefixes":list(required_gradient_prefixes),
              "stage3_raster_backend":self.stage3_raster_backend_id,
              "stage3_device":self.stage3_raster_device_type},
             sort_keys=True,separators=(",",":"),
@@ -688,6 +698,22 @@ class RealSaSSLRMTrainerV1:
         self.optimizer.zero_grad(set_to_none=True)
         parts=self.objective(batch)
         parts["total"].backward()
+        # Fail before optimizer.step, not afterwards: a disconnected shared-H
+        # head must not allow the other task heads to update a bad checkpoint.
+        for prefix in self.required_gradient_prefixes:
+            gradients = [
+                p.grad for name,p in self.model.named_parameters()
+                if name.startswith(prefix) and p.requires_grad
+            ]
+            if not gradients or not any(g is not None for g in gradients):
+                raise RuntimeError(
+                    "RSS_VNEXT_REALSAS_SLRM_REQUIRED_OWNER_GRADIENT_MISSING:" + prefix
+                )
+            if any(g is not None and (g.is_sparse or not bool(torch.isfinite(g).all()))
+                   for g in gradients):
+                raise RuntimeError(
+                    "RSS_VNEXT_REALSAS_SLRM_REQUIRED_OWNER_GRADIENT_NONFINITE:" + prefix
+                )
         torch.nn.utils.clip_grad_norm_(
             (p for p in self.model.parameters() if p.requires_grad),
             self.clip_gradient_norm,error_if_nonfinite=True,

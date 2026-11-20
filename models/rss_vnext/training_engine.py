@@ -3788,6 +3788,21 @@ class RSSvNextStructuralTrainer:
         if current.binding_sha256 != self.optimizer_ownership.binding_sha256:
             raise RuntimeError("RSS_VNEXT_TRAIN_OPTIMIZER_PHASE_IDENTITY_DRIFT")
 
+    def assert_pilot_batch_source_asset_v1(
+        self, batch: RSSvNextStructuralTrainingBatch,
+        expected_source_asset_sha256: str,
+    ) -> None:
+        """E's matched M* teacher source must agree with sealed TRAIN index."""
+        teacher=getattr(batch,"seeded_tessa_source_teacher",None)
+        actual=getattr(teacher,"source_asset_sha256",None)
+        if (
+            self.training_profile!="PRODUCT_SEEDED_IRIS_TESSA_V1"
+            or type(expected_source_asset_sha256) is not str
+            or len(expected_source_asset_sha256)!=64
+            or actual!=expected_source_asset_sha256
+        ):
+            raise RuntimeError("RSS_VNEXT_PILOT_E_BATCH_ASSET_IDENTITY_DRIFT")
+
     def train_step(self, batch: RSSvNextStructuralTrainingBatch) -> RSSvNextTrainingResult:
         self._assert_optimizer_ownership()
         # Phase changes may leave stale frozen tensors from a former

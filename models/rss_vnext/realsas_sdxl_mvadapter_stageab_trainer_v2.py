@@ -292,6 +292,22 @@ class SourceSDXLStageABOptimizerV2:
             "cuda",enabled=amp_dtype=="FP16" and self.device.type=="cuda",
         )
 
+    def assert_pilot_batch_source_asset_v1(
+        self,batch:SDXLSourceStageABatchV2|MVAdapterSourceStageBBatchV2,
+        expected_source_asset_sha256:str,
+    )->None:
+        """Resolve batch's frozen source-render receipt to actual TRAIN asset."""
+        key=getattr(batch,"source_render_qualification_key",None)
+        receipt=self.trusted_source_registry.get(key)
+        if (
+            not _sha(expected_source_asset_sha256)
+            or not isinstance(receipt,Mapping)
+            or receipt.get("source_asset_sha256")!=expected_source_asset_sha256
+            or receipt.get("dataset_manifest_sha256")!=self.dataset_manifest_sha256
+            or receipt.get("stage")!=self.stage
+        ):
+            raise RuntimeError("RSS_VNEXT_STAGE_AB_PILOT_BATCH_ASSET_IDENTITY_DRIFT")
+
     def train_step(
         self,batch:SDXLSourceStageABatchV2|MVAdapterSourceStageBBatchV2,
     )->StageABStepV2:

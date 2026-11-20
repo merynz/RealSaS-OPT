@@ -19,7 +19,7 @@ import tempfile
 
 from .product_real_pilot_cohort_v1 import (
     RealPilotAssetV1, RealPilotCohortReceiptV1,
-    assert_train_only_source_v1,
+    assert_train_only_source_v1, qualify_real_pilot_cohort_v1,
 )
 
 SCHEMA = "RealSaS.RSSvNext.Real400PilotPhaseLedger.v1"
@@ -288,10 +288,25 @@ def run_source_qualified_pilot_updates_v1(
         raise ValueError("RSS_VNEXT_PILOT_TRAINER_NOT_ADMITTED")
     manifest=getattr(trainer,"dataset_manifest_sha256",
              getattr(trainer,"manifest_sha256",None))
-    if manifest is not None and manifest!=cohort.cohort_sha256:
+    if manifest is None or manifest!=cohort.cohort_sha256:
         raise ValueError("RSS_VNEXT_PILOT_TRAINER_MANIFEST_IDENTITY_DRIFT")
-    if not source_index:
+    # A subset or caller-invented TRAIN record is not proof of membership in
+    # the user's exact sealed 300–400 asset cohort. Reconstruct its immutable
+    # identity from ALL split entries before allowing a single optimizer step.
+    if (
+        not isinstance(source_index, Mapping) or not source_index
+        or any(
+            type(item) is not RealPilotAssetV1 or key != item.source_id
+            for key, item in source_index.items()
+        )
+    ):
         raise ValueError("RSS_VNEXT_PILOT_TRAIN_SOURCE_INDEX_MISSING")
+    indexed_cohort=qualify_real_pilot_cohort_v1(tuple(source_index.values()))
+    if indexed_cohort.cohort_sha256 != cohort.cohort_sha256:
+        raise ValueError("RSS_VNEXT_PILOT_TRAIN_SOURCE_INDEX_COHORT_DRIFT")
+    current_step=getattr(trainer,"global_step",getattr(trainer,"step",None))
+    if type(current_step) is not int or current_step<0:
+        raise ValueError("RSS_VNEXT_PILOT_TRAINER_PROGRESS_COUNTER_REQUIRED")
     reports=[]
     for envelope in staged_examples:
         if len(reports)>=max_steps:
@@ -305,7 +320,20 @@ def run_source_qualified_pilot_updates_v1(
         ):
             raise ValueError("RSS_VNEXT_PILOT_BATCH_ASSET_BINDING_DRIFT")
         assert_train_only_source_v1(item,cohort)
+        # An admitted TRAIN envelope can otherwise wrap an unrelated
+        # source-qualified validation batch. Every actual trainer must resolve
+        # its immutable batch receipt key into THIS source asset SHA.
+        verifier=getattr(trainer,"assert_pilot_batch_source_asset_v1",None)
+        if not callable(verifier):
+            raise RuntimeError("RSS_VNEXT_PILOT_BATCH_SOURCE_IDENTITY_VERIFIER_REQUIRED")
+        verifier(envelope.batch,item.source_asset_sha256)
+        previous_step=getattr(trainer,"global_step",getattr(trainer,"step",None))
+        if previous_step!=current_step:
+            raise RuntimeError("RSS_VNEXT_PILOT_TRAINER_EXTERNAL_STEP_DRIFT")
         result=trainer.train_step(envelope.batch)
+        current_step=getattr(trainer,"global_step",getattr(trainer,"step",None))
+        if type(current_step) is not int or current_step!=previous_step+1:
+            raise RuntimeError("RSS_VNEXT_PILOT_TRAINER_OPTIMIZER_STEP_NOT_RECORDED")
         scalar=(
             result.get("total_loss",result.get("loss",result.get("total")))
             if isinstance(result,dict) else
@@ -318,7 +346,7 @@ def run_source_qualified_pilot_updates_v1(
         if not math.isfinite(value):
             raise RuntimeError("RSS_VNEXT_PILOT_TRAIN_NONFINITE_LOSS")
         reports.append({
-            "source_id":envelope.source_id,"step":len(reports),
+            "source_id":envelope.source_id,"step":current_step,
             "total_loss":value,
         })
     if len(reports)!=max_steps:

@@ -216,8 +216,14 @@ def test_train_runner_never_uses_validation_or_unseen_examples(admitted):
         dataset_manifest_sha256=cohort.cohort_sha256
         def __init__(self):
             self.calls=0
+            self.step=0
+        def assert_pilot_batch_source_asset_v1(self,batch,asset_sha):
+            expected=assets[int(batch)-1].source_asset_sha256
+            if asset_sha!=expected:
+                raise RuntimeError("TEST_PILOT_BATCH_SOURCE_MISMATCH")
         def train_step(self,batch):
             self.calls+=1
+            self.step+=1
             return type("Loss",(),{"total_loss":torch.tensor(float(batch))})()
     runner=Trainer()
     source_index={a.source_id:a for a in assets}
@@ -233,6 +239,50 @@ def test_train_runner_never_uses_validation_or_unseen_examples(admitted):
     )
     assert runner.calls==2
     assert len(results)==2
+    assert [r["step"] for r in results]==[1,2]
+    # A TRAIN envelope with a different TRAIN asset's authorized batch is
+    # not source-equivalent. Nor may VAL tensor truth be relabeled TRAIN.
+    with pytest.raises(RuntimeError,match="TEST_PILOT_BATCH_SOURCE_MISMATCH"):
+        run_source_qualified_pilot_updates_v1(
+            trainer=runner,staged_examples=[
+                RealPilotTrainingEnvelopeV1(
+                    assets[1].source_id,assets[1].source_asset_sha256,1.,
+                ),
+            ],source_index=source_index,cohort=cohort,max_steps=1,
+        )
+    with pytest.raises(ValueError,match="SOURCE_INDEX_COHORT_DRIFT"):
+        run_source_qualified_pilot_updates_v1(
+            trainer=runner,staged_examples=train,cohort=cohort,
+            source_index={**source_index,assets[0].source_id:replace(
+                assets[0],lineage_group="fabricated-family",
+            )},max_steps=1,
+        )
+    with pytest.raises(ValueError,match="300_TO_400"):
+        run_source_qualified_pilot_updates_v1(
+            trainer=runner,staged_examples=train,cohort=cohort,
+            source_index={a.source_id:a for a in assets[:2]},max_steps=1,
+        )
+    class NoCounter:
+        dataset_manifest_sha256=cohort.cohort_sha256
+        def train_step(self,batch):
+            return {"total":torch.tensor(1.)}
+    with pytest.raises(ValueError,match="PROGRESS_COUNTER_REQUIRED"):
+        run_source_qualified_pilot_updates_v1(
+            trainer=NoCounter(),staged_examples=train,source_index=source_index,
+            cohort=cohort,max_steps=1,
+        )
+    class SilentCounter:
+        dataset_manifest_sha256=cohort.cohort_sha256
+        step=0
+        def assert_pilot_batch_source_asset_v1(self,batch,asset_sha):
+            assert asset_sha==assets[0].source_asset_sha256
+        def train_step(self,batch):
+            return {"total":torch.tensor(1.)}
+    with pytest.raises(RuntimeError,match="OPTIMIZER_STEP_NOT_RECORDED"):
+        run_source_qualified_pilot_updates_v1(
+            trainer=SilentCounter(),staged_examples=train,source_index=source_index,
+            cohort=cohort,max_steps=1,
+        )
     with pytest.raises(ValueError,match="TRAIN_SOURCE_NOT_ADMITTED"):
         run_source_qualified_pilot_updates_v1(
             trainer=runner,staged_examples=[
@@ -253,6 +303,7 @@ class TinyProduct(nn.Module):
         self.axis=nn.Linear(2,2)
         self.mira=nn.Module()
         self.mira.codec=nn.Linear(2,2)
+        self.mira.spatial_decoder=nn.Linear(2,2)
         self.mira.skin=nn.Linear(2,2)
     def forward(self,x):
         return (self.iris(x)+self.tessa_seeded_head(x)
@@ -266,6 +317,9 @@ def test_structural_phase_ownership_freezes_vision_and_embedded_codec():
     assert "iris.weight" in names and "graphics.weight" in names
     assert not any(name.startswith("vision.") for name in names)
     assert not any(name.startswith("mira.codec.") for name in names)
+    assert not any(name.startswith("mira.spatial_decoder.") for name in names)
+    assert not model.mira.spatial_decoder.weight.requires_grad
+    frozen_spatial=model.mira.spatial_decoder.weight.detach().clone()
     opt=torch.optim.AdamW(
         [p for p in model.parameters() if p.requires_grad],lr=1e-4,
     )
@@ -273,6 +327,7 @@ def test_structural_phase_ownership_freezes_vision_and_embedded_codec():
     model(torch.randn(2,2)).backward()
     policy.assert_gradient_owners_after_backward(model)
     opt.step()
+    assert torch.equal(model.mira.spatial_decoder.weight,frozen_spatial)
     with pytest.raises(ValueError,match="MOMENTS_NOT_FRESH"):
         policy.assert_qualified_optimizer(model,opt)
 
@@ -287,3 +342,15 @@ def test_bad_gradient_route_and_stage_mismatch_fail_closed():
         phase.assert_gradient_owners_after_backward(model)
     with pytest.raises(ValueError,match="OWNER_POLICY_INVALID"):
         replace(phase,allowed_prefixes=("iris.",)).validate()
+
+def test_every_e_phase_protects_both_fsq_and_deployed_point_query_decoder():
+    for stage in PHASES:
+        model=TinyProduct()
+        owner=ProductSeededPhaseOwnerPolicyV1.standard(stage)
+        owner.activate_before_optimizer_v1(model)
+        assert not model.mira.codec.weight.requires_grad
+        assert not model.mira.spatial_decoder.weight.requires_grad
+        assert not model.vision.weight.requires_grad
+    owner=ProductSeededPhaseOwnerPolicyV1.standard("FULL_SHARED_H_FINETUNE")
+    with pytest.raises(ValueError,match="OWNER_POLICY_INVALID"):
+        replace(owner,protected_prefixes=("vision.","mira.codec.")).validate()

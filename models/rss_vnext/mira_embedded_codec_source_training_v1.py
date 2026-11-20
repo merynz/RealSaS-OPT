@@ -774,6 +774,20 @@ class RSSvNextEmbeddedMIRASourceCodecTrainerV1:
         }
         return report
 
+    def assert_pilot_batch_source_asset_v1(
+        self, batch: RSSvNextEmbeddedMIRACodecBatchV1,
+        expected_source_asset_sha256: str,
+    ) -> None:
+        """D codec must never learn a VAL batch hidden in a TRAIN envelope."""
+        receipt = self.trusted_registry.get(getattr(batch, "admission_key", None))
+        if (
+            not _hex(expected_source_asset_sha256)
+            or receipt is None
+            or receipt.get("source_asset_sha256") != expected_source_asset_sha256
+            or receipt.get("dataset_manifest_sha256") != self.dataset_manifest_sha256
+        ):
+            raise RuntimeError("RSS_VNEXT_MIRA_PILOT_BATCH_ASSET_IDENTITY_DRIFT")
+
     def train_step(self, batch: RSSvNextEmbeddedMIRACodecBatchV1):
         self._assert_scope()
         if self.step % 128 == 0:

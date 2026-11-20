@@ -171,3 +171,23 @@ def test_intervention_loss_is_eighth_distinct_training_family():
     )
     assert set(groups)=={"GEOMETRY","CONTROL_INTERVENTION"}
     torch.testing.assert_close(sum(groups.values()),result.total_loss)
+
+
+def test_native_intervention_backpropagates_into_actual_mira_lbs_skin_weights():
+    from models.rss_vnext.animation_ready_mesh import (
+        posed_lbs_from_joint_matrices,
+    )
+    evaluate,source,_,joints,*_ = _case()
+    rest=source[:,0].detach().clone()
+    # A bad 50/50 skin assignment makes the wing move only halfway while
+    # dragging body vertices. The qualified source pairs correct BOTH.
+    skin_logits=torch.zeros((1,6,2),requires_grad=True)
+    skin=torch.softmax(skin_logits,dim=-1)
+    posed=posed_lbs_from_joint_matrices(rest,skin,joints)
+    loss,parts,count=evaluate(pred=posed)
+    assert count==6 and float(loss)>0
+    loss.backward()
+    assert skin_logits.grad is not None
+    assert torch.isfinite(skin_logits.grad).all()
+    assert bool((skin_logits.grad[0,:3].abs()>0).any())
+    assert bool((skin_logits.grad[0,3:].abs()>0).any())

@@ -115,6 +115,14 @@ from .product_multitask_gradient_control_v1 import (
     prepare_product_gradient_route_v1,
 )
 from .product_multitask_curriculum_v1 import ProductSeededCurriculumV1
+from .product_mstar_pose_graphics_v1 import (
+    NativeMstarPoseRasterTargetV1, NativeMstarPoseRasterWeightsV1,
+    qualified_product_mstar_pose_loss_v1,
+)
+from .realsas_flexicubes_mesh_render_v1 import (
+    stage3_default_raster_backend_v1, RASTER_ID as CPU_MSTAR_RASTER_ID,
+    PYTORCH3D_RASTER_ID as CUDA_MSTAR_RASTER_ID,
+)
 
 
 @dataclass
@@ -216,6 +224,9 @@ class RSSvNextStructuralTrainingBatch:
     realsas_joint_keep_roles: Tensor | None = None     # [B,R,K] bool
     realsas_joint_target: RealSaSJointTargetV1 | None = None
     realsas_joint_teacher_admission_key: str = ""
+    # Source-native real pose / moving M* RGB/alpha render (LOSS ONLY).
+    product_mstar_pose_render_target: NativeMstarPoseRasterTargetV1 | None = None
+    product_mstar_pose_render_admission_key: str = ""
 
     # Interim signed-surface training witness; not final foundry supervision.
     # Requires qualified source, mesh coordinate/camera bind and sample proof.
@@ -347,6 +358,9 @@ class RSSvNextTrainingResult:
     tessa_iris_surface_alignment_loss: Tensor | None = None
     realsas_joint_slrm_loss: Tensor | None = None
     eligible_realsas_joint_rays: int = 0
+    product_mstar_pose_raster_loss: Tensor | None = None
+    product_mstar_pose_raster_parts: dict[str, Tensor] | None = None
+    eligible_mstar_pose_raster_pixels: int = 0
     gradient_norm: Tensor | None = None
     gradient_interference_report: dict | None = None
     # Opt-in full shared-owner gradient route; never a scientific ProductPASS.
@@ -493,6 +507,7 @@ class RSSvNextStructuralTrainer:
         trusted_graphics_rgb_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_source_field_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_realsas_joint_scene_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_product_mstar_pose_raster_registry: Mapping[str, Mapping[str, object]] | None = None,
         # Explicit product-v1 admission: legacy token CE and product seeded
         # supervision can never be activated within the same optimizer phase.
         training_profile: str = "LEGACY_STRUCTURAL_RESEARCH",
@@ -507,6 +522,8 @@ class RSSvNextStructuralTrainer:
         # Optional source-native appearance and semantic losses, same H(x).
         product_graphics_rgb_weight: float = 0.0,
         product_joint_ray_weight: float = 0.0,
+        product_mstar_pose_raster_weight: float = 0.0,
+        product_mstar_pose_raster_loss_weights: NativeMstarPoseRasterWeightsV1 = NativeMstarPoseRasterWeightsV1(),
         product_semantic_weights: ProductSemanticWeightsV1 = ProductSemanticWeightsV1(),
         product_axis_mira_weights: ProductSeededAXISMIRAWeightsV1 = ProductSeededAXISMIRAWeightsV1(),
         product_anchor_face_weight: float = 0.0,
@@ -601,6 +618,21 @@ class RSSvNextStructuralTrainer:
         if not isinstance(product_axis_mira_weights,ProductSeededAXISMIRAWeightsV1):
             raise ValueError("RSS_VNEXT_PRODUCT_SEEDED_AXIS_MIRA_PHASE_POLICY")
         product_axis_mira_weights.validate()
+        product_mstar_pose_raster_loss_weights.validate()
+        if (
+            type(product_mstar_pose_raster_weight) not in (int,float)
+            or not math.isfinite(product_mstar_pose_raster_weight)
+            or product_mstar_pose_raster_weight < 0
+            or (product_mstar_pose_raster_weight > 0 and (
+                not seeded_mode or product_axis_mira_weights.posed_surface <= 0
+                or product_axis_mira_weights.source_skin <= 0
+                or axis_training_policy != "PRODUCT_MESH_MATCHED_REQUIRED"
+                or not trusted_product_mstar_pose_raster_registry
+            ))
+            or (product_mstar_pose_raster_weight == 0
+                and trusted_product_mstar_pose_raster_registry)
+        ):
+            raise ValueError("RSS_VNEXT_PRODUCT_MSTAR_POSE_RASTER_PHASE_POLICY")
         product_curriculum.validate(
             seeded_mode=seeded_mode,
             semantic_weights=product_semantic_weights,
@@ -609,6 +641,7 @@ class RSSvNextStructuralTrainer:
             graphics_joint_ray_weight=product_joint_ray_weight,
             component_udf_weight=component_udf_weight,
             anchor_face_weight=product_anchor_face_weight,
+            mstar_pose_raster_weight=product_mstar_pose_raster_weight,
         )
         if product_axis_mira_weights.chain_skin>0 and not trusted_chain_teacher_registry:
             raise ValueError("RSS_VNEXT_CHAIN_SKIN_REQUIRES_SOURCE_NATIVE_REGISTRY")
@@ -728,6 +761,37 @@ class RSSvNextStructuralTrainer:
         self.component_udf_weight = float(component_udf_weight)
         self.component_udf_enabled = component_enabled
         self.product_hybrid_open_policy = product_hybrid_open_policy
+        self.product_mstar_pose_raster_weight = float(product_mstar_pose_raster_weight)
+        self.product_mstar_pose_raster_loss_weights = product_mstar_pose_raster_loss_weights
+        pose_raster_snapshot = {
+            str(k):dict(v) for k,v in
+            (trusted_product_mstar_pose_raster_registry or {}).items()
+        }
+        self.trusted_product_mstar_pose_raster_registry = MappingProxyType({
+            k:MappingProxyType(v) for k,v in pose_raster_snapshot.items()
+        })
+        self.pose_raster_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                pose_raster_snapshot,sort_keys=True,separators=(",",":"),
+                allow_nan=False,
+            ).encode("utf8")).hexdigest()
+            if self.product_mstar_pose_raster_weight>0 else ""
+        )
+        self.pose_raster_device_type = (
+            next(model.parameters()).device.type
+            if self.product_mstar_pose_raster_weight>0 else ""
+        )
+        backend = (
+            stage3_default_raster_backend_v1(
+                torch.device(self.pose_raster_device_type)
+            ) if self.pose_raster_device_type else None
+        )
+        if self.product_mstar_pose_raster_weight>0 and backend is None:
+            raise ValueError("RSS_VNEXT_MSTAR_POSE_RASTER_DEVICE_UNSUPPORTED")
+        self.pose_raster_backend_id = (
+            CUDA_MSTAR_RASTER_ID if self.pose_raster_device_type=="cuda" else
+            CPU_MSTAR_RASTER_ID if self.pose_raster_device_type=="cpu" else ""
+        )
         hybrid_snapshot = {
             str(k): dict(v)
             for k,v in (trusted_hybrid_open_source_registry or {}).items()
@@ -840,6 +904,14 @@ class RSSvNextStructuralTrainer:
                 "seeded_anchor_native_mstar_address_required":True,
                 "source_anchor_missing_is_unknown_not_negative":True,
             } if self.product_anchor_face_weight>0 else {}),
+            **({
+                "product_mstar_pose_raster_weight":self.product_mstar_pose_raster_weight,
+                "product_mstar_pose_raster_weights":asdict(self.product_mstar_pose_raster_loss_weights),
+                "trusted_pose_raster_registry_sha256":self.pose_raster_registry_sha256,
+                "pose_raster_backend_id":self.pose_raster_backend_id,
+                "pose_raster_device_type":self.pose_raster_device_type,
+                "source_native_pose_and_mstar_address_required":True,
+            } if self.product_mstar_pose_raster_weight>0 else {}),
             **({
                 "product_graphics_rgb_weight":self.product_graphics_rgb_weight,
                 "product_joint_ray_weight":self.product_joint_ray_weight,
@@ -2563,6 +2635,10 @@ class RSSvNextStructuralTrainer:
                 "realsas_joint_keep_roles","realsas_joint_target",
                 "realsas_joint_teacher_admission_key",
             } if self.product_joint_ray_weight>0 else set()),
+            *({
+                "product_mstar_pose_render_target",
+                "product_mstar_pose_render_admission_key",
+            } if self.product_mstar_pose_raster_weight>0 else set()),
         }
         unexpected = []
         for name, value in vars(batch).items():
@@ -2933,6 +3009,34 @@ class RSSvNextStructuralTrainer:
             axis_sequence_digest=axis_teacher_sequence_sha256_v6,
             frozen_codec_digest=frozen_mira_codec_state_sha256_v6,
         )
+        # The independently source-rendered 2D target is applied to the
+        # STUDENT'S AXIS/MIRA-deformed SAME M*, not a second FC cosmetic mesh.
+        # Its native pose transport was authenticated by axis_mira above.
+        if self.product_mstar_pose_raster_weight>0 and (
+            next(self.model.parameters()).device.type != self.pose_raster_device_type
+        ):
+            raise RuntimeError("RSS_VNEXT_MSTAR_POSE_RASTER_DEVICE_DRIFT")
+        pose_raster_loss,pose_raster_parts,n_pose_pixels = (
+            qualified_product_mstar_pose_loss_v1(
+                model=self.model,state=state,mesh=mesh,
+                predicted_posed_xyz=axis_mira.predicted_posed_vertices,
+                batch=batch,seeded_teacher=teacher,
+                target=batch.product_mstar_pose_render_target,
+                admission_key=batch.product_mstar_pose_render_admission_key,
+                trusted_registry=self.trusted_product_mstar_pose_raster_registry,
+                dataset_manifest_sha256=self.dataset_manifest_sha256,
+                loss_weights=self.product_mstar_pose_raster_loss_weights,
+                tensor_digest=source_surface_tensor_sha256,
+                axis_sequence_digest=axis_teacher_sequence_sha256_v6,
+                seeded_mstar_address_digest=seeded_mstar_teacher_address_sha256_v1,
+            )
+        )
+        if (
+            self.product_mstar_pose_raster_weight>0
+            and pose_raster_loss is None
+            and not self.allow_sparse_qualified_source_batches
+        ):
+            raise ValueError("RSS_VNEXT_MSTAR_POSE_RENDER_ENABLED_NO_SOURCE")
         # Same forward carrier, same final indexed M* and source-qualified AXIS
         # sequence as the production skin/rig objective above. The loss is
         # conditional: unlabeled assets are UNKNOWN, not negative examples.
@@ -3097,6 +3201,11 @@ class RSSvNextStructuralTrainer:
             joint_total=joint_total+self.product_graphics_rgb_weight*rgb_loss
         if ray_loss is not None:
             joint_total=joint_total+self.product_joint_ray_weight*ray_loss
+        if pose_raster_loss is not None:
+            joint_total=(
+                joint_total
+                +self.product_mstar_pose_raster_weight*pose_raster_loss
+            )
         return RSSvNextTrainingResult(
             total_loss=joint_total,
             topology_loss=None,motion_preference_loss=None,
@@ -3133,6 +3242,9 @@ class RSSvNextStructuralTrainer:
             eligible_graphics_source_rgb_queries=n_rgb,
             realsas_joint_slrm_loss=ray_loss,
             eligible_realsas_joint_rays=n_rays,
+            product_mstar_pose_raster_loss=pose_raster_loss,
+            product_mstar_pose_raster_parts=pose_raster_parts,
+            eligible_mstar_pose_raster_pixels=n_pose_pixels,
             product_graphics_joint_loss_parts=ray_parts,
             product_semantic_loss=semantic.total,
             product_semantic_loss_parts={
@@ -3310,6 +3422,9 @@ class RSSvNextStructuralTrainer:
         if result.realsas_joint_slrm_loss is not None or not self.allow_sparse_qualified_source_batches:
             add("joint_source_rays",result.realsas_joint_slrm_loss,
                 self.product_joint_ray_weight)
+        if result.product_mstar_pose_raster_loss is not None or not self.allow_sparse_qualified_source_batches:
+            add("posed_mstar_native_raster",result.product_mstar_pose_raster_loss,
+                self.product_mstar_pose_raster_weight)
         if not admitted:
             raise RuntimeError("RSS_VNEXT_SEEDED_GRADIENT_AUDIT_NO_LIVE_OBJECTIVE")
         report = audit_rss_vnext_gradient_interference_v1(
@@ -3359,6 +3474,7 @@ class RSSvNextStructuralTrainer:
                 graphics_rgb_weight=self.product_graphics_rgb_weight,
                 graphics_joint_ray_weight=self.product_joint_ray_weight,
                 anchor_face_weight=self.product_anchor_face_weight,
+                mstar_pose_raster_weight=self.product_mstar_pose_raster_weight,
             )
             route = prepare_product_gradient_route_v1(
                 named_parameters=tuple(self.model.named_parameters()),
@@ -3385,6 +3501,7 @@ class RSSvNextStructuralTrainer:
             if (
                 result.graphics_source_rgb_loss is not None
                 or result.realsas_joint_slrm_loss is not None
+                or result.product_mstar_pose_raster_loss is not None
             ):
                 required.append(("GRAPHICS",self.model.graphics))
             if result.graphics_source_rgb_loss is not None:
@@ -3392,6 +3509,10 @@ class RSSvNextStructuralTrainer:
                     ("SOURCE_RGB_VIEW_CORE",self.model.constructed_view_renderer.core),
                     ("SOURCE_RGB_VIEW_HEAD",self.model.constructed_view_renderer.rgb),
                 ))
+            if result.product_mstar_pose_raster_parts is not None and (
+                "role" in result.product_mstar_pose_raster_parts
+            ):
+                required.append(("POSED_MSTAR_ROLE",self.model.presentation_role_head))
             if result.anchor_face_correspondence_loss is not None:
                 required.append(("ANCHOR_FACE",self.model.anchor_face_correspondence))
             if result.product_axis_mira_loss is not None:
@@ -3454,10 +3575,13 @@ class RSSvNextStructuralTrainer:
                     graphics_joint_ray_weight=self.product_joint_ray_weight,
                     component_udf_weight=self.component_udf_weight,
                     anchor_face_weight=self.product_anchor_face_weight,
+                    mstar_pose_raster_weight=self.product_mstar_pose_raster_weight,
                 )
             ),
             "compiler_acceptance_gaps": list(
-                self.product_curriculum.compiler_acceptance_gaps()
+                self.product_curriculum.compiler_acceptance_gaps(
+                    mstar_pose_raster_weight=self.product_mstar_pose_raster_weight,
+                )
             ),
             "model_release_ready": False,
             "product_proof_ready": False,
@@ -3550,6 +3674,11 @@ class RSSvNextStructuralTrainer:
             "graphics_rgb_registry_sha256": self.graphics_rgb_registry_sha256,
             "source_field_registry_sha256": self.source_field_registry_sha256,
             "realsas_joint_registry_sha256": self.realsas_joint_registry_sha256,
+            **({
+                "pose_raster_registry_sha256":self.pose_raster_registry_sha256,
+                "pose_raster_backend_id":self.pose_raster_backend_id,
+                "pose_raster_device_type":self.pose_raster_device_type,
+            } if self.product_mstar_pose_raster_weight>0 else {}),
             "global_step": self.global_step,
             "sampler_cursor": int(sampler_cursor),
             "model": self.model.state_dict(),
@@ -3588,6 +3717,12 @@ class RSSvNextStructuralTrainer:
                 != self.seeded_tessa_driver.policy_sha256
         ):
             raise ValueError("RSS_VNEXT_TRAIN_SEEDED_CHECKPOINT_REGISTRY_OR_PHASE_DRIFT")
+        if self.product_mstar_pose_raster_weight>0 and (
+            data.get("pose_raster_registry_sha256")!=self.pose_raster_registry_sha256
+            or data.get("pose_raster_backend_id")!=self.pose_raster_backend_id
+            or data.get("pose_raster_device_type")!=self.pose_raster_device_type
+        ):
+            raise ValueError("RSS_VNEXT_MSTAR_POSE_RASTER_CHECKPOINT_REGISTRY_OR_BACKEND_DRIFT")
         if self.component_udf_enabled and (
             data.get("component_udf_registry_sha256")
                 != self.component_udf_registry_sha256

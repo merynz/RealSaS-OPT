@@ -78,6 +78,8 @@ class ProductSeededAXISMIRAResultV1:
     chain_skin: Tensor | None = None
     eligible_chain_vertices: int = 0
     authority: str = "SOURCE_NATIVE_RIG_POSE_LOSS_ONLY_NOT_MODEL_RELEASE"
+    # Actual predicted SAME-M* posed vertices, never source/teacher XYZ.
+    predicted_posed_vertices: Tensor | None = None
 
 
 def product_seeded_axis_mira_objective_v1(
@@ -201,6 +203,7 @@ def product_seeded_axis_mira_objective_v1(
     total=weights.axis_program*axis_loss
     skin_loss=pose_loss=dynamic_loss=hard_loss=chain_loss=None
     pose_count=0
+    predicted_posed_vertices=None
     chain_count=0
     needs_skin=any(v>0 for v in (
         weights.source_skin,weights.posed_surface,
@@ -325,6 +328,7 @@ def product_seeded_axis_mira_objective_v1(
             posed=posed_lbs_from_joint_matrices(
                 mesh.rest_vertices_iris,skin,teacher.source_pose_matrices,
             )
+            predicted_posed_vertices=posed
             source_pose=teacher.source_candidate_posed
             mask=teacher.source_pose_mask
             position=F.smooth_l1_loss(
@@ -386,6 +390,7 @@ def product_seeded_axis_mira_objective_v1(
         posed=pose_loss,dynamic=dynamic_loss,hard_skin=hard_loss,
         eligible_pose_faces=pose_count,
         chain_skin=chain_loss,eligible_chain_vertices=chain_count,
+        predicted_posed_vertices=predicted_posed_vertices,
     )
 
 

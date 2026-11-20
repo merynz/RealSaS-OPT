@@ -258,6 +258,21 @@ asset_id/
 12. [Source-first truth foundry primitives](https://github.com/merynz/RealSaS-OPT/blob/main/docs/research/truth_foundry/TRUTH_FOUNDRY_V1.md)
 13. [Loss inventory (2026-11-17; dated snapshot, later decisions may supersede)](https://github.com/merynz/RealSaS-OPT/blob/main/models/rss_vnext/training_supervision_inventory_v1.json)
 
+## 12. Trainer Eki — Nitelikli hareketli M* 2D kaynak raster (2026-11-20)
+
+**Durum:** Yeni eğitim yolu yalnız `product_mstar_pose_raster_weight > 0` ve bağımsız kaynak kayıtlarıyla açılabilir. Varsayılan kapalıdır; kalite, A100 veya ProductProof kabulü değildir. Ana şart aynı TESSA **M\***, AXIS joint order ve MIRA native pose transport.
+
+Data Foundry, **gerçek source-native posed mesh** üzerinden, *öğrencinin tahmin ettiği mesh'i render ederek değil*, şunları üretebilmelidir:
+
+- `pose_index` ve native bind/rest pozundan türeyen `source_pose_matrices [1,P,J,4,4]`, `source_pose_mask [1,P,V]`, gerçek native-face/barycentric → final M\* transport ve aynı AXIS joint order SHA. Bu v1 loss, seçilen pozun **tüm M\* vertex'lerinde** geçerli source pose desteği ister; eksik support UNKNOWN ve o loss için ABSTAIN.
+- `cameras [1,1|2|6,13]` gerçek source 3D render kamera matrisleri, `height`, `width`, first-hit `rgb_white [1,R,3]`, `alpha [1,R,1]` ve bağımsız maskeler `rgb_mask/alpha_mask [1,R]`. İsteğe bağlı `role_indices/role_mask`, `normal_xyz/normal_mask`, `depth/depth_mask`; tüm optional maskeler kaynak kanıtıyla desteklenmelidir.
+- `source_3d_truth_binding_sha256` ve trusted launcher registry içinde dataset/asset lineage, source camera bytes, M\* topology identity, native pose transport SHA, source role/normal/depth/RGB/mask SHA, render resolution, generator pin SHA ve `SOURCE_NATIVE_OPAQUE_ZBUFFER_FIRST_HIT` görünürlük politikası.
+- Bu teacher yalnız **opak yüzey ve gerçek first-hit geometrik alpha** için geçerlidir. Şeffaf malzeme, görünmeyen bölgeler, kumaşın fizik parametresi, temas/XPBD, kaynak dışında tahmin edilen eksik UV ve animasyon klibi teacher'ı değildir.
+
+Eğitimde posed triangle ilk-hit raster, **pose-space vertex konumunu** görünürlük ve geometri için; **canonical/rest M\* vertex konumunu** H(x) üzerinden Graphics RGB logit ve SLR vertex posterioru için kullanır. RGB ilk-hit pikselinde **önce vertex logit'leri barycentrik harmanlanır, sonra sigmoid uygulanır**; bu sıralama Compiler UV atlasındaki `vertex_logits → barycentric → sigmoid` ile eşleşir. SLR posterioru vertex softmax sonrası face üzerinde ortalanır. Bu seçim, world-space texture swimming'i önlemeye yöneliktir. Compiler'a aktarılacak kalıcı bilgiler halen **M\* vertex/face/component/layer kimliği, AXIS program ve joint order, MIRA skin, source-vs-inferred Graphics provenance, canonical UV/texture atlas, appearance ownership/visibility, Mechanics koşulları ve ProductProof** olmalıdır. Raster loss tek başına bunların hepsini üretmiş/kanıtlamış sayılmaz.
+
+Kaynak kod: [posed M* Graphics teacher](https://github.com/merynz/RealSaS-OPT/blob/main/models/rss_vnext/product_mstar_pose_graphics_v1.py), [trainer](https://github.com/merynz/RealSaS-OPT/blob/main/models/rss_vnext/training_engine.py) ve [teknik kapsam/sınırlar](https://github.com/merynz/RealSaS-OPT/blob/main/docs/research/RSS_VNEXT_PRODUCT_POSED_MSTAR_GRAPHICS_TRAINING_20261120.md). Aktif loss–teacher gereksinimleri, sabit liste yerine trainer'ın `source_supervision_requirements_v1()` çıktısından da doğrulanmalıdır.
+
 ---
 
 **Devir cümlesi:** *Öğretmen paketlerimiz, modeli doğru cevaba zorla götüren gizli input değildir; kaynakta gerçekten ölçülmüş cevapları, aynı tek puppet'ın geometri–rig–skin–Graphics ilişkilerini öğrenebilmesi ve bağımsız doğrulayabilmesi için kayıpsız, maskeli ve adresli sunar.*

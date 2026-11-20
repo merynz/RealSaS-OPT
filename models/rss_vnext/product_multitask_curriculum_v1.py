@@ -30,9 +30,14 @@ class ProductSeededCurriculumV1:
         axis_mira_weights, graphics_rgb_weight: float,
         graphics_joint_ray_weight: float, component_udf_weight: float,
         anchor_face_weight: float,
+        mstar_pose_raster_weight: float = 0.,
     ) -> None:
         if self.stage not in STAGES:
             raise ValueError("RSS_VNEXT_CURRICULUM_STAGE_INVALID")
+        if mstar_pose_raster_weight > 0 and (
+            not seeded_mode or axis_mira_weights.posed_surface <= 0
+        ):
+            raise ValueError("RSS_VNEXT_CURRICULUM_POSED_MSTAR_REQUIRES_NATIVE_POSE")
         if self.stage == "COMPATIBILITY_UNSCHEDULED":
             return
         if not seeded_mode:
@@ -42,7 +47,8 @@ class ProductSeededCurriculumV1:
             + semantic_weights.surface_roles + semantic_weights.region_pairs
             + semantic_weights.typed_relations
         ) > 0
-        rgb = graphics_rgb_weight > 0 or graphics_joint_ray_weight > 0
+        rgb = (graphics_rgb_weight > 0 or graphics_joint_ray_weight > 0
+               or mstar_pose_raster_weight > 0)
         axis = axis_mira_weights.axis_program > 0
         posed = (
             axis_mira_weights.posed_surface > 0
@@ -77,6 +83,7 @@ class ProductSeededCurriculumV1:
         self, *, semantic_weights, axis_mira_weights,
         graphics_rgb_weight: float, graphics_joint_ray_weight: float,
         component_udf_weight: float, anchor_face_weight: float,
+        mstar_pose_raster_weight: float = 0.,
     ) -> dict[str, Mapping[str, str]]:
         """Loss->foundry witness; source observable != generated hypothesis.
 
@@ -137,6 +144,11 @@ class ProductSeededCurriculumV1:
                 "authority": "SOURCE_3D_RENDERED_RAY_STACK_AND_LAYER_MASK",
                 "purpose": "Joint color/opacity/visibility and SLR peeled targets",
             }
+        if mstar_pose_raster_weight > 0:
+            result["source_native_pose_mstar_2d_raster"] = {
+                "authority": "SOURCE_NATIVE_POSE_ZBUFFER_RGB_ALPHA_CAMERA_AND_MSTAR_ADDRESS",
+                "purpose": "Canonical-material first-hit M* posed raster; no teacher RGB into H",
+            }
         if axis_mira_weights.enabled:
             result["native_axis_rig"] = {
                 "authority": "SOURCE_NATIVE_JOINT_ORDER_PARENT_FRAMES",
@@ -172,10 +184,14 @@ class ProductSeededCurriculumV1:
             }
         return result
 
-    def compiler_acceptance_gaps(self) -> tuple[str, ...]:
+    def compiler_acceptance_gaps(
+        self, *, mstar_pose_raster_weight: float = 0.,
+    ) -> tuple[str, ...]:
         """Not extra source truths. Do not silently train what cannot be known."""
         return (
-            "PRODUCT_MSTAR_STAGE3_NATIVE_MOVING_RGBA_RASTER_NOT_CONNECTED",
+            ("POSED_MSTAR_STAGE3_TEACHER_FORCED_NOT_POST_XPBD_OR_FREE_RUNNING"
+             if mstar_pose_raster_weight > 0 else
+             "PRODUCT_MSTAR_STAGE3_NATIVE_MOVING_RGBA_RASTER_NOT_CONNECTED"),
             "UNSEEN_TWO_SOURCE_FREE_RUNNING_MSTAR_AXIS_MIRA_NOT_QUALIFIED",
             "GARMENT_BODY_CLEARANCE_AND_POST_PHYSICS_RASTER_NOT_QUALIFIED",
             "XPBD_MATERIAL_PINS_CONTACT_REQUIRE_AUTHORED_SOURCE_OR_POLICY",

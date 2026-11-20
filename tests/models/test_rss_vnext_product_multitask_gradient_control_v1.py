@@ -27,14 +27,15 @@ class TinyShared(nn.Module):
 
 
 def _result(*, geometry, semantic=None, graphics=None, mechanics=None,
-            component=None, anchor=None):
+            component=None, anchor=None, joint_rays=None):
     appearance_total = .75 * graphics if graphics is not None else None
+    rendered_total = .25 * joint_rays if joint_rays is not None else None
     mechanical_total = mechanics
     if anchor is not None:
         mechanical_total = (.5 * anchor if mechanical_total is None
                             else mechanical_total + .5 * anchor)
     total = geometry + (2.0 * component if component is not None else 0)
-    for v in (semantic, appearance_total, mechanical_total):
+    for v in (semantic, appearance_total, rendered_total, mechanical_total):
         if v is not None:
             total = total + v
     return SimpleNamespace(
@@ -43,7 +44,7 @@ def _result(*, geometry, semantic=None, graphics=None, mechanics=None,
         component_udf_loss=component,
         product_semantic_loss=semantic,
         graphics_source_rgb_loss=graphics,
-        realsas_joint_slrm_loss=None,
+        realsas_joint_slrm_loss=joint_rays,
         product_axis_mira_loss=mechanics,
         anchor_face_correspondence_loss=anchor,
     )
@@ -52,7 +53,7 @@ def _result(*, geometry, semantic=None, graphics=None, mechanics=None,
 def _families(result):
     return admitted_product_task_losses_v1(
         result, component_udf_weight=2.,
-        graphics_rgb_weight=.75, graphics_joint_ray_weight=.0,
+        graphics_rgb_weight=.75, graphics_joint_ray_weight=.25,
         anchor_face_weight=.5,
     )
 
@@ -73,10 +74,11 @@ def test_partition_counts_source_qualified_groups_once():
         mechanics=net.axis.private.square().sum(),
         component=x.square().sum(),
         anchor=(x[0] + 1) ** 2,
+        joint_rays=(x[0] + x[1]) ** 2,
     )
     families = _families(r)
     assert set(families) == {
-        "GEOMETRY", "SEMANTIC", "GRAPHICS", "MECHANICS"
+        "GEOMETRY", "SEMANTIC", "GRAPHICS", "JOINT_RENDER", "MECHANICS"
     }
     torch.testing.assert_close(sum(families.values()), r.total_loss)
 

@@ -45,6 +45,7 @@ class SDXLCanonicalTaskWeightsV2:
     checkpoint_path:str
     checkpoint_sha256:str
     pretrained_unet_sha256:str
+    vae_checkpoint_sha256:str
     qualified_corpus_sha256:str
     trained_steps:int
     schema:str=SCHEMA
@@ -58,6 +59,7 @@ class SDXLCanonicalTaskWeightsV2:
             or any(not _sha(v) for v in (
                 self.checkpoint_sha256,
                 self.pretrained_unet_sha256,
+                self.vae_checkpoint_sha256,
                 self.qualified_corpus_sha256,
             ))
             or type(self.trained_steps) is not int
@@ -84,11 +86,12 @@ def write_stage_a_task_weights_v2(
     conditioner:RSSvNextTwoImageConditionerV1,
     alpha_head:SDXLCanonicalAlphaHeadV2,
     trained_steps:int,pretrained_unet_sha256:str,
-    qualified_corpus_sha256:str,
+    vae_checkpoint_sha256:str,qualified_corpus_sha256:str,
 )->SDXLCanonicalTaskWeightsV2:
     if (
         type(trained_steps) is not int or trained_steps<1
         or not _sha(pretrained_unet_sha256)
+        or not _sha(vae_checkpoint_sha256)
         or not _sha(qualified_corpus_sha256)
     ):
         raise RuntimeError("RSS_VNEXT_SDXL_STAGE_A_UNTRAINED_SAVE_FORBIDDEN")
@@ -96,6 +99,7 @@ def write_stage_a_task_weights_v2(
         "schema":SCHEMA,
         "trained_steps":trained_steps,
         "pretrained_unet_sha256":pretrained_unet_sha256,
+        "vae_checkpoint_sha256":vae_checkpoint_sha256,
         "qualified_corpus_sha256":qualified_corpus_sha256,
         "lora":{k:v.detach().cpu().contiguous()
                 for k,v in _lora_params(unet).items()},
@@ -123,6 +127,7 @@ def write_stage_a_task_weights_v2(
     return SDXLCanonicalTaskWeightsV2(
         checkpoint_path=str(dest),checkpoint_sha256=_file_sha(dest),
         pretrained_unet_sha256=pretrained_unet_sha256,
+        vae_checkpoint_sha256=vae_checkpoint_sha256,
         qualified_corpus_sha256=qualified_corpus_sha256,
         trained_steps=trained_steps,
     )
@@ -138,6 +143,7 @@ def load_exact_stage_a_task_weights_v2(
         type(data) is not dict or data.get("schema")!=SCHEMA
         or data.get("trained_steps")!=receipt.trained_steps
         or data.get("pretrained_unet_sha256")!=receipt.pretrained_unet_sha256
+        or data.get("vae_checkpoint_sha256")!=receipt.vae_checkpoint_sha256
         or data.get("qualified_corpus_sha256")!=receipt.qualified_corpus_sha256
         or type(data.get("lora")) is not dict
         or type(data.get("conditioner")) is not dict
@@ -185,6 +191,8 @@ def sample_trained_stage_a_canonical_v2(
     time_ids:Tensor,height:int,width:int,steps:int,seed:int,
 )->PairedSDXLCanonicalPredictionV2:
     receipt.validate()
+    if getattr(vae,"_rss_vnext_vae_ancestor_sha256",None)!=receipt.vae_checkpoint_sha256:
+        raise RuntimeError("RSS_VNEXT_SDXL_STAGE_A_VAE_ANCESTRY_DRIFT")
     if any(
         getattr(module,"_rss_vnext_stage_a_task_sha256",None)
         !=receipt.checkpoint_sha256

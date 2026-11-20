@@ -115,6 +115,14 @@ from .product_multitask_gradient_control_v1 import (
     prepare_product_gradient_route_v1,
 )
 from .product_multitask_curriculum_v1 import ProductSeededCurriculumV1
+from .product_mstar_pose_graphics_v1 import (
+    NativeMstarPoseRasterTargetV1, NativeMstarPoseRasterWeightsV1,
+    qualified_product_mstar_pose_loss_v1,
+)
+from .realsas_flexicubes_mesh_render_v1 import (
+    stage3_default_raster_backend_v1, RASTER_ID as CPU_MSTAR_RASTER_ID,
+    PYTORCH3D_RASTER_ID as CUDA_MSTAR_RASTER_ID,
+)
 
 
 @dataclass
@@ -216,6 +224,9 @@ class RSSvNextStructuralTrainingBatch:
     realsas_joint_keep_roles: Tensor | None = None     # [B,R,K] bool
     realsas_joint_target: RealSaSJointTargetV1 | None = None
     realsas_joint_teacher_admission_key: str = ""
+    # Source-native real pose / moving M* RGB/alpha render (LOSS ONLY).
+    product_mstar_pose_render_target: NativeMstarPoseRasterTargetV1 | None = None
+    product_mstar_pose_render_admission_key: str = ""
 
     # Interim signed-surface training witness; not final foundry supervision.
     # Requires qualified source, mesh coordinate/camera bind and sample proof.
@@ -347,6 +358,9 @@ class RSSvNextTrainingResult:
     tessa_iris_surface_alignment_loss: Tensor | None = None
     realsas_joint_slrm_loss: Tensor | None = None
     eligible_realsas_joint_rays: int = 0
+    product_mstar_pose_raster_loss: Tensor | None = None
+    product_mstar_pose_raster_parts: dict[str, Tensor] | None = None
+    eligible_mstar_pose_raster_pixels: int = 0
     gradient_norm: Tensor | None = None
     gradient_interference_report: dict | None = None
     # Opt-in full shared-owner gradient route; never a scientific ProductPASS.
@@ -493,6 +507,7 @@ class RSSvNextStructuralTrainer:
         trusted_graphics_rgb_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_source_field_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_realsas_joint_scene_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_product_mstar_pose_raster_registry: Mapping[str, Mapping[str, object]] | None = None,
         # Explicit product-v1 admission: legacy token CE and product seeded
         # supervision can never be activated within the same optimizer phase.
         training_profile: str = "LEGACY_STRUCTURAL_RESEARCH",
@@ -507,6 +522,8 @@ class RSSvNextStructuralTrainer:
         # Optional source-native appearance and semantic losses, same H(x).
         product_graphics_rgb_weight: float = 0.0,
         product_joint_ray_weight: float = 0.0,
+        product_mstar_pose_raster_weight: float = 0.0,
+        product_mstar_pose_raster_loss_weights: NativeMstarPoseRasterWeightsV1 = NativeMstarPoseRasterWeightsV1(),
         product_semantic_weights: ProductSemanticWeightsV1 = ProductSemanticWeightsV1(),
         product_axis_mira_weights: ProductSeededAXISMIRAWeightsV1 = ProductSeededAXISMIRAWeightsV1(),
         product_anchor_face_weight: float = 0.0,

@@ -170,10 +170,16 @@ class PilotLedgerV1:
         )
         if receipt.previous_stage_weights_sha256!=previous:
             raise RuntimeError("RSS_VNEXT_PILOT_STAGE_PREVIOUS_WEIGHTS_DRIFT")
-        if previous is not None and receipt.input_weights_sha256!=previous:
-            # Real stage B has its *own* pretrained MV-Adapter weights and
-            # depends on A; use the separate B sidecar pretrained pin in
-            # validation evidence, not as a replacement for A's digest.
+        # Distinguish *dependency* from model weight *handoff*.
+        # B starts from its own genuine pretrained MV-Adapter, while taking
+        # trained A outputs as conditioning. C starts from structural/vision
+        # weights, while taking trained B outputs. Neither imports the prior
+        # stage's UNet into its own optimizer. D and E do transport the full
+        # shared student state and MUST match prior weights byte-for-byte.
+        if (
+            receipt.stage in ("D_EMBEDDED_MIRA_CODEC",)
+            or receipt.stage.startswith("E_")
+        ) and receipt.input_weights_sha256 != previous:
             raise RuntimeError("RSS_VNEXT_PILOT_STAGE_INPUT_CHECKPOINT_DRIFT")
         if (
             _file_digest(receipt.output_checkpoint_path)

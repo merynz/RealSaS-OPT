@@ -91,6 +91,7 @@ class SourceSDXLStageABOptimizerV2:
         noise_scheduler:Any,
         source_manifest_sha256:str,
         pretrained_source_sha256:str,
+        pretrained_mv_adapter_sha256:str|None=None,
         conditioner:RSSvNextTwoImageConditionerV1|None=None,
         task_a_alpha:SDXLCanonicalAlphaHeadV2|None=None,
         mv_pipeline:Any=None,
@@ -102,6 +103,10 @@ class SourceSDXLStageABOptimizerV2:
             stage not in ("A_CANONICAL_SDXL","B_PAIRED_RGB_NORMAL_MVADAPTER")
             or not _sha(source_manifest_sha256)
             or not _sha(pretrained_source_sha256)
+            or (stage=="B_PAIRED_RGB_NORMAL_MVADAPTER"
+                and not _sha(pretrained_mv_adapter_sha256))
+            or (stage=="A_CANONICAL_SDXL"
+                and pretrained_mv_adapter_sha256 is not None)
             or type(lr) not in (int,float) or not math.isfinite(lr)
             or not 1e-8<=lr<=1e-2
             or type(warmup_steps) is not int or not 0<=warmup_steps<=100000
@@ -116,6 +121,7 @@ class SourceSDXLStageABOptimizerV2:
         self.noise_scheduler=noise_scheduler
         self.source_manifest_sha256=source_manifest_sha256
         self.pretrained_source_sha256=pretrained_source_sha256
+        self.pretrained_mv_adapter_sha256=pretrained_mv_adapter_sha256
         self.conditioner=conditioner
         self.alpha=task_a_alpha
         self.pipeline=mv_pipeline
@@ -244,6 +250,31 @@ class SourceSDXLStageABOptimizerV2:
             learning_rate=float(self.optimizer.param_groups[0]["lr"]),
         )
 
+    def export_trained_task_weights(self,path:str|Path):
+        """Only after real optimizer steps; export exact v2 task ABI."""
+        if self.step < 1:
+            raise RuntimeError("RSS_VNEXT_STAGE_AB_NO_TRAINED_STEP_TO_EXPORT")
+        if self.stage=="A_CANONICAL_SDXL":
+            from .realsas_sdxl_stage_a_sampler_v2 import (
+                write_stage_a_task_weights_v2,
+            )
+            return write_stage_a_task_weights_v2(
+                path,unet=self.unet,conditioner=self.conditioner,
+                alpha_head=self.alpha,trained_steps=self.step,
+                pretrained_unet_sha256=self.pretrained_source_sha256,
+                qualified_corpus_sha256=self.source_manifest_sha256,
+            )
+        from .realsas_mvadapter_stage_b_sampler_v2 import (
+            write_stage_b_task_weights_v2,
+        )
+        return write_stage_b_task_weights_v2(
+            path,pipe=self.pipeline,task_heads=self.heads,
+            trained_steps=self.step,
+            pretrained_base_unet_sha256=self.pretrained_source_sha256,
+            pretrained_mv_adapter_sha256=self.pretrained_mv_adapter_sha256,
+            qualified_corpus_sha256=self.source_manifest_sha256,
+        )
+
     def save_resume_checkpoint(self,path:str|Path)->None:
         """Full optimizer+RNG resume; NOT task-weight release."""
         if self.step<1:
@@ -252,6 +283,7 @@ class SourceSDXLStageABOptimizerV2:
             "schema":SCHEMA,"stage":self.stage,"step":self.step,
             "source_manifest_sha256":self.source_manifest_sha256,
             "pretrained_source_sha256":self.pretrained_source_sha256,
+            "pretrained_mv_adapter_sha256":self.pretrained_mv_adapter_sha256,
             "optimizer_binding":self.optimizer_binding,
             "unet_trainable":{n:p.detach().cpu().contiguous()
                                for n,p in self.unet.named_parameters()
@@ -296,6 +328,8 @@ class SourceSDXLStageABOptimizerV2:
                 !=self.source_manifest_sha256
             or data.get("pretrained_source_sha256")
                 !=self.pretrained_source_sha256
+            or data.get("pretrained_mv_adapter_sha256")
+                !=self.pretrained_mv_adapter_sha256
             or data.get("optimizer_binding")!=self.optimizer_binding
             or type(data.get("step")) is not int
             or data["step"]<1

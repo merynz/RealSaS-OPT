@@ -29,6 +29,7 @@ from models.rss_vnext.product_real_pilot_codec_launcher_v1 import (
 )
 from models.rss_vnext.product_real_pilot_structural_launcher_v1 import (
     PilotStructuralEPhasePlanV1, PreparedPilotStructuralPhaseV1,
+    activate_real_pilot_e_training_mode_v1,
     save_real_pilot_structural_e_resume_v1,
     load_real_pilot_structural_e_resume_v1,
     execute_real_pilot_structural_e_phase_v1,
@@ -333,3 +334,23 @@ def test_d_codec_gradient_guard_blocks_disconnected_deployed_decoder():
     trainer.train_step(None)
     assert trainer.step==2
     assert not torch.equal(net.mira.codec.weight,old)
+
+def test_e_reactivates_shared_train_graph_but_preserves_frozen_eval_modes():
+    # D intentionally leaves the unified model in eval mode; E must
+    # reactivate learning without turning frozen vision/skin dropout back on.
+    net=nn.Module()
+    net.vision=nn.Sequential(nn.Linear(2,2),nn.Dropout(.1))
+    net.iris=nn.Sequential(nn.Linear(2,2),nn.Dropout(.1))
+    net.mira=nn.Module()
+    net.mira.codec=nn.Sequential(nn.Linear(2,2),nn.Dropout(.1))
+    net.mira.spatial_decoder=nn.Sequential(nn.Linear(2,2),nn.Dropout(.1))
+    net.mira.skin=nn.Sequential(nn.Linear(2,2),nn.Dropout(.1))
+    net.eval()
+    activate_real_pilot_e_training_mode_v1(net)
+    assert net.training and net.iris.training and net.mira.skin.training
+    assert not net.vision.training
+    assert not net.mira.codec.training
+    assert not net.mira.spatial_decoder.training
+    assert not net.vision[1].training
+    assert not net.mira.codec[1].training
+    assert not net.mira.spatial_decoder[1].training

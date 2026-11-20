@@ -640,9 +640,31 @@ async def execute_capability(request: dict[str, Any]) -> dict[str, Any]:
         from compiler.realsas_compiler_services.platform_worker.product_downstream_executor_v1 import (
             execute_proof_capability_v1,
         )
+        from compiler.rss_vnext.workers.rss_vnext_product_edit_native_evidence_bridge_v1 import (
+            make_trusted_native_edit_replayer_v1,
+        )
+        # Only the worker operator may provision an executable. Neither user
+        # request metadata nor a CAS witness is permitted to select a binary.
+        # Both host variables must be set together; no unpinned downgrade.
+        renderer_path = os.environ.get(
+            "REALSAS_PRODUCT_PROOF_NATIVE_RENDERER_PATH", "",
+        ).strip()
+        renderer_digest = os.environ.get(
+            "REALSAS_PRODUCT_PROOF_NATIVE_RENDERER_SHA256", "",
+        ).strip()
+        if bool(renderer_path) != bool(renderer_digest):
+            raise RuntimeError("PRODUCT_PROOF_HOST_RENDERER_PIN_CONFIG_INCOMPLETE")
+        edit_replayer = (
+            make_trusted_native_edit_replayer_v1(
+                renderer_executable=Path(renderer_path),
+                expected_renderer_executable_sha256=renderer_digest,
+            )
+            if renderer_path else None
+        )
         return await _with_heartbeat(
             lambda value: execute_proof_capability_v1(
                 value, read_object=_read_cas_object, put_bytes=_put_cas_bytes,
+                trusted_native_edit_replayer=edit_replayer,
             ), request,
         )
 

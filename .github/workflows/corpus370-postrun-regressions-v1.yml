@@ -26,6 +26,7 @@ on:
       - 'tests/corpus/test_tessa_exact_correspondence_v1.py'
       - 'tests/corpus/test_image_buffer_contract_v1.py'
       - 'tests/corpus/test_process_log_streaming_v1.py'
+      - 'tests/corpus/test_rss_vnext_source_supervision_coverage_v1.py'
   workflow_dispatch:
 
 permissions:
@@ -64,4 +65,5 @@ jobs:
             tests/corpus/test_source_capability_separation_v1.py \
             tests/corpus/test_isolated_local_probe_v1.py \
             tests/corpus/test_corpus370_evidence_slice_v1.py \
+            tests/corpus/test_rss_vnext_source_supervision_coverage_v1.py \
             tests/training/test_tessa_candidate_diagnostics_v1.py

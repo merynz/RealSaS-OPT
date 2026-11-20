@@ -205,6 +205,32 @@ class _StageABGradientRecorder:
         self.dataset_manifest_sha256=trainer.dataset_manifest_sha256
         self.grads:list[dict[str,float]]=[]
 
+    def assert_batch_source_identity(
+        self,envelope:RealPilotTrainingEnvelopeV1,
+    )->None:
+        # A/B source receipts bind one qualified asset, not a free-form
+        # minibatch. Until per-subject multi-key receipts exist, B=1 is
+        # mandatory. A hidden second subject must not enter a TRAIN update.
+        batch=envelope.batch
+        if self.trainer.stage==STAGE_A:
+            first=getattr(batch,"source_tokens",None)
+        else:
+            first=getattr(batch,"canonical_rgba",None)
+        key=getattr(batch,"source_render_qualification_key",None)
+        receipt=self.trainer.trusted_source_registry.get(key)
+        if (
+            not isinstance(first,Tensor)
+            or first.ndim<2
+            or first.shape[0]!=1
+            or not isinstance(receipt,Mapping)
+            or receipt.get("source_asset_sha256")
+                !=envelope.source_asset_sha256
+            or receipt.get("source_render_qualification_key")!=key
+        ):
+            raise ValueError(
+                "RSS_VNEXT_PILOT_STAGE_AB_PER_ASSET_TEACHER_IDENTITY_DRIFT"
+            )
+
     def train_step(self,batch:Any):
         result=self.trainer.train_step(batch)
         audited=dict(result.gradient_norms)

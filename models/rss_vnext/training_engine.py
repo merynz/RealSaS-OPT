@@ -631,6 +631,20 @@ class RSSvNextStructuralTrainer:
         product_axis_mira_weights.validate()
         product_mstar_pose_raster_loss_weights.validate()
         if (
+            type(product_native_layer_clearance_weight) not in (int,float)
+            or not math.isfinite(product_native_layer_clearance_weight)
+            or product_native_layer_clearance_weight < 0
+            or (product_native_layer_clearance_weight > 0 and (
+                not seeded_mode or product_axis_mira_weights.posed_surface <= 0
+                or product_axis_mira_weights.source_skin <= 0
+                or axis_training_policy != "PRODUCT_MESH_MATCHED_REQUIRED"
+                or not trusted_product_native_layer_clearance_registry
+            ))
+            or (product_native_layer_clearance_weight == 0 and
+                trusted_product_native_layer_clearance_registry)
+        ):
+            raise ValueError("RSS_VNEXT_NATIVE_LAYER_CLEARANCE_PHASE_POLICY")
+        if (
             type(product_mstar_pose_raster_weight) not in (int,float)
             or not math.isfinite(product_mstar_pose_raster_weight)
             or product_mstar_pose_raster_weight < 0
@@ -653,6 +667,7 @@ class RSSvNextStructuralTrainer:
             component_udf_weight=component_udf_weight,
             anchor_face_weight=product_anchor_face_weight,
             mstar_pose_raster_weight=product_mstar_pose_raster_weight,
+            native_layer_clearance_weight=product_native_layer_clearance_weight,
         )
         if product_axis_mira_weights.chain_skin>0 and not trusted_chain_teacher_registry:
             raise ValueError("RSS_VNEXT_CHAIN_SKIN_REQUIRES_SOURCE_NATIVE_REGISTRY")
@@ -773,6 +788,21 @@ class RSSvNextStructuralTrainer:
         self.component_udf_enabled = component_enabled
         self.product_hybrid_open_policy = product_hybrid_open_policy
         self.product_mstar_pose_raster_weight = float(product_mstar_pose_raster_weight)
+        self.product_native_layer_clearance_weight = float(product_native_layer_clearance_weight)
+        native_clearance_snapshot = {
+            str(k):dict(v) for k,v in
+            (trusted_product_native_layer_clearance_registry or {}).items()
+        }
+        self.trusted_product_native_layer_clearance_registry = MappingProxyType({
+            k:MappingProxyType(v) for k,v in native_clearance_snapshot.items()
+        })
+        self.native_layer_clearance_registry_sha256 = (
+            hashlib.sha256(json.dumps(
+                native_clearance_snapshot,sort_keys=True,separators=(",",":"),
+                allow_nan=False,
+            ).encode("utf8")).hexdigest()
+            if self.product_native_layer_clearance_weight>0 else ""
+        )
         self.product_mstar_pose_raster_loss_weights = product_mstar_pose_raster_loss_weights
         pose_raster_snapshot = {
             str(k):dict(v) for k,v in
@@ -915,6 +945,12 @@ class RSSvNextStructuralTrainer:
                 "seeded_anchor_native_mstar_address_required":True,
                 "source_anchor_missing_is_unknown_not_negative":True,
             } if self.product_anchor_face_weight>0 else {}),
+            **({
+                "product_native_layer_clearance_weight":self.product_native_layer_clearance_weight,
+                "native_layer_clearance_registry_sha256":self.native_layer_clearance_registry_sha256,
+                "source_signed_body_outward_and_face_barycentric_pose_required":True,
+                "xpbd_physics_truth_inferred":False,
+            } if self.product_native_layer_clearance_weight>0 else {}),
             **({
                 "product_mstar_pose_raster_weight":self.product_mstar_pose_raster_weight,
                 "product_mstar_pose_raster_weights":asdict(self.product_mstar_pose_raster_loss_weights),

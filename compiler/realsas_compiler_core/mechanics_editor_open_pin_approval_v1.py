@@ -133,6 +133,7 @@ def prepare_editor_approved_open_pin_domain_v1(
         or review.anchor_event_index < 0
         or type(review.source_mstar_topology_digest) is not str
         or len(review.source_mstar_topology_digest) != 64
+        or any(c not in "0123456789abcdef" for c in review.source_mstar_topology_digest)
         or not review.review_hash
         or review.review_hash != _hash_record(review, "review_hash")
         or not review.candidate_component_id
@@ -159,6 +160,11 @@ def prepare_editor_approved_open_pin_domain_v1(
         or not command.approved_host_chain_id
     ):
         raise QualificationError("EDITOR_PIN_EXPLICIT_AUTHORING_COMMAND_REQUIRED")
+    # A NEEDS_REPAIR review cannot be converted into an executable domain,
+    # even by signing a fresh command over the same uncorrected Skin lineage.
+    # Repair Skin, recompile its lineage and re-review before approval.
+    if review.state == "REVIEW_NEEDS_EXPLICIT_HOST_PIN_BINDING_REPAIR":
+        raise QualificationError("EDITOR_PIN_HOST_BINDING_REPAIR_REQUIRED")
     if (
         review.canonical_mesh_lineage_hash != mesh.mesh_lineage_hash
         or review.canonical_rig_lineage_hash != rig.rig_lineage_hash

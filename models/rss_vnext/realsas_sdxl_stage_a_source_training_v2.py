@@ -200,10 +200,12 @@ def source_sdxl_canonical_stage_a_loss_v2(
         canonical_pose_queries=batch.canonical_pose_queries,
     )
     predicted=predict_sdxl_unet_noise_from_two_images_v1(
-        unet=unet,noisy_latents=noisy,timestep=timesteps,
-        text_context=batch.prompt_embeds.repeat_interleave(2,dim=0),
-        paired_image_context=paired,
-        pooled_text_embedding=batch.pooled_text_embeds.repeat_interleave(2,dim=0),
+        unet=unet,
+        noisy_latents=noisy.to(dtype=next(unet.parameters()).dtype),
+        timestep=timesteps,
+        text_context=batch.prompt_embeds.repeat_interleave(2,dim=0).to(next(unet.parameters()).dtype),
+        paired_image_context=paired.to(next(unet.parameters()).dtype),
+        pooled_text_embedding=batch.pooled_text_embeds.repeat_interleave(2,dim=0).to(next(unet.parameters()).dtype),
         time_ids=batch.time_ids.repeat_interleave(2,dim=0),
     )
     mask=F.interpolate(

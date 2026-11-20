@@ -17,7 +17,7 @@ On an independently recorded **single control event** from the native rig, obser
 Qualified source-asset fields (loss-only) are:
 - `source_control_event_sha256` = independently authored source control event, exactly one changed control, recorded by a trusted source ledger; `source_scope` is `SOURCE_HOST_ONLY` or `SOURCE_BRANCH_ONLY`;
 - `baseline_pose_index` and later `intervention_pose_index`, indexing the **same** qualified `source_candidate_posed [1,P,V,3]`, `source_pose_mask [1,P,V]`, and `source_pose_matrices [1,P,J,4,4]` used by AXIS/MIRA;
-- `changed_world_joint_mask [J]`, checked against exact source joint matrix differences. World-joint motion alone is not evidence that **one** artist control was actuated; the independent trusted ledger must separately certify that;
+- `changed_skin_joint_matrix_mask [J]`, checked against exact source joint matrix differences. World-joint motion alone is not evidence that **one** artist control was actuated; the independent trusted ledger must separately certify that;
 - `responding_vertex_ids [K]` and `protected_vertex_ids [Q]` in the **same final TESSA M*** address namespace, with native face/barycentric transport. They must not overlap, be student-nearest predictions, or be guessed from names/SLR classes;
 - source landmark checks: measured responding vertices actually move, source protected vertices remain stationary within a declared normalized tolerance, and both poses have qualified per-vertex support.
 

@@ -13,13 +13,18 @@ manifest and independently authorized source receipts. No training runs at
 module import or during launcher construction.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 import math
 
 import torch
 
+from .product_real_pilot_resume_v1 import (
+    PilotDEPhaseResumeIdentityV1,
+    pilot_phase_plan_sha256_v1,
+    read_pilot_de_resume_v1, write_pilot_de_resume_v1,
+)
 from .product_real_pilot_cohort_v1 import (
     RealPilotAssetV1, RealPilotCohortReceiptV1,
 )
@@ -79,6 +84,8 @@ class PreparedPilotStructuralPhaseV1:
     initial_optimizer_binding_sha256:str
     incoming_handoff_model_sha256:str
     source_cohort_sha256:str
+    verified_resume_step:int|None=None
+    verified_resume_cursor:int=0
 
 
 def build_real_pilot_structural_e_phase_v1(
@@ -178,6 +185,64 @@ def build_real_pilot_structural_e_phase_v1(
     )
 
 
+def _structural_pilot_resume_identity_v1(
+    phase:PreparedPilotStructuralPhaseV1,
+)->PilotDEPhaseResumeIdentityV1:
+    return PilotDEPhaseResumeIdentityV1(
+        stage="E_"+phase.stage,
+        cohort_sha256=phase.source_cohort_sha256,
+        plan_sha256=pilot_phase_plan_sha256_v1(phase.plan),
+        incoming_model_state_sha256=phase.incoming_handoff_model_sha256,
+        optimizer_binding_sha256=phase.initial_optimizer_binding_sha256,
+        objective_policy_sha256=phase.trainer.objective_policy_sha256,
+    )
+
+
+def save_real_pilot_structural_e_resume_v1(
+    phase:PreparedPilotStructuralPhaseV1,
+    *,checkpoint_path:str|Path,sampler_cursor:int,
+)->Path:
+    """Save real E optimizer+model+RNG and bind phase plan/source receipt."""
+    current=phase.trainer.global_step
+    if not 0<=current<=phase.plan.planned_optimizer_steps:
+        raise RuntimeError("RSS_VNEXT_PILOT_E_RESUME_PROGRESS_INVALID")
+    identity=_structural_pilot_resume_identity_v1(phase)
+    identity.validate()
+    phase.trainer.save_checkpoint(checkpoint_path,sampler_cursor=sampler_cursor)
+    return write_pilot_de_resume_v1(
+        checkpoint_path,identity=identity,step=current,
+        sampler_cursor=sampler_cursor,
+    )
+
+
+def load_real_pilot_structural_e_resume_v1(
+    phase:PreparedPilotStructuralPhaseV1,
+    *,checkpoint_path:str|Path,
+)->PreparedPilotStructuralPhaseV1:
+    """Do not import E AdamW moments until lineage, stage and plan match."""
+    if phase.trainer.global_step!=0 or phase.trainer.optimizer.state:
+        raise RuntimeError("RSS_VNEXT_PILOT_E_RESUME_DESTINATION_NOT_FRESH")
+    expected,cursor=read_pilot_de_resume_v1(
+        checkpoint_path,identity=_structural_pilot_resume_identity_v1(phase),
+        max_steps=phase.plan.planned_optimizer_steps,
+    )
+    restored_cursor=phase.trainer.load_checkpoint(checkpoint_path)
+    if phase.trainer.global_step!=expected or restored_cursor!=cursor:
+        raise RuntimeError("RSS_VNEXT_PILOT_E_RESUME_STEP_OR_CURSOR_DRIFT")
+    return replace(
+        phase,verified_resume_step=expected,verified_resume_cursor=cursor,
+    )
+
+
+def export_real_pilot_structural_e_handoff_v1(
+    phase:PreparedPilotStructuralPhaseV1, *,path:str|Path,
+):
+    """No partial E1..E5 checkpoint may seed the next E stage."""
+    if phase.trainer.global_step!=phase.plan.planned_optimizer_steps:
+        raise RuntimeError("RSS_VNEXT_PILOT_E_UNFINISHED_PHASE_HANDOFF")
+    return phase.trainer.export_phase_handoff(path,target_kind="STRUCTURAL")
+
+
 def execute_real_pilot_structural_e_phase_v1(
     phase:PreparedPilotStructuralPhaseV1,*,
     examples:Iterable[RealPilotTrainingEnvelopeV1],
@@ -185,15 +250,17 @@ def execute_real_pilot_structural_e_phase_v1(
     cohort:RealPilotCohortReceiptV1,
 )->list[dict[str,object]]:
     """Runs actual PyTorch optimizer steps, but ONLY on user's TRAIN split."""
+    current=phase.trainer.global_step
     if (
         phase.source_cohort_sha256!=cohort.cohort_sha256
-        or phase.trainer.global_step!=0
+        or not 0<=current<phase.plan.planned_optimizer_steps
+        or (current>0 and phase.verified_resume_step!=current)
     ):
         raise ValueError("RSS_VNEXT_PILOT_E_STAGE_RESUME_EXPECTS_CHECKPOINT")
     outcome=run_source_qualified_pilot_updates_v1(
         trainer=phase.trainer,staged_examples=examples,
         source_index=source_index,cohort=cohort,
-        max_steps=phase.plan.planned_optimizer_steps,
+        max_steps=phase.plan.planned_optimizer_steps-current,
     )
     if phase.trainer.global_step!=phase.plan.planned_optimizer_steps:
         raise RuntimeError("RSS_VNEXT_PILOT_E_STAGE_OPTIMIZER_STEP_DRIFT")
@@ -206,4 +273,7 @@ __all__=[
     "PreparedPilotStructuralPhaseV1",
     "build_real_pilot_structural_e_phase_v1",
     "execute_real_pilot_structural_e_phase_v1",
+    "save_real_pilot_structural_e_resume_v1",
+    "load_real_pilot_structural_e_resume_v1",
+    "export_real_pilot_structural_e_handoff_v1",
 ]

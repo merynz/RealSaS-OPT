@@ -134,7 +134,12 @@ def build_real_pilot_stage_ab_v1(
     if (
         not isinstance(cohort,RealPilotCohortReceiptV1)
         or not cohort.source_evidence_bytes_verified
-        or cohort.full_pilot_launch_qualified
+        or not 300<=cohort.total_assets<=400
+        or cohort.train_assets<1
+        or cohort.val_assets<1
+        or cohort.unseen_test_assets<1
+        or cohort.train_assets+cohort.val_assets
+            +cohort.unseen_test_assets!=cohort.total_assets
         or cohort.cohort_sha256!=ledger.cohort_sha256
         or ledger.next_stage!=plan.stage
         or not isinstance(trusted_source_registry,Mapping)

@@ -17,7 +17,7 @@ from torch import Tensor, nn
 
 SCHEMA = "RealSaS.RSSvNext.ProductMultitaskGradientRouting.v1"
 MODES = frozenset({"WEIGHTED_SUM", "BOUNDED_SHARED_PCGRAD"})
-FAMILIES = ("GEOMETRY", "SEMANTIC", "GRAPHICS", "MECHANICS")
+FAMILIES = ("GEOMETRY", "SEMANTIC", "GRAPHICS", "JOINT_RENDER", "MECHANICS")
 # Ownership is explicit. Introducing additional owners requires code review.
 SHARED_OWNERS = (
     "iris.scene.",
@@ -114,19 +114,22 @@ def admitted_product_task_losses_v1(
     if sem is not None:
         groups["SEMANTIC"] = sem
 
-    appearance = []
-    for loss, coefficient, name in (
-        (result.graphics_source_rgb_loss, graphics_rgb_weight, "visible_rgb"),
-        (result.realsas_joint_slrm_loss, graphics_joint_ray_weight, "source_rays"),
-    ):
-        if loss is not None:
-            if coefficient <= 0:
-                raise RuntimeError(
-                    "RSS_VNEXT_MULTITASK_UNWEIGHTED_ACTIVE_GRAPHICS:" + name
-                )
-            appearance.append(coefficient * checked(loss, name))
-    if appearance:
-        groups["GRAPHICS"] = sum(appearance[1:], appearance[0])
+    # A first-hit visible RGB objective is NOT the same gradient task as
+    # 3D ray-rendered RGB/alpha/semantic transmittance. The second objective
+    # reaches multiple IRIS heads; folding it into Graphics would falsify
+    # measured Geometry-vs-Graphics gradient conflict.
+    if result.graphics_source_rgb_loss is not None:
+        if graphics_rgb_weight <= 0:
+            raise RuntimeError("RSS_VNEXT_MULTITASK_UNWEIGHTED_ACTIVE_RGB")
+        groups["GRAPHICS"] = graphics_rgb_weight * checked(
+            result.graphics_source_rgb_loss, "visible_rgb"
+        )
+    if result.realsas_joint_slrm_loss is not None:
+        if graphics_joint_ray_weight <= 0:
+            raise RuntimeError("RSS_VNEXT_MULTITASK_UNWEIGHTED_JOINT_RENDER")
+        groups["JOINT_RENDER"] = graphics_joint_ray_weight * checked(
+            result.realsas_joint_slrm_loss, "source_rgb_alpha_semantic_rays"
+        )
 
     mechanical = []
     if result.product_axis_mira_loss is not None:

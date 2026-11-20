@@ -696,15 +696,17 @@ class RealSaSSLRMTrainerV1:
         self.global_step+=1
         return parts
 
-    def export_phase_handoff(self,path:str|Path):
-        """Explicit S-LRM -> structural weights transfer, never optimizer resume."""
+    def export_phase_handoff(self,path:str|Path,*,target_kind:str="STRUCTURAL"):
+        """Transfer S-LRM -> codec or structural weights, never optimizer moments."""
+        if target_kind not in ("MIRA_CODEC","STRUCTURAL"):
+            raise ValueError("RSS_VNEXT_SLRM_HANDOFF_TARGET_UNSUPPORTED")
         from .training_phase_handoff_v1 import (
             export_rss_vnext_training_phase_handoff_v1,
         )
         self._assert_optimizer_ownership()
         return export_rss_vnext_training_phase_handoff_v1(
             path,model=self.model,source_kind="SLRM",
-            target_kind="STRUCTURAL",source_global_step=self.global_step,
+            target_kind=target_kind,source_global_step=self.global_step,
             dataset_manifest_sha256=self.manifest_sha256,
             source_objective_policy_sha256=self.policy_sha256,
             source_optimizer_binding_sha256=self.optimizer_ownership.binding_sha256,

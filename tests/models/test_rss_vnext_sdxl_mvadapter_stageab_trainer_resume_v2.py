@@ -268,3 +268,32 @@ def test_stage_b_task_fit_exact_native_weights_and_six_rgb_normals(tmp_path):
     )
     restored.load_resume_checkpoint(resume)
     assert restored.step==1
+
+def test_independent_source_truth_must_match_actual_loss_tensor_bytes():
+    from dataclasses import replace
+    from models.rss_vnext.realsas_stageab_source_court_v2 import (
+        qualify_stageab_training_source_v2,
+    )
+    stage="A_CANONICAL_SDXL"
+    batch=_batch_a()
+    registry=_source_registry(stage,batch)
+    assert len(qualify_stageab_training_source_v2(
+        stage=stage,batch=batch,
+        dataset_manifest_sha256="a"*64,
+        trusted_source_registry=registry,
+    ))==64
+    tampered=batch.target_canonical_rgba.clone()
+    tampered[0,0,0,0,0]=1-tampered[0,0,0,0,0]
+    with pytest.raises(ValueError,match="NATIVE_TEACHER_RECEIPT_DRIFT"):
+        qualify_stageab_training_source_v2(
+            stage=stage,
+            batch=replace(batch,target_canonical_rgba=tampered),
+            dataset_manifest_sha256="a"*64,
+            trusted_source_registry=registry,
+        )
+    with pytest.raises(ValueError,match="SOURCE_TRUTH_NOT_REGISTERED"):
+        qualify_stageab_training_source_v2(
+            stage=stage,batch=batch,
+            dataset_manifest_sha256="a"*64,
+            trusted_source_registry={},
+        )

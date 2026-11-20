@@ -70,12 +70,27 @@ def _batch_a():
     )
 
 
+def _official_test_scheduler():
+    # Synthetic regression only; production constructs the exact pinned
+    # upstream DDPM interpolated ShiftSNR schedule (scale 8).
+    from models.rss_vnext.realsas_mvadapter_shift_snr_training_v2 import (
+        schedule_alphas_sha256_v1,
+    )
+    result=Scheduler()
+    result._rss_vnext_training_shift_mode="interpolated"
+    result._rss_vnext_training_shift_scale=8.0
+    result._rss_vnext_shift_snr_schedule_sha256=(
+        schedule_alphas_sha256_v1(result)
+    )
+    return result
+
+
 def _stage_b():
     vae=VAE()
     vae._rss_vnext_vae_ancestor_sha256="d"*64
     return (
         SimpleNamespace(unet=FakeMVUnet(),cond_encoder=FakeControl(),
-                        vae=vae,scheduler=Scheduler()),
+                        vae=vae,scheduler=_official_test_scheduler()),
         MVAdapterRGBNormalTaskHeadsV2(),
     )
 
@@ -169,7 +184,7 @@ def test_stage_b_task_fit_exact_native_weights_and_six_rgb_normals(tmp_path):
     optimizer=SourceSDXLStageABOptimizerV2(
         stage="B_PAIRED_RGB_NORMAL_MVADAPTER",
         unet=pipeline.unet,vae=pipeline.vae,
-        noise_scheduler=Scheduler(),
+        noise_scheduler=_official_test_scheduler(),
         source_manifest_sha256="a"*64,
         pretrained_source_sha256="b"*64,
         source_vae_sha256="d"*64,
@@ -218,9 +233,10 @@ def test_stage_b_task_fit_exact_native_weights_and_six_rgb_normals(tmp_path):
     restored=SourceSDXLStageABOptimizerV2(
         stage="B_PAIRED_RGB_NORMAL_MVADAPTER",
         unet=other2.unet,vae=other2.vae,
-        noise_scheduler=Scheduler(),
+        noise_scheduler=_official_test_scheduler(),
         source_manifest_sha256="a"*64,
         pretrained_source_sha256="b"*64,
+        source_vae_sha256="d"*64,
         pretrained_mv_adapter_sha256="c"*64,
         mv_pipeline=other2,task_b_heads=heads2,warmup_steps=2,
     )

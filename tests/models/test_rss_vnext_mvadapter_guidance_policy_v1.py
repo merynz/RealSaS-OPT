@@ -99,7 +99,7 @@ def test_native_classifier_free_guidance_formula_uses_real_empty_prompt():
     epsilon_conditional=torch.tensor([[2.,3.,4.]])
     guidance=OfficialMVAdapterGuidancePolicyV1()
     guided=epsilon_negative+guidance.inference_guidance_scale*(
-        epsilon_conditional-epsilon_negative,
+        epsilon_conditional-epsilon_negative
     )
     assert torch.equal(guided,torch.tensor([[8.,9.,10.]]))
     assert not torch.equal(guided,epsilon_conditional)

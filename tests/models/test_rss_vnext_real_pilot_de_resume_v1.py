@@ -8,6 +8,12 @@ from types import SimpleNamespace
 import json
 
 import pytest
+import torch
+from torch import nn
+
+from models.rss_vnext.mira_embedded_codec_source_training_v1 import (
+    RSSvNextEmbeddedMIRASourceCodecTrainerV1,
+)
 
 from models.rss_vnext.product_real_pilot_resume_v1 import (
     PilotDEPhaseResumeIdentityV1,
@@ -274,3 +280,42 @@ def test_structural_resume_remaining_only_and_finished_handoff(monkeypatch,tmp_p
     assert export_real_pilot_structural_e_handoff_v1(
         restored,path=tmp_path/"next-e.pt",
     )=="E_WEIGHTS_EXPORTED"
+
+class TinyCodecNetwork(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.mira=nn.Module()
+        self.mira.codec=nn.Linear(2,1)
+        self.mira.spatial_decoder=nn.Linear(2,1)
+
+
+def test_d_codec_gradient_guard_blocks_disconnected_deployed_decoder():
+    net=TinyCodecNetwork()
+    optimizer=torch.optim.AdamW(net.parameters(),lr=.01)
+    trainer=object.__new__(RSSvNextEmbeddedMIRASourceCodecTrainerV1)
+    trainer.model=net
+    trainer.optimizer=optimizer
+    trainer.step=1  # Avoid periodic unrelated frozen-upstream hash check.
+    trainer._trainable_mira_names=frozenset(n for n,_ in net.named_parameters())
+    trainer.gradient_court_policy=SimpleNamespace(every_n_steps=0)
+    trainer.skin_decoder_mode="POINT_QUERY_CROSS_ATTENTION"
+    trainer._assert_scope=lambda:None
+    trainer._assert_frozen_state_identity=lambda:None
+
+    trainer.objective=lambda batch:SimpleNamespace(
+        loss=net.mira.codec.weight.square().sum(),
+    )
+    old=net.mira.codec.weight.detach().clone()
+    with pytest.raises(RuntimeError,match="REQUIRED_TRAINABLE_GRADIENT_MISSING"):
+        trainer.train_step(None)
+    assert trainer.step==1
+    assert not optimizer.state
+    assert torch.equal(net.mira.codec.weight,old)
+
+    trainer.objective=lambda batch:SimpleNamespace(
+        loss=(net.mira.codec.weight.square().sum()
+              +net.mira.spatial_decoder.weight.square().sum()),
+    )
+    trainer.train_step(None)
+    assert trainer.step==2
+    assert not torch.equal(net.mira.codec.weight,old)

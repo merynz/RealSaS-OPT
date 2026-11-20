@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Fail-closed 300–400 *real* source pilot with lineage-disjoint unseen splits.
+"""Fail-closed 300–400 *real* source pilot with user-authored split membership.
 
 This is an admission contract, NOT a dataset creator or a claim that 300–400
 licensed sources are already available. All fields must come from independently
@@ -101,26 +101,21 @@ class RealPilotCohortReceiptV1:
     unseen_test_assets: int
     lineage_groups: int
     teacher_family_coverage_train: dict[str, int]
-    unseen_holdout_source_id: str
     source_evidence_bytes_verified: bool
     full_pilot_launch_qualified: bool = False
 
 
 def qualify_real_pilot_cohort_v1(
-    assets: tuple[RealPilotAssetV1, ...], *,
-    unseen_anchor_source_id: str = "SK190",
+    assets: tuple[RealPilotAssetV1, ...],
 ) -> RealPilotCohortReceiptV1:
-    """Lock 300..400 independent REAL identities and true unseen evaluation.
+    """Validate 300..400 independently qualified identities without picking splits.
 
-    TRAIN and validation must be disjoint from UNSEEN_TEST at BOTH content and
-    native lineage level. Validation/test images are never training targets.
-    This does not permit trying test assets repeatedly to tune hyperparameters.
+    Every split comes exclusively from the user-supplied source manifest.
+    We enforce only disjointness, separate validation/test and train-only
+    optimizer access. No asset, especially SK190/Pieta, is automatically
+    assigned to a split; no 80/10/10 distribution is imposed.
     """
-    if (
-        type(assets) is not tuple or not 300 <= len(assets) <= 400
-        or type(unseen_anchor_source_id) is not str
-        or not unseen_anchor_source_id
-    ):
+    if type(assets) is not tuple or not 300 <= len(assets) <= 400:
         raise ValueError("RSS_VNEXT_REAL_PILOT_REQUIRES_300_TO_400_SOURCES")
     ids: set[str] = set()
     asset_sha: set[str] = set()
@@ -128,7 +123,6 @@ def qualify_real_pilot_cohort_v1(
     groups: dict[str, str] = {}
     counts = {split: 0 for split in SPLITS}
     coverage = {family: 0 for family in sorted(VALID_TEACHERS)}
-    anchor_found = False
     for item in assets:
         if type(item) is not RealPilotAssetV1:
             raise TypeError("RSS_VNEXT_REAL_PILOT_ASSET_TYPE")
@@ -149,22 +143,11 @@ def qualify_real_pilot_cohort_v1(
         if item.split == "TRAIN":
             for family in item.teacher_families:
                 coverage[family] += 1
-        if item.source_id == unseen_anchor_source_id:
-            anchor_found = True
-            if item.split != "UNSEEN_TEST":
-                raise ValueError("RSS_VNEXT_REAL_PILOT_PIETA_MUST_BE_UNSEEN")
-    if not anchor_found:
-        raise ValueError("RSS_VNEXT_REAL_PILOT_PIETA_MISSING")
+    # These are evaluation protocol requirements, NOT a suggested split ratio.
+    # Which asset enters which split remains exclusively user-controlled.
+    if any(counts[split] < 1 for split in SPLITS):
+        raise ValueError("RSS_VNEXT_REAL_PILOT_SPLIT_REQUIRED_NONEMPTY")
     total = len(assets)
-    target = {
-        "TRAIN": .80 * total, "VAL": .10 * total, "UNSEEN_TEST": .10 * total,
-    }
-    # Grouped-source splits may deviate by up to 5% of total; empty splits forbidden.
-    if any(
-        counts[split] < 1 or abs(counts[split] - target[split]) > .05 * total
-        for split in SPLITS
-    ):
-        raise ValueError("RSS_VNEXT_REAL_PILOT_SPLIT_DISTRIBUTION")
     content = [asdict(x) for x in sorted(assets, key=lambda x: x.source_id)]
     return RealPilotCohortReceiptV1(
         schema=SCHEMA,
@@ -175,7 +158,6 @@ def qualify_real_pilot_cohort_v1(
         unseen_test_assets=counts["UNSEEN_TEST"],
         lineage_groups=len(groups),
         teacher_family_coverage_train=coverage,
-        unseen_holdout_source_id=unseen_anchor_source_id,
         source_evidence_bytes_verified=False,
     )
 
@@ -191,9 +173,7 @@ def verify_pilot_source_evidence_v1(
     observation truth still need independent external authorization. This
     guarantees the run cannot be admitted on SHA-shaped placeholders.
     """
-    if cohort != qualify_real_pilot_cohort_v1(
-        assets, unseen_anchor_source_id=cohort.unseen_holdout_source_id,
-    ):
+    if cohort != qualify_real_pilot_cohort_v1(assets):
         raise ValueError("RSS_VNEXT_REAL_PILOT_COHORT_IDENTITY_DRIFT")
     root = Path(receipt_root).expanduser().resolve()
     if not root.is_dir():

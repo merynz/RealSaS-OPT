@@ -218,6 +218,50 @@ def test_open_pin_only_rsedit_persists_and_independently_requalifies_xpbd(tmp_pa
         )
 
 
+def test_reopened_pin_runs_existing_xpbd_without_auto_activation(tmp_path):
+    from compiler.realsas_compiler_core.canonical_mechanics_ir_v1 import (
+        mint_canonical_mechanics_v1,
+    )
+    from compiler.realsas_compiler_core.mechanics_live_runtime_v1 import (
+        evaluate_mechanics_intervention_frame_v1,
+    )
+    from compiler.realsas_compiler_core.mechanics_xpbd_surface_v1 import (
+        XPBDSurfacePolicyV1,
+    )
+    source,shell,review,command,_=_case(tmp_path)
+    blob,_=seal_editor_approved_open_pin_rsedit_v1(
+        source_rss_path=source,revision_path=shell,
+        review=review,command=command,
+    )
+    path=tmp_path/"physics-explicit-only.rsedit"
+    path.write_bytes(blob)
+    state=reopen_rss_vnext_canonical_user_edit_revision_v1(
+        revision_path=path,source_rss_path=source,
+    )
+    assert state["editor_open_pin"]["automatic_xpbd_activation"] is False
+    domain=state["editor_open_pin"]["prepared"].domain
+    policy=XPBDSurfacePolicyV1(domain_hash=domain.domain_hash)
+    mechanics=mint_canonical_mechanics_v1(
+        state["mesh"],state["rig"],state["skin"],
+    )
+    first=evaluate_mechanics_intervention_frame_v1(
+        state["mesh"],state["rig"],state["skin"],mechanics,
+        xpbd_surface_domain=domain,xpbd_surface_policy=policy,
+    )
+    assert first.xpbd_surface_state.ticks==0
+    advanced=evaluate_mechanics_intervention_frame_v1(
+        state["mesh"],state["rig"],state["skin"],mechanics,
+        xpbd_surface_domain=domain,xpbd_surface_policy=policy,
+        xpbd_surface_previous_state=first.xpbd_surface_state,
+        xpbd_surface_dt_seconds=1./60.,
+    )
+    assert advanced.xpbd_surface_state.ticks==2
+    assert advanced.deformation.canonical_mesh_vertex_ids==(
+        first.deformation.canonical_mesh_vertex_ids
+    )
+    assert advanced.deformation.positions!=first.deformation.positions
+
+
 def test_manual_editor_pin_override_remains_separate_from_neural_candidate(tmp_path):
     source,shell,review,command,held=_case(tmp_path,manual_pin_index=1)
     blob,row=seal_editor_approved_open_pin_rsedit_v1(

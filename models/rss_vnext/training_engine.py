@@ -127,6 +127,9 @@ from .product_native_control_intervention_v1 import (
     SourceNativeControlInterventionTeacherV1,
     qualified_native_control_intervention_loss_v1,
 )
+from .product_open_pin_vertex_head_v1 import (
+    SourceNativeOpenPinVertexTargetV1,source_native_open_pin_vertex_loss_v1,
+)
 from .realsas_flexicubes_mesh_render_v1 import (
     stage3_default_raster_backend_v1, RASTER_ID as CPU_MSTAR_RASTER_ID,
     PYTORCH3D_RASTER_ID as CUDA_MSTAR_RASTER_ID,
@@ -239,6 +242,8 @@ class RSSvNextStructuralTrainingBatch:
     product_native_layer_clearance_admission_key: str = ""
     product_native_control_intervention_teacher: SourceNativeControlInterventionTeacherV1 | None = None
     product_native_control_intervention_admission_key: str = ""
+    product_open_pin_vertex_target: SourceNativeOpenPinVertexTargetV1 | None = None
+    product_open_pin_vertex_admission_key: str = ""
 
     # Interim signed-surface training witness; not final foundry supervision.
     # Requires qualified source, mesh coordinate/camera bind and sample proof.
@@ -379,6 +384,8 @@ class RSSvNextTrainingResult:
     product_native_control_intervention_loss: Tensor | None = None
     product_native_control_intervention_parts: dict[str,Tensor] | None = None
     eligible_native_control_intervention_vertices: int = 0
+    product_open_pin_vertex_loss: Tensor | None = None
+    eligible_open_pin_vertex_labels: int = 0
     gradient_norm: Tensor | None = None
     gradient_interference_report: dict | None = None
     # Opt-in full shared-owner gradient route; never a scientific ProductPASS.
@@ -528,6 +535,7 @@ class RSSvNextStructuralTrainer:
         trusted_product_mstar_pose_raster_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_product_native_layer_clearance_registry: Mapping[str, Mapping[str, object]] | None = None,
         trusted_product_native_control_intervention_registry: Mapping[str, Mapping[str, object]] | None = None,
+        trusted_product_open_pin_vertex_registry: Mapping[str, Mapping[str, object]] | None = None,
         # Explicit product-v1 admission: legacy token CE and product seeded
         # supervision can never be activated within the same optimizer phase.
         training_profile: str = "LEGACY_STRUCTURAL_RESEARCH",
@@ -545,6 +553,7 @@ class RSSvNextStructuralTrainer:
         product_mstar_pose_raster_weight: float = 0.0,
         product_native_layer_clearance_weight: float = 0.0,
         product_native_control_intervention_weight: float = 0.0,
+        product_open_pin_vertex_weight: float = 0.0,
         product_mstar_pose_raster_loss_weights: NativeMstarPoseRasterWeightsV1 = NativeMstarPoseRasterWeightsV1(),
         product_semantic_weights: ProductSemanticWeightsV1 = ProductSemanticWeightsV1(),
         product_axis_mira_weights: ProductSeededAXISMIRAWeightsV1 = ProductSeededAXISMIRAWeightsV1(),

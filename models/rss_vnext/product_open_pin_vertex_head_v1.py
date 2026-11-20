@@ -222,6 +222,8 @@ def source_native_open_pin_vertex_loss_v1(
     dataset_manifest_sha256: str,
     candidate_mstar_topology_address_sha256: str,
     source_asset_sha256: str, source_qualification_key: str,
+    source_anchor_face_targets: Tensor | None,
+    source_anchor_face_mask: Tensor | None,
     original_rgba_sha256: str, original_camera_sha256: str,
     combined_generation_checkpoint_sha256: str,
 ) -> tuple[Tensor|None,int]:
@@ -241,6 +243,31 @@ def source_native_open_pin_vertex_loss_v1(
     ):
         raise ValueError("RSS_VNEXT_NATIVE_PIN_VERTEX_SOURCE_REQUIRED")
     teacher.validate(output)
+    a,v=output.pin_logits.shape
+    f=int(output.face_component_ids.shape[0])
+    if (
+        not isinstance(source_anchor_face_targets,Tensor)
+        or not isinstance(source_anchor_face_mask,Tensor)
+        or source_anchor_face_targets.shape!=(a,2)
+        or source_anchor_face_mask.shape!=(a,2)
+        or source_anchor_face_targets.dtype!=torch.long
+        or source_anchor_face_mask.dtype!=torch.bool
+        or source_anchor_face_targets.device!=output.pin_logits.device
+        or source_anchor_face_mask.device!=output.pin_logits.device
+        or not bool(source_anchor_face_mask.all())
+        or bool((source_anchor_face_targets<0).any())
+        or bool((source_anchor_face_targets>=f).any())
+    ):
+        raise ValueError("RSS_VNEXT_NATIVE_PIN_SOURCE_HELD_HOLDER_REQUIRED")
+    owner=output.face_component_ids[source_anchor_face_targets[:,0]]
+    holder=output.face_component_ids[source_anchor_face_targets[:,1]]
+    if (
+        bool((owner==holder).any())
+        or bool((output.vertex_component_ids[None,:].expand(a,-1)[
+            teacher.known_mask
+        ] != owner[:,None].expand(-1,v)[teacher.known_mask]).any())
+    ):
+        raise ValueError("RSS_VNEXT_NATIVE_PIN_HELD_COMPONENT_DRIFT")
     expected={
         "admission_status":"QUALIFIED_SOURCE_NATIVE_OPEN_PIN_VERTEX_REINDEX",
         "schema":TEACHER_SCHEMA,
@@ -255,6 +282,9 @@ def source_native_open_pin_vertex_loss_v1(
             candidate_mstar_topology_address_sha256,
         "mesh_topology_digest":output.mesh_topology_digest,
         "axis_sequence_digest":output.axis_sequence_digest,
+        "source_anchor_face_targets_sha256":_digest_tensor(source_anchor_face_targets),
+        "source_anchor_face_mask_sha256":_digest_tensor(source_anchor_face_mask),
+        "source_held_holder_are_distinct_components":True,
         "native_open_hem_sha256":teacher.native_open_hem_sha256,
         "native_pin_witness_sha256":teacher.native_pin_witness_sha256,
         "heldout_host_only_intervention_sha256":

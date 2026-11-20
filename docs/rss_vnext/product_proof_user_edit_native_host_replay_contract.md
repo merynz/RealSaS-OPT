@@ -48,10 +48,19 @@ reopened **candidate** and
 `independently_native_replayed_edit_frame_count=0`. Once independently
 replayed, one bounded edit frame may be reported, but not continuous motion.
 
-The default platform worker currently does not configure this optional
-callback; therefore deployed runs **do not yet get a host-positive edit
-sample** just by adding CAS artifacts. A production host must explicitly
-provision the trusted renderer binary and inject the callable.
+The actual platform worker now provisions the optional callback only from
+**operator-controlled environment**:
+
+- `REALSAS_PRODUCT_PROOF_NATIVE_RENDERER_PATH` — local installed C++ binary
+- `REALSAS_PRODUCT_PROOF_NATIVE_RENDERER_SHA256` — exact trusted binary digest
+
+Both must be supplied together or the worker refuses the incomplete pin
+configuration. Neither setting can be supplied by user request or CAS
+metadata. The worker verifies the executable SHA before use; each replayer
+execution checks it again and runs isolated SHA-verified file snapshots.
+With neither variable configured, deployed proof remains untrusted-candidate
+only and fail-closed. Provisioning a binary does not turn on ProductPASS by
+itself.
 
 ## Deliberate fail-closed boundary
 

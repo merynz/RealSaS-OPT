@@ -269,6 +269,13 @@ def load_official_pretrained_i2mv_stage_b_v1(
         or pipe.unet.config.cross_attention_dim != 2048
     ):
         raise RuntimeError("RSS_VNEXT_PRETRAINED_LOADED_UNET_ARCH_DRIFT")
+    schedule_mod = _verified_upstream_module(
+        "mvadapter.schedulers.scheduling_shift_snr", pin=pin,
+    )
+    pipe.scheduler = schedule_mod.ShiftSNRScheduler.from_scheduler(
+        pipe.scheduler, shift_mode="interpolated", shift_scale=8.0,
+        scheduler_class=None,
+    )
     pipe.init_custom_adapter(num_views=6)
     pipe.load_custom_adapter(
         str(Path(pin.adapter_snapshot_dir).expanduser().resolve()),
@@ -314,13 +321,31 @@ def run_official_pretrained_six_rgb_v1(
     source = Path(reference_canonical_png).expanduser()
     if not source.is_file() or source.suffix.lower() != ".png":
         raise ValueError("RSS_VNEXT_PRETRAINED_CANONICAL_REFERENCE_REQUIRED")
+    # Preserve official MV-Adapter reference preprocessing: alpha crop,
+    # fit inside 90% of canvas, and middle-gray transparent background.
+    # Stretching the image to square would distort BUSTED's morphology.
+    import numpy as np
     with Image.open(source) as file:
-        original = file.convert("RGBA")
-        white = Image.new("RGBA", original.size, (255, 255, 255, 255))
-        white.alpha_composite(original)
-        reference = white.convert("RGB").resize(
-            (image_size, image_size), resample=Image.Resampling.LANCZOS,
-        )
+        rgba = np.asarray(file.convert("RGBA"))
+    y, x = np.where(rgba[..., 3] > 0)
+    if y.size == 0:
+        raise ValueError("RSS_VNEXT_PRETRAINED_REFERENCE_ALPHA_EMPTY")
+    y0, y1 = max(int(y.min())-1, 0), min(int(y.max())+1, rgba.shape[0])
+    x0, x1 = max(int(x.min())-1, 0), min(int(x.max())+1, rgba.shape[1])
+    cropped = Image.fromarray(rgba[y0:y1,x0:x1])
+    scale = image_size*0.9/max(cropped.height,cropped.width)
+    final_size = (max(1,int(cropped.width*scale)),
+                  max(1,int(cropped.height*scale)))
+    cropped = cropped.resize(final_size, resample=Image.Resampling.BICUBIC)
+    canvas = Image.new("RGBA",(image_size,image_size),(0,0,0,0))
+    canvas.alpha_composite(cropped,(
+        (image_size-final_size[0])//2,(image_size-final_size[1])//2,
+    ))
+    composed=np.asarray(canvas).astype(np.float32)/255.
+    reference=Image.fromarray(np.uint8(np.clip(
+        255*(composed[...,:3]*composed[...,3:4]
+             + .5*(1-composed[...,3:4])),0,255,
+    )))
     pipe = load_official_pretrained_i2mv_stage_b_v1(
         pin, device=device, dtype=dtype,
     )

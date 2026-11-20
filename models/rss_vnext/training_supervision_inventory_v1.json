@@ -24,7 +24,8 @@
     "models/rss_vnext/component_conditioned_udf_v1.py",
     "models/rss_vnext/product_semantic_supervision_v1.py",
     "models/rss_vnext/product_graphics_supervision_v1.py",
-    "models/rss_vnext/product_axis_mira_seeded_training_v1.py"
+    "models/rss_vnext/product_axis_mira_seeded_training_v1.py",
+    "models/rss_vnext/product_open_pin_vertex_head_v1.py"
   ],
   "separation_principles": [
     "One persistent shared IRIS H(x) and source/asset identity.",
@@ -1003,6 +1004,13 @@
       "losses": "axis_rig_skin_codes, axis_posed_surface, anchor_face_correspondence",
       "state": "DIRECT_AND_INDIRECT",
       "connection": "Real source hierarchy, interventions, AXIS causal token grammar, frozen MIRA codec Optional product-seeded same-Mstar source-qualified AXIS/MIRA direct loss path exists, distinct from legacy topology-token AXIS; native pose transport and codec freeze required; not a real-corpus release proof."
+    },
+    {
+      "module": "open_pin_vertex",
+      "output": "Source-neutral OPEN M* boundary pin support logits per causal AXIS socket anchor",
+      "losses": "product_open_pin_vertex_loss (opt-in, native OPEN hem + host intervention source only)",
+      "state": "DIRECT_SOURCE_QUALIFIED_SEEDED_LOSS_OPTIONAL",
+      "connection": "Exact one-H(x)/one-TESSA-M*/AXIS control input; mask non-boundary vertices, trained only on independently source-addressed pins, no inferred XPBD/material/attachment authority; default OFF until licensed native pin corpus and held-out interventions"
     },
     {
       "module": "anchor_face_correspondence",

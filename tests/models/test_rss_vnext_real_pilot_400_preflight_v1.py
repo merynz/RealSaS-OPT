@@ -217,6 +217,10 @@ def test_train_runner_never_uses_validation_or_unseen_examples(admitted):
         def __init__(self):
             self.calls=0
             self.step=0
+        def assert_pilot_batch_source_asset_v1(self,batch,asset_sha):
+            expected=assets[int(batch)-1].source_asset_sha256
+            if asset_sha!=expected:
+                raise RuntimeError("TEST_PILOT_BATCH_SOURCE_MISMATCH")
         def train_step(self,batch):
             self.calls+=1
             self.step+=1
@@ -236,6 +240,16 @@ def test_train_runner_never_uses_validation_or_unseen_examples(admitted):
     assert runner.calls==2
     assert len(results)==2
     assert [r["step"] for r in results]==[1,2]
+    # A TRAIN envelope with a different TRAIN asset's authorized batch is
+    # not source-equivalent. Nor may VAL tensor truth be relabeled TRAIN.
+    with pytest.raises(RuntimeError,match="TEST_PILOT_BATCH_SOURCE_MISMATCH"):
+        run_source_qualified_pilot_updates_v1(
+            trainer=runner,staged_examples=[
+                RealPilotTrainingEnvelopeV1(
+                    assets[1].source_id,assets[1].source_asset_sha256,1.,
+                ),
+            ],source_index=source_index,cohort=cohort,max_steps=1,
+        )
     with pytest.raises(ValueError,match="SOURCE_INDEX_COHORT_DRIFT"):
         run_source_qualified_pilot_updates_v1(
             trainer=runner,staged_examples=train,cohort=cohort,
@@ -260,6 +274,8 @@ def test_train_runner_never_uses_validation_or_unseen_examples(admitted):
     class SilentCounter:
         dataset_manifest_sha256=cohort.cohort_sha256
         step=0
+        def assert_pilot_batch_source_asset_v1(self,batch,asset_sha):
+            assert asset_sha==assets[0].source_asset_sha256
         def train_step(self,batch):
             return {"total":torch.tensor(1.)}
     with pytest.raises(RuntimeError,match="OPTIMIZER_STEP_NOT_RECORDED"):

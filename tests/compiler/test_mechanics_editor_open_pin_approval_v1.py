@@ -170,6 +170,18 @@ def test_forged_review_user_action_and_altered_command_fail_closed():
         )
 
 
+def test_host_binding_repair_review_cannot_skip_guided_repair():
+    _,review,command,args=_case()
+    flagged=replace(
+        review,state="REVIEW_NEEDS_EXPLICIT_HOST_PIN_BINDING_REPAIR",
+    ).sealed()
+    attempted=replace(command,review_hash=flagged.review_hash).sealed()
+    with pytest.raises(QualificationError,match="HOST_BINDING_REPAIR_REQUIRED"):
+        prepare_editor_approved_open_pin_domain_v1(
+            **{**args,"review":flagged,"command":attempted},
+        )
+
+
 def test_manual_pin_override_is_user_edit_not_source_or_auto_physics():
     _,review,command,args=_case()
     manual=replace(command,approved_pin_vertex_ids=("MV:1",)).sealed()

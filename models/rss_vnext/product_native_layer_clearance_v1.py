@@ -47,7 +47,8 @@ class SourceNativeLayerClearanceTeacherV1:
                    for ch in self.source_asset_sha256)
             or type(self.source_qualification_key) is not str
             or not self.source_qualification_key
-            or not 1 <= k <= 131072
+            or not 1 <= k <= 65536
+            or p * k > 2_097_152  # bounded source pose/pair memory, no OOM fallback
             or self.garment_vertex_ids.shape != (k,)
             or self.body_face_ids.shape != (k,)
             or self.body_face_barycentric.shape != (k, 3)

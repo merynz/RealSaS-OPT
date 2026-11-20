@@ -258,6 +258,31 @@ def load_pilot_ledger_v1(path:str|Path)->PilotLedgerV1:
     return ledger
 
 
+def requalify_pilot_ledger_artifacts_v1(
+    ledger:PilotLedgerV1, *, cohort:RealPilotCohortReceiptV1,
+)->None:
+    """Recheck every PREVIOUS stage at each new phase launch.
+
+    Structural validation alone accepts a loaded JSON ledger containing
+    SHA-shaped claims. The original advance() court additionally checks
+    actual output checkpoint bytes, VAL report bytes and its gradient
+    statement, and actual CUDA evidence bytes/schema. Replay it from
+    the user's identical source-verified cohort: no missing/altered prior
+    artifact may authorize an A/B/C/D/E optimizer.
+    """
+    ledger.validate()
+    if (
+        not cohort.source_evidence_bytes_verified
+        or ledger.cohort_sha256!=cohort.cohort_sha256
+    ):
+        raise RuntimeError("RSS_VNEXT_PILOT_REQUALIFY_COHORT_DRIFT")
+    reconstructed=empty_pilot_ledger_v1(cohort)
+    for receipt in ledger.completed:
+        reconstructed=reconstructed.advance(receipt,cohort=cohort)
+    if reconstructed.digest!=ledger.digest:
+        raise RuntimeError("RSS_VNEXT_PILOT_REQUALIFY_REPLAY_DRIFT")
+
+
 @dataclass(frozen=True)
 class RealPilotTrainingEnvelopeV1:
     """Caller must supply an independently source-admitted trainer batch."""
@@ -358,5 +383,6 @@ __all__=[
     "SCHEMA","STAGES","STAGE_KIND","E_CURRICULUM","FINAL_TEST_STAGE",
     "PilotCompletedStageV1","PilotLedgerV1","empty_pilot_ledger_v1",
     "save_pilot_ledger_v1","load_pilot_ledger_v1",
+    "requalify_pilot_ledger_artifacts_v1",
     "RealPilotTrainingEnvelopeV1","run_source_qualified_pilot_updates_v1",
 ]

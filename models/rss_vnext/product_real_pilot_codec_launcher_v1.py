@@ -36,6 +36,7 @@ from .product_real_pilot_cohort_v1 import (
 from .product_real_pilot_execution_v1 import (
     PilotLedgerV1,RealPilotTrainingEnvelopeV1,
     run_source_qualified_pilot_updates_v1,_file_digest,
+    requalify_pilot_ledger_artifacts_v1,
 )
 
 
@@ -98,6 +99,7 @@ def build_real_pilot_embedded_codec_phase_v1(
         or not trusted_source_skin_registry
     ):
         raise ValueError("RSS_VNEXT_PILOT_CODEC_STAGE_OR_TEACHER_NOT_ADMITTED")
+    requalify_pilot_ledger_artifacts_v1(ledger,cohort=cohort)
     prev=ledger.completed[-1]
     source=Path(prior_handoff_file).expanduser().resolve()
     expected=Path(prev.output_checkpoint_path).expanduser().resolve()

@@ -121,6 +121,21 @@ class _ProvenanceBoundSLRMTrainerV1:
     def global_step(self) -> int:
         return self.trainer.global_step
 
+    def assert_pilot_batch_source_asset_v1(
+        self, batch: RealSaSSLRMBatchV1, expected_source_asset_sha256: str,
+    ) -> None:
+        """C's admitted source render may never be relabeled as another asset."""
+        key = getattr(batch, "admitted_3d_render_key", None)
+        receipt = self.trainer.trusted_source_3d_render_registry.get(key)
+        if (
+            type(expected_source_asset_sha256) is not str
+            or len(expected_source_asset_sha256) != 64
+            or receipt is None
+            or receipt.get("source_asset_sha256") != expected_source_asset_sha256
+            or receipt.get("dataset_manifest_sha256") != self.dataset_manifest_sha256
+        ):
+            raise RuntimeError("RSS_VNEXT_PILOT_SLRM_BATCH_ASSET_IDENTITY_DRIFT")
+
     def train_step(self, batch: RealSaSSLRMBatchV1) -> dict[str, Tensor]:
         before = self.trainer.global_step
         if before >= self.plan.total_steps:

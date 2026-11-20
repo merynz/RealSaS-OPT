@@ -123,6 +123,14 @@ class SourceSDXLStageABOptimizerV2:
         self.unet=unet
         self.vae=vae
         self.noise_scheduler=noise_scheduler
+        self.training_noise_schedule_sha256=None
+        if stage=="B_PAIRED_RGB_NORMAL_MVADAPTER":
+            from .realsas_mvadapter_shift_snr_training_v2 import (
+                require_pinned_official_mvadapter_schedule_v2,
+            )
+            self.training_noise_schedule_sha256=(
+                require_pinned_official_mvadapter_schedule_v2(noise_scheduler)
+            )
         self.source_manifest_sha256=source_manifest_sha256
         self.pretrained_source_sha256=pretrained_source_sha256
         self.source_vae_sha256=source_vae_sha256
@@ -278,6 +286,7 @@ class SourceSDXLStageABOptimizerV2:
             trained_steps=self.step,
             pretrained_base_unet_sha256=self.pretrained_source_sha256,
             pretrained_mv_adapter_sha256=self.pretrained_mv_adapter_sha256,
+            training_noise_schedule_sha256=self.training_noise_schedule_sha256,
             vae_checkpoint_sha256=self.source_vae_sha256,
             qualified_corpus_sha256=self.source_manifest_sha256,
         )
@@ -292,6 +301,7 @@ class SourceSDXLStageABOptimizerV2:
             "pretrained_source_sha256":self.pretrained_source_sha256,
             "pretrained_mv_adapter_sha256":self.pretrained_mv_adapter_sha256,
             "source_vae_sha256":self.source_vae_sha256,
+            "training_noise_schedule_sha256":self.training_noise_schedule_sha256,
             "optimizer_binding":self.optimizer_binding,
             "unet_trainable":{n:p.detach().cpu().contiguous()
                                for n,p in self.unet.named_parameters()
@@ -339,6 +349,8 @@ class SourceSDXLStageABOptimizerV2:
             or data.get("pretrained_mv_adapter_sha256")
                 !=self.pretrained_mv_adapter_sha256
             or data.get("source_vae_sha256")!=self.source_vae_sha256
+            or data.get("training_noise_schedule_sha256")
+                !=self.training_noise_schedule_sha256
             or data.get("optimizer_binding")!=self.optimizer_binding
             or type(data.get("step")) is not int
             or data["step"]<1

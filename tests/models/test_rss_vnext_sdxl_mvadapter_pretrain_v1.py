@@ -72,7 +72,7 @@ def test_changed_weight_or_source_code_is_rejected(tmp_path):
     (adapter / m.ADAPTER_WEIGHT).write_bytes(b"other model")
     with pytest.raises(RuntimeError, match="CHECKPOINT_BYTES_DRIFT"):
         m.verify_strong_pretrained_snapshots_v1(pin)
-    pin, base, adapter, code = _fixture(tmp_path)
+    pin, base, adapter, code = _fixture(tmp_path / "modified-source")
     (code / "mvadapter" / "__init__.py").write_text("# silently modified")
     with pytest.raises(RuntimeError, match="UPSTREAM_CODE_DRIFT"):
         m.verify_strong_pretrained_snapshots_v1(pin)

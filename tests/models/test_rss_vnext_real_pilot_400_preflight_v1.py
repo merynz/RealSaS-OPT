@@ -274,6 +274,31 @@ def test_train_runner_rejects_cohort_index_substitution_before_gradients(admitte
     assert trainer.calls==0
 
 
+def test_train_runner_enforces_per_subject_teacher_hook_before_optimizer(admitted):
+    assets,root,cohort=admitted
+    class Trainer:
+        dataset_manifest_sha256=cohort.cohort_sha256
+        calls=0
+        examined=0
+        def assert_batch_source_identity(self,envelope):
+            self.examined+=1
+            raise ValueError("PER_ASSET_TEACHER_IDENTITY_DRIFT")
+        def train_step(self,batch):
+            self.calls+=1
+            raise AssertionError("SOURCE_REJECTED_BUT_GRADIENT_EXECUTED")
+    trainer=Trainer()
+    envelope=RealPilotTrainingEnvelopeV1(
+        assets[0].source_id,assets[0].source_asset_sha256,1.,
+    )
+    with pytest.raises(ValueError,match="PER_ASSET_TEACHER_IDENTITY_DRIFT"):
+        run_source_qualified_pilot_updates_v1(
+            trainer=trainer,staged_examples=(envelope,),
+            source_index={a.source_id:a for a in assets},
+            cohort=cohort,max_steps=1,
+        )
+    assert trainer.examined==1 and trainer.calls==0
+
+
 class TinyProduct(nn.Module):
     def __init__(self):
         super().__init__()

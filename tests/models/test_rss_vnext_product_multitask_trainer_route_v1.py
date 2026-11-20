@@ -38,7 +38,7 @@ def test_live_seeded_geometry_plus_graphics_uses_same_shared_H(monkeypatch):
         "RealSaS.RSSvNext.ProductMultitaskGradientRouting.v1"
     )
     assert set(report["active_shared_task_families"]) == {
-        "GEOMETRY", "GRAPHICS"
+        "GEOMETRY", "GRAPHICS", "JOINT_RENDER"
     }
     assert report["task_private_gradients_preserved"]
     assert report["first_order_total_descent_preserved"]

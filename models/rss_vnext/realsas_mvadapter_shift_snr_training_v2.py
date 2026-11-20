@@ -51,7 +51,21 @@ def build_official_mvadapter_training_scheduler_v2(
     upstream=_verified_upstream_module(
         "mvadapter.schedulers.scheduling_shift_snr",pin=pin,
     )
-    original=DDPMScheduler.from_config(pipeline.scheduler.config)
+    # The pretrained pipeline may already have shifted its inference
+    # scheduler. Always reconstruct ONCE from the sealed unshifted base
+    # schedule rather than a previously-shifted scheduler's betas.
+    base_config=getattr(
+        pipeline,"_rss_vnext_unshifted_scheduler_config",None,
+    )
+    if base_config is None:
+        # Raw pipelines only; an already shifted scheduler lacking a
+        # recorded ancestor cannot be safely shifted again.
+        if getattr(pipeline.scheduler.config,"trained_betas",None) is not None:
+            raise RuntimeError(
+                "RSS_VNEXT_MVADAPTER_SHIFTED_SCHEDULER_BASELINE_MISSING"
+            )
+        base_config=pipeline.scheduler.config
+    original=DDPMScheduler.from_config(base_config)
     shifted=upstream.ShiftSNRScheduler.from_scheduler(
         original,shift_mode=SHIFT_MODE,shift_scale=SHIFT_SCALE,
         scheduler_class=DDPMScheduler,
@@ -63,6 +77,7 @@ def build_official_mvadapter_training_scheduler_v2(
     )
     shifted._rss_vnext_training_shift_mode=SHIFT_MODE
     shifted._rss_vnext_training_shift_scale=SHIFT_SCALE
+    pipeline.scheduler=shifted
     return shifted
 
 

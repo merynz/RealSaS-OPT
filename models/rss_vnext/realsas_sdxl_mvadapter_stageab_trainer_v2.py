@@ -276,6 +276,16 @@ class SourceSDXLStageABOptimizerV2:
         }
         self.optimizer_binding=_optimizer_binding(self.groups,exact_names)
         self.device=next(self.unet.parameters()).device
+        # The real SDXL native MV attention at 768px and six row-wise
+        # coupled views is activation-heavy. Train the FULL pretrained
+        # adapter, never a tiny replacement, with checkpoint/recompute.
+        if self.device.type=="cuda":
+            checkpoint=getattr(self.unet,"enable_gradient_checkpointing",None)
+            if not callable(checkpoint):
+                raise RuntimeError(
+                    "RSS_VNEXT_STAGE_AB_SDXL_ACTIVATION_CHECKPOINT_REQUIRED"
+                )
+            checkpoint()
         self.autocast_dtype=(torch.bfloat16 if amp_dtype=="BF16"
                              else torch.float16)
         self.scaler=torch.amp.GradScaler(

@@ -222,9 +222,13 @@ def mv_adapter_stage_b_loss_v2(
         reconstructed.reshape(b*6,4,h//8,w//8),
         (h,w),
     ).reshape(b,6,1,h,w)
-    alpha=F.binary_cross_entropy_with_logits(
-        alpha_pred,source.alpha.float(),
+    # Source-qualified pixels only; unknown alpha cannot supervise a
+    # fabricated transparent/opaque negative.
+    alpha_raw=F.binary_cross_entropy_with_logits(
+        alpha_pred,source.alpha.float(),reduction="none",
     )
+    alpha_valid=source.valid.float()
+    alpha=(alpha_raw*alpha_valid).sum()/alpha_valid.sum().clamp_min(1.)
     loss=rgb+normal+float(alpha_weight)*alpha
     if not bool(torch.isfinite(loss).all()) or not loss.requires_grad:
         raise RuntimeError("RSS_VNEXT_MVADAPTER_STAGE_B_LOSS_DISCONNECTED")

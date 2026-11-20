@@ -35,7 +35,7 @@ class SourceNativeControlInterventionTeacherV1:
     source_scope: str
     baseline_pose_index: int
     intervention_pose_index: int
-    changed_world_joint_mask: Tensor  # [J], measured from source matrices
+    changed_skin_joint_matrix_mask: Tensor  # [J], measured from source matrices
     responding_vertex_ids: Tensor     # [K], final TESSA M* addresses
     protected_vertex_ids: Tensor      # [Q], also final M*, disjoint from K
 
@@ -66,8 +66,8 @@ class SourceNativeControlInterventionTeacherV1:
             or source_pose_matrices.shape[:2] != (1, p)
             or source_pose_mask.shape != (1, p, v)
             or source_pose_mask.dtype != torch.bool
-            or self.changed_world_joint_mask.shape != (j,)
-            or self.changed_world_joint_mask.dtype != torch.bool
+            or self.changed_skin_joint_matrix_mask.shape != (j,)
+            or self.changed_skin_joint_matrix_mask.dtype != torch.bool
             or self.responding_vertex_ids.ndim != 1
             or self.protected_vertex_ids.ndim != 1
             or self.responding_vertex_ids.dtype != torch.long
@@ -78,7 +78,7 @@ class SourceNativeControlInterventionTeacherV1:
                + self.protected_vertex_ids.numel() > 65536
             or any(t.device != source_posed.device for t in (
                 source_pose_mask, source_pose_matrices,
-                self.changed_world_joint_mask, self.responding_vertex_ids,
+                self.changed_skin_joint_matrix_mask, self.responding_vertex_ids,
                 self.protected_vertex_ids,
             ))
             or not bool(torch.isfinite(source_posed).all())
@@ -100,7 +100,7 @@ class SourceNativeControlInterventionTeacherV1:
         changed = (b - a).abs().amax(dim=(-1, -2)) > 1e-5
         if (
             not bool(changed.any())
-            or not torch.equal(changed, self.changed_world_joint_mask)
+            or not torch.equal(changed, self.changed_skin_joint_matrix_mask)
         ):
             raise ValueError("RSS_VNEXT_CONTROL_INTERVENTION_JOINT_WITNESS")
         source_delta = (
@@ -194,8 +194,8 @@ def qualified_native_control_intervention_loss_v1(
         "source_posed_sha256": tensor_digest(source_posed),
         "source_pose_mask_sha256": tensor_digest(source_pose_mask),
         "source_pose_matrices_sha256": tensor_digest(source_pose_matrices),
-        "changed_world_joint_mask_sha256":
-            tensor_digest(teacher.changed_world_joint_mask),
+        "changed_skin_joint_matrix_mask_sha256":
+            tensor_digest(teacher.changed_skin_joint_matrix_mask),
         "responding_vertex_ids_sha256":
             tensor_digest(teacher.responding_vertex_ids),
         "protected_vertex_ids_sha256":

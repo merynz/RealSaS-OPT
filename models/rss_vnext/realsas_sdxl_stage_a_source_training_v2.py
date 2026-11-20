@@ -221,9 +221,13 @@ def source_sdxl_canonical_stage_a_loss_v2(
     )[timesteps].view(b*2,1,1,1)
     x0=(noisy-(1.-a).sqrt()*predicted)/a.sqrt().clamp_min(1.e-5)
     logits=alpha_head(x0,(h,w)).reshape(b,2,1,h,w)
-    alpha=F.binary_cross_entropy_with_logits(
-        logits,rgba[:,:,3:4].float(),
+    # Alpha teacher is only valid where source renderer independently
+    # certified mask pixels. Unknown never becomes a negative background.
+    alpha_raw=F.binary_cross_entropy_with_logits(
+        logits,rgba[:,:,3:4].float(),reduction="none",
     )
+    valid=batch.target_valid.float()
+    alpha=(alpha_raw*valid).sum()/valid.sum().clamp_min(1.)
     total=epsilon+alpha*float(alpha_weight)
     if not bool(torch.isfinite(total).all()) or not total.requires_grad:
         raise RuntimeError("RSS_VNEXT_SDXL_STAGE_A_LOSS_DISCONNECTED")

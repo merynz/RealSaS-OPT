@@ -17,7 +17,7 @@ from torch import Tensor, nn
 
 SCHEMA = "RealSaS.RSSvNext.ProductMultitaskGradientRouting.v1"
 MODES = frozenset({"WEIGHTED_SUM", "BOUNDED_SHARED_PCGRAD"})
-FAMILIES = ("GEOMETRY", "SEMANTIC", "GRAPHICS", "JOINT_RENDER", "MECHANICS")
+FAMILIES = ("GEOMETRY", "SEMANTIC", "GRAPHICS", "JOINT_RENDER", "MECHANICS", "POSED_MSTAR_RENDER")
 # Ownership is explicit. Introducing additional owners requires code review.
 SHARED_OWNERS = (
     "iris.scene.",
@@ -68,6 +68,7 @@ def admitted_product_task_losses_v1(
     graphics_rgb_weight: float,
     graphics_joint_ray_weight: float,
     anchor_face_weight: float,
+    mstar_pose_raster_weight: float = 0.,
 ) -> dict[str, Tensor]:
     """Partition EXACTLY the qualified product total; never duplicate a subloss.
 
@@ -86,6 +87,7 @@ def admitted_product_task_losses_v1(
         for weight in (
             component_udf_weight, graphics_rgb_weight,
             graphics_joint_ray_weight, anchor_face_weight,
+            mstar_pose_raster_weight,
         )
     ):
         raise ValueError("RSS_VNEXT_MULTITASK_LOSS_WEIGHTS_INVALID")
@@ -129,6 +131,17 @@ def admitted_product_task_losses_v1(
             raise RuntimeError("RSS_VNEXT_MULTITASK_UNWEIGHTED_JOINT_RENDER")
         groups["JOINT_RENDER"] = graphics_joint_ray_weight * checked(
             result.realsas_joint_slrm_loss, "source_rgb_alpha_semantic_rays"
+        )
+
+    # Screen-space M* render backpropagates to Geometry, SLR, Graphics, AXIS
+    # and MIRA. It is NOT only Graphics or the earlier shared-H ray objective.
+    # Keeping it separate preserves honest inter-task gradient attribution.
+    posed_raster_loss = getattr(result, "product_mstar_pose_raster_loss", None)
+    if posed_raster_loss is not None:
+        if mstar_pose_raster_weight <= 0:
+            raise RuntimeError("RSS_VNEXT_MULTITASK_UNWEIGHTED_POSED_MSTAR")
+        groups["POSED_MSTAR_RENDER"] = mstar_pose_raster_weight * checked(
+            posed_raster_loss, "posed_mstar_render",
         )
 
     mechanical = []

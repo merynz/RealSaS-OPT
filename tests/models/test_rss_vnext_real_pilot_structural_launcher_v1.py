@@ -6,6 +6,11 @@ from dataclasses import replace
 
 import pytest
 
+from models.rss_vnext.product_real_pilot_codec_launcher_v1 import (
+    PilotEmbeddedCodecPlanV1,
+    build_real_pilot_embedded_codec_phase_v1,
+)
+
 from models.rss_vnext.product_real_pilot_structural_launcher_v1 import (
     PilotStructuralEPhasePlanV1,
     build_real_pilot_structural_e_phase_v1,
@@ -57,3 +62,28 @@ def test_launch_cannot_skip_untrained_abcd_or_manufacture_source_splits():
             prior_handoff_file="/tmp/nonexistent-structural-source.pt",
             source_trainer_kwargs={},
         )
+
+def test_slrm_codec_phase_requires_proven_training_origin_before_any_optimizer():
+    cohort=RealPilotCohortReceiptV1(
+        schema=COHORT_SCHEMA,cohort_sha256="a"*64,
+        total_assets=300,train_assets=285,val_assets=10,
+        unseen_test_assets=5,lineage_groups=300,
+        teacher_family_coverage_train={},
+        source_evidence_bytes_verified=True,
+    )
+    ledger=PilotLedgerV1(
+        schema=LEDGER_SCHEMA,cohort_sha256=cohort.cohort_sha256,
+        completed=(),
+    )
+    plan=PilotEmbeddedCodecPlanV1(
+        optimizer_steps=100,learning_rate=5e-5,
+    )
+    plan.validate()
+    with pytest.raises(ValueError,match="CODEC_STAGE_OR_TEACHER_NOT_ADMITTED"):
+        build_real_pilot_embedded_codec_phase_v1(
+            model=None,cohort=cohort,ledger=ledger,
+            prior_handoff_file="/tmp/no-real-slrm-checkpoint.pt",
+            plan=plan,trusted_source_skin_registry={"fictional":"not-used"},
+        )
+    with pytest.raises(ValueError,match="CODEC_SCHEDULE_INVALID"):
+        replace(plan,source_area_skin_weight=-1.).validate()

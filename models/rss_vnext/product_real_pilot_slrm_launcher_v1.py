@@ -327,6 +327,7 @@ def build_real_pilot_slrm_phase_v1(
         lpips_loss_fn=lpips_loss_fn,
         clip_gradient_norm=plan.clip_gradient_norm,
         input_profile=REALSAS_SIX_VIEW_TRAINING_PROFILE,
+        required_gradient_prefixes=("iris.",),
     )
     return PreparedPilotSLRMPhaseV1(
         trainer=_ProvenanceBoundSLRMTrainerV1(

@@ -72,13 +72,27 @@ def mv_adapter_controls_from_13d_virtual_cameras_v2(
 def fixed_sdxl_mvadapter_two_plus_six_cameras_v2(
     batch:int,*,device:str,dtype:torch.dtype,image_size:int,
 )->tuple[Tensor,Tensor,Tensor]:
+    # Virtual camera frames are geometric evidence, not model activations.
+    # Construct and validate in FP32 even when SDXL/MV-Adapter is running
+    # under CUDA FP16/BF16; rounding the 13D camera before the policy check
+    # otherwise violates the strict orthonormal/canonical-camera contract.
+    if dtype not in (
+        torch.float16,torch.bfloat16,torch.float32,torch.float64,
+    ):
+        raise ValueError("RSS_VNEXT_MVADAPTER_CAMERA_OUTPUT_DTYPE_INVALID")
+    camera_dtype=(
+        torch.float32
+        if dtype in (torch.float16,torch.bfloat16) else dtype
+    )
     canonical,six=target_canonical_and_six_cameras_v1(
-        batch,device=device,dtype=dtype,
+        batch,device=device,dtype=camera_dtype,
     )
     control=mv_adapter_controls_from_13d_virtual_cameras_v2(
         six,height=image_size,width=image_size,
     )
-    return canonical,six,control
+    # Only the six channel CNN inputs follow the network's mixed precision.
+    # Keep canonical/six camera authority as FP32 for downstream validation.
+    return canonical,six,control.to(dtype=dtype)
 
 
 __all__=[

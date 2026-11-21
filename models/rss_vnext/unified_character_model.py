@@ -70,23 +70,46 @@ from .contracts import RSSvNextConfig, RSSvNextOutput, RSSvNextSceneState
 
 
 class RSSvNextFrozenDINOv2(nn.Module):
-    """Production-oriented local-only vision token adapter.
+    """Frozen DINOv2 ViT-L/14 + four registers, with two original source views.
 
-    Requires transformers + locally cached pretrained DINOv2-S. It never
-    downloads weights or substitutes randomly initialized features. Alpha
-    remains intact in the source carrier; only the encoder's input is matted.
+    The source 1024px RGBA observations are NEVER modified or reclassified as
+    synthetic views. Just as StdGEN decouples high-res generation from S-LRM
+    encoding, the frozen ViT receives a deterministic 448px white-matted
+    image while downstream source observations remain full-resolution.
+    Three-stage training and inference use the same adapter and interpolation.
     """
 
-    def __init__(self, model_path: str, *, expected_dim: int = 384) -> None:
+    architecture_id = "RSS.vNext.Vision.DINOv2-L14-Reg4.TwoView.448.v1"
+    feature_dim = 1024
+    patch_size = 14
+    num_register_tokens = 4
+    vision_side = 448
+    token_count = (vision_side // patch_size) ** 2
+
+    def __init__(self, model_path: str, *, expected_dim: int = 1024) -> None:
         super().__init__()
+        if expected_dim != self.feature_dim or not isinstance(model_path, str) or not model_path.strip():
+            raise ValueError("RSS_VNEXT_LARGE_REGISTERED_VISION_CONFIG_INVALID")
         try:
             from transformers import AutoModel
         except ImportError as exc:
             raise RuntimeError("RSS_VNEXT_TRANSFORMERS_REQUIRED") from exc
-        self.backbone = AutoModel.from_pretrained(model_path, local_files_only=True)
-        hidden = int(self.backbone.config.hidden_size)
-        if hidden != expected_dim:
-            raise ValueError("RSS_VNEXT_DINO_HIDDEN_WIDTH_DRIFT")
+        # Never fetch from the network or silently initialize a random model.
+        self.backbone = AutoModel.from_pretrained(
+            model_path, local_files_only=True, trust_remote_code=False,
+        )
+        cfg = self.backbone.config
+        expected = {
+            "model_type": "dinov2_with_registers",
+            "hidden_size": 1024,
+            "patch_size": 14,
+            "num_register_tokens": 4,
+            "num_hidden_layers": 24,
+            "num_attention_heads": 16,
+            "num_channels": 3,
+        }
+        if any(getattr(cfg, key, None) != value for key, value in expected.items()):
+            raise RuntimeError("RSS_VNEXT_LARGE_REGISTERED_BACKBONE_ARCHITECTURE_DRIFT")
         self.register_buffer(
             "mean", torch.tensor([0.485, 0.456, 0.406])[None, :, None, None],
             persistent=False,
@@ -97,7 +120,7 @@ class RSSvNextFrozenDINOv2(nn.Module):
         )
         self.backbone.requires_grad_(False)
         self.backbone.eval()
-        self.expected_dim = expected_dim
+        self.expected_dim = self.feature_dim
 
     def train(self, mode: bool = True):
         super().train(mode)
@@ -105,28 +128,48 @@ class RSSvNextFrozenDINOv2(nn.Module):
         return self
 
     def forward(self, rgba: Tensor) -> tuple[Tensor, Tensor]:
-        if rgba.ndim != 5 or rgba.shape[1:3] != (2,4):
+        if rgba.ndim != 5 or rgba.shape[1:3] != (2, 4):
             raise ValueError("RSS_VNEXT_DINO_EXPECTS_TWO_RGBA")
         return self.forward_variable_views(rgba)
 
     def forward_variable_views(self, rgba: Tensor) -> tuple[Tensor, Tensor]:
-        if rgba.ndim != 5 or rgba.shape[1] not in (1,2,6) or rgba.shape[2] != 4:
+        if rgba.ndim != 5 or rgba.shape[1] not in (1, 2, 6) or rgba.shape[2] != 4:
             raise ValueError("RSS_VNEXT_REALSAS_DINO_EXPECT_ONE_TWO_OR_SIX_RGBA")
+        if (
+            not torch.is_floating_point(rgba) or not bool(torch.isfinite(rgba).all())
+            or bool(((rgba < 0) | (rgba > 1)).any())
+        ):
+            raise ValueError("RSS_VNEXT_DINO_RGBA_NUMERIC_INVALID")
         b, v, _, h, w = rgba.shape
-        if h % 14 or w % 14:
-            raise ValueError("RSS_VNEXT_DINO_PATCH_DIVISIBILITY")
-        rgb = rgba[:, :, :3]
-        alpha = rgba[:, :, 3:4]
+        if h < 64 or w < 64 or h != w:
+            raise ValueError("RSS_VNEXT_DINO_SQUARE_SOURCE_REQUIRED")
+        # White-matte at native resolution, THEN downsample: preserves alpha
+        # edges without bleeding transparent RGB into the visible image.
+        rgb, alpha = rgba[:, :, :3], rgba[:, :, 3:4]
         matted = rgb * alpha + (1.0 - alpha)
-        x = ((matted.reshape(b * v, 3, h, w) - self.mean) / self.std)
+        source = matted.reshape(b * v, 3, h, w)
+        if h != self.vision_side:
+            source = F.interpolate(
+                source, size=(self.vision_side, self.vision_side),
+                mode="bicubic", align_corners=False, antialias=True,
+            ).clamp_(0.0, 1.0)
+        x = (source - self.mean) / self.std
         with torch.no_grad():
-            tokens = self.backbone(pixel_values=x).last_hidden_state[:, 1:]
-        t = tokens.shape[1]
-        if t != (h // 14) * (w // 14):
-            raise ValueError("RSS_VNEXT_DINO_PATCH_COUNT_DRIFT")
-        xy = _xy_grid(h // 14, w // 14, rgba.device, rgba.dtype)
-        return tokens.reshape(b, v, t, self.expected_dim), xy[None, None].expand(b, v, -1, -1)
-
+            hidden = self.backbone(pixel_values=x).last_hidden_state
+        n = self.token_count
+        # HF DINOv2-with-registers order is CLS, four register tokens, patches.
+        if hidden.shape != (b * v, 1 + self.num_register_tokens + n, self.feature_dim):
+            raise RuntimeError("RSS_VNEXT_DINO_REGISTER_PATCH_TOKEN_COUNT_DRIFT")
+        patches = hidden[:, 1 + self.num_register_tokens:]
+        xy = _xy_grid(
+            self.vision_side // self.patch_size,
+            self.vision_side // self.patch_size,
+            rgba.device, rgba.dtype,
+        )
+        return (
+            patches.reshape(b, v, n, self.feature_dim),
+            xy[None, None].expand(b, v, -1, -1),
+        )
 
 def _xy_grid(h: int, w: int, device, dtype) -> Tensor:
     yy = (torch.arange(h, device=device, dtype=dtype) + 0.5) * (2.0 / h) - 1

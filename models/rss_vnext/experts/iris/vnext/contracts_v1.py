@@ -9,11 +9,11 @@ from models.tessa.v1.model_v1 import TESSAConfigV1
 class IRISVNextConfigV1:
     """Balanced single-scene configuration for the post-demo IRIS line.
 
-    DINO remains an external frozen 384-D image-token producer.  This config owns
+    DINOv2-L/14 + Registers is a frozen 1024-D source-token producer.  This config owns
     the trainable shared scene trunk and evidence/structure heads only.
     """
 
-    image_token_dim: int = 384
+    image_token_dim: int = 1024
     camera_feature_dim: int = 13
     scene_dim: int = 1024
     camera_embed_dim: int = 128

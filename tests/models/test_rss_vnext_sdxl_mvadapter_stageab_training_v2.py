@@ -140,6 +140,32 @@ def test_camera_translation_matches_native_mv_adapter_ortho_semantics():
         )
 
 
+@pytest.mark.parametrize("execution_dtype", (torch.float16, torch.bfloat16))
+def test_amp_camera_control_preserves_fp32_virtual_authority(execution_dtype):
+    # FP16/BF16 denoisers must not round the authoritative 13D camera.
+    # Native CNN control tensors do have to match the denoiser precision.
+    canonical,six,control=fixed_sdxl_mvadapter_two_plus_six_cameras_v2(
+        1,device="cpu",dtype=execution_dtype,image_size=64,
+    )
+    assert canonical.dtype==six.dtype==torch.float32
+    assert control.dtype==execution_dtype
+    assert canonical.shape==(1,2,13)
+    assert six.shape==(1,6,13)
+    assert control.shape==(1,6,6,64,64)
+    expected=mv_adapter_controls_from_13d_virtual_cameras_v2(
+        six,height=64,width=64,
+    )
+    assert torch.equal(control,expected.to(dtype=execution_dtype))
+    assert bool(torch.isfinite(control).all())
+
+
+def test_amp_camera_factory_rejects_nonfloating_activation_dtype():
+    with pytest.raises(ValueError,match="CAMERA_OUTPUT_DTYPE_INVALID"):
+        fixed_sdxl_mvadapter_two_plus_six_cameras_v2(
+            1,device="cpu",dtype=torch.int64,image_size=64,
+        )
+
+
 def test_paired_stage_a_supervision_reaches_lora_conditioner_and_alpha():
     unet=FakeSDXLUnet()
     conditioner=RSSvNextTwoImageConditionerV1(

@@ -277,7 +277,7 @@ def test_real_production_worker_fails_closed_if_pinned_local_dino_is_unavailable
         _make_executor_fixture(tmp_path, monkeypatch)
     )
     monkeypatch.setenv(
-        "REALSAS_RSS_DINOV2_SOURCE", str(tmp_path / "missing-pretrained-model"),
+        "REALSAS_RSS_DINOV2_LARGE_REGISTERS_SOURCE", str(tmp_path / "missing-pretrained-model"),
     )
     # Reject a V1 checkpoint before attempting to initialize DINO.
     with pytest.raises(RuntimeError, match="CHECKPOINT_RELEASE_ABI_DRIFT"):

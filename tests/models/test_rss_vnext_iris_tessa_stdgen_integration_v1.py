@@ -29,9 +29,9 @@ def deterministic_cpu():
     torch.set_num_threads(1)
 
 
-def test_production_iris_matches_stdgen_transformer_scale_without_encoder_swap():
+def test_production_iris_matches_stdgen_transformer_scale_with_large_encoder():
     cfg = RSSvNextConfig()
-    assert cfg.iris.image_token_dim == 384  # Keep the existing DINOv2-S.
+    assert cfg.iris.image_token_dim == 1024  # Frozen DINOv2-L/14 + four registers.
     assert cfg.iris.scene_dim == 1024
     assert cfg.iris.scene_layers == 16
     assert cfg.iris.attention_heads == 16

@@ -116,15 +116,15 @@ def _inference_device() -> str:
 def _production_vision_factory():
     from models.rss_vnext.unified_character_model import RSSvNextFrozenDINOv2
 
-    raw = os.environ.get("REALSAS_RSS_DINOV2_SOURCE", "").strip()
+    raw = os.environ.get("REALSAS_RSS_DINOV2_LARGE_REGISTERS_SOURCE", "").strip()
     if not raw:
         root = os.environ.get("REALSAS_DEPLOY_ROOT", "").strip()
         if not root:
-            raise RuntimeError("RSS_VNEXT_SHAPE_LOCAL_DINOV2_REQUIRED")
-        raw = str(Path(root) / "foundations" / "dinov2" / "rss_vnext_pretrained")
+            raise RuntimeError("RSS_VNEXT_SHAPE_LOCAL_DINOV2_LARGE_REQUIRED")
+        raw = str(Path(root) / "foundations" / "dinov2" / "dinov2_with_registers_large")
     source = Path(raw).expanduser().resolve()
     if not source.is_dir():
-        raise RuntimeError("RSS_VNEXT_SHAPE_LOCAL_DINOV2_NOT_FOUND")
+        raise RuntimeError("RSS_VNEXT_SHAPE_LOCAL_DINOV2_LARGE_NOT_FOUND")
     return RSSvNextFrozenDINOv2(str(source))
 
 

@@ -42,7 +42,7 @@ _CHECKPOINT_KEYS = frozenset({
 })
 _SOURCE_POLICY = "FRONT_BACK_ONLY_NO_TEACHER_NO_PREQUALIFIED_PRODUCT"
 _BACKENDS = {
-    RSSvNextFrozenDINOv2: "FROZEN_LOCAL_DINOV2",
+    RSSvNextFrozenDINOv2: "FROZEN_LOCAL_DINOV2_L14_REG4_448_V1",
     RSSvNextPatchEncoderForTests: "TEST_PATCH_ENCODER_NOT_PRODUCT",
 }
 
@@ -271,7 +271,7 @@ def load_inference_checkpoint_v1(
     backend = _BACKENDS.get(type(vision_encoder))
     if backend is None or backend != payload["vision_backend"]:
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_VISION_BACKEND_DRIFT")
-    if product_mode and backend != "FROZEN_LOCAL_DINOV2":
+    if product_mode and backend != "FROZEN_LOCAL_DINOV2_L14_REG4_448_V1":
         raise RuntimeError("RSS_VNEXT_CHECKPOINT_TEST_VISION_FORBIDDEN_IN_PRODUCT")
     if product_mode:
         raise RuntimeError("RSS_VNEXT_THREE_STAGE_BUNDLE_REQUIRED")
